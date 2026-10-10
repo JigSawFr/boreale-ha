@@ -1,0 +1,179 @@
+"""The console's entities: PlayGuard's table (source/sync/sync_entities.c).
+
+Same object ids, platforms, write classes and options as the native MQTT
+discovery the console publishes, so that taking over from it keeps the entity
+ids. tests/test_parity.py checks this table against the entities.json PlayGuard's
+host tests export. A few entities exist only here (`extra`).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from homeassistant.const import Platform
+
+from .const import DAYS, RESTRICTION_LEVELS, WRITE_FREE, WRITE_NONE, WRITE_TIMER
+
+
+@dataclass(frozen=True, kw_only=True)
+class EntityDef:
+    """One entity of the console."""
+
+    key: str  # object id, and the order's topic level
+    platform: Platform
+    write: str = WRITE_NONE
+    path: tuple[str, ...] | None = None  # where the value is in the state document
+    fallback: tuple[str, ...] | None = None  # read when `path` gives nothing
+    icon: str | None = None
+    category: str | None = None  # "config" or "diagnostic"
+    enabled: bool = True
+    unit: str | None = None
+    device_class: str | None = None
+    state_class: str | None = None
+    options: tuple[str, ...] | None = None
+    minimum: int | None = None
+    maximum: int | None = None
+    step: int | None = None
+    extra: bool = False  # this integration's own: not in PlayGuard's table
+
+
+def _binary(key: str, path: tuple[str, ...], **kw) -> EntityDef:
+    return EntityDef(key=key, platform=Platform.BINARY_SENSOR, path=path, **kw)
+
+
+def _minutes(key: str, path: tuple[str, ...], measure: bool = True, **kw) -> EntityDef:
+    return EntityDef(
+        key=key,
+        platform=Platform.SENSOR,
+        path=path,
+        unit="min",
+        device_class="duration",
+        state_class="measurement" if measure else None,
+        **kw,
+    )
+
+
+def _limit(key: str, path: tuple[str, ...]) -> EntityDef:
+    return EntityDef(
+        key=key,
+        platform=Platform.NUMBER,
+        write=WRITE_TIMER,
+        path=path,
+        category="config",
+        unit="min",
+        device_class="duration",
+        minimum=0,
+        maximum=1440,
+        step=5,
+    )
+
+
+def _switch(key: str, path: tuple[str, ...], write: str = WRITE_TIMER, **kw) -> EntityDef:
+    return EntityDef(key=key, platform=Platform.SWITCH, write=write, path=path, **kw)
+
+
+def _button(key: str, write: str, **kw) -> EntityDef:
+    return EntityDef(key=key, platform=Platform.BUTTON, write=write, **kw)
+
+
+ENTITIES: tuple[EntityDef, ...] = (
+    # binary sensors
+    _binary("parental_controls_enabled", ("controls", "enabled"), icon="mdi:shield-account"),
+    _binary("temp_unlocked", ("controls", "temp_unlocked"), device_class="lock"),
+    _binary("pin_set", ("controls", "pin_set"), category="diagnostic"),
+    _binary("companion_linked", ("controls", "companion_linked"), icon="mdi:cellphone-link"),
+    _binary("timer_enabled", ("timer", "enabled"), icon="mdi:timer-outline"),
+    _binary("limit_reached", ("timer", "limit_reached"), icon="mdi:timer-alert-outline"),
+    _binary("clock_accurate", ("clock_accurate",), category="diagnostic"),
+    # sensors
+    _minutes("used_screen_time", ("timer", "used_min")),
+    _minutes("used_screen_time_log", ("activity_today", "used_min")),
+    _minutes("screen_time_remaining", ("timer", "remaining_min")),
+    _minutes("extended_screen_time", ("timer", "extended_today_min"), measure=False),
+    EntityDef(
+        key="now_playing",
+        platform=Platform.SENSOR,
+        path=("activity_today", "now_playing", "name"),
+        fallback=("activity_today", "now_playing", "app_id"),
+        icon="mdi:gamepad-variant",
+    ),
+    EntityDef(key="rating_age", platform=Platform.SENSOR, path=("controls", "rating_age"), category="diagnostic"),
+    EntityDef(key="firmware", platform=Platform.SENSOR, path=("console", "firmware"), category="diagnostic"),
+    EntityDef(key="atmosphere", platform=Platform.SENSOR, path=("console", "atmosphere"), category="diagnostic"),
+    _minutes("spent_raw", ("timer", "spent_raw_min"), measure=False, category="diagnostic", enabled=False),
+    EntityDef(key="last_order", platform=Platform.SENSOR, path=("link", "last_result"), category="diagnostic"),
+    # limits
+    *(_limit(f"limit_{day}", ("timer", "limits", day)) for day in DAYS),
+    _limit("limit_uniform", ("timer", "uniform_min")),
+    _limit("max_screentime_today", ("timer", "limit_today_min")),
+    # bedtime
+    EntityDef(
+        key="bedtime_alarm",
+        platform=Platform.TIME,
+        write=WRITE_TIMER,
+        path=("timer", "bedtime", "start"),
+        category="config",
+    ),
+    EntityDef(
+        key="bedtime_end_time",
+        platform=Platform.TIME,
+        write=WRITE_TIMER,
+        path=("timer", "bedtime", "end"),
+        category="config",
+    ),
+    _switch("bedtime_enabled", ("timer", "bedtime", "enabled"), category="config"),
+    # switches
+    _switch("console_lock", ("timer", "console_locked"), icon="mdi:lock"),
+    _switch("play_timer_alarm", ("timer", "alarm_on"), category="config"),
+    _switch("unlocked", ("controls", "temp_unlocked"), icon="mdi:lock-open-variant"),
+    _switch("vr_restricted", ("controls", "vr_restricted"), write=WRITE_FREE, category="config"),
+    _switch("sns_post_restricted", ("controls", "sns_post_restricted"), write=WRITE_FREE, category="config"),
+    _switch(
+        "free_communication_restricted",
+        ("controls", "free_communication_restricted"),
+        write=WRITE_FREE,
+        category="config",
+    ),
+    # selects (the profiles come from the state's "profiles")
+    EntityDef(
+        key="restriction_level",
+        platform=Platform.SELECT,
+        write=WRITE_FREE,
+        path=("controls", "level"),
+        category="config",
+        options=RESTRICTION_LEVELS,
+    ),
+    EntityDef(key="profile", platform=Platform.SELECT, write=WRITE_TIMER, category="config"),
+    # buttons
+    _button("sync_now", WRITE_FREE, icon="mdi:sync"),
+    _button("lock_now", WRITE_FREE, icon="mdi:lock"),
+    _button("export_report", WRITE_FREE, category="diagnostic"),
+    _button("add_bonus_time_15", WRITE_TIMER, icon="mdi:timer-plus-outline"),
+    _button("add_bonus_time_30", WRITE_TIMER, icon="mdi:timer-plus-outline"),
+    _button("add_bonus_time_60", WRITE_TIMER, icon="mdi:timer-plus-outline"),
+    _button("stop_today", WRITE_TIMER, icon="mdi:timer-off-outline"),
+    _button("remove_limit", WRITE_TIMER, icon="mdi:timer-remove-outline"),
+    # events (the console's "event" topic)
+    EntityDef(key="events", platform=Platform.EVENT),
+    # this integration's own
+    _binary("online", ("availability",), device_class="connectivity", extra=True),
+    _binary("agent", ("link", "agent"), icon="mdi:server-network", category="diagnostic", extra=True),
+    _minutes("week_play_time", ("week",), measure=False, icon="mdi:calendar-week", extra=True),
+)
+
+BY_KEY: dict[str, EntityDef] = {e.key: e for e in ENTITIES}
+
+
+def for_platform(platform: Platform) -> list[EntityDef]:
+    """The entities of one platform."""
+    return [e for e in ENTITIES if e.platform == platform]
+
+
+def dig(doc: dict | None, path: tuple[str, ...] | None):
+    """The value at `path` in a document, None when any step is missing."""
+    value = doc
+    for step in path or ():
+        if not isinstance(value, dict):
+            return None
+        value = value.get(step)
+    return value if path else None

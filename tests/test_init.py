@@ -1,0 +1,240 @@
+"""A console on the broker: its entities, its orders, its events."""
+
+from __future__ import annotations
+
+from unittest.mock import call
+
+from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import device_registry as dr, entity_registry as er, issue_registry as ir
+import pytest
+from pytest_homeassistant_custom_component.components.diagnostics import get_diagnostics_for_config_entry
+import voluptuous as vol
+
+from custom_components.playguard.const import DOMAIN
+
+from .conftest import BASE, CONSOLE_ID, fixture, publish
+
+
+def _id(platform: str, key: str, hass: HomeAssistant) -> str:
+    entity_id = er.async_get(hass).async_get_entity_id(platform, DOMAIN, f"{CONSOLE_ID}_{key}")
+    assert entity_id, key
+    return entity_id
+
+
+async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
+    def state(platform: str, key: str) -> str:
+        return hass.states.get(_id(platform, key, hass)).state
+
+    assert state("binary_sensor", "parental_controls_enabled") == STATE_ON
+    assert state("binary_sensor", "limit_reached") == STATE_OFF
+    assert state("binary_sensor", "online") == STATE_ON
+    assert state("sensor", "used_screen_time") == "75"
+    assert state("sensor", "screen_time_remaining") == "45"
+    assert state("sensor", "now_playing") == "Super Mario Odyssey"
+    assert state("sensor", "firmware") == "23.0.1"
+    assert state("number", "limit_mon") == "120"
+    assert state("number", "limit_sat") == "1440"
+    assert state("number", "limit_uniform") == STATE_UNKNOWN  # the days differ
+    assert state("time", "bedtime_alarm") == "21:30:00"
+    assert state("time", "bedtime_end_time") == "06:00:00"
+    assert state("switch", "bedtime_enabled") == STATE_ON
+    assert state("switch", "vr_restricted") == STATE_UNKNOWN  # null: not read
+    assert state("select", "restriction_level") == "child"
+    profile = hass.states.get(_id("select", "profile", hass))
+    assert profile.attributes["options"] == ["School week", "Holidays"]
+
+    log = hass.states.get(_id("sensor", "used_screen_time_log", hass))
+    assert log.state == "74"
+    assert log.attributes["games"] == {"Super Mario Odyssey": 60, "Mario Kart 8 Deluxe": 14}
+
+    # The device takes the console's name and versions.
+    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, CONSOLE_ID)})
+    assert device.name == "Salon" and device.sw_version == "1.1.0" and device.hw_version == "23.0.1"
+
+    # Asleep: the last state stays, "online" says it.
+    publish(hass, "availability", "offline")
+    await hass.async_block_till_done()
+    assert state("binary_sensor", "online") == STATE_OFF
+    assert state("number", "limit_mon") == "120"
+
+
+async def test_unavailable_before_the_state(hass: HomeAssistant, mqtt_mock, entry) -> None:
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get(_id("number", "limit_mon", hass)).state == STATE_UNAVAILABLE
+    assert hass.states.get(_id("binary_sensor", "online", hass)).state == STATE_UNAVAILABLE
+
+
+async def test_takes_over_the_native_discovery(hass: HomeAssistant, setup, mqtt_mock) -> None:
+    mqtt_mock.async_publish.assert_any_call(f"{BASE}/discovery/set", "OFF", 1, True)
+    count = mqtt_mock.async_publish.call_count
+    # Once: the console clears it, its next state says so.
+    publish(hass, "state", fixture("state.json"))
+    await hass.async_block_till_done()
+    assert mqtt_mock.async_publish.call_count == count
+
+
+async def test_orders(hass: HomeAssistant, setup, mqtt_mock) -> None:
+    mqtt_mock.async_publish.reset_mock()
+    await hass.services.async_call(
+        "number", "set_value", {"entity_id": _id("number", "limit_mon", hass), "value": 90}, blocking=True
+    )
+    await hass.services.async_call(
+        "time", "set_value", {"entity_id": _id("time", "bedtime_alarm", hass), "time": "21:00:00"}, blocking=True
+    )
+    await hass.services.async_call(
+        "switch", "turn_off", {"entity_id": _id("switch", "console_lock", hass)}, blocking=True
+    )
+    await hass.services.async_call(
+        "select",
+        "select_option",
+        {"entity_id": _id("select", "restriction_level", hass), "option": "teen"},
+        blocking=True,
+    )
+    await hass.services.async_call(
+        "button", "press", {"entity_id": _id("button", "add_bonus_time_30", hass)}, blocking=True
+    )
+    assert mqtt_mock.async_publish.call_args_list == [
+        call(f"{BASE}/limit_mon/set", "90", 1, True),
+        call(f"{BASE}/bedtime_alarm/set", "21:00", 1, True),
+        call(f"{BASE}/console_lock/set", "OFF", 1, True),
+        call(f"{BASE}/restriction_level/set", "teen", 1, True),
+        call(f"{BASE}/add_bonus_time_30/set", "PRESS", 1, True),
+    ]
+
+
+async def test_orders_the_console_would_refuse(hass: HomeAssistant, setup, mqtt_mock, state) -> None:
+    state["link"]["remote_timer_writes"] = False
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    mqtt_mock.async_publish.reset_mock()
+    with pytest.raises(ServiceValidationError) as err:
+        await hass.services.async_call(
+            "number", "set_value", {"entity_id": _id("number", "limit_mon", hass), "value": 90}, blocking=True
+        )
+    assert err.value.translation_key == "timer_writes_disabled"
+    # Locking again and the restrictions need no timer writes.
+    await hass.services.async_call("switch", "turn_off", {"entity_id": _id("switch", "unlocked", hass)}, blocking=True)
+    await hass.services.async_call(
+        "switch", "turn_on", {"entity_id": _id("switch", "vr_restricted", hass)}, blocking=True
+    )
+    assert mqtt_mock.async_publish.call_args_list == [
+        call(f"{BASE}/unlocked/set", "OFF", 1, True),
+        call(f"{BASE}/vr_restricted/set", "ON", 1, True),
+    ]
+
+    state["console"]["read_only"] = True
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    with pytest.raises(ServiceValidationError) as err:
+        await hass.services.async_call("button", "press", {"entity_id": _id("button", "sync_now", hass)}, blocking=True)
+    assert err.value.translation_key == "read_only"
+
+
+async def test_events(hass: HomeAssistant, setup) -> None:
+    entity_id = _id("event", "events", hass)
+    publish(
+        hass,
+        "event",
+        {
+            "schema": 1,
+            "source": "app",
+            "ts": 1,
+            "event_type": "command_rejected",
+            "entity": "limit_mon",
+            "payload": "5000",
+            "reason": "out_of_range",
+            "rc": None,
+        },
+        retain=False,
+    )
+    await hass.async_block_till_done()
+    event = hass.states.get(entity_id)
+    assert event.attributes["event_type"] == "command_rejected"
+    assert event.attributes["reason"] == "out_of_range" and event.attributes["entity"] == "limit_mon"
+
+
+async def test_week_and_names(hass: HomeAssistant, setup) -> None:
+    publish(
+        hass,
+        "week",
+        {
+            "schema": 1,
+            "ts": 1,
+            "days": ["2026-10-03", "2026-10-04"],
+            "games": [{"app_id": "0100000000010000", "min": [30, 60]}, {"app_id": "01000A10041EA000", "min": [0, 15]}],
+        },
+    )
+    await hass.async_block_till_done()
+    week = hass.states.get(_id("sensor", "week_play_time", hass))
+    assert week.state == "105"
+    assert week.attributes["days"] == {"2026-10-03": 30, "2026-10-04": 75}
+    assert week.attributes["games"] == {"Super Mario Odyssey": 90, "Mario Kart 8 Deluxe": 15}
+
+
+async def test_services(hass: HomeAssistant, setup, mqtt_mock) -> None:
+    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, CONSOLE_ID)})
+    mqtt_mock.async_publish.reset_mock()
+    await hass.services.async_call(DOMAIN, "set_limits", {"device_id": device.id, "minutes": 60}, blocking=True)
+    await hass.services.async_call(
+        DOMAIN, "set_limits", {"device_id": device.id, "minutes": 45, "day": "today"}, blocking=True
+    )
+    await hass.services.async_call(
+        DOMAIN, "set_limits", {"device_id": device.id, "week": [60, 60, 60, 60, 60, 120, 120]}, blocking=True
+    )
+    await hass.services.async_call(DOMAIN, "add_bonus_time", {"device_id": device.id, "minutes": 20}, blocking=True)
+    await hass.services.async_call(
+        DOMAIN, "apply_profile", {"device_id": device.id, "profile": "Holidays"}, blocking=True
+    )
+    await hass.services.async_call(DOMAIN, "request_report", {"device_id": device.id}, blocking=True)
+    assert mqtt_mock.async_publish.call_args_list == [
+        call(f"{BASE}/limit_uniform/set", "60", 1, True),
+        call(f"{BASE}/max_screentime_today/set", "45", 1, True),
+        call(f"{BASE}/limits_week/set", "60,60,60,60,60,120,120", 1, True),
+        call(f"{BASE}/add_bonus_time/set", "20", 1, True),
+        call(f"{BASE}/profile/set", "Holidays", 1, True),
+        call(f"{BASE}/export_report/set", "PRESS", 1, True),
+    ]
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            DOMAIN, "apply_profile", {"device_id": device.id, "profile": "Nope"}, blocking=True
+        )
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(DOMAIN, "sync_now", {"device_id": "not-a-device"}, blocking=True)
+    with pytest.raises(vol.Invalid):  # out of bounds: the schema refuses it
+        await hass.services.async_call(
+            DOMAIN, "add_bonus_time", {"device_id": device.id, "minutes": 500}, blocking=True
+        )
+
+
+async def test_newer_schema(hass: HomeAssistant, setup, state) -> None:
+    state["schema"] = 2
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+    state["schema"] = 1
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert not ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+
+
+async def test_diagnostics(hass: HomeAssistant, setup, hass_client) -> None:
+    publish(hass, "report", "=== PlayGuard report ===\nfirmware 23.0.1\n")
+    await hass.async_block_till_done()
+    diag = await get_diagnostics_for_config_entry(hass, hass_client, setup)
+    assert diag["state"]["console"]["name"] == "Salon"
+    assert diag["report"].startswith("=== PlayGuard report ===")
+    assert diag["online"] is True
+
+
+async def test_unload_and_remove(hass: HomeAssistant, setup, mqtt_mock) -> None:
+    assert await hass.config_entries.async_unload(setup.entry_id)
+    await hass.async_block_till_done()
+    mqtt_mock.async_publish.reset_mock()
+    await hass.config_entries.async_remove(setup.entry_id)
+    await hass.async_block_till_done()
+    # The console's own discovery comes back.
+    mqtt_mock.async_publish.assert_called_once_with(f"{BASE}/discovery/set", "ON", 1, True)

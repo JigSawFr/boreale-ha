@@ -1,0 +1,576 @@
+{
+  "schema": 1,
+  "entities": [
+    {
+      "id": "parental_controls_enabled",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "Parental controls",
+      "value_template": "{{ value_json.controls.enabled }}",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "ic": "mdi:shield-account"
+      }
+    },
+    {
+      "id": "temp_unlocked",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "Temporarily unlocked",
+      "value_template": "{{ value_json.controls.temp_unlocked }}",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "dev_cla": "lock"
+      }
+    },
+    {
+      "id": "pin_set",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "PIN set",
+      "value_template": "{{ value_json.controls.pin_set }}",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "companion_linked",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "Companion app linked",
+      "value_template": "{{ value_json.controls.companion_linked }}",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "ic": "mdi:cellphone-link"
+      }
+    },
+    {
+      "id": "timer_enabled",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "Play timer",
+      "value_template": "{{ value_json.timer.enabled }}",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "ic": "mdi:timer-outline"
+      }
+    },
+    {
+      "id": "limit_reached",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "Time is up",
+      "value_template": "{{ value_json.timer.limit_reached }}",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "ic": "mdi:timer-alert-outline"
+      }
+    },
+    {
+      "id": "clock_accurate",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "Network clock accurate",
+      "value_template": "{{ value_json.clock_accurate }}",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "used_screen_time",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Used screen time",
+      "value_template": "{{ value_json.timer.used_min }}",
+      "extra": {
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "stat_cla": "measurement"
+      }
+    },
+    {
+      "id": "used_screen_time_log",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Used screen time (play log)",
+      "value_template": "{{ value_json.activity_today.used_min }}",
+      "extra": {
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "stat_cla": "measurement"
+      }
+    },
+    {
+      "id": "screen_time_remaining",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Screen time remaining",
+      "value_template": "{{ value_json.timer.remaining_min }}",
+      "extra": {
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "stat_cla": "measurement"
+      }
+    },
+    {
+      "id": "extended_screen_time",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Extended screen time",
+      "value_template": "{{ value_json.timer.extended_today_min }}",
+      "extra": {
+        "unit_of_meas": "min",
+        "dev_cla": "duration"
+      }
+    },
+    {
+      "id": "now_playing",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Now playing",
+      "value_template": "{{ value_json.activity_today.now_playing.name or value_json.activity_today.now_playing.app_id }}",
+      "extra": {
+        "ic": "mdi:gamepad-variant"
+      }
+    },
+    {
+      "id": "rating_age",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Age rating",
+      "value_template": "{{ value_json.controls.rating_age }}",
+      "extra": {
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "firmware",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Firmware",
+      "value_template": "{{ value_json.console.firmware }}",
+      "extra": {
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "atmosphere",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Atmosphère",
+      "value_template": "{{ value_json.console.atmosphere }}",
+      "extra": {
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "spent_raw",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Time spent (1952)",
+      "value_template": "{{ value_json.timer.spent_raw_min }}",
+      "extra": {
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "diagnostic",
+        "en": false
+      }
+    },
+    {
+      "id": "last_order",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Last order",
+      "value_template": "{{ value_json.link.last_result }}",
+      "extra": {
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "limit_sun",
+      "platform": "number",
+      "write": "timer",
+      "name": "Limit Sunday",
+      "value_template": "{{ value_json.timer.limits.sun }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "limit_mon",
+      "platform": "number",
+      "write": "timer",
+      "name": "Limit Monday",
+      "value_template": "{{ value_json.timer.limits.mon }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "limit_tue",
+      "platform": "number",
+      "write": "timer",
+      "name": "Limit Tuesday",
+      "value_template": "{{ value_json.timer.limits.tue }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "limit_wed",
+      "platform": "number",
+      "write": "timer",
+      "name": "Limit Wednesday",
+      "value_template": "{{ value_json.timer.limits.wed }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "limit_thu",
+      "platform": "number",
+      "write": "timer",
+      "name": "Limit Thursday",
+      "value_template": "{{ value_json.timer.limits.thu }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "limit_fri",
+      "platform": "number",
+      "write": "timer",
+      "name": "Limit Friday",
+      "value_template": "{{ value_json.timer.limits.fri }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "limit_sat",
+      "platform": "number",
+      "write": "timer",
+      "name": "Limit Saturday",
+      "value_template": "{{ value_json.timer.limits.sat }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "limit_uniform",
+      "platform": "number",
+      "write": "timer",
+      "name": "Limit every day",
+      "value_template": "{{ value_json.timer.uniform_min }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "max_screentime_today",
+      "platform": "number",
+      "write": "timer",
+      "name": "Max screentime today",
+      "value_template": "{{ value_json.timer.limit_today_min }}",
+      "extra": {
+        "min": 0,
+        "max": 1440,
+        "step": 5,
+        "mode": "box",
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "bedtime_alarm",
+      "platform": "time",
+      "write": "timer",
+      "name": "Bedtime alarm",
+      "value_template": "{{ value_json.timer.bedtime.start }}",
+      "extra": {
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "bedtime_end_time",
+      "platform": "time",
+      "write": "timer",
+      "name": "Bedtime end time",
+      "value_template": "{{ value_json.timer.bedtime.end }}",
+      "extra": {
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "bedtime_enabled",
+      "platform": "switch",
+      "write": "timer",
+      "name": "Bedtime alarm enabled",
+      "value_template": "{{ value_json.timer.bedtime.enabled }}",
+      "extra": {
+        "stat_on": "True",
+        "stat_off": "False",
+        "pl_on": "ON",
+        "pl_off": "OFF",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "console_lock",
+      "platform": "switch",
+      "write": "timer",
+      "name": "Console lock",
+      "value_template": "{{ value_json.timer.console_locked }}",
+      "extra": {
+        "stat_on": "True",
+        "stat_off": "False",
+        "pl_on": "ON",
+        "pl_off": "OFF",
+        "ic": "mdi:lock"
+      }
+    },
+    {
+      "id": "play_timer_alarm",
+      "platform": "switch",
+      "write": "timer",
+      "name": "Time's up alarm",
+      "value_template": "{{ value_json.timer.alarm_on }}",
+      "extra": {
+        "stat_on": "True",
+        "stat_off": "False",
+        "pl_on": "ON",
+        "pl_off": "OFF",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "unlocked",
+      "platform": "switch",
+      "write": "timer",
+      "name": "Unlocked",
+      "value_template": "{{ value_json.controls.temp_unlocked }}",
+      "extra": {
+        "stat_on": "True",
+        "stat_off": "False",
+        "pl_on": "ON",
+        "pl_off": "OFF",
+        "ic": "mdi:lock-open-variant"
+      }
+    },
+    {
+      "id": "vr_restricted",
+      "platform": "switch",
+      "write": "free",
+      "name": "VR mode restricted",
+      "value_template": "{{ value_json.controls.vr_restricted }}",
+      "extra": {
+        "stat_on": "True",
+        "stat_off": "False",
+        "pl_on": "ON",
+        "pl_off": "OFF",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "sns_post_restricted",
+      "platform": "switch",
+      "write": "free",
+      "name": "Posting to social media restricted",
+      "value_template": "{{ value_json.controls.sns_post_restricted }}",
+      "extra": {
+        "stat_on": "True",
+        "stat_off": "False",
+        "pl_on": "ON",
+        "pl_off": "OFF",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "free_communication_restricted",
+      "platform": "switch",
+      "write": "free",
+      "name": "Communication restricted",
+      "value_template": "{{ value_json.controls.free_communication_restricted }}",
+      "extra": {
+        "stat_on": "True",
+        "stat_off": "False",
+        "pl_on": "ON",
+        "pl_off": "OFF",
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "restriction_level",
+      "platform": "select",
+      "write": "free",
+      "name": "Restriction level",
+      "value_template": "{{ value_json.controls.level }}",
+      "extra": {
+        "ops": [
+          "none",
+          "young_child",
+          "child",
+          "teen",
+          "custom"
+        ],
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "profile",
+      "platform": "select",
+      "write": "timer",
+      "name": "Profile",
+      "value_template": "{{ None }}",
+      "extra": {
+        "ent_cat": "config"
+      }
+    },
+    {
+      "id": "sync_now",
+      "platform": "button",
+      "write": "free",
+      "name": "Sync now",
+      "value_template": null,
+      "extra": {
+        "ic": "mdi:sync"
+      }
+    },
+    {
+      "id": "lock_now",
+      "platform": "button",
+      "write": "free",
+      "name": "Lock now",
+      "value_template": null,
+      "extra": {
+        "ic": "mdi:lock"
+      }
+    },
+    {
+      "id": "export_report",
+      "platform": "button",
+      "write": "free",
+      "name": "Export a diagnostic report",
+      "value_template": null,
+      "extra": {
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "add_bonus_time_15",
+      "platform": "button",
+      "write": "timer",
+      "name": "Extra time +15 min",
+      "value_template": null,
+      "extra": {
+        "ic": "mdi:timer-plus-outline"
+      }
+    },
+    {
+      "id": "add_bonus_time_30",
+      "platform": "button",
+      "write": "timer",
+      "name": "Extra time +30 min",
+      "value_template": null,
+      "extra": {
+        "ic": "mdi:timer-plus-outline"
+      }
+    },
+    {
+      "id": "add_bonus_time_60",
+      "platform": "button",
+      "write": "timer",
+      "name": "Extra time +1 h",
+      "value_template": null,
+      "extra": {
+        "ic": "mdi:timer-plus-outline"
+      }
+    },
+    {
+      "id": "stop_today",
+      "platform": "button",
+      "write": "timer",
+      "name": "No more play today",
+      "value_template": null,
+      "extra": {
+        "ic": "mdi:timer-off-outline"
+      }
+    },
+    {
+      "id": "remove_limit",
+      "platform": "button",
+      "write": "timer",
+      "name": "Remove the limit",
+      "value_template": null,
+      "extra": {
+        "ic": "mdi:timer-remove-outline"
+      }
+    },
+    {
+      "id": "events",
+      "platform": "event",
+      "write": "none",
+      "name": "Events",
+      "value_template": null,
+      "extra": {}
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+"""The base of every PlayGuard entity."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from homeassistant.const import EntityCategory
+from homeassistant.core import callback
+from homeassistant.helpers.entity import Entity
+
+from .console import PlayGuardConsole
+from .entities import EntityDef, dig
+
+
+class PlayGuardEntity(Entity):
+    """An entity reading the console's documents."""
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+
+    def __init__(self, console: PlayGuardConsole, definition: EntityDef) -> None:
+        self.console = console
+        self.definition = definition
+        self._attr_unique_id = f"{console.console_id}_{definition.key}"
+        self._attr_translation_key = definition.key
+        self._attr_device_info = console.device_info
+        self._attr_entity_registry_enabled_default = definition.enabled
+        if definition.icon:
+            self._attr_icon = definition.icon
+        if definition.category:
+            self._attr_entity_category = EntityCategory(definition.category)
+
+    async def async_added_to_hass(self) -> None:
+        self.async_on_remove(self.console.async_add_listener(self._handle_update))
+
+    @callback
+    def _handle_update(self) -> None:
+        self.async_write_ha_state()
+
+    @property
+    def available(self) -> bool:
+        """Known once the console's state arrived (retained: at once after a
+        restart). A sleeping console keeps its last state; `online` says it."""
+        return self.console.state is not None
+
+    def read(self) -> Any:
+        """This entity's value in the state document (not `value`: NumberEntity has one)."""
+        value = dig(self.console.state, self.definition.path)
+        if value is None and self.definition.fallback:
+            value = dig(self.console.state, self.definition.fallback)
+        return value
+
+    async def async_order(self, payload: str) -> None:
+        """Sends this entity's order (retained: it waits if the console sleeps)."""
+        await self.console.async_order(self.definition.key, self.definition.write, payload)

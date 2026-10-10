@@ -1,0 +1,2 @@
+# The Home Assistant release the tests run against (and its test harness).
+pytest-homeassistant-custom-component==0.13.316

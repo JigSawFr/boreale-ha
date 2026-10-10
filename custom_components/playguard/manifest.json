@@ -1,0 +1,15 @@
+{
+  "domain": "playguard",
+  "name": "PlayGuard",
+  "after_dependencies": ["recorder"],
+  "codeowners": ["@JigSawFr"],
+  "config_flow": true,
+  "dependencies": ["mqtt"],
+  "documentation": "https://github.com/JigSawFr/playguard-ha",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/JigSawFr/playguard-ha/issues",
+  "mqtt": ["playguard/+/state"],
+  "requirements": [],
+  "version": "0.1.0"
+}

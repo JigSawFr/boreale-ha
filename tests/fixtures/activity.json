@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "source": "agent",
+  "ts": 1791000000,
+  "local_date": "2026-10-05",
+  "final": false,
+  "total_s": 4440,
+  "total_min": 74,
+  "per_app": [
+    {
+      "app_id": "0100000000010000",
+      "s": 3600,
+      "min": 60
+    },
+    {
+      "app_id": "01000A10041EA000",
+      "s": 840,
+      "min": 14
+    }
+  ],
+  "per_account": null,
+  "now_playing": {
+    "app_id": "0100000000010000",
+    "since": 1790990000
+  }
+}

@@ -1,0 +1,357 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": {
+        "title": "Console PlayGuard trouvée",
+        "description": "Ajouter **{name}** (identifiant `{console_id}`) ? Son appareil Home Assistant d'origine (découverte MQTT) est remplacé par celui de cette intégration, avec les mêmes entités, les noms des jeux, le temps de jeu de la semaine et des statistiques à long terme."
+      },
+      "user": {
+        "title": "Ajouter une console PlayGuard",
+        "description": "Les consoles qui publient sur le broker sont trouvées toutes seules. Pour en ajouter une à la main : son identifiant est dans PlayGuard › Préférences › Accès à distance › Identifiant de la console.",
+        "data": {
+          "console_id": "Identifiant de la console",
+          "topic_prefix": "Préfixe des topics"
+        },
+        "data_description": {
+          "console_id": "8 caractères, comme 5a0c3e11.",
+          "topic_prefix": "playguard, sauf si sync.conf dit autre chose."
+        }
+      }
+    },
+    "error": {
+      "invalid_console_id": "Un identifiant de console fait 8 caractères, de 0 à 9 et de a à f.",
+      "invalid_prefix": "Ce préfixe ne peut pas faire partie d'un topic MQTT."
+    },
+    "abort": {
+      "already_configured": "Cette console est déjà configurée.",
+      "invalid_discovery_info": "Ce message n'est pas un état PlayGuard."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "take_over_discovery": "Remplacer l'appareil Home Assistant d'origine de la console"
+        },
+        "data_description": {
+          "take_over_discovery": "Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivé : la console publie de nouveau son propre appareil."
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "parental_controls_enabled": {
+        "name": "Contrôle parental"
+      },
+      "temp_unlocked": {
+        "name": "Déverrouillé temporairement"
+      },
+      "pin_set": {
+        "name": "Code PIN défini"
+      },
+      "companion_linked": {
+        "name": "Application mobile liée"
+      },
+      "timer_enabled": {
+        "name": "Minuteur de jeu"
+      },
+      "limit_reached": {
+        "name": "Temps écoulé"
+      },
+      "clock_accurate": {
+        "name": "Horloge réseau exacte"
+      },
+      "online": {
+        "name": "En ligne"
+      },
+      "agent": {
+        "name": "Agent actif"
+      }
+    },
+    "button": {
+      "sync_now": {
+        "name": "Synchroniser maintenant"
+      },
+      "lock_now": {
+        "name": "Verrouiller maintenant"
+      },
+      "export_report": {
+        "name": "Exporter un rapport de diagnostic"
+      },
+      "add_bonus_time_15": {
+        "name": "Temps en plus +15 min"
+      },
+      "add_bonus_time_30": {
+        "name": "Temps en plus +30 min"
+      },
+      "add_bonus_time_60": {
+        "name": "Temps en plus +1 h"
+      },
+      "stop_today": {
+        "name": "Fin du jeu pour aujourd'hui"
+      },
+      "remove_limit": {
+        "name": "Retirer la limite"
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Événements",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "command_applied": "Ordre exécuté",
+              "command_rejected": "Ordre refusé",
+              "command_waiting": "Ordre en attente de PlayGuard"
+            }
+          }
+        }
+      }
+    },
+    "number": {
+      "limit_sun": {
+        "name": "Limite dimanche"
+      },
+      "limit_mon": {
+        "name": "Limite lundi"
+      },
+      "limit_tue": {
+        "name": "Limite mardi"
+      },
+      "limit_wed": {
+        "name": "Limite mercredi"
+      },
+      "limit_thu": {
+        "name": "Limite jeudi"
+      },
+      "limit_fri": {
+        "name": "Limite vendredi"
+      },
+      "limit_sat": {
+        "name": "Limite samedi"
+      },
+      "limit_uniform": {
+        "name": "Limite tous les jours"
+      },
+      "max_screentime_today": {
+        "name": "Temps d'écran max aujourd'hui"
+      }
+    },
+    "select": {
+      "restriction_level": {
+        "name": "Niveau de restriction",
+        "state": {
+          "none": "Aucune",
+          "young_child": "Jeune enfant",
+          "child": "Enfant",
+          "teen": "Adolescent",
+          "custom": "Personnalisé"
+        }
+      },
+      "profile": {
+        "name": "Profil"
+      }
+    },
+    "sensor": {
+      "used_screen_time": {
+        "name": "Temps d'écran utilisé"
+      },
+      "used_screen_time_log": {
+        "name": "Temps d'écran utilisé (journal de jeu)"
+      },
+      "screen_time_remaining": {
+        "name": "Temps d'écran restant"
+      },
+      "extended_screen_time": {
+        "name": "Temps d'écran prolongé"
+      },
+      "now_playing": {
+        "name": "Jeu en cours"
+      },
+      "rating_age": {
+        "name": "Âge de classification"
+      },
+      "firmware": {
+        "name": "Firmware"
+      },
+      "atmosphere": {
+        "name": "Atmosphère"
+      },
+      "spent_raw": {
+        "name": "Temps passé (1952)"
+      },
+      "last_order": {
+        "name": "Dernier ordre"
+      },
+      "week_play_time": {
+        "name": "Temps de jeu cette semaine"
+      }
+    },
+    "switch": {
+      "bedtime_enabled": {
+        "name": "Alarme du coucher activée"
+      },
+      "console_lock": {
+        "name": "Verrouillage de la console"
+      },
+      "play_timer_alarm": {
+        "name": "Alarme de fin de temps"
+      },
+      "unlocked": {
+        "name": "Déverrouillé"
+      },
+      "vr_restricted": {
+        "name": "Mode VR restreint"
+      },
+      "sns_post_restricted": {
+        "name": "Publication sur les réseaux sociaux restreinte"
+      },
+      "free_communication_restricted": {
+        "name": "Communication restreinte"
+      }
+    },
+    "time": {
+      "bedtime_alarm": {
+        "name": "Alarme du coucher"
+      },
+      "bedtime_end_time": {
+        "name": "Fin du coucher"
+      }
+    }
+  },
+  "exceptions": {
+    "read_only": {
+      "message": "PlayGuard est en mode lecture seule sur cette console : il ne change rien."
+    },
+    "policy_off": {
+      "message": "La console refuse les ordres (Accès à distance › Ordres reçus)."
+    },
+    "timer_writes_disabled": {
+      "message": "Les ordres ne peuvent pas changer le minuteur : activez Accès à distance › Les ordres peuvent changer le minuteur sur la console."
+    },
+    "read_only_entity": {
+      "message": "Cette valeur ne peut pas être changée d'ici."
+    },
+    "unknown_device": {
+      "message": "{device_id} n'est pas une console PlayGuard."
+    },
+    "no_such_profile": {
+      "message": "Aucun profil nommé {profile} n'est enregistré dans PlayGuard."
+    }
+  },
+  "issues": {
+    "newer_schema": {
+      "title": "{name} parle un protocole PlayGuard plus récent",
+      "description": "{name} publie le schéma {schema} ; cette intégration connaît le schéma {known}. Mettez à jour l'intégration PlayGuard : certaines valeurs peuvent manquer d'ici là."
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "all": "Tous les jours",
+        "today": "Aujourd'hui seulement",
+        "sun": "Dimanche",
+        "mon": "Lundi",
+        "tue": "Mardi",
+        "wed": "Mercredi",
+        "thu": "Jeudi",
+        "fri": "Vendredi",
+        "sat": "Samedi"
+      }
+    }
+  },
+  "services": {
+    "set_limits": {
+      "name": "Régler les limites",
+      "description": "Règle la limite d'un jour, de tous les jours, d'aujourd'hui ou de toute la semaine (1440 = pas de limite).",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        },
+        "minutes": {
+          "name": "Minutes",
+          "description": "0 à 1440 ; 1440 signifie pas de limite."
+        },
+        "day": {
+          "name": "Jour",
+          "description": "Quel jour."
+        },
+        "week": {
+          "name": "Semaine",
+          "description": "Sept limites, dimanche d'abord, à la place des minutes et du jour."
+        }
+      }
+    },
+    "add_bonus_time": {
+      "name": "Ajouter du temps",
+      "description": "Des minutes en plus aujourd'hui ; la limite habituelle revient demain.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        },
+        "minutes": {
+          "name": "Minutes",
+          "description": "5 à 180."
+        }
+      }
+    },
+    "apply_profile": {
+      "name": "Appliquer un profil",
+      "description": "Applique les limites d'un profil enregistré dans PlayGuard.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        },
+        "profile": {
+          "name": "Profil",
+          "description": "Son nom dans PlayGuard."
+        }
+      }
+    },
+    "stop_today": {
+      "name": "Fin du jeu pour aujourd'hui",
+      "description": "0 minute aujourd'hui ; la limite habituelle revient demain.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        }
+      }
+    },
+    "lock_now": {
+      "name": "Verrouiller maintenant",
+      "description": "Verrouille de nouveau le contrôle parental après un déverrouillage temporaire.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        }
+      }
+    },
+    "sync_now": {
+      "name": "Synchroniser maintenant",
+      "description": "La console republie tout.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        }
+      }
+    },
+    "request_report": {
+      "name": "Demander un rapport de diagnostic",
+      "description": "La console enregistre un rapport sur sa carte SD, et le publie quand Accès à distance le permet (il est alors dans les diagnostics de l'appareil).",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "source": "app",
+  "ts": 1791000000,
+  "local_date": "2026-10-05",
+  "weekday": 1,
+  "clock_accurate": true,
+  "console": {
+    "id": "a1b2c3d4",
+    "name": "Salon",
+    "firmware": "23.0.1",
+    "atmosphere": "1.12.0",
+    "app_version": "1.1.0",
+    "agent_version": null,
+    "emummc": null,
+    "read_only": false
+  },
+  "controls": {
+    "enabled": true,
+    "temp_unlocked": false,
+    "pin_set": true,
+    "level": "child",
+    "rating_age": 12,
+    "sns_post_restricted": true,
+    "free_communication_restricted": false,
+    "vr_restricted": null,
+    "rating_org": null,
+    "companion_linked": false
+  },
+  "timer": {
+    "supported": true,
+    "enabled": true,
+    "limit_reached": false,
+    "limits": {
+      "sun": 180,
+      "mon": 120,
+      "tue": 120,
+      "wed": 120,
+      "thu": 120,
+      "fri": 120,
+      "sat": 1440
+    },
+    "limits_min": [
+      180,
+      120,
+      120,
+      120,
+      120,
+      120,
+      1440
+    ],
+    "uniform_min": null,
+    "limit_today_min": 120,
+    "remaining_min": 45,
+    "used_min": 75,
+    "spent_raw_min": null,
+    "alarm_on": true,
+    "bedtime": {
+      "enabled": true,
+      "start": "21:30:00",
+      "end": "06:00:00"
+    },
+    "extended_today_min": 30,
+    "console_locked": false
+  },
+  "activity_today": {
+    "used_min": 74,
+    "now_playing": {
+      "app_id": "0100000000010000",
+      "name": "Super Mario Odyssey",
+      "since": 1790990000
+    }
+  },
+  "link": {
+    "policy": "ask",
+    "remote_timer_writes": false,
+    "ha_discovery": true,
+    "agent": false,
+    "last_result": null
+  },
+  "profiles": [
+    "School week",
+    "Vacances d'été"
+  ]
+}

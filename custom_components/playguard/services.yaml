@@ -1,0 +1,93 @@
+set_limits:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: playguard
+    minutes:
+      selector:
+        number:
+          min: 0
+          max: 1440
+          step: 5
+          unit_of_measurement: min
+    day:
+      default: all
+      selector:
+        select:
+          translation_key: day
+          options:
+            - all
+            - today
+            - sun
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            - sat
+    week:
+      selector:
+        object:
+
+add_bonus_time:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: playguard
+    minutes:
+      required: true
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 180
+          step: 5
+          unit_of_measurement: min
+
+apply_profile:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: playguard
+    profile:
+      required: true
+      selector:
+        text:
+
+stop_today:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: playguard
+
+lock_now:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: playguard
+
+sync_now:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: playguard
+
+request_report:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: playguard
