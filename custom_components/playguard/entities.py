@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import SensorStateClass
-from homeassistant.const import Platform
+from homeassistant.const import Platform, UnitOfTime
 
 from .const import DAYS, RESTRICTION_OPTIONS, RESTRICTION_RENAMED, WRITE_FREE, WRITE_NONE, WRITE_TIMER
 
@@ -48,7 +48,7 @@ def _minutes(key: str, path: tuple[str, ...], state_class: SensorStateClass | No
         key=key,
         platform=Platform.SENSOR,
         path=path,
-        unit="min",
+        unit=UnitOfTime.MINUTES,
         device_class="duration",
         state_class=state_class,
         **kw,
@@ -62,7 +62,7 @@ def _limit(key: str, path: tuple[str, ...]) -> EntityDef:
         write=WRITE_TIMER,
         path=path,
         category="config",
-        unit="min",
+        unit=UnitOfTime.MINUTES,
         device_class="duration",
         minimum=0,
         maximum=1440,

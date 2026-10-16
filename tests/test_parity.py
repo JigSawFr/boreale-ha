@@ -15,7 +15,7 @@ from custom_components.playguard.entities import BY_KEY, ENTITIES
 
 from .conftest import fixture
 
-STRINGS = Path(__file__).parent.parent / "custom_components" / "playguard" / "strings.json"
+STRINGS = Path(__file__).parent.parent / "custom_components" / "playguard" / "translations" / "en.json"
 
 
 def _template(definition) -> str | None:

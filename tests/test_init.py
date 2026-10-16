@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr, entity_registry as er, issue_registry as ir
 import pytest
 from pytest_homeassistant_custom_component.components.diagnostics import get_diagnostics_for_config_entry
@@ -71,6 +74,13 @@ async def test_unavailable_before_the_state(hass: HomeAssistant, mqtt_mock, entr
     await hass.async_block_till_done()
     assert hass.states.get(_id("number", "limit_mon", hass)).state == STATE_UNAVAILABLE
     assert hass.states.get(_id("binary_sensor", "online", hass)).state == STATE_UNAVAILABLE
+
+
+async def test_waits_for_mqtt(hass: HomeAssistant, entry) -> None:
+    entry.add_to_hass(hass)
+    assert not await hass.config_entries.async_setup(entry.entry_id)
+    assert entry.state is ConfigEntryState.SETUP_RETRY
+    assert entry.error_reason_translation_key == "mqtt_not_ready"
 
 
 async def test_takes_over_the_native_discovery(hass: HomeAssistant, setup, mqtt_mock) -> None:
@@ -259,3 +269,15 @@ async def test_unload_and_remove(hass: HomeAssistant, setup, mqtt_mock) -> None:
     await hass.async_block_till_done()
     # The console's own discovery comes back.
     assert _published(mqtt_mock) == [(f"{BASE}/discovery/set", "ON", 1, True)]
+
+
+async def test_remove_without_mqtt(hass: HomeAssistant, setup, caplog: pytest.LogCaptureFixture) -> None:
+    """MQTT may be gone when the entry is removed: the removal still goes through."""
+    assert await hass.config_entries.async_unload(setup.entry_id)
+    with patch(
+        "custom_components.playguard.console.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
+    ):
+        await hass.config_entries.async_remove(setup.entry_id)
+        await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(setup.entry_id) is None
+    assert "could not be turned back on" in caplog.text

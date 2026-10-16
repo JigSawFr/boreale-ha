@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from datetime import timedelta
+from functools import partial
 
 from homeassistant.components.recorder import Recorder
-from homeassistant.components.recorder.statistics import statistics_during_period
+from homeassistant.components.recorder.statistics import get_metadata, statistics_during_period
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 import pytest
@@ -65,3 +66,5 @@ async def test_finished_days(hass: HomeAssistant, mqtt_mock, entry) -> None:
     assert [r["mean"] for r in stats[total]] == [45.0, 90.0]
     assert [r["mean"] for r in stats[mario]] == [45.0, 60.0]
     assert [r["mean"] for r in stats[kart]] == [0.0, 30.0]  # not played on the 3rd
+    metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_ids={total}))
+    assert metadata[total][1]["unit_of_measurement"] == "min"

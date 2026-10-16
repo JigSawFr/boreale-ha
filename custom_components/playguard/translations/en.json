@@ -222,6 +222,9 @@
     }
   },
   "exceptions": {
+    "mqtt_not_ready": {
+      "message": "The MQTT integration is not available yet."
+    },
     "read_only": {
       "message": "PlayGuard is in read-only mode on this console: it changes nothing."
     },

@@ -8,6 +8,7 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.playguard.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, DOMAIN
 
@@ -41,6 +42,21 @@ async def test_discovered(hass: HomeAssistant) -> None:
     )
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "already_configured"
+
+
+async def test_discovery_follows_the_prefix(hass: HomeAssistant) -> None:
+    """A console set up by hand under another prefix, found under the usual one."""
+    entry = MockConfigEntry(
+        domain=DOMAIN, unique_id=CONSOLE_ID, data={CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "home/playguard"}
+    )
+    entry.add_to_hass(hass)
+    info = _info(f"playguard/{CONSOLE_ID}/state", json.dumps(fixture("state.json")))
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_MQTT}, data=info
+    )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+    assert entry.data[CONF_PREFIX] == "playguard"
 
 
 async def test_discovery_ignores_other_messages(hass: HomeAssistant) -> None:

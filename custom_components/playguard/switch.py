@@ -13,6 +13,8 @@ from . import PlayGuardConfigEntry
 from .entities import for_platform
 from .entity import PlayGuardEntity
 
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback

@@ -13,6 +13,8 @@ from . import PlayGuardConfigEntry
 from .entities import for_platform
 from .entity import PlayGuardEntity
 
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
@@ -71,6 +73,9 @@ class NowPlayingSensor(PlayGuardSensor):
 class PlayLogSensor(PlayGuardSensor):
     """Today's play time from the play log, with each game's."""
 
+    # Each game's minutes change as it is played: not worth recording.
+    _unrecorded_attributes = frozenset({"games"})
+
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         return {"games": _games(self.console, (self.console.activity or {}).get("per_app"))}
@@ -78,6 +83,8 @@ class PlayLogSensor(PlayGuardSensor):
 
 class WeekSensor(PlayGuardSensor):
     """The last seven days' play time (PlayGuard's week table), with each day's."""
+
+    _unrecorded_attributes = frozenset({"days", "games"})
 
     @property
     def available(self) -> bool:

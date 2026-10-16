@@ -13,6 +13,8 @@ import voluptuous as vol
 
 from .const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, CONSOLE_ID_RE, DEFAULT_PREFIX, DOMAIN
 
+OPTIONS_SCHEMA = vol.Schema({vol.Required(CONF_TAKE_OVER, default=True): bool})
+
 
 class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
     """A console per entry, its id as the unique id."""
@@ -38,8 +40,9 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="invalid_discovery_info")
         self._prefix, self._console_id = parts[0], parts[1]
         await self.async_set_unique_id(self._console_id)
-        # Already set up: nothing to reload (its subscriptions get the same state).
-        self._abort_if_unique_id_configured(reload_on_update=False)
+        # Already set up: the entry follows the console's prefix (reloaded
+        # only when it changed).
+        self._abort_if_unique_id_configured(updates={CONF_PREFIX: self._prefix})
         self._name = ((doc.get("console") or {}).get("name")) or "Nintendo Switch"
         self.context["title_placeholders"] = {"name": self._name}
         return await self.async_step_confirm()
@@ -106,9 +109,5 @@ class PlayGuardOptionsFlow(OptionsFlowWithReload):
             return self.async_create_entry(data=user_input)
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_TAKE_OVER, default=self.config_entry.options.get(CONF_TAKE_OVER, True)): bool,
-                }
-            ),
+            data_schema=self.add_suggested_values_to_schema(OPTIONS_SCHEMA, self.config_entry.options),
         )

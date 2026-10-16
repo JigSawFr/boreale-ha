@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import logging
 from typing import TYPE_CHECKING
 
+from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
@@ -78,7 +79,7 @@ async def async_import_days(hass: HomeAssistant, console: PlayGuardConsole) -> N
             source=DOMAIN,
             statistic_id=statistic_id,
             unit_class="duration",
-            unit_of_measurement="min",
+            unit_of_measurement=UnitOfTime.MINUTES,
         )
 
     def point(start: datetime, minutes: float) -> StatisticData:

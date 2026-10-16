@@ -244,7 +244,9 @@ class PlayGuardConsole:
         self._discovery_sent = True
         payload = "ON" if want_native else "OFF"
         _LOGGER.debug("%s: the console's own discovery %s", self.base, payload)
-        self.hass.async_create_task(self.async_send("discovery", payload))
+        self.entry.async_create_background_task(
+            self.hass, self.async_send("discovery", payload), f"{DOMAIN} {self.console_id} discovery"
+        )
 
     # ---- orders ----
 
@@ -284,7 +286,9 @@ class PlayGuardConsole:
             self._statistics_timer = None
             from .statistics import async_import_days  # noqa: PLC0415 (the recorder may not be there)
 
-            self.hass.async_create_task(async_import_days(self.hass, self))
+            self.entry.async_create_background_task(
+                self.hass, async_import_days(self.hass, self), f"{DOMAIN} {self.console_id} statistics"
+            )
 
         self._statistics_timer = async_call_later(self.hass, STATISTICS_DELAY, _run)
 
