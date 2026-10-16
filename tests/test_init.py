@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import patch
 
+from homeassistant.components.diagnostics import REDACTED
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
@@ -253,12 +255,20 @@ async def test_newer_schema(hass: HomeAssistant, setup, state) -> None:
 
 
 async def test_diagnostics(hass: HomeAssistant, setup, hass_client) -> None:
+    activity = fixture("activity.json")
+    activity["per_account"] = [{"uid": "00112233445566778899AABBCCDDEEFF", "s": 600, "min": 10}]
+    publish(hass, "activity", activity)
     publish(hass, "report", "=== PlayGuard report ===\nfirmware 23.0.1\n")
     await hass.async_block_till_done()
     diag = await get_diagnostics_for_config_entry(hass, hass_client, setup)
-    assert diag["state"]["console"]["name"] == "Salon"
     assert diag["report"].startswith("=== PlayGuard report ===")
     assert diag["online"] is True
+    assert diag["state"]["console"]["firmware"] == "23.0.1"
+    # What may name someone is not there.
+    assert diag["state"]["console"]["name"] == REDACTED
+    assert diag["state"]["profiles"] == REDACTED
+    assert diag["activity"]["per_account"][0]["uid"] == REDACTED
+    assert "Salon" not in json.dumps(diag)
 
 
 async def test_unload_and_remove(hass: HomeAssistant, setup, mqtt_mock) -> None:
