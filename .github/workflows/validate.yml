@@ -1,0 +1,61 @@
+name: validate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"   # weekly: Home Assistant and HACS change their checks
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  # Home Assistant's own checks of an integration (manifest, strings,
+  # services, config flow).
+  hassfest:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: home-assistant/actions/hassfest@06749dd8c0b54f350bc69c8752456cee498808a3 # master
+
+  # What HACS checks before it lists a repository (the brand images are the
+  # integration's own: custom_components/playguard/brand/).
+  hacs:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
+        with:
+          category: integration
+
+  lint:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - run: pip install ruff==0.17.0
+      - run: ruff check custom_components tests scripts
+      - run: ruff format --check custom_components tests scripts
+
+  tests:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements_test.txt
+      - run: pip install -r requirements_test.txt
+      - run: python -m pytest -q --cov=custom_components.playguard --cov-branch --cov-report=term --cov-report=json
+      # Home Assistant's quality scale: more than 95% of every module.
+      - run: python scripts/coverage_per_module.py coverage.json
+      # What a release attaches for HACS (release-please.yml), built the same way.
+      - run: python scripts/package.py --out dist/playguard.zip

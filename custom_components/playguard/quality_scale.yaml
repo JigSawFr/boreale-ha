@@ -1,0 +1,96 @@
+rules:
+  # Bronze
+  action-setup: done
+  appropriate-polling:
+    status: exempt
+    comment: Nothing is polled; the console pushes its documents over MQTT.
+  brands: done
+  common-modules: done
+  config-flow: done
+  config-flow-test-coverage: done
+  dependency-transparency: done
+  docs-actions: done
+  docs-conditions:
+    status: exempt
+    comment: The integration provides no conditions of its own.
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  docs-triggers:
+    status: exempt
+    comment: >-
+      The integration provides no triggers of its own; its Events entity is an
+      event entity, used with Home Assistant's state trigger.
+  entity-event-setup: done
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: >-
+      The integration holds no credentials: it reaches the console through Home
+      Assistant's MQTT integration, which holds the broker's and has its own
+      reauthentication.
+  test-coverage: done
+
+  # Gold
+  devices: done
+  diagnostics: done
+  discovery: done
+  discovery-update-info:
+    status: done
+    comment: >-
+      A known console found again by MQTT discovery under another topic prefix
+      (its address on the broker) has its entry updated and reloaded, when the
+      state found is newer than the last one its loaded entry read: a state
+      left retained under the former prefix does not move it back.
+  docs-data-update: done
+  docs-examples: done
+  docs-known-limitations: done
+  docs-supported-devices: done
+  docs-supported-functions: done
+  docs-troubleshooting: done
+  docs-use-cases: done
+  dynamic-devices:
+    status: exempt
+    comment: >-
+      One fixed console per config entry (a device integration); another
+      console is another entry, offered by MQTT discovery.
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default: done
+  entity-translations: done
+  exception-translations: done
+  icon-translations: done
+  reconfiguration-flow: done
+  repair-issues: done
+  stale-devices:
+    status: exempt
+    comment: One fixed console per config entry; its device goes with the entry.
+
+  # Platinum
+  async-dependency:
+    status: exempt
+    comment: No library; MQTT goes through Home Assistant's MQTT integration.
+  inject-websession:
+    status: exempt
+    comment: No library, and no HTTP.
+  strict-typing:
+    status: todo
+    comment: >-
+      mypy --strict still reports errors on Home Assistant 2026.10: untyped
+      platform constructors, bare dict types, and voluptuous schemas where Home
+      Assistant's types now expect Probatio's.

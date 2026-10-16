@@ -1,0 +1,86 @@
+name: Bug report
+description: The integration does something it should not, or does not do something it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The quickest way to a fix is the console's **diagnostics**: on its device page
+        (*Settings › Devices & services › PlayGuard*, the console), *⋮ › Download
+        diagnostics*. They hold the console's last state and its last diagnostic report,
+        with the console's name, the profiles, account ids and game names left out.
+        Something the console itself does with an order belongs to
+        [PlayGuard](https://github.com/JigSawFr/PlayGuard/issues/new/choose).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what Home Assistant showed or did instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+      description: The steps, from the dashboard, the action or the automation. Screenshots help.
+      placeholder: |
+        1. Settings › Devices & services › PlayGuard
+        2. …
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Integration version
+      description: Shown in HACS, or in `custom_components/playguard/manifest.json`.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: ha
+    attributes:
+      label: Home Assistant version
+      description: Settings › About.
+      placeholder: 2026.10.1
+    validations:
+      required: true
+
+  - type: input
+    id: playguard
+    attributes:
+      label: PlayGuard version
+      description: Shown in PlayGuard's *About*, and on the console's device page in Home Assistant.
+      placeholder: 1.2.0
+    validations:
+      required: true
+
+  - type: input
+    id: broker
+    attributes:
+      label: Broker
+      description: Which one, and the MQTT version Home Assistant uses with it (5 or 3.1.1).
+      placeholder: Mosquitto add-on, MQTT 5
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Drag the downloaded diagnostics file here.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log
+      description: |
+        Optional. With *Enable debug logging* on the integration's page, the lines of
+        `custom_components.playguard` around the problem. Read them first: a debug log
+        may hold names the diagnostics leave out.
+      render: text

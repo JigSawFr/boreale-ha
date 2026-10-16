@@ -1,0 +1,34 @@
+name: labels
+
+# .github/labels.json is the list of labels: the issue templates and Dependabot rely on
+# these names. Each one is created, or its colour and description
+# brought back in line; a label that is not in the file is left alone, never deleted.
+on:
+  push:
+    branches: [ main ]
+    paths: [ .github/labels.json, .github/workflows/labels.yml ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-26.04
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/labels.json
+          sparse-checkout-cone-mode: false
+      - name: Create or update each label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          jq -c '.[]' .github/labels.json | while read -r label; do
+            gh label create "$(jq -r .name <<<"$label")" --force \
+              --color "$(jq -r .color <<<"$label")" \
+              --description "$(jq -r .description <<<"$label")"
+          done

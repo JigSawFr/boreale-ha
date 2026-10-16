@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/JigSawFr/playguard-ha/security/advisories/new
+    about: Privately, never as a public issue — a way around what PlayGuard allows must not be readable by everyone before it is fixed.
+  - name: Something the console does (PlayGuard itself)
+    url: https://github.com/JigSawFr/PlayGuard/issues/new/choose
+    about: What the console does with an order, its Remote access settings, the agent, or its own Home Assistant device.
+  - name: Questions and ideas
+    url: https://github.com/JigSawFr/PlayGuard/discussions
+    about: How to use PlayGuard with Home Assistant, or an idea you want to talk through before it becomes a request.

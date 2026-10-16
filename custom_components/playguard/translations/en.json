@@ -1,0 +1,380 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": {
+        "title": "PlayGuard console found",
+        "description": "Add **{name}** (console id `{console_id}`)? Its own Home Assistant device (MQTT discovery) is replaced by this integration's, with the same entities, game names, the week's play time and long-term statistics."
+      },
+      "user": {
+        "title": "Add a PlayGuard console",
+        "description": "Consoles that publish on the broker are found by themselves. To add one by hand: its id is in PlayGuard › Preferences › Remote access › Console id.",
+        "data": {
+          "console_id": "Console id",
+          "topic_prefix": "Topic prefix"
+        },
+        "data_description": {
+          "console_id": "8 characters, such as 5a0c3e11.",
+          "topic_prefix": "playguard, unless sync.conf says otherwise."
+        }
+      },
+      "reconfigure": {
+        "title": "Change the topic prefix",
+        "description": "The prefix {name} publishes under: `topic_prefix` in PlayGuard's sync.conf.",
+        "data": {
+          "topic_prefix": "Topic prefix"
+        },
+        "data_description": {
+          "topic_prefix": "playguard, unless sync.conf says otherwise."
+        }
+      }
+    },
+    "error": {
+      "invalid_console_id": "A console id is 8 characters, 0 to 9 and a to f.",
+      "invalid_prefix": "This prefix cannot be part of an MQTT topic.",
+      "no_state": "This console has published nothing on the broker under this prefix. Check the console id and the prefix, and that the console's link is up once (PlayGuard › Preferences › Remote access › Status)."
+    },
+    "abort": {
+      "already_configured": "This console is already set up.",
+      "invalid_discovery_info": "This message is not a PlayGuard state.",
+      "mqtt_not_ready": "The MQTT integration is not set up yet: PlayGuard talks to Home Assistant through it. Set it up first, on the same broker as the console."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "take_over_discovery": "Replace the console's own Home Assistant device"
+        },
+        "data_description": {
+          "take_over_discovery": "Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again."
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "parental_controls_enabled": {
+        "name": "Parental controls"
+      },
+      "temp_unlocked": {
+        "name": "Temporarily unlocked"
+      },
+      "pin_set": {
+        "name": "PIN set"
+      },
+      "companion_linked": {
+        "name": "Companion app linked"
+      },
+      "timer_enabled": {
+        "name": "Play timer"
+      },
+      "limit_reached": {
+        "name": "Time is up"
+      },
+      "clock_accurate": {
+        "name": "Network clock accurate"
+      },
+      "online": {
+        "name": "Online"
+      },
+      "agent": {
+        "name": "Agent running"
+      }
+    },
+    "button": {
+      "sync_now": {
+        "name": "Sync now"
+      },
+      "lock_now": {
+        "name": "Lock now"
+      },
+      "export_report": {
+        "name": "Export a diagnostic report"
+      },
+      "add_bonus_time_15": {
+        "name": "Extra time +15 min"
+      },
+      "add_bonus_time_30": {
+        "name": "Extra time +30 min"
+      },
+      "add_bonus_time_60": {
+        "name": "Extra time +1 h"
+      },
+      "stop_today": {
+        "name": "No more play today"
+      },
+      "remove_limit": {
+        "name": "Remove the limit"
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Events",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "command_applied": "Order applied",
+              "command_rejected": "Order refused",
+              "command_waiting": "Order waiting for PlayGuard"
+            }
+          }
+        }
+      }
+    },
+    "number": {
+      "limit_sun": {
+        "name": "Limit Sunday"
+      },
+      "limit_mon": {
+        "name": "Limit Monday"
+      },
+      "limit_tue": {
+        "name": "Limit Tuesday"
+      },
+      "limit_wed": {
+        "name": "Limit Wednesday"
+      },
+      "limit_thu": {
+        "name": "Limit Thursday"
+      },
+      "limit_fri": {
+        "name": "Limit Friday"
+      },
+      "limit_sat": {
+        "name": "Limit Saturday"
+      },
+      "limit_uniform": {
+        "name": "Limit every day"
+      },
+      "max_screentime_today": {
+        "name": "Max screentime today"
+      }
+    },
+    "select": {
+      "restriction_level": {
+        "name": "Restriction level",
+        "state": {
+          "unrestricted": "Unrestricted",
+          "young_child": "Young child",
+          "child": "Child",
+          "teen": "Teen",
+          "custom": "Custom"
+        }
+      },
+      "profile": {
+        "name": "Profile"
+      }
+    },
+    "sensor": {
+      "used_screen_time": {
+        "name": "Used screen time"
+      },
+      "used_screen_time_log": {
+        "name": "Used screen time (play log)"
+      },
+      "screen_time_remaining": {
+        "name": "Screen time remaining"
+      },
+      "extended_screen_time": {
+        "name": "Extended screen time"
+      },
+      "now_playing": {
+        "name": "Now playing"
+      },
+      "rating_age": {
+        "name": "Age rating"
+      },
+      "firmware": {
+        "name": "Firmware"
+      },
+      "atmosphere": {
+        "name": "Atmosphère"
+      },
+      "spent_raw": {
+        "name": "Time spent (1952)"
+      },
+      "last_order": {
+        "name": "Last order"
+      },
+      "week_play_time": {
+        "name": "Play time this week"
+      }
+    },
+    "switch": {
+      "bedtime_enabled": {
+        "name": "Bedtime alarm enabled"
+      },
+      "console_lock": {
+        "name": "Console lock"
+      },
+      "play_timer_alarm": {
+        "name": "Time's up alarm"
+      },
+      "unlocked": {
+        "name": "Unlocked"
+      },
+      "vr_restricted": {
+        "name": "VR mode restricted"
+      },
+      "sns_post_restricted": {
+        "name": "Posting to social media restricted"
+      },
+      "free_communication_restricted": {
+        "name": "Communication restricted"
+      }
+    },
+    "time": {
+      "bedtime_alarm": {
+        "name": "Bedtime alarm"
+      },
+      "bedtime_end_time": {
+        "name": "Bedtime end time"
+      }
+    }
+  },
+  "exceptions": {
+    "mqtt_not_ready": {
+      "message": "The MQTT integration is not available yet."
+    },
+    "read_only": {
+      "message": "PlayGuard is in read-only mode on this console: it changes nothing."
+    },
+    "policy_off": {
+      "message": "The console refuses orders (Remote access › Orders received)."
+    },
+    "timer_writes_disabled": {
+      "message": "Orders may not change the play timer: turn on Remote access › Orders may change the play timer on the console."
+    },
+    "read_only_entity": {
+      "message": "This value cannot be changed from here."
+    },
+    "no_such_profile": {
+      "message": "No profile named {profile} is saved in PlayGuard."
+    }
+  },
+  "issues": {
+    "newer_schema": {
+      "title": "{name} speaks a newer PlayGuard protocol",
+      "description": "{name} publishes schema {schema}; this integration knows schema {known}. Update the PlayGuard integration: some values may be missing until then."
+    },
+    "native_discovery": {
+      "title": "{name} publishes its own Home Assistant device again",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name}'s entities are there twice",
+            "description": "The console's own MQTT device is back next to this integration's: it was turned on again in PlayGuard, or the console's PlayGuard is too old to take the order that turns it off. Submit to ask the console again to turn it off.\n\nIf it comes back, update PlayGuard, or turn off *Create the device in Home Assistant (MQTT discovery)* in PlayGuard › Preferences › Remote access. To keep the console's own device instead, turn off this integration's option *Replace the console's own Home Assistant device*."
+          }
+        }
+      }
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "all": "Every day",
+        "today": "Today only",
+        "sun": "Sunday",
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday"
+      }
+    }
+  },
+  "services": {
+    "set_limits": {
+      "name": "Set the limits",
+      "description": "Sets a day's limit, every day's, today's, or the whole week's (1440 = no limit).",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        },
+        "minutes": {
+          "name": "Minutes",
+          "description": "0 to 1440; 1440 means no limit."
+        },
+        "day": {
+          "name": "Day",
+          "description": "Which day."
+        },
+        "week": {
+          "name": "Week",
+          "description": "Seven limits, Sunday first, in place of minutes and day."
+        }
+      }
+    },
+    "add_bonus_time": {
+      "name": "Add extra time",
+      "description": "Extra minutes today; the usual limit comes back tomorrow.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        },
+        "minutes": {
+          "name": "Minutes",
+          "description": "5 to 180."
+        }
+      }
+    },
+    "apply_profile": {
+      "name": "Apply a profile",
+      "description": "Applies the limits of a profile saved in PlayGuard.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        },
+        "profile": {
+          "name": "Profile",
+          "description": "Its name in PlayGuard."
+        }
+      }
+    },
+    "stop_today": {
+      "name": "No more play today",
+      "description": "0 minutes today; the usual limit comes back tomorrow.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        }
+      }
+    },
+    "lock_now": {
+      "name": "Lock now",
+      "description": "Locks parental controls again after a temporary unlock.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        }
+      }
+    },
+    "sync_now": {
+      "name": "Sync now",
+      "description": "The console publishes everything again.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        }
+      }
+    },
+    "request_report": {
+      "name": "Request a diagnostic report",
+      "description": "The console saves a report on its SD card, and publishes it when Remote access allows it (then in the device's diagnostics).",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        }
+      }
+    }
+  }
+}

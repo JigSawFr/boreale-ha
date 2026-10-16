@@ -1,0 +1,34 @@
+# The workflow actions are pinned to commit SHAs (a moved tag cannot swap the code that
+# runs with write access to releases), but a pinned action never updates on its own,
+# security fixes included. Dependabot moves the SHA and its version comment together.
+#
+# Titles must pass pr-title.yml: `ci(deps): …` is conventional, and release-please hides
+# `ci` from the changelog.
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      # `init` and `analyze` are two steps of one action and must run the same release:
+      # ungrouped, Dependabot opens two PRs that each fail CodeQL on their own.
+      codeql:
+        patterns:
+          - github/codeql-action*
+
+  # The test harness (requirements_test.txt): each release of
+  # pytest-homeassistant-custom-component is a Home Assistant release, so its PR
+  # runs the tests against the new Home Assistant before users get it. The
+  # minimum in hacs.json and the README moves by hand, when it has to.
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+      include: scope
