@@ -8,6 +8,9 @@
 
 [English](README.md) · **Français**
 
+[![Ouvrez votre instance Home Assistant et ouvrez un dépôt dans le Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
+[![Ouvrez votre instance Home Assistant et commencez à configurer une nouvelle intégration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
+
 Une intégration Home Assistant pour [PlayGuard](https://github.com/JigSawFr/PlayGuard),
 le homebrew Nintendo Switch qui gère le contrôle parental de la console hors
 ligne : limites de temps de jeu, heure du coucher, restrictions, temps en plus,
@@ -103,7 +106,11 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 Avec [HACS](https://hacs.xyz/) :
 
 1. *HACS › ⋮ › Dépôts personnalisés* : ajoutez
-   `https://github.com/JigSawFr/playguard-ha`, type *Intégration*.
+   `https://github.com/JigSawFr/playguard-ha`, type *Intégration* ; ou le
+   premier bouton en haut de cette page (My Home Assistant ouvre le dépôt dans
+   votre HACS). Dans PlayGuard, *Accès à distance › Home Assistant ›
+   Installer l'intégration Home Assistant* affiche les deux mêmes boutons en
+   QR codes, pour un téléphone.
 2. Ouvrez **PlayGuard** dans HACS, puis *Télécharger* : HACS installe le
    `playguard.zip` de la version que vous choisissez.
 3. Redémarrez Home Assistant.

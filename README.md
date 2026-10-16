@@ -8,6 +8,9 @@
 
 **English** · [Français](README.fr.md)
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
+
 A Home Assistant integration for [PlayGuard](https://github.com/JigSawFr/PlayGuard),
 the Nintendo Switch homebrew that manages the console's parental controls
 offline: play-time limits, bedtime, restrictions, extra time, the console
@@ -100,7 +103,11 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 With [HACS](https://hacs.xyz/):
 
 1. *HACS › ⋮ › Custom repositories*: add
-   `https://github.com/JigSawFr/playguard-ha`, type *Integration*.
+   `https://github.com/JigSawFr/playguard-ha`, type *Integration*; or the
+   first button at the top of this page (My Home Assistant opens the
+   repository in your HACS). In PlayGuard, *Remote access › Home Assistant ›
+   Install the Home Assistant integration* shows the same two buttons as QR
+   codes, for a phone.
 2. Open **PlayGuard** in HACS and *Download* it: HACS installs the
    `playguard.zip` of the release you pick.
 3. Restart Home Assistant.
