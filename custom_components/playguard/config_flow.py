@@ -13,7 +13,16 @@ import voluptuous as vol
 
 from .const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, CONSOLE_ID_RE, DEFAULT_PREFIX, DOMAIN
 
+RECONFIGURE_SCHEMA = vol.Schema({vol.Required(CONF_PREFIX): str})
 OPTIONS_SCHEMA = vol.Schema({vol.Required(CONF_TAKE_OVER, default=True): bool})
+
+
+def _valid_prefix(prefix: str, console_id: str) -> bool:
+    try:
+        valid_publish_topic(f"{prefix}/{console_id}/state")
+    except vol.Invalid:
+        return False
+    return True
 
 
 class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -65,11 +74,8 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
             prefix = user_input[CONF_PREFIX].strip().strip("/")
             if not CONSOLE_ID_RE.match(console_id):
                 errors[CONF_CONSOLE_ID] = "invalid_console_id"
-            else:
-                try:
-                    valid_publish_topic(f"{prefix}/{console_id}/state")
-                except vol.Invalid:
-                    errors[CONF_PREFIX] = "invalid_prefix"
+            elif not _valid_prefix(prefix, console_id):
+                errors[CONF_PREFIX] = "invalid_prefix"
             if not errors:
                 self._console_id, self._prefix = console_id, prefix
                 self._name = "Nintendo Switch"
@@ -84,6 +90,24 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_PREFIX, default=DEFAULT_PREFIX): str,
                 }
             ),
+            errors=errors,
+        )
+
+    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Another topic prefix (sync.conf's topic_prefix on the console)."""
+        entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            prefix = user_input[CONF_PREFIX].strip().strip("/")
+            if _valid_prefix(prefix, entry.data[CONF_CONSOLE_ID]):
+                return self.async_update_reload_and_abort(entry, data_updates={CONF_PREFIX: prefix})
+            errors[CONF_PREFIX] = "invalid_prefix"
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=self.add_suggested_values_to_schema(
+                RECONFIGURE_SCHEMA, {CONF_PREFIX: entry.data.get(CONF_PREFIX, DEFAULT_PREFIX)}
+            ),
+            description_placeholders={"name": entry.title},
             errors=errors,
         )
 

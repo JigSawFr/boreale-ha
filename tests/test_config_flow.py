@@ -5,10 +5,12 @@ from __future__ import annotations
 import json
 
 from homeassistant import config_entries
+from homeassistant.const import STATE_ON
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_mqtt_message
 
 from custom_components.playguard.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, DOMAIN
 
@@ -98,3 +100,23 @@ async def test_options(hass: HomeAssistant, setup) -> None:
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     assert setup.options == {CONF_TAKE_OVER: False}
+
+
+async def test_reconfigure(hass: HomeAssistant, setup) -> None:
+    result = await setup.start_reconfigure_flow(hass)
+    assert result["step_id"] == "reconfigure"
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_PREFIX: "bad/+/prefix"})
+    assert result["errors"] == {CONF_PREFIX: "invalid_prefix"}
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_PREFIX: " home/playguard/ "})
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    await hass.async_block_till_done()
+    assert setup.data == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "home/playguard"}
+    assert setup.options == {CONF_TAKE_OVER: True}
+
+    # Reloaded: the console is heard under the new prefix only.
+    async_fire_mqtt_message(hass, f"home/playguard/{CONSOLE_ID}/availability", "online")
+    async_fire_mqtt_message(hass, f"playguard/{CONSOLE_ID}/availability", "offline")
+    await hass.async_block_till_done()
+    online = er.async_get(hass).async_get_entity_id("binary_sensor", DOMAIN, f"{CONSOLE_ID}_online")
+    assert hass.states.get(online).state == STATE_ON

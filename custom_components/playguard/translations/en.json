@@ -17,6 +17,16 @@
           "console_id": "8 characters, such as 5a0c3e11.",
           "topic_prefix": "playguard, unless sync.conf says otherwise."
         }
+      },
+      "reconfigure": {
+        "title": "Change the topic prefix",
+        "description": "The prefix {name} publishes under: `topic_prefix` in PlayGuard's sync.conf.",
+        "data": {
+          "topic_prefix": "Topic prefix"
+        },
+        "data_description": {
+          "topic_prefix": "playguard, unless sync.conf says otherwise."
+        }
       }
     },
     "error": {

@@ -67,6 +67,9 @@ unless `sync.conf` says otherwise).
 default) turns the console's MQTT discovery off; turned off, the console
 publishes its own device again. Removing the integration turns it back on.
 
+**Reconfigure** changes the topic prefix, when `topic_prefix` in the
+console's `sync.conf` changes.
+
 ## What it does on the broker
 
 It reads `playguard/<id>/state`, `availability`, `activity`,

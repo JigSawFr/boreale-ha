@@ -17,6 +17,16 @@
           "console_id": "8 caractères, comme 5a0c3e11.",
           "topic_prefix": "playguard, sauf si sync.conf dit autre chose."
         }
+      },
+      "reconfigure": {
+        "title": "Changer le préfixe des topics",
+        "description": "Le préfixe sous lequel {name} publie : `topic_prefix` dans le sync.conf de PlayGuard.",
+        "data": {
+          "topic_prefix": "Préfixe des topics"
+        },
+        "data_description": {
+          "topic_prefix": "playguard, sauf si sync.conf dit autre chose."
+        }
       }
     },
     "error": {
