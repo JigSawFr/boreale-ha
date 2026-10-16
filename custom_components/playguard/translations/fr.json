@@ -244,7 +244,7 @@
       "message": "La console refuse les ordres (Accès à distance › Ordres reçus)."
     },
     "timer_writes_disabled": {
-      "message": "Les ordres ne peuvent pas changer le minuteur : activez Accès à distance › Les ordres peuvent changer le minuteur sur la console."
+      "message": "Les ordres ne peuvent pas changer le temps de jeu : activez Accès à distance › Les ordres peuvent changer le temps de jeu sur la console."
     },
     "read_only_entity": {
       "message": "Cette valeur ne peut pas être changée d'ici."

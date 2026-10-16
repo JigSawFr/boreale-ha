@@ -70,7 +70,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   and account, see Home Assistant's *Nintendo Switch Parental Controls*
   integration instead.
 - **Home Assistant 2026.10 or newer**, and an MQTT broker in version 5.0 or
-  3.1.1: the Mosquitto add-on, or EMQX, HiveMQ, NanoMQ, VerneMQ and others.
+  3.1.1: the Mosquitto app, or EMQX, HiveMQ, NanoMQ, VerneMQ and others.
   The console speaks 5.0 and falls back to 3.1.1. Home Assistant's MQTT
   integration moves to 5.0 by itself when the broker takes it, else it raises
   a repair, *MQTT protocol migration failed* (Home Assistant drops 3.1.1 in
@@ -80,8 +80,8 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 
 1. An MQTT broker, and Home Assistant's **MQTT** integration set up on it
    (*Settings › Devices & services › Add integration › MQTT*; with the
-   Mosquitto add-on, it is offered by itself).
-2. A broker user for the console (with the Mosquitto add-on, any Home
+   Mosquitto app, it is offered by itself).
+2. A broker user for the console (with the Mosquitto app, any Home
    Assistant user can log in: create one named `playguard`).
 3. On the console, PlayGuard's link set up on that broker: *Preferences ›
    Remote access › MQTT / Home Assistant* (broker address, port, user name
@@ -510,8 +510,8 @@ report, names left out) and open an
    PlayGuard.
 2. With HACS: *HACS › PlayGuard › ⋮ › Remove*; by hand: delete
    `custom_components/playguard`. Restart Home Assistant.
-3. The long-term statistics stay in the recorder: delete them in *Developer
-   tools › Statistics* if you do not want them any more.
+3. The long-term statistics stay in the recorder: delete them in *Settings ›
+   Tools › Statistics* if you do not want them any more.
 
 Nothing else is left on the broker: the console clears each order once
 handled. To stop the console publishing at all, turn *Remote link* off in
