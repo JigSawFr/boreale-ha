@@ -2,16 +2,22 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import Any
 
-from homeassistant.components.mqtt import valid_publish_topic
+from homeassistant.components import mqtt
+from homeassistant.components.mqtt import ReceiveMessage, valid_publish_topic
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow, OptionsFlowWithReload
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import voluptuous as vol
 
 from .const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, CONSOLE_ID_RE, DEFAULT_PREFIX, DOMAIN
+
+# How long a flow waits for the console's state on the broker. Retained, it
+# comes at once when the console ever published, even asleep.
+STATE_TIMEOUT = 10.0
 
 RECONFIGURE_SCHEMA = vol.Schema({vol.Required(CONF_PREFIX): str})
 OPTIONS_SCHEMA = vol.Schema({vol.Required(CONF_TAKE_OVER, default=True): bool})
@@ -23,6 +29,34 @@ def _valid_prefix(prefix: str, console_id: str) -> bool:
     except vol.Invalid:
         return False
     return True
+
+
+def _state(payload: str | bytes) -> dict | None:
+    """A PlayGuard state document, else None."""
+    try:
+        doc = json.loads(payload) if payload else None
+    except ValueError:
+        return None
+    return doc if isinstance(doc, dict) and "schema" in doc else None
+
+
+async def _async_wait_for_state(hass: HomeAssistant, prefix: str, console_id: str) -> dict | None:
+    """The console's state on the broker under this prefix, or None."""
+    received: asyncio.Future[dict] = hass.loop.create_future()
+
+    @callback
+    def _on_state(msg: ReceiveMessage) -> None:
+        if (doc := _state(msg.payload)) is not None and not received.done():
+            received.set_result(doc)
+
+    unsubscribe = await mqtt.async_subscribe(hass, f"{prefix}/{console_id}/state", _on_state, qos=1)
+    try:
+        async with asyncio.timeout(STATE_TIMEOUT):
+            return await received
+    except TimeoutError:
+        return None
+    finally:
+        unsubscribe()
 
 
 class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -41,11 +75,7 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         parts = discovery_info.topic.split("/")
         if len(parts) != 3 or parts[2] != "state" or not CONSOLE_ID_RE.match(parts[1]):
             return self.async_abort(reason="invalid_discovery_info")
-        try:
-            doc = json.loads(discovery_info.payload) if discovery_info.payload else None
-        except ValueError:
-            doc = None
-        if not isinstance(doc, dict) or "schema" not in doc:
+        if (doc := _state(discovery_info.payload)) is None:
             return self.async_abort(reason="invalid_discovery_info")
         self._prefix, self._console_id = parts[0], parts[1]
         await self.async_set_unique_id(self._console_id)
@@ -67,7 +97,10 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """A console by its id (Preferences › Remote access › Console id)."""
+        """A console by its id (Preferences › Remote access › Console id),
+        once its state is seen on the broker."""
+        if not await mqtt.async_wait_for_mqtt_client(self.hass):
+            return self.async_abort(reason="mqtt_not_ready")
         errors: dict[str, str] = {}
         if user_input is not None:
             console_id = user_input[CONF_CONSOLE_ID].strip().lower()
@@ -77,11 +110,15 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
             elif not _valid_prefix(prefix, console_id):
                 errors[CONF_PREFIX] = "invalid_prefix"
             if not errors:
-                self._console_id, self._prefix = console_id, prefix
-                self._name = "Nintendo Switch"
-                await self.async_set_unique_id(console_id)
+                # A discovery of the same console may be waiting: this one goes on.
+                await self.async_set_unique_id(console_id, raise_on_progress=False)
                 self._abort_if_unique_id_configured()
-                return self._create()
+                if (doc := await _async_wait_for_state(self.hass, prefix, console_id)) is None:
+                    errors["base"] = "no_state"
+                else:
+                    self._console_id, self._prefix = console_id, prefix
+                    self._name = (doc.get("console") or {}).get("name") or "Nintendo Switch"
+                    return self._create()
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
@@ -96,12 +133,18 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Another topic prefix (sync.conf's topic_prefix on the console)."""
         entry = self._get_reconfigure_entry()
+        if not await mqtt.async_wait_for_mqtt_client(self.hass):
+            return self.async_abort(reason="mqtt_not_ready")
         errors: dict[str, str] = {}
         if user_input is not None:
             prefix = user_input[CONF_PREFIX].strip().strip("/")
-            if _valid_prefix(prefix, entry.data[CONF_CONSOLE_ID]):
+            console_id = entry.data[CONF_CONSOLE_ID]
+            if not _valid_prefix(prefix, console_id):
+                errors[CONF_PREFIX] = "invalid_prefix"
+            elif await _async_wait_for_state(self.hass, prefix, console_id) is None:
+                errors["base"] = "no_state"
+            else:
                 return self.async_update_reload_and_abort(entry, data_updates={CONF_PREFIX: prefix})
-            errors[CONF_PREFIX] = "invalid_prefix"
         return self.async_show_form(
             step_id="reconfigure",
             data_schema=self.add_suggested_values_to_schema(

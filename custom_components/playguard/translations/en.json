@@ -31,11 +31,13 @@
     },
     "error": {
       "invalid_console_id": "A console id is 8 characters, 0 to 9 and a to f.",
-      "invalid_prefix": "This prefix cannot be part of an MQTT topic."
+      "invalid_prefix": "This prefix cannot be part of an MQTT topic.",
+      "no_state": "This console has published nothing on the broker under this prefix. Check the console id and the prefix, and that the console's link is up once (PlayGuard › Preferences › Remote access › Status)."
     },
     "abort": {
       "already_configured": "This console is already set up.",
-      "invalid_discovery_info": "This message is not a PlayGuard state."
+      "invalid_discovery_info": "This message is not a PlayGuard state.",
+      "mqtt_not_ready": "The MQTT integration is not set up yet: PlayGuard talks to Home Assistant through it. Set it up first, on the same broker as the console."
     }
   },
   "options": {
