@@ -1,5 +1,13 @@
 # PlayGuard for Home Assistant
 
+[![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
+[![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
+[![HACS: custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![quality scale: gold](https://img.shields.io/badge/quality%20scale-gold-d4af37.svg)](custom_components/playguard/quality_scale.yaml)
+[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+
+**English** · [Français](README.fr.md)
+
 A Home Assistant integration for [PlayGuard](https://github.com/JigSawFr/PlayGuard),
 the Nintendo Switch homebrew that manages the console's parental controls
 offline: play-time limits, bedtime, restrictions, extra time, the console
@@ -42,7 +50,8 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 [entities](#entities) · [actions](#actions) · [events](#events) ·
 [data updates](#data-updates) · [examples](#examples) ·
 [use cases](#use-cases) · [known limitations](#known-limitations) ·
-[troubleshooting](#troubleshooting) · [removal](#removal)
+[troubleshooting](#troubleshooting) · [removal](#removal) ·
+[help, security and contributing](#help-security-and-contributing)
 
 ## Supported devices
 
@@ -92,11 +101,17 @@ With [HACS](https://hacs.xyz/):
 
 1. *HACS › ⋮ › Custom repositories*: add
    `https://github.com/JigSawFr/playguard-ha`, type *Integration*.
-2. Open **PlayGuard** in HACS and *Download* it.
+2. Open **PlayGuard** in HACS and *Download* it: HACS installs the
+   `playguard.zip` of the release you pick.
 3. Restart Home Assistant.
 
-By hand: copy `custom_components/playguard` into the `custom_components`
-folder of your configuration, and restart Home Assistant.
+By hand: download `playguard.zip` from the
+[latest release](https://github.com/JigSawFr/playguard-ha/releases/latest),
+extract it into a `custom_components/playguard` folder of your configuration,
+and restart Home Assistant. Each release's zip carries a build provenance
+attestation: `gh attestation verify playguard.zip -R JigSawFr/playguard-ha`
+checks that it was built by this repository's CI (`SHA256SUMS.txt`, next to
+it, has its checksum).
 
 ## Set-up
 
@@ -511,25 +526,19 @@ same retained scalar orders as the native entities on
 contract is PlayGuard's
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md).
 
-## Development
+## Help, security and contributing
 
-```sh
-python3.14 -m venv .venv && . .venv/bin/activate
-pip install -r requirements_test.txt
-python -m pytest --cov=custom_components.playguard --cov-branch --cov-report=json
-python scripts/coverage_per_module.py   # more than 95% of every module, as CI asks
-```
-
-`custom_components/playguard/entities.py`, with the names in
-`translations/` and the icons in `icons.json`, mirrors PlayGuard's entity
-table (`source/sync/sync_entities.c`). PlayGuard's host tests export it as
-`build/host-tests/sync/entities.json` (`make test`); copy that file to
-`tests/fixtures/entities.json` when it changes: `tests/test_parity.py` fails
-until this integration follows. `tests/fixtures/state.json` and
-`activity.json` are PlayGuard's own examples, from the same folder.
-`quality_scale.yaml` says where the integration stands on Home Assistant's
-[quality scale](https://contributors.home-assistant.io/core/quality-scale/rules/);
-`tests/test_quality_scale.py` checks it, as hassfest does for core.
+- A problem with the integration: [Getting help](.github/SUPPORT.md) says
+  where to ask; a bug report wants the console's diagnostics (the device's
+  page, *⋮ › Download diagnostics*: names and account ids left out).
+- A security problem: privately, as [SECURITY.md](SECURITY.md) says, never in
+  a public issue.
+- Working on the integration (tests, coverage, the quality scale, the parity
+  with PlayGuard's entity table, translations, releases):
+  [CONTRIBUTING.md](CONTRIBUTING.md). Changes are listed in
+  [CHANGELOG.md](CHANGELOG.md).
+- Support PlayGuard: [GitHub Sponsors](https://github.com/sponsors/JigSawFr)
+  or [Ko-fi](https://ko-fi.com/jigsawfr).
 
 ## License
 
