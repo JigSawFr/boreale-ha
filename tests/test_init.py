@@ -285,7 +285,7 @@ async def test_remove_without_mqtt(hass: HomeAssistant, setup, caplog: pytest.Lo
     """MQTT may be gone when the entry is removed: the removal still goes through."""
     assert await hass.config_entries.async_unload(setup.entry_id)
     with patch(
-        "custom_components.playguard.console.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
+        "custom_components.playguard.coordinator.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
     ):
         await hass.config_entries.async_remove(setup.entry_id)
         await hass.async_block_till_done()

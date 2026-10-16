@@ -1,4 +1,5 @@
-"""One console on the broker: its topics, its last documents, its orders.
+"""The coordinator: one console on the broker, its topics, its last
+documents, its orders. Pushed, not polled: the entities listen to it.
 
 Everything arrives retained but the events, so a restart of Home Assistant
 gets the last state back at once, and an order sent while the console sleeps

@@ -8,7 +8,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import callback
 from homeassistant.helpers.entity import Entity
 
-from .console import PlayGuardConsole
+from .coordinator import PlayGuardConsole
 from .entities import EntityDef, dig
 
 

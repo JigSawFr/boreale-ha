@@ -7,8 +7,8 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv, service
 import voluptuous as vol
 
-from .console import PlayGuardConsole
 from .const import DAYS, DOMAIN, WRITE_FREE, WRITE_TIMER
+from .coordinator import PlayGuardConsole
 
 ATTR_DEVICE_ID = "device_id"
 ATTR_MINUTES = "minutes"

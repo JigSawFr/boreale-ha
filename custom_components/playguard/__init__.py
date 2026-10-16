@@ -19,8 +19,8 @@ from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
-from .console import PlayGuardConsole
 from .const import DOMAIN
+from .coordinator import PlayGuardConsole
 from .services import async_setup_services
 
 _LOGGER = logging.getLogger(__name__)

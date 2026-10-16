@@ -20,7 +20,7 @@ from homeassistant.util import dt as dt_util
 from .const import DOMAIN
 
 if TYPE_CHECKING:
-    from .console import PlayGuardConsole
+    from .coordinator import PlayGuardConsole
 
 _LOGGER = logging.getLogger(__name__)
 
