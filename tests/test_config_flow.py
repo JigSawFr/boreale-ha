@@ -73,19 +73,73 @@ async def test_discovered(hass: HomeAssistant) -> None:
     assert result["reason"] == "already_configured"
 
 
-async def test_discovery_follows_the_prefix(hass: HomeAssistant) -> None:
-    """A console set up by hand under another prefix, found under the usual one."""
+@pytest.fixture
+async def moved(hass: HomeAssistant, mqtt_mock, state: dict) -> MockConfigEntry:
+    """A console set up under another prefix, its state (ts 1791000000) read there."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="Salon",
+        unique_id=CONSOLE_ID,
+        data={CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "home/playguard"},
+        options={CONF_TAKE_OVER: True},
+    )
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    async_fire_mqtt_message(hass, f"home/playguard/{CONSOLE_ID}/state", json.dumps(state))
+    await hass.async_block_till_done()
+    assert entry.runtime_data.state["ts"] == 1791000000
+    return entry
+
+
+async def _rediscovered(hass: HomeAssistant, ts: object) -> dict:
+    """The console's state found under the default prefix, built at `ts`."""
+    doc = {**fixture("state.json"), "ts": ts}
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": config_entries.SOURCE_MQTT},
+        data=_info(f"playguard/{CONSOLE_ID}/state", json.dumps(doc)),
+    )
+    await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+    return result
+
+
+async def test_rediscovery_ignores_a_stale_state(hass: HomeAssistant, moved) -> None:
+    """A state left retained under the console's former prefix (older, or no
+    time at all) does not move the entry back."""
+    console = moved.runtime_data
+    for ts in (1790000000, 1791000000, None, True):
+        await _rediscovered(hass, ts)
+        assert moved.data[CONF_PREFIX] == "home/playguard", ts
+    assert moved.runtime_data is console  # not reloaded
+
+
+async def test_rediscovery_follows_a_newer_state(hass: HomeAssistant, moved) -> None:
+    """The console moved back to the default prefix: the entry follows, and reloads."""
+    console = moved.runtime_data
+    await _rediscovered(hass, 1792000000)
+    assert moved.data[CONF_PREFIX] == "playguard"
+    assert moved.state is config_entries.ConfigEntryState.LOADED
+    assert moved.runtime_data is not console and moved.runtime_data.base == f"playguard/{CONSOLE_ID}"
+
+
+async def test_rediscovery_waits_for_a_loaded_entry(hass: HomeAssistant) -> None:
+    """Not loaded yet: nothing to compare with; the console's next state will do."""
     entry = MockConfigEntry(
         domain=DOMAIN, unique_id=CONSOLE_ID, data={CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "home/playguard"}
     )
     entry.add_to_hass(hass)
-    info = _info(f"playguard/{CONSOLE_ID}/state", json.dumps(fixture("state.json")))
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_MQTT}, data=info
-    )
-    assert result["type"] is FlowResultType.ABORT
-    assert result["reason"] == "already_configured"
-    assert entry.data[CONF_PREFIX] == "playguard"
+    await _rediscovered(hass, 1792000000)
+    assert entry.data[CONF_PREFIX] == "home/playguard"
+
+
+async def test_rediscovery_under_the_same_prefix(hass: HomeAssistant, setup) -> None:
+    console = setup.runtime_data
+    await _rediscovered(hass, 1792000000)
+    assert setup.data[CONF_PREFIX] == "playguard"
+    assert setup.runtime_data is console
 
 
 async def test_discovery_ignores_other_messages(hass: HomeAssistant) -> None:

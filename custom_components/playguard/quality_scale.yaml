@@ -54,7 +54,9 @@ rules:
     status: done
     comment: >-
       A known console found again by MQTT discovery under another topic prefix
-      (its address on the broker) has its entry updated and reloaded.
+      (its address on the broker) has its entry updated and reloaded, when the
+      state found is newer than the last one its loaded entry read: a state
+      left retained under the former prefix does not move it back.
   docs-data-update: done
   docs-examples: done
   docs-known-limitations: done

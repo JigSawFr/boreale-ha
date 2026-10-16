@@ -135,6 +135,11 @@ twice.
 console's `sync.conf` changes. As when adding a console by hand, the console
 must answer under the new prefix; the entry then reloads.
 
+A console moved back to the prefix `playguard` is found again by discovery,
+and its entry follows it (and reloads) once the console publishes a state
+newer than the last one the entry read; a state left on the broker under the
+former prefix does not move it back.
+
 ## Entities
 
 One device per console, named after the console (*Name in Home Assistant*

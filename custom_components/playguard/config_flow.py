@@ -8,7 +8,14 @@ from typing import Any
 
 from homeassistant.components import mqtt
 from homeassistant.components.mqtt import ReceiveMessage, valid_publish_topic
-from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow, OptionsFlowWithReload
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigEntryState,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+    OptionsFlowWithReload,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import voluptuous as vol
@@ -38,6 +45,24 @@ def _state(payload: str | bytes) -> dict | None:
     except ValueError:
         return None
     return doc if isinstance(doc, dict) and "schema" in doc else None
+
+
+def _posix(value: Any) -> int | None:
+    """A state's `ts` (the POSIX time it was built), else None."""
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _moved_back(entry: ConfigEntry | None, prefix: str, doc: dict) -> bool:
+    """Whether a known console's entry follows it to `prefix`: only for a
+    state newer than the last one its coordinator read. A state left
+    retained under the console's former prefix is older, and an entry not
+    loaded yet waits for the console's next state (every poll interval)."""
+    if entry is None or entry.data.get(CONF_PREFIX, DEFAULT_PREFIX) == prefix:
+        return False
+    if entry.state is not ConfigEntryState.LOADED or (console := getattr(entry, "runtime_data", None)) is None:
+        return False
+    found, last = _posix(doc.get("ts")), _posix((console.state or {}).get("ts"))
+    return found is not None and last is not None and last < found
 
 
 async def _async_wait_for_state(hass: HomeAssistant, prefix: str, console_id: str) -> dict | None:
@@ -78,10 +103,11 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         if (doc := _state(discovery_info.payload)) is None:
             return self.async_abort(reason="invalid_discovery_info")
         self._prefix, self._console_id = parts[0], parts[1]
-        await self.async_set_unique_id(self._console_id)
-        # Already set up: the entry follows the console's prefix (reloaded
-        # only when it changed).
-        self._abort_if_unique_id_configured(updates={CONF_PREFIX: self._prefix})
+        entry = await self.async_set_unique_id(self._console_id)
+        # Already set up: the entry follows the console back to this prefix
+        # (and reloads) only when the state is newer than its own.
+        moved = _moved_back(entry, self._prefix, doc)
+        self._abort_if_unique_id_configured(updates={CONF_PREFIX: self._prefix} if moved else None)
         self._name = ((doc.get("console") or {}).get("name")) or "Nintendo Switch"
         self.context["title_placeholders"] = {"name": self._name}
         return await self.async_step_confirm()
