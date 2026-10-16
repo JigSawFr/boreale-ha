@@ -8,7 +8,7 @@ from unittest.mock import patch
 from homeassistant.components.diagnostics import REDACTED
 from homeassistant.components.repairs import repairs_flow_manager
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
+from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
@@ -61,6 +61,13 @@ async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
     log = hass.states.get(_id("sensor", "used_screen_time_log", hass))
     assert log.state == "74"
     assert log.attributes["games"] == {"Super Mario Odyssey": 60, "Mario Kart 8 Deluxe": 14}
+
+    # The integration's own diagnostics: the link, and the agent (rarely needed: off).
+    registry = er.async_get(hass)
+    assert registry.async_get(_id("binary_sensor", "online", hass)).entity_category is EntityCategory.DIAGNOSTIC
+    agent = registry.async_get(_id("binary_sensor", "agent", hass))
+    assert agent.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+    assert registry.async_get(_id("button", "sync_now", hass)).entity_category is EntityCategory.DIAGNOSTIC
 
     # The device takes the console's name and versions.
     device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)

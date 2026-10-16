@@ -148,7 +148,7 @@ ENTITIES: tuple[EntityDef, ...] = (
     ),
     EntityDef(key="profile", platform=Platform.SELECT, write=WRITE_TIMER, category="config"),
     # buttons
-    _button("sync_now", WRITE_FREE),
+    _button("sync_now", WRITE_FREE, category="diagnostic"),  # ahead of PlayGuard's table (tests/test_parity.py)
     _button("lock_now", WRITE_FREE),
     _button("export_report", WRITE_FREE, category="diagnostic"),
     _button("add_bonus_time_15", WRITE_TIMER),
@@ -159,8 +159,8 @@ ENTITIES: tuple[EntityDef, ...] = (
     # events (the console's "event" topic)
     EntityDef(key="events", platform=Platform.EVENT),
     # this integration's own
-    _binary("online", ("availability",), device_class="connectivity", extra=True),
-    _binary("agent", ("link", "agent"), category="diagnostic", extra=True),
+    _binary("online", ("availability",), device_class="connectivity", category="diagnostic", extra=True),
+    _binary("agent", ("link", "agent"), device_class="running", category="diagnostic", enabled=False, extra=True),
     _minutes("week_play_time", ("week",), extra=True),
 )
 
