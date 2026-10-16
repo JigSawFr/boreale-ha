@@ -235,8 +235,8 @@ class PlayGuardConsole:
 
     @callback
     def _take_over(self) -> None:
-        """Turns the console's own discovery off (these entities replace it,
-        with the same object ids), or back on when the option says so."""
+        """Turns the console's own discovery off (these entities replace it),
+        or back on when the option says so."""
         want_native = not self.entry.options.get(CONF_TAKE_OVER, True)
         have_native = bool(((self.state or {}).get("link") or {}).get("ha_discovery"))
         if self._discovery_sent or want_native == have_native:

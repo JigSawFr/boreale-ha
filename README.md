@@ -12,9 +12,12 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 
 - **Found by itself**: every console that publishes on the broker is offered
   for set-up, no id to type.
-- **The same entities**, under the same object ids, replacing the console's
-  own MQTT device (no duplicates; turn it back on in the options), plus
-  **Online**, **Agent running** and **Play time this week**.
+- **The same entities** as the console's own MQTT device (names, units,
+  options), replacing it (no duplicates; turn it back on in the options),
+  plus **Online**, **Agent running** and **Play time this week**. Home
+  Assistant builds the entity ids itself, from the device's and the
+  entities' names, when they are first registered, and you can change them:
+  check the automations that use the console's former entities.
 - **Game names** on *Now playing*, and each game's time today and this week as
   attributes.
 - **Long-term statistics**: every finished day's total, and each game's,
@@ -36,8 +39,10 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 
 - Home Assistant 2026.10 or newer, with the **MQTT** integration connected to
   the same broker as the console (the Mosquitto add-on, or any other, in
-  MQTT 5.0 or 3.1.1: the console speaks 5.0 and falls back to 3.1.1, and
-  Home Assistant's MQTT integration may use either).
+  MQTT 5.0 or 3.1.1: the console speaks 5.0 and falls back to 3.1.1).
+  Home Assistant's MQTT integration moves to 5.0 by itself when the broker
+  takes it, else it raises a repair, *MQTT protocol migration failed*
+  (Home Assistant drops 3.1.1 in 2027.1).
 - PlayGuard with *Preferences › Remote access* set up: see PlayGuard's
   [Home Assistant guide](https://github.com/JigSawFr/PlayGuard/blob/main/docs/home-assistant.md).
 

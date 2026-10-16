@@ -19,7 +19,7 @@ DEFAULT_PREFIX: Final = "playguard"
 CONF_CONSOLE_ID: Final = "console_id"
 CONF_PREFIX: Final = "topic_prefix"
 # Turn the console's own Home Assistant discovery off (the integration's
-# entities replace it, with the same object ids).
+# entities replace it).
 CONF_TAKE_OVER: Final = "take_over_discovery"
 
 CONSOLE_ID_RE: Final = re.compile(r"^[0-9a-f]{8}$")

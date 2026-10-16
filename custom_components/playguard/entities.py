@@ -1,9 +1,10 @@
 """The console's entities: PlayGuard's table (source/sync/sync_entities.c).
 
-Same object ids, platforms, write classes and options as the native MQTT
-discovery the console publishes, so that taking over from it keeps the entity
-ids. tests/test_parity.py checks this table against the entities.json PlayGuard's
-host tests export. A few entities exist only here (`extra`).
+Same object ids, names, platforms, write classes and options as the native
+MQTT discovery the console publishes, so that taking over from it gives the
+same entities (Home Assistant picks their entity ids). tests/test_parity.py
+checks this table against the entities.json PlayGuard's host tests export. A
+few entities exist only here (`extra`).
 """
 
 from __future__ import annotations
