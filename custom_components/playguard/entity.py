@@ -25,8 +25,6 @@ class PlayGuardEntity(Entity):
         self._attr_translation_key = definition.key
         self._attr_device_info = console.device_info
         self._attr_entity_registry_enabled_default = definition.enabled
-        if definition.icon:
-            self._attr_icon = definition.icon
         if definition.category:
             self._attr_entity_category = EntityCategory(definition.category)
 

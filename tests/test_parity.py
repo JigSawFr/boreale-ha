@@ -11,11 +11,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from homeassistant.util.yaml import load_yaml
+
 from custom_components.playguard.entities import BY_KEY, ENTITIES
 
 from .conftest import fixture
 
-STRINGS = Path(__file__).parent.parent / "custom_components" / "playguard" / "translations" / "en.json"
+INTEGRATION = Path(__file__).parent.parent / "custom_components" / "playguard"
+STRINGS = INTEGRATION / "translations" / "en.json"
+ICONS = INTEGRATION / "icons.json"
 
 
 def _template(definition) -> str | None:
@@ -46,6 +50,7 @@ def test_same_entities_as_playguard() -> None:
     theirs = {e["id"] for e in table["entities"]}
     assert ours == theirs, f"only here: {sorted(ours - theirs)}, only in PlayGuard: {sorted(theirs - ours)}"
     names = json.loads(STRINGS.read_text(encoding="utf-8"))["entity"]
+    icons = json.loads(ICONS.read_text(encoding="utf-8"))["entity"]
     for e in table["entities"]:
         d = BY_KEY[e["id"]]
         extra = e["extra"]
@@ -54,7 +59,7 @@ def test_same_entities_as_playguard() -> None:
         assert _template(d) == e["value_template"], e["id"]
         assert _command_template(d) == extra.get("cmd_tpl"), e["id"]
         assert names[e["platform"]][e["id"]]["name"] == e["name"], e["id"]
-        assert d.icon == extra.get("ic"), e["id"]
+        assert icons.get(e["platform"], {}).get(e["id"], {}).get("default") == extra.get("ic"), e["id"]
         assert d.category == extra.get("ent_cat"), e["id"]
         assert d.enabled == extra.get("en", True), e["id"]
         assert d.unit == extra.get("unit_of_meas"), e["id"]
@@ -70,3 +75,11 @@ def test_every_entity_is_named() -> None:
     names = json.loads(STRINGS.read_text(encoding="utf-8"))["entity"]
     for d in ENTITIES:
         assert d.key in names[str(d.platform)], d.key
+
+
+def test_icons_are_for_entities_and_actions() -> None:
+    icons = json.loads(ICONS.read_text(encoding="utf-8"))
+    for platform, keys in icons["entity"].items():
+        for key in keys:
+            assert key in BY_KEY and str(BY_KEY[key].platform) == platform, key
+    assert set(icons["services"]) == set(load_yaml(INTEGRATION / "services.yaml"))

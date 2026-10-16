@@ -87,8 +87,9 @@ pip install -r requirements_test.txt
 python -m pytest
 ```
 
-`custom_components/playguard/entities.py` mirrors PlayGuard's entity table
-(`source/sync/sync_entities.c`). PlayGuard's host tests export it as
+`custom_components/playguard/entities.py`, with the names in
+`translations/` and the icons in `icons.json`, mirrors PlayGuard's entity
+table (`source/sync/sync_entities.c`). PlayGuard's host tests export it as
 `build/host-tests/sync/entities.json` (`make test`); copy that file to
 `tests/fixtures/entities.json` when it changes: `tests/test_parity.py` fails
 until this integration follows. `tests/fixtures/state.json` and

@@ -26,7 +26,6 @@ class EntityDef:
     write: str = WRITE_NONE
     path: tuple[str, ...] | None = None  # where the value is in the state document
     fallback: tuple[str, ...] | None = None  # read when `path` gives nothing
-    icon: str | None = None
     category: str | None = None  # "config" or "diagnostic"
     enabled: bool = True
     unit: str | None = None
@@ -81,12 +80,12 @@ def _button(key: str, write: str, **kw) -> EntityDef:
 
 ENTITIES: tuple[EntityDef, ...] = (
     # binary sensors
-    _binary("parental_controls_enabled", ("controls", "enabled"), icon="mdi:shield-account"),
+    _binary("parental_controls_enabled", ("controls", "enabled")),
     _binary("temp_unlocked", ("controls", "temp_unlocked"), device_class="lock"),
     _binary("pin_set", ("controls", "pin_set"), category="diagnostic"),
-    _binary("companion_linked", ("controls", "companion_linked"), icon="mdi:cellphone-link"),
-    _binary("timer_enabled", ("timer", "enabled"), icon="mdi:timer-outline"),
-    _binary("limit_reached", ("timer", "limit_reached"), icon="mdi:timer-alert-outline"),
+    _binary("companion_linked", ("controls", "companion_linked")),
+    _binary("timer_enabled", ("timer", "enabled")),
+    _binary("limit_reached", ("timer", "limit_reached")),
     _binary("clock_accurate", ("clock_accurate",), category="diagnostic"),
     # sensors
     # A day's play time, back to 0 at midnight: a daily total.
@@ -99,7 +98,6 @@ ENTITIES: tuple[EntityDef, ...] = (
         platform=Platform.SENSOR,
         path=("activity_today", "now_playing", "name"),
         fallback=("activity_today", "now_playing", "app_id"),
-        icon="mdi:gamepad-variant",
     ),
     EntityDef(key="rating_age", platform=Platform.SENSOR, path=("controls", "rating_age"), category="diagnostic"),
     EntityDef(key="firmware", platform=Platform.SENSOR, path=("console", "firmware"), category="diagnostic"),
@@ -127,9 +125,9 @@ ENTITIES: tuple[EntityDef, ...] = (
     ),
     _switch("bedtime_enabled", ("timer", "bedtime", "enabled"), category="config"),
     # switches
-    _switch("console_lock", ("timer", "console_locked"), icon="mdi:lock"),
+    _switch("console_lock", ("timer", "console_locked")),
     _switch("play_timer_alarm", ("timer", "alarm_on"), category="config"),
-    _switch("unlocked", ("controls", "temp_unlocked"), icon="mdi:lock-open-variant"),
+    _switch("unlocked", ("controls", "temp_unlocked")),
     _switch("vr_restricted", ("controls", "vr_restricted"), write=WRITE_FREE, category="config"),
     _switch("sns_post_restricted", ("controls", "sns_post_restricted"), write=WRITE_FREE, category="config"),
     _switch(
@@ -150,20 +148,20 @@ ENTITIES: tuple[EntityDef, ...] = (
     ),
     EntityDef(key="profile", platform=Platform.SELECT, write=WRITE_TIMER, category="config"),
     # buttons
-    _button("sync_now", WRITE_FREE, icon="mdi:sync"),
-    _button("lock_now", WRITE_FREE, icon="mdi:lock"),
+    _button("sync_now", WRITE_FREE),
+    _button("lock_now", WRITE_FREE),
     _button("export_report", WRITE_FREE, category="diagnostic"),
-    _button("add_bonus_time_15", WRITE_TIMER, icon="mdi:timer-plus-outline"),
-    _button("add_bonus_time_30", WRITE_TIMER, icon="mdi:timer-plus-outline"),
-    _button("add_bonus_time_60", WRITE_TIMER, icon="mdi:timer-plus-outline"),
-    _button("stop_today", WRITE_TIMER, icon="mdi:timer-off-outline"),
-    _button("remove_limit", WRITE_TIMER, icon="mdi:timer-remove-outline"),
+    _button("add_bonus_time_15", WRITE_TIMER),
+    _button("add_bonus_time_30", WRITE_TIMER),
+    _button("add_bonus_time_60", WRITE_TIMER),
+    _button("stop_today", WRITE_TIMER),
+    _button("remove_limit", WRITE_TIMER),
     # events (the console's "event" topic)
     EntityDef(key="events", platform=Platform.EVENT),
     # this integration's own
     _binary("online", ("availability",), device_class="connectivity", extra=True),
-    _binary("agent", ("link", "agent"), icon="mdi:server-network", category="diagnostic", extra=True),
-    _minutes("week_play_time", ("week",), icon="mdi:calendar-week", extra=True),
+    _binary("agent", ("link", "agent"), category="diagnostic", extra=True),
+    _minutes("week_play_time", ("week",), extra=True),
 )
 
 BY_KEY: dict[str, EntityDef] = {e.key: e for e in ENTITIES}

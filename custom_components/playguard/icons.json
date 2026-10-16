@@ -1,0 +1,83 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "parental_controls_enabled": {
+        "default": "mdi:shield-account"
+      },
+      "companion_linked": {
+        "default": "mdi:cellphone-link"
+      },
+      "timer_enabled": {
+        "default": "mdi:timer-outline"
+      },
+      "limit_reached": {
+        "default": "mdi:timer-alert-outline"
+      },
+      "agent": {
+        "default": "mdi:server-network"
+      }
+    },
+    "button": {
+      "sync_now": {
+        "default": "mdi:sync"
+      },
+      "lock_now": {
+        "default": "mdi:lock"
+      },
+      "add_bonus_time_15": {
+        "default": "mdi:timer-plus-outline"
+      },
+      "add_bonus_time_30": {
+        "default": "mdi:timer-plus-outline"
+      },
+      "add_bonus_time_60": {
+        "default": "mdi:timer-plus-outline"
+      },
+      "stop_today": {
+        "default": "mdi:timer-off-outline"
+      },
+      "remove_limit": {
+        "default": "mdi:timer-remove-outline"
+      }
+    },
+    "sensor": {
+      "now_playing": {
+        "default": "mdi:gamepad-variant"
+      },
+      "week_play_time": {
+        "default": "mdi:calendar-week"
+      }
+    },
+    "switch": {
+      "console_lock": {
+        "default": "mdi:lock"
+      },
+      "unlocked": {
+        "default": "mdi:lock-open-variant"
+      }
+    }
+  },
+  "services": {
+    "set_limits": {
+      "service": "mdi:timer-cog-outline"
+    },
+    "add_bonus_time": {
+      "service": "mdi:timer-plus-outline"
+    },
+    "apply_profile": {
+      "service": "mdi:playlist-check"
+    },
+    "stop_today": {
+      "service": "mdi:timer-off-outline"
+    },
+    "lock_now": {
+      "service": "mdi:lock"
+    },
+    "sync_now": {
+      "service": "mdi:sync"
+    },
+    "request_report": {
+      "service": "mdi:file-document-outline"
+    }
+  }
+}
