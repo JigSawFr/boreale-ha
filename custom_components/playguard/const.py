@@ -54,3 +54,8 @@ NATIVE_STATES_MAX: Final = 2
 # Finished days are imported as long-term statistics a moment after the last
 # one arrives (the broker hands the retained ones over in a burst).
 STATISTICS_DELAY: Final = 5.0
+
+# Where the integration tells the console which version runs (retained, at
+# every set-up; cleared when the entry is removed): PlayGuard warns of a
+# newer release of the integration.
+TOPIC_INTEGRATION: Final = "integration"

@@ -303,6 +303,13 @@ qu'écouter.
   journée la remplace.
 - Les **ordres** sont retenus jusqu'à ce que la console les traite ; elle les
   efface alors, publie un événement et son nouvel état.
+- **La version de l'intégration** : à chaque configuration de l'entrée d'une
+  console (donc à chaque démarrage de Home Assistant), l'intégration publie
+  sa version et celle de Home Assistant, retenues, sur
+  `playguard/<id>/integration`. PlayGuard l'affiche dans *Accès à distance ›
+  Home Assistant* et, quand il cherche les mises à jour, signale dans ses
+  notifications qu'une nouvelle version de l'intégration est sortie, avec ce
+  qui change et le QR code qui l'ouvre dans HACS.
 
 ## Exemples
 
@@ -532,8 +539,10 @@ et le dernier rapport de la console, sans les noms) et ouvrez un
 1. *Paramètres › Appareils et services › PlayGuard*, puis pour chaque console
    *⋮ › Supprimer*. Supprimer l'entrée d'une console demande à la console de
    publier de nouveau son propre appareil Home Assistant (une console en veille
-   le fait quand elle sort de veille) ; pour vous en passer, désactivez *Créer
-   l'appareil dans Home Assistant* dans PlayGuard.
+   le fait quand elle sort de veille), et efface la version de l'intégration
+   sur le broker (PlayGuard ne signale plus ses nouvelles versions) ; pour vous
+   passer de l'appareil de la console, désactivez *Créer l'appareil dans Home
+   Assistant* dans PlayGuard.
 2. Avec HACS : *HACS › PlayGuard › ⋮ › Désinstaller* ; à la main : supprimez
    `custom_components/playguard`. Redémarrez Home Assistant.
 3. Les statistiques à long terme restent dans l'enregistreur : supprimez-les
@@ -548,8 +557,8 @@ distance* dans PlayGuard.
 Elle lit `playguard/<id>/state`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` et `report`, et publie les mêmes
 ordres scalaires retenus que les entités natives sur
-`playguard/<id>/<entity>/set` (la console efface chacun une fois traité). Le
-contrat est le
+`playguard/<id>/<entity>/set` (la console efface chacun une fois traité), et
+sa version, retenue, sur `playguard/<id>/integration`. Le contrat est le
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md)
 de PlayGuard (en anglais).
 

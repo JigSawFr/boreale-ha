@@ -3,12 +3,20 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 from homeassistant.components.diagnostics import REDACTED
 from homeassistant.components.repairs import repairs_flow_manager
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN, EntityCategory
+from homeassistant.const import (
+    STATE_OFF,
+    STATE_ON,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+    EntityCategory,
+    __version__ as HA_VERSION,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
@@ -121,6 +129,28 @@ async def test_takes_over_the_native_discovery(hass: HomeAssistant, setup, mqtt_
     publish(hass, "state", fixture("state.json"))
     await hass.async_block_till_done()
     assert mqtt_mock.async_publish.call_count == count
+
+
+async def test_tells_the_console_its_version(hass: HomeAssistant, setup, mqtt_mock) -> None:
+    """Retained, once at set-up: PlayGuard warns of a newer release of the integration."""
+    manifest = json.loads((Path(__file__).parents[1] / "custom_components/playguard/manifest.json").read_text())
+    told = [p for p in _published(mqtt_mock) if p[0] == f"{BASE}/integration"]
+    assert len(told) == 1
+    _topic, payload, qos, retain = told[0]
+    assert (qos, retain) == (1, True)
+    assert json.loads(payload) == {"schema": 1, "version": manifest["version"], "homeassistant": HA_VERSION}
+
+
+async def test_version_not_told(hass: HomeAssistant, mqtt_mock, entry, caplog: pytest.LogCaptureFixture) -> None:
+    """The broker refusing it does not fail the set-up."""
+    entry.add_to_hass(hass)
+    with patch(
+        "custom_components.playguard.coordinator.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    assert "could not tell the console the integration's version" in caplog.text
 
 
 async def test_orders(hass: HomeAssistant, setup, mqtt_mock) -> None:
@@ -347,8 +377,8 @@ async def test_unload_and_remove(hass: HomeAssistant, setup, mqtt_mock) -> None:
     mqtt_mock.async_publish.reset_mock()
     await hass.config_entries.async_remove(setup.entry_id)
     await hass.async_block_till_done()
-    # The console's own discovery comes back.
-    assert _published(mqtt_mock) == [(f"{BASE}/discovery/set", "ON", 1, True)]
+    # The console's own discovery comes back, and it forgets the integration's version.
+    assert _published(mqtt_mock) == [(f"{BASE}/discovery/set", "ON", 1, True), (f"{BASE}/integration", "", 1, True)]
 
 
 async def test_remove_without_mqtt(hass: HomeAssistant, setup, caplog: pytest.LogCaptureFixture) -> None:

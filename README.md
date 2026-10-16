@@ -293,6 +293,12 @@ listens.
   arrives (they come in a burst); importing a day again replaces it.
 - **Orders** are retained until the console handles them; it then clears
   them, publishes an event and its new state.
+- **The integration's version**: at each set-up of a console's entry (so at
+  each start of Home Assistant), the integration publishes its version and
+  Home Assistant's, retained, on `playguard/<id>/integration`. PlayGuard
+  shows it in *Remote access › Home Assistant* and, when it checks for
+  updates, says in its notifications that a newer release of the integration
+  is out, with what changed and the QR code that opens it in HACS.
 
 ## Examples
 
@@ -512,9 +518,10 @@ report, names left out) and open an
 
 1. *Settings › Devices & services › PlayGuard*, then for each console *⋮ ›
    Delete*. Removing a console's entry asks the console to publish its own
-   Home Assistant device again (a sleeping console does it when it wakes up);
-   to do without it, turn off *Create the device in Home Assistant* in
-   PlayGuard.
+   Home Assistant device again (a sleeping console does it when it wakes up),
+   and clears the integration's version on the broker (PlayGuard no longer
+   warns of its releases); to do without the console's own device, turn off
+   *Create the device in Home Assistant* in PlayGuard.
 2. With HACS: *HACS › PlayGuard › ⋮ › Remove*; by hand: delete
    `custom_components/playguard`. Restart Home Assistant.
 3. The long-term statistics stay in the recorder: delete them in *Settings ›
@@ -529,8 +536,9 @@ PlayGuard.
 It reads `playguard/<id>/state`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` and `report`, and publishes the
 same retained scalar orders as the native entities on
-`playguard/<id>/<entity>/set` (the console clears each one once handled). The
-contract is PlayGuard's
+`playguard/<id>/<entity>/set` (the console clears each one once handled), and
+its version, retained, on `playguard/<id>/integration`. The contract is
+PlayGuard's
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md).
 
 ## Help, security and contributing
