@@ -38,7 +38,7 @@ class PlayGuardEvent(PlayGuardEntity, EventEntity):
 
     @property
     def available(self) -> bool:
-        return True
+        return self.console.reachable
 
     @callback
     def _handle_event(self, doc: dict) -> None:

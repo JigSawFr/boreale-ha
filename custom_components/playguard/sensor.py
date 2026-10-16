@@ -88,7 +88,7 @@ class WeekSensor(PlayGuardSensor):
 
     @property
     def available(self) -> bool:
-        return self.console.week is not None
+        return self.console.week is not None and self.console.reachable
 
     def _days(self) -> dict[str, int]:
         week = self.console.week or {}

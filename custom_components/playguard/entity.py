@@ -44,8 +44,9 @@ class PlayGuardEntity(Entity):
     @property
     def available(self) -> bool:
         """Known once the console's state arrived (retained: at once after a
-        restart). A sleeping console keeps its last state; `online` says it."""
-        return self.console.state is not None
+        restart), while the console is on the broker: its last will says when
+        it is not. The actions still send orders then (they wait on the broker)."""
+        return self.console.state is not None and self.console.reachable
 
     def read(self) -> Any:
         """This entity's value in the state document (not `value`: NumberEntity has one)."""

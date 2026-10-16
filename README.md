@@ -24,9 +24,9 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   imported into the recorder (`playguard:<console id>_play_time`,
   `playguard:<console id>_game_<application id>`), for months of history in a
   *Statistics graph* card.
-- Entities that stay **available while the console sleeps**, with its last
-  state: an order sent then waits on the broker and is carried out when the
-  console wakes up.
+- **Orders while the console sleeps**: its entities are unavailable then
+  (its last will says it is gone), but the actions still send their orders,
+  which wait on the broker and are carried out when the console wakes up.
 - **Services**: `set_limits`, `add_bonus_time`, `apply_profile`, `stop_today`,
   `lock_now`, `sync_now`, `request_report`.
 - An **event entity** for every order handled (applied, refused with the
