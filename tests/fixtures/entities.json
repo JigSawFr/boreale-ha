@@ -94,7 +94,7 @@
       "extra": {
         "unit_of_meas": "min",
         "dev_cla": "duration",
-        "stat_cla": "measurement"
+        "stat_cla": "total_increasing"
       }
     },
     {
@@ -106,7 +106,7 @@
       "extra": {
         "unit_of_meas": "min",
         "dev_cla": "duration",
-        "stat_cla": "measurement"
+        "stat_cla": "total_increasing"
       }
     },
     {
@@ -462,15 +462,16 @@
       "platform": "select",
       "write": "free",
       "name": "Restriction level",
-      "value_template": "{{ value_json.controls.level }}",
+      "value_template": "{{ 'unrestricted' if value_json.controls.level == 'none' else value_json.controls.level }}",
       "extra": {
         "ops": [
-          "none",
+          "unrestricted",
           "young_child",
           "child",
           "teen",
           "custom"
         ],
+        "cmd_tpl": "{{ 'none' if value == 'unrestricted' else value }}",
         "ent_cat": "config"
       }
     },

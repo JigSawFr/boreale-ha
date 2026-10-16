@@ -24,6 +24,18 @@ def _template(definition) -> str | None:
     expr = "value_json." + ".".join(definition.path)
     if definition.fallback:
         expr += " or value_json." + ".".join(definition.fallback)
+    for value, option in definition.renamed:
+        expr = f"'{option}' if {expr} == '{value}' else {expr}"
+    return "{{ " + expr + " }}"
+
+
+def _command_template(definition) -> str | None:
+    """The order of an option shown under another name is still the value's."""
+    if not definition.renamed:
+        return None
+    expr = "value"
+    for value, option in definition.renamed:
+        expr = f"'{value}' if value == '{option}' else {expr}"
     return "{{ " + expr + " }}"
 
 
@@ -40,6 +52,7 @@ def test_same_entities_as_playguard() -> None:
         assert str(d.platform) == e["platform"], e["id"]
         assert d.write == e["write"], e["id"]
         assert _template(d) == e["value_template"], e["id"]
+        assert _command_template(d) == extra.get("cmd_tpl"), e["id"]
         assert names[e["platform"]][e["id"]]["name"] == e["name"], e["id"]
         assert d.icon == extra.get("ic"), e["id"]
         assert d.category == extra.get("ent_cat"), e["id"]

@@ -10,9 +10,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from homeassistant.components.sensor import SensorStateClass
 from homeassistant.const import Platform
 
-from .const import DAYS, RESTRICTION_LEVELS, WRITE_FREE, WRITE_NONE, WRITE_TIMER
+from .const import DAYS, RESTRICTION_OPTIONS, RESTRICTION_RENAMED, WRITE_FREE, WRITE_NONE, WRITE_TIMER
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -29,8 +30,9 @@ class EntityDef:
     enabled: bool = True
     unit: str | None = None
     device_class: str | None = None
-    state_class: str | None = None
+    state_class: SensorStateClass | None = None
     options: tuple[str, ...] | None = None
+    renamed: tuple[tuple[str, str], ...] = ()  # (value in the state and the order, option shown)
     minimum: int | None = None
     maximum: int | None = None
     step: int | None = None
@@ -41,14 +43,14 @@ def _binary(key: str, path: tuple[str, ...], **kw) -> EntityDef:
     return EntityDef(key=key, platform=Platform.BINARY_SENSOR, path=path, **kw)
 
 
-def _minutes(key: str, path: tuple[str, ...], measure: bool = True, **kw) -> EntityDef:
+def _minutes(key: str, path: tuple[str, ...], state_class: SensorStateClass | None = None, **kw) -> EntityDef:
     return EntityDef(
         key=key,
         platform=Platform.SENSOR,
         path=path,
         unit="min",
         device_class="duration",
-        state_class="measurement" if measure else None,
+        state_class=state_class,
         **kw,
     )
 
@@ -86,10 +88,11 @@ ENTITIES: tuple[EntityDef, ...] = (
     _binary("limit_reached", ("timer", "limit_reached"), icon="mdi:timer-alert-outline"),
     _binary("clock_accurate", ("clock_accurate",), category="diagnostic"),
     # sensors
-    _minutes("used_screen_time", ("timer", "used_min")),
-    _minutes("used_screen_time_log", ("activity_today", "used_min")),
-    _minutes("screen_time_remaining", ("timer", "remaining_min")),
-    _minutes("extended_screen_time", ("timer", "extended_today_min"), measure=False),
+    # A day's play time, back to 0 at midnight: a daily total.
+    _minutes("used_screen_time", ("timer", "used_min"), SensorStateClass.TOTAL_INCREASING),
+    _minutes("used_screen_time_log", ("activity_today", "used_min"), SensorStateClass.TOTAL_INCREASING),
+    _minutes("screen_time_remaining", ("timer", "remaining_min"), SensorStateClass.MEASUREMENT),
+    _minutes("extended_screen_time", ("timer", "extended_today_min")),
     EntityDef(
         key="now_playing",
         platform=Platform.SENSOR,
@@ -100,7 +103,7 @@ ENTITIES: tuple[EntityDef, ...] = (
     EntityDef(key="rating_age", platform=Platform.SENSOR, path=("controls", "rating_age"), category="diagnostic"),
     EntityDef(key="firmware", platform=Platform.SENSOR, path=("console", "firmware"), category="diagnostic"),
     EntityDef(key="atmosphere", platform=Platform.SENSOR, path=("console", "atmosphere"), category="diagnostic"),
-    _minutes("spent_raw", ("timer", "spent_raw_min"), measure=False, category="diagnostic", enabled=False),
+    _minutes("spent_raw", ("timer", "spent_raw_min"), category="diagnostic", enabled=False),
     EntityDef(key="last_order", platform=Platform.SENSOR, path=("link", "last_result"), category="diagnostic"),
     # limits
     *(_limit(f"limit_{day}", ("timer", "limits", day)) for day in DAYS),
@@ -141,7 +144,8 @@ ENTITIES: tuple[EntityDef, ...] = (
         write=WRITE_FREE,
         path=("controls", "level"),
         category="config",
-        options=RESTRICTION_LEVELS,
+        options=RESTRICTION_OPTIONS,
+        renamed=RESTRICTION_RENAMED,
     ),
     EntityDef(key="profile", platform=Platform.SELECT, write=WRITE_TIMER, category="config"),
     # buttons
@@ -158,7 +162,7 @@ ENTITIES: tuple[EntityDef, ...] = (
     # this integration's own
     _binary("online", ("availability",), device_class="connectivity", extra=True),
     _binary("agent", ("link", "agent"), icon="mdi:server-network", category="diagnostic", extra=True),
-    _minutes("week_play_time", ("week",), measure=False, icon="mdi:calendar-week", extra=True),
+    _minutes("week_play_time", ("week",), icon="mdi:calendar-week", extra=True),
 )
 
 BY_KEY: dict[str, EntityDef] = {e.key: e for e in ENTITIES}

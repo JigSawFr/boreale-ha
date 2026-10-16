@@ -143,7 +143,7 @@
       "restriction_level": {
         "name": "Restriction level",
         "state": {
-          "none": "None",
+          "unrestricted": "Unrestricted",
           "young_child": "Young child",
           "child": "Child",
           "teen": "Teen",

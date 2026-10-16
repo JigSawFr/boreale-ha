@@ -27,14 +27,19 @@ class PlayGuardSelect(PlayGuardEntity, SelectEntity):
     def __init__(self, console, definition) -> None:
         super().__init__(console, definition)
         self._attr_options = list(definition.options or ())
+        self._option_of = dict(definition.renamed)
+        self._value_of = {option: value for value, option in definition.renamed}
 
     @property
     def current_option(self) -> str | None:
         value = self.read()
-        return value if value in self.options else None
+        if not isinstance(value, str):
+            return None
+        option = self._option_of.get(value, value)
+        return option if option in self.options else None
 
     async def async_select_option(self, option: str) -> None:
-        await self.async_order(option)
+        await self.async_order(self._value_of.get(option, option))
 
 
 class ProfileSelect(PlayGuardSelect):

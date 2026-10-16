@@ -34,6 +34,8 @@ async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
     assert state("binary_sensor", "limit_reached") == STATE_OFF
     assert state("binary_sensor", "online") == STATE_ON
     assert state("sensor", "used_screen_time") == "75"
+    used = hass.states.get(_id("sensor", "used_screen_time", hass))
+    assert used.attributes["state_class"] == "total_increasing"  # back to 0 at midnight
     assert state("sensor", "screen_time_remaining") == "45"
     assert state("sensor", "now_playing") == "Super Mario Odyssey"
     assert state("sensor", "firmware") == "23.0.1"
@@ -107,6 +109,21 @@ async def test_orders(hass: HomeAssistant, setup, mqtt_mock) -> None:
         (f"{BASE}/restriction_level/set", "teen", 1, True),
         (f"{BASE}/add_bonus_time_30/set", "PRESS", 1, True),
     ]
+
+
+async def test_restriction_level_unrestricted(hass: HomeAssistant, setup, mqtt_mock, state) -> None:
+    """PlayGuard's level "none" is the option "unrestricted"; its order is still "none"."""
+    state["controls"]["level"] = "none"
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    entity_id = _id("select", "restriction_level", hass)
+    select = hass.states.get(entity_id)
+    assert select.state == "unrestricted" and "none" not in select.attributes["options"]
+    mqtt_mock.async_publish.reset_mock()
+    await hass.services.async_call(
+        "select", "select_option", {"entity_id": entity_id, "option": "unrestricted"}, blocking=True
+    )
+    assert _published(mqtt_mock) == [(f"{BASE}/restriction_level/set", "none", 1, True)]
 
 
 async def test_orders_the_console_would_refuse(hass: HomeAssistant, setup, mqtt_mock, state) -> None:
