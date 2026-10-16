@@ -10,6 +10,7 @@
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/JigSawFr/playguard-ha/issues",
   "mqtt": ["playguard/+/state"],
+  "quality_scale": "gold",
   "requirements": [],
   "version": "0.1.0"
 }
