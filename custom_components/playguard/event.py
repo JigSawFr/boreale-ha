@@ -29,6 +29,11 @@ class PlayGuardEvent(PlayGuardEntity, EventEntity):
         await super().async_added_to_hass()
         self.async_on_remove(self.console.async_add_event_listener(self._handle_event))
 
+    @callback
+    def async_entity_id_changed(self, old_entity_id: str) -> None:
+        """The event listener does not depend on the entity id either."""
+        super().async_entity_id_changed(old_entity_id)
+
     @property
     def available(self) -> bool:
         return True

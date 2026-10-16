@@ -234,9 +234,6 @@
     "read_only_entity": {
       "message": "Cette valeur ne peut pas être changée d'ici."
     },
-    "unknown_device": {
-      "message": "{device_id} n'est pas une console PlayGuard."
-    },
     "no_such_profile": {
       "message": "Aucun profil nommé {profile} n'est enregistré dans PlayGuard."
     }

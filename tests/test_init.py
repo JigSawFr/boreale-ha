@@ -205,8 +205,9 @@ async def test_services(hass: HomeAssistant, setup, mqtt_mock) -> None:
         await hass.services.async_call(
             DOMAIN, "apply_profile", {"device_id": device.id, "profile": "Nope"}, blocking=True
         )
-    with pytest.raises(ServiceValidationError):
+    with pytest.raises(ServiceValidationError) as err:
         await hass.services.async_call(DOMAIN, "sync_now", {"device_id": "not-a-device"}, blocking=True)
+    assert err.value.translation_key == "service_device_not_found"
     with pytest.raises(vol.Invalid):  # out of bounds: the schema refuses it
         await hass.services.async_call(
             DOMAIN, "add_bonus_time", {"device_id": device.id, "minutes": 500}, blocking=True

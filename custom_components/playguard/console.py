@@ -186,32 +186,34 @@ class PlayGuardConsole:
         name = ((self.state or {}).get("console") or {}).get("name")
         return name or self.entry.title
 
+    def _device_details(self) -> tuple[str, str | None, str | None]:
+        """The device's name, software and hardware versions, from the state."""
+        console = (self.state or {}).get("console") or {}
+        return self.name, console.get("app_version") or console.get("agent_version"), console.get("firmware")
+
     @property
     def device_info(self) -> DeviceInfo:
         """The device all the entities belong to."""
-        console = (self.state or {}).get("console") or {}
+        name, sw_version, hw_version = self._device_details()
         return DeviceInfo(
             identifiers={(DOMAIN, self.console_id)},
-            name=self.name,
+            name=name,
             manufacturer=MANUFACTURER,
             model=MODEL,
-            sw_version=console.get("app_version") or console.get("agent_version"),
-            hw_version=console.get("firmware"),
+            sw_version=sw_version,
+            hw_version=hw_version,
         )
 
     @callback
     def _update_device(self) -> None:
         registry = dr.async_get(self.hass)
-        device = registry.async_get_device(identifiers={(DOMAIN, self.console_id)})
+        device = registry.async_get_device_by_identifier((DOMAIN, self.console_id), self.entry.entry_id)
         if device is None:
             return
-        info = self.device_info
-        changes = {
-            "sw_version": info.get("sw_version"),
-            "hw_version": info.get("hw_version"),
-        }
-        if device.name_by_user is None and device.name != info["name"]:
-            changes["name"] = info["name"]
+        name, sw_version, hw_version = self._device_details()
+        changes: dict[str, str | None] = {"sw_version": sw_version, "hw_version": hw_version}
+        if device.name_by_user is None and device.name != name:
+            changes["name"] = name
         if any(getattr(device, k) != v for k, v in changes.items()):
             registry.async_update_device(device.id, **changes)
 

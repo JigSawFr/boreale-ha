@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import ServiceValidationError
-from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers import config_validation as cv, service
 import voluptuous as vol
 
+from .console import PlayGuardConsole
 from .const import DAYS, DOMAIN, WRITE_FREE, WRITE_TIMER
 
 ATTR_DEVICE_ID = "device_id"
@@ -51,17 +52,11 @@ PRESS = {
 }
 
 
-def _console(hass: HomeAssistant, device_id: str):
-    """The console of a device."""
-    device = dr.async_get(hass).async_get(device_id)
-    if device is not None:
-        for entry_id in device.config_entries:
-            entry = hass.config_entries.async_get_entry(entry_id)
-            if entry and entry.domain == DOMAIN and getattr(entry, "runtime_data", None) is not None:
-                return entry.runtime_data
-    raise ServiceValidationError(
-        translation_domain=DOMAIN, translation_key="unknown_device", translation_placeholders={"device_id": device_id}
-    )
+def _console(hass: HomeAssistant, device_id: str) -> PlayGuardConsole:
+    """The console of a device. Home Assistant refuses, saying why, a device
+    that is not a PlayGuard console's or whose entry is not loaded."""
+    _device, entry = service.async_get_device_and_config_entry(hass, DOMAIN, device_id)
+    return entry.runtime_data
 
 
 @callback
@@ -101,5 +96,5 @@ def async_setup_services(hass: HomeAssistant) -> None:
     hass.services.async_register(DOMAIN, "set_limits", set_limits, schema=SET_LIMITS_SCHEMA)
     hass.services.async_register(DOMAIN, "add_bonus_time", add_bonus_time, schema=BONUS_SCHEMA)
     hass.services.async_register(DOMAIN, "apply_profile", apply_profile, schema=PROFILE_SCHEMA)
-    for service in PRESS:
-        hass.services.async_register(DOMAIN, service, press, schema=DEVICE_SCHEMA)
+    for name in PRESS:
+        hass.services.async_register(DOMAIN, name, press, schema=DEVICE_SCHEMA)
