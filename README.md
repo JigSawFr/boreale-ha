@@ -223,6 +223,30 @@ diagnostic report*.
 
 **Event**: *Events*, see [events](#events).
 
+**The console itself** (`playguard/<id>/system`, kept fresh by the agent
+while PlayGuard is closed):
+
+| Entity | What it says | Notes |
+|---|---|---|
+| Battery, Charging, Docked | Its charge, whether a charger gives power, whether it is docked. | |
+| SD card free space, Internal storage free space | MiB left on the SD card and on the system's user storage (the emuMMC's on an emuMMC). | read every 5 minutes; their sizes are diagnostic |
+| Model | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic |
+| Console nickname, Region, System, hekate | System Settings' nickname, the region, sysMMC or emuMMC, hekate on the SD card. | diagnostic |
+| PRODINFO blanked | Atmosphère hides the console's identity. | diagnostic |
+| Temperature, Connection, IP address, Wi-Fi signal | The internal sensor, Wi-Fi or ethernet, the console's address, 0–3 bars. | diagnostic |
+| Last started | When the console started (not when it last woke up). | diagnostic |
+| Serial number | The console's real serial number (from Atmosphère's backup when PRODINFO is blanked). | diagnostic, disabled by default; only with *Publish the serial number* on the console |
+| Wi-Fi network | The network's name. | diagnostic, disabled by default |
+
+**Games** (`playguard/<id>/games`, which PlayGuard publishes after each read
+of the play log): *Games installed*, *Play time (all time)* (every game,
+every account), *User accounts* (diagnostic); and **one sensor per game**,
+*Play time · <game>*: its minutes since it was first played (a growing total,
+for the long-term statistics), with attributes `installed`, `version`,
+`launches`, `first_played`, `last_played`. A game's sensor appears when the
+console first lists it, and stays when the game is uninstalled (with
+`installed: false`); one the console no longer lists is unavailable.
+
 The entities that change the play timer (limits, bedtime, extra time, the
 console lock, profiles) need *Orders may change the play timer* on the
 console; without it, they are refused here with the reason. Locking again
@@ -533,7 +557,7 @@ PlayGuard.
 
 ## What it does on the broker
 
-It reads `playguard/<id>/state`, `availability`, `activity`,
+It reads `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` and `report`, and publishes the
 same retained scalar orders as the native entities on
 `playguard/<id>/<entity>/set` (the console clears each one once handled), and

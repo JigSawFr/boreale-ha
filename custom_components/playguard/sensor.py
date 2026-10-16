@@ -1,16 +1,19 @@
-"""Sensors: play time, what is being played, the console."""
+"""Sensors: play time, what is being played, the console, one per game."""
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.const import Platform, UnitOfTime
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from . import PlayGuardConfigEntry
-from .entities import for_platform
+from .coordinator import PlayGuardConsole
+from .entities import EntityDef, for_platform
 from .entity import PlayGuardEntity
 
 PARALLEL_UPDATES = 0
@@ -27,6 +30,30 @@ async def async_setup_entry(
     }
     async_add_entities(classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR))
 
+    # One sensor per game, as the games document lists them: added when a
+    # game first appears, kept when it is uninstalled (its play time stays).
+    known: set[str] = set()
+
+    @callback
+    def _add_games() -> None:
+        new = [app_id for app_id in _game_ids(console) if app_id not in known]
+        known.update(new)
+        if new:
+            async_add_entities(GameSensor(console, app_id) for app_id in new)
+
+    _add_games()
+    entry.async_on_unload(console.async_add_listener(_add_games))
+
+
+def _game_ids(console: PlayGuardConsole) -> list[str]:
+    games = (console.games or {}).get("games")
+    return [k for k, v in games.items() if isinstance(v, dict)] if isinstance(games, dict) else []
+
+
+def _timestamp(value: Any) -> datetime | None:
+    """POSIX seconds as a date, None unknown."""
+    return dt_util.utc_from_timestamp(value) if isinstance(value, int) and value > 0 else None
+
 
 class PlayGuardSensor(PlayGuardEntity, SensorEntity):
     """A value of the state."""
@@ -39,10 +66,16 @@ class PlayGuardSensor(PlayGuardEntity, SensorEntity):
             self._attr_device_class = SensorDeviceClass(definition.device_class)
         if definition.state_class:
             self._attr_state_class = SensorStateClass(definition.state_class)
+        if definition.options:
+            self._attr_options = list(definition.options)
 
     @property
     def native_value(self) -> Any:
         value = self.read()
+        if self.definition.device_class == SensorDeviceClass.TIMESTAMP:
+            return _timestamp(value)
+        if self.definition.options and value not in self.definition.options:
+            return None  # an option this integration does not know (a newer console)
         return value if isinstance(value, (int, float, str)) and not isinstance(value, bool) else None
 
 
@@ -115,3 +148,46 @@ class WeekSensor(PlayGuardSensor):
             if isinstance(g, dict) and g.get("app_id")
         }
         return {"days": self._days(), "games": dict(sorted(games.items(), key=lambda kv: -kv[1]))}
+
+
+class GameSensor(PlayGuardEntity, SensorEntity):
+    """One game's play time since it was first played (every account), with
+    its launches, when it was first and last played, its version."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_translation_key = "game"
+
+    def __init__(self, console: PlayGuardConsole, app_id: str) -> None:
+        super().__init__(console, EntityDef(key=f"game_{app_id.lower()}", platform=Platform.SENSOR, topic="games"))
+        self.app_id = app_id
+        self._attr_translation_key = "game"
+        self._attr_translation_placeholders = {"game": self._game().get("name") or app_id}
+
+    def _game(self) -> dict:
+        games = (self.console.games or {}).get("games")
+        game = games.get(self.app_id) if isinstance(games, dict) else None
+        return game if isinstance(game, dict) else {}
+
+    @property
+    def available(self) -> bool:
+        return super().available and bool(self._game())
+
+    @property
+    def native_value(self) -> int | None:
+        value = self._game().get("total_min")
+        return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        game = self._game()
+        first, last = _timestamp(game.get("first_played")), _timestamp(game.get("last_played"))
+        return {
+            "app_id": self.app_id,
+            "installed": game.get("installed"),
+            "version": game.get("version"),
+            "launches": game.get("launches"),
+            "first_played": first.isoformat() if first else None,
+            "last_played": last.isoformat() if last else None,
+        }

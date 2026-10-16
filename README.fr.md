@@ -228,6 +228,31 @@ tout), *Exporter un rapport de diagnostic*.
 
 **Événement** : *Événements*, voir [événements](#événements).
 
+**La console elle-même** (`playguard/<id>/system`, tenu à jour par l'agent
+quand PlayGuard est fermé) :
+
+| Entité | Ce qu'elle indique | Notes |
+|---|---|---|
+| Batterie, En charge, Sur le dock | Sa charge, si un chargeur l'alimente, si elle est sur le dock. | |
+| Espace libre de la carte SD, Espace libre du stockage interne | Mio restants sur la carte SD et sur le stockage utilisateur du système (celui de l'emuMMC sur un emuMMC). | lus toutes les 5 minutes ; leurs tailles sont de diagnostic |
+| Modèle | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic |
+| Surnom de la console, Région, Système, hekate | Le surnom des Paramètres de la console, la région, sysMMC ou emuMMC, hekate sur la carte SD. | diagnostic |
+| PRODINFO masqué | Atmosphère cache l'identité de la console. | diagnostic |
+| Température, Connexion, Adresse IP, Signal Wi-Fi | Le capteur interne, Wi-Fi ou ethernet, l'adresse de la console, 0 à 3 barres. | diagnostic |
+| Dernier démarrage | Quand la console a démarré (pas quand elle est sortie de veille). | diagnostic |
+| Numéro de série | Le vrai numéro de série de la console (tiré de la sauvegarde d'Atmosphère quand le PRODINFO est masqué). | diagnostic, désactivé par défaut ; seulement avec *Publier le numéro de série* sur la console |
+| Réseau Wi-Fi | Le nom du réseau. | diagnostic, désactivé par défaut |
+
+**Jeux** (`playguard/<id>/games`, que PlayGuard publie après chaque lecture
+du journal de jeu) : *Jeux installés*, *Temps de jeu (depuis toujours)* (tous
+les jeux, tous les comptes), *Comptes utilisateurs* (diagnostic) ; et **un
+capteur par jeu**, *Temps de jeu · <jeu>* : ses minutes depuis sa première
+partie (un total croissant, pour les statistiques à long terme), avec les
+attributs `installed`, `version`, `launches`, `first_played`, `last_played`.
+Le capteur d'un jeu apparaît quand la console le liste pour la première fois,
+et reste quand le jeu est désinstallé (avec `installed: false`) ; celui d'un
+jeu que la console ne liste plus est indisponible.
+
 Les entités qui changent le minuteur (limites, heure du coucher, temps en plus,
 verrouillage de la console, profils) demandent *Les ordres peuvent changer le
 temps de jeu* activé sur la console ; sans lui, elles sont refusées ici avec la
@@ -554,7 +579,7 @@ distance* dans PlayGuard.
 
 ## Ce qu'elle fait sur le broker
 
-Elle lit `playguard/<id>/state`, `availability`, `activity`,
+Elle lit `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` et `report`, et publie les mêmes
 ordres scalaires retenus que les entités natives sur
 `playguard/<id>/<entity>/set` (la console efface chacun une fois traité), et

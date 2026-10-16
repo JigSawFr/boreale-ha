@@ -15,6 +15,9 @@
       },
       "agent": {
         "default": "mdi:server-network"
+      },
+      "docked": {
+        "default": "mdi:television"
       }
     },
     "button": {
@@ -46,6 +49,42 @@
       },
       "week_play_time": {
         "default": "mdi:calendar-week"
+      },
+      "nickname": {
+        "default": "mdi:tag-text-outline"
+      },
+      "sd_free": {
+        "default": "mdi:micro-sd"
+      },
+      "sd_total": {
+        "default": "mdi:micro-sd"
+      },
+      "nand_free": {
+        "default": "mdi:harddisk"
+      },
+      "nand_total": {
+        "default": "mdi:harddisk"
+      },
+      "ip_address": {
+        "default": "mdi:ip-network"
+      },
+      "wifi_signal": {
+        "default": "mdi:wifi"
+      },
+      "ssid": {
+        "default": "mdi:wifi"
+      },
+      "games_installed": {
+        "default": "mdi:gamepad-square"
+      },
+      "play_time_total": {
+        "default": "mdi:timer-sand-complete"
+      },
+      "accounts": {
+        "default": "mdi:account-multiple"
+      },
+      "game": {
+        "default": "mdi:gamepad-variant-outline"
       }
     },
     "switch": {

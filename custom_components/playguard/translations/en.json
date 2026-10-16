@@ -80,6 +80,15 @@
       },
       "agent": {
         "name": "Agent running"
+      },
+      "prodinfo_blanked": {
+        "name": "PRODINFO blanked"
+      },
+      "charging": {
+        "name": "Charging"
+      },
+      "docked": {
+        "name": "Docked"
       }
     },
     "button": {
@@ -199,6 +208,93 @@
       },
       "week_play_time": {
         "name": "Play time this week"
+      },
+      "model": {
+        "name": "Model",
+        "state": {
+          "erista": "Switch (2017)",
+          "mariko": "Switch (2019)",
+          "lite": "Switch Lite",
+          "oled": "Switch OLED",
+          "other": "Development unit"
+        }
+      },
+      "nickname": {
+        "name": "Console nickname"
+      },
+      "region": {
+        "name": "Region",
+        "state": {
+          "jpn": "Japan",
+          "usa": "The Americas",
+          "eur": "Europe",
+          "aus": "Australia and New Zealand",
+          "htk": "Hong Kong, Taiwan, Korea",
+          "chn": "China"
+        }
+      },
+      "hekate": {
+        "name": "hekate"
+      },
+      "system_storage": {
+        "name": "System",
+        "state": {
+          "sysmmc": "sysMMC",
+          "emummc": "emuMMC"
+        }
+      },
+      "serial": {
+        "name": "Serial number"
+      },
+      "sd_free": {
+        "name": "SD card free space"
+      },
+      "sd_total": {
+        "name": "SD card size"
+      },
+      "nand_free": {
+        "name": "Internal storage free space"
+      },
+      "nand_total": {
+        "name": "Internal storage size"
+      },
+      "battery": {
+        "name": "Battery"
+      },
+      "temperature": {
+        "name": "Temperature"
+      },
+      "network": {
+        "name": "Connection",
+        "state": {
+          "none": "None",
+          "wifi": "Wi-Fi",
+          "ethernet": "Ethernet"
+        }
+      },
+      "ip_address": {
+        "name": "IP address"
+      },
+      "wifi_signal": {
+        "name": "Wi-Fi signal"
+      },
+      "ssid": {
+        "name": "Wi-Fi network"
+      },
+      "last_boot": {
+        "name": "Last started"
+      },
+      "games_installed": {
+        "name": "Games installed"
+      },
+      "play_time_total": {
+        "name": "Play time (all time)"
+      },
+      "accounts": {
+        "name": "User accounts"
+      },
+      "game": {
+        "name": "Play time · {game}"
       }
     },
     "switch": {

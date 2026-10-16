@@ -359,8 +359,17 @@ async def test_diagnostics(hass: HomeAssistant, setup, hass_client) -> None:
     activity["per_account"] = [{"uid": "00112233445566778899AABBCCDDEEFF", "s": 600, "min": 10}]
     publish(hass, "activity", activity)
     publish(hass, "report", "=== PlayGuard report ===\nfirmware 23.0.1\n")
+    system = fixture("system.json")
+    system["hardware"]["serial"] = "XAW10012345678"
+    publish(hass, "system", system)
+    publish(hass, "games", fixture("games.json"))
     await hass.async_block_till_done()
     diag = await get_diagnostics_for_config_entry(hass, hass_client, setup)
+    assert diag["system"]["hardware"]["model"] == "oled" and diag["games"] == {"installed": 2, "listed": 3}
+    for key in ("serial", "nickname"):
+        assert diag["system"]["hardware"][key] == REDACTED
+    assert diag["system"]["network"]["ssid"] == REDACTED and diag["system"]["network"]["ip"] == REDACTED
+    assert "XAW10012345678" not in json.dumps(diag) and "Maison" not in json.dumps(diag)
     assert diag["report"].startswith("=== PlayGuard report ===")
     assert diag["online"] is True
     assert diag["state"]["console"]["firmware"] == "23.0.1"

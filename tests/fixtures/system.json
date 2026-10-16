@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "ts": 1790990000,
+  "versions": {
+    "firmware": "23.0.1",
+    "atmosphere": "1.12.0",
+    "hekate": "6.5.4",
+    "app": "1.2.0",
+    "agent": "1.2.0"
+  },
+  "hardware": {
+    "model": "oled",
+    "nickname": "Switch de Léa",
+    "region": "eur",
+    "system": "emummc",
+    "prodinfo_blanked": true,
+    "serial": null
+  },
+  "storage": {
+    "sd": {
+      "free_mb": 21344,
+      "total_mb": 59640
+    },
+    "nand": {
+      "free_mb": 18470,
+      "total_mb": 26592
+    }
+  },
+  "power": {
+    "battery_pct": 87,
+    "charging": true,
+    "charger": "official",
+    "docked": false,
+    "temperature_c": 41
+  },
+  "network": {
+    "type": "wifi",
+    "ip": "192.168.1.20",
+    "wifi_bars": 3,
+    "ssid": "Maison"
+  },
+  "boot_ts": 1790971980
+}

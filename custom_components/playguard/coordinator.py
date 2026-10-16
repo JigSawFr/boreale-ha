@@ -69,6 +69,8 @@ class PlayGuardConsole:
         self.base = f"{self.prefix}/{self.console_id}"
 
         self.state: dict | None = None
+        self.system: dict | None = None  # the console itself (versions, storage, power, network)
+        self.games: dict | None = None  # the games installed and played, with their totals
         self.online: bool | None = None
         self.activity: dict | None = None
         self.names: dict = {}
@@ -92,6 +94,8 @@ class PlayGuardConsole:
         """Subscribes to the console's topics."""
         topics: dict[str, Callable[[ReceiveMessage], None]] = {
             "state": self._on_state,
+            "system": self._on_system,
+            "games": self._on_games,
             "availability": self._on_availability,
             "activity": self._on_activity,
             "activity/+": self._on_final,
@@ -164,6 +168,20 @@ class PlayGuardConsole:
         self._update_device()
         self._take_over()
         self._changed()
+
+    @callback
+    def _on_system(self, msg: ReceiveMessage) -> None:
+        self.system = _json(msg.payload)
+        self._changed()
+
+    @callback
+    def _on_games(self, msg: ReceiveMessage) -> None:
+        self.games = _json(msg.payload)
+        self._changed()
+
+    def document(self, topic: str) -> dict | None:
+        """The last document of `topic`: "state", "system" or "games"."""
+        return {"system": self.system, "games": self.games}.get(topic, self.state)
 
     @callback
     def _on_availability(self, msg: ReceiveMessage) -> None:
