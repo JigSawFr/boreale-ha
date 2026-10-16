@@ -520,10 +520,9 @@ python scripts/coverage_per_module.py   # more than 95% of every module, as CI a
 table (`source/sync/sync_entities.c`). PlayGuard's host tests export it as
 `build/host-tests/sync/entities.json` (`make test`); copy that file to
 `tests/fixtures/entities.json` when it changes: `tests/test_parity.py` fails
-until this integration follows (`AHEAD` there lists where the integration is
-ahead of PlayGuard). `tests/fixtures/state.json` and `activity.json` are
-PlayGuard's own examples, from the same folder. `quality_scale.yaml` says
-where the integration stands on Home Assistant's
+until this integration follows. `tests/fixtures/state.json` and
+`activity.json` are PlayGuard's own examples, from the same folder.
+`quality_scale.yaml` says where the integration stands on Home Assistant's
 [quality scale](https://contributors.home-assistant.io/core/quality-scale/rules/);
 `tests/test_quality_scale.py` checks it, as hassfest does for core.
 

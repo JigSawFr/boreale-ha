@@ -22,23 +22,6 @@ STRINGS = INTEGRATION / "translations" / "en.json"
 ICONS = INTEGRATION / "icons.json"
 
 
-# Where this integration is ahead of PlayGuard's table, until PlayGuard
-# follows (this test then fails: drop the line). (id, key): (ours, PlayGuard's).
-AHEAD: dict[tuple[str, str], tuple[object, object]] = {
-    ("sync_now", "ent_cat"): ("diagnostic", None),
-}
-
-
-def _theirs(entity: dict, key: str, default: object = None) -> object:
-    """PlayGuard's value, or ours where we are ahead of it."""
-    value = entity["extra"].get(key, default)
-    if (entity["id"], key) in AHEAD:
-        ours, was = AHEAD[(entity["id"], key)]
-        assert value == was, f"PlayGuard now has {key}={value!r} for {entity['id']}: drop it from AHEAD"
-        return ours
-    return value
-
-
 def _template(definition) -> str | None:
     if definition.path is None:
         return "{{ None }}" if definition.platform in ("select",) else None
@@ -74,18 +57,18 @@ def test_same_entities_as_playguard() -> None:
         assert str(d.platform) == e["platform"], e["id"]
         assert d.write == e["write"], e["id"]
         assert _template(d) == e["value_template"], e["id"]
-        assert _command_template(d) == _theirs(e, "cmd_tpl"), e["id"]
+        assert _command_template(d) == extra.get("cmd_tpl"), e["id"]
         assert names[e["platform"]][e["id"]]["name"] == e["name"], e["id"]
-        assert icons.get(e["platform"], {}).get(e["id"], {}).get("default") == _theirs(e, "ic"), e["id"]
-        assert d.category == _theirs(e, "ent_cat"), e["id"]
-        assert d.enabled == _theirs(e, "en", True), e["id"]
-        assert d.unit == _theirs(e, "unit_of_meas"), e["id"]
-        assert d.device_class == _theirs(e, "dev_cla"), e["id"]
-        assert d.state_class == _theirs(e, "stat_cla"), e["id"]
+        assert icons.get(e["platform"], {}).get(e["id"], {}).get("default") == extra.get("ic"), e["id"]
+        assert d.category == extra.get("ent_cat"), e["id"]
+        assert d.enabled == extra.get("en", True), e["id"]
+        assert d.unit == extra.get("unit_of_meas"), e["id"]
+        assert d.device_class == extra.get("dev_cla"), e["id"]
+        assert d.state_class == extra.get("stat_cla"), e["id"]
         if "ops" in extra:
-            assert list(d.options or ()) == _theirs(e, "ops"), e["id"]
+            assert list(d.options or ()) == extra["ops"], e["id"]
         for ours_attr, key in (("minimum", "min"), ("maximum", "max"), ("step", "step")):
-            assert getattr(d, ours_attr) == _theirs(e, key), (e["id"], key)
+            assert getattr(d, ours_attr) == extra.get(key), (e["id"], key)
 
 
 def test_every_entity_is_named() -> None:

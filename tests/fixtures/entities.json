@@ -492,7 +492,8 @@
       "name": "Sync now",
       "value_template": null,
       "extra": {
-        "ic": "mdi:sync"
+        "ic": "mdi:sync",
+        "ent_cat": "diagnostic"
       }
     },
     {

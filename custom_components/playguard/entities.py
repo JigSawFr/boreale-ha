@@ -148,7 +148,7 @@ ENTITIES: tuple[EntityDef, ...] = (
     ),
     EntityDef(key="profile", platform=Platform.SELECT, write=WRITE_TIMER, category="config"),
     # buttons
-    _button("sync_now", WRITE_FREE, category="diagnostic"),  # ahead of PlayGuard's table (tests/test_parity.py)
+    _button("sync_now", WRITE_FREE, category="diagnostic"),
     _button("lock_now", WRITE_FREE),
     _button("export_report", WRITE_FREE, category="diagnostic"),
     _button("add_bonus_time_15", WRITE_TIMER),
