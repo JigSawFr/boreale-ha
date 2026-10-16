@@ -13,6 +13,7 @@ import pytest
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 from pytest_homeassistant_custom_component.components.recorder.common import async_wait_recording_done
 
+from custom_components.playguard.const import DOMAIN
 from custom_components.playguard.statistics import day_start, game_id, total_id
 
 from .conftest import CONSOLE_ID, publish
@@ -68,3 +69,28 @@ async def test_finished_days(hass: HomeAssistant, mqtt_mock, entry) -> None:
     assert [r["mean"] for r in stats[kart]] == [0.0, 30.0]  # not played on the 3rd
     metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_ids={total}))
     assert metadata[total][1]["unit_of_measurement"] == "min"
+
+
+async def test_odd_days(hass: HomeAssistant, mqtt_mock, entry) -> None:
+    """A topic that is not a date, a day not finished, entries that are not a game."""
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    publish(hass, "activity/not-a-date", _day("2026-10-01", 10, {}), True)
+    publish(hass, "activity/2026-10-02", {**_day("2026-10-02", 20, {}), "final": False}, True)
+    await hass.async_block_till_done()
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    await async_wait_recording_done(hass)
+    assert not await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=DOMAIN))
+
+    odd = {**_day("2026-10-04", 0, {}), "total_min": None}
+    odd["per_app"] = ["junk", {"app_id": "not-hex!", "min": 5}, {"app_id": "0100000000010000", "min": "x"}]
+    odd["per_app"].append({"app_id": "0100000000010000", "min": 5})
+    publish(hass, "activity/2026-10-04", odd, True)
+    await hass.async_block_till_done()
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=20))
+    await hass.async_block_till_done()
+    await async_wait_recording_done(hass)
+    metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=DOMAIN))
+    assert set(metadata) == {game_id(CONSOLE_ID, "0100000000010000")}  # no total: it had none
