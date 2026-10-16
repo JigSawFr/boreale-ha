@@ -1,0 +1,12 @@
+[
+  { "name": "bug",              "color": "d73a4a", "description": "The integration does something it should not, or not something it should" },
+  { "name": "enhancement",      "color": "a2eeef", "description": "Something the integration could do for a console that it does not yet" },
+  { "name": "playguard",        "color": "5319e7", "description": "Needs a change on the console's side first (JigSawFr/PlayGuard)" },
+  { "name": "i18n",             "color": "1d76db", "description": "A translation, or a string that needs one" },
+  { "name": "documentation",    "color": "0075ca", "description": "README, CONTRIBUTING or another Markdown file" },
+  { "name": "dependencies",     "color": "0366d6", "description": "A pinned action or the test harness moves (Dependabot)" },
+  { "name": "good first issue", "color": "7057ff", "description": "Small and self-contained: a good way into the code" },
+  { "name": "help wanted",      "color": "008672", "description": "Open to anyone who wants to take it: say so in the issue first" },
+  { "name": "duplicate",        "color": "cfd3d7", "description": "Already reported: the other issue is linked" },
+  { "name": "wontfix",          "color": "ffffff", "description": "Out of the integration's scope, or not worth what it costs" }
+]
