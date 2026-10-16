@@ -1,0 +1,39 @@
+name: pr-title
+
+# PRs are squash-merged, so the PR title becomes the commit message that
+# release-please reads: it must be a conventional commit with a scope
+# (feat(config-flow): …, fix(statistics): …), so the changelog groups each
+# part of the integration.
+on:
+  pull_request_target:
+    types: [ opened, edited, synchronize, reopened ]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  conventional-title:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            perf
+            refactor
+            style
+            build
+            chore
+            ci
+            test
+            docs
+            revert
+            deps
+            security
+            change
+            deprecate
+            remove
+          requireScope: true

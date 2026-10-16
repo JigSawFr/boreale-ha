@@ -1,0 +1,36 @@
+name: codeql
+
+# Static analysis of the integration, the scripts and the workflows themselves, on the
+# pull request that introduces a problem, plus a weekly run so that a newly published
+# query also finds old code. Findings land in the Security tab and as annotations on the PR.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '41 6 * * 4'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      security-events: write
+      # The action reads its own run to attach the analysis to the right commit.
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: python, actions
+          build-mode: none
+          queries: security-extended
+      - uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
