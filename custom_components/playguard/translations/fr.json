@@ -257,6 +257,17 @@
     "newer_schema": {
       "title": "{name} parle un protocole PlayGuard plus récent",
       "description": "{name} publie le schéma {schema} ; cette intégration connaît le schéma {known}. Mettez à jour l'intégration PlayGuard : certaines valeurs peuvent manquer d'ici là."
+    },
+    "native_discovery": {
+      "title": "{name} publie de nouveau son propre appareil Home Assistant",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Les entités de {name} sont en double",
+            "description": "L'appareil MQTT d'origine de la console est revenu à côté de celui de cette intégration : il a été réactivé dans PlayGuard, ou le PlayGuard de la console est trop ancien pour accepter l'ordre qui le désactive. Validez pour demander de nouveau à la console de le désactiver.\n\nS'il revient, mettez PlayGuard à jour, ou désactivez *Créer l'appareil dans Home Assistant (découverte MQTT)* dans PlayGuard › Préférences › Accès à distance. Pour garder plutôt l'appareil d'origine de la console, désactivez l'option *Remplacer l'appareil Home Assistant d'origine de la console* de cette intégration."
+          }
+        }
+      }
     }
   },
   "selector": {

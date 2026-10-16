@@ -6,11 +6,14 @@ import json
 from unittest.mock import patch
 
 from homeassistant.components.diagnostics import REDACTED
+from homeassistant.components.repairs import repairs_flow_manager
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr, entity_registry as er, issue_registry as ir
+from homeassistant.setup import async_setup_component
 import pytest
 from pytest_homeassistant_custom_component.components.diagnostics import get_diagnostics_for_config_entry
 import voluptuous as vol
@@ -270,6 +273,47 @@ async def test_newer_schema(hass: HomeAssistant, setup, state) -> None:
     state["schema"] = 1
     publish(hass, "state", state)
     await hass.async_block_till_done()
+    assert not ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+
+
+async def test_native_discovery_repair(hass: HomeAssistant, setup, mqtt_mock, state) -> None:
+    """Asked off, the console's own discovery stays on: a repair asks again."""
+    assert await async_setup_component(hass, "repairs", {})
+    issue_id = f"native_discovery_{CONSOLE_ID}"
+    publish(hass, "state", state)  # may have been published before the order
+    await hass.async_block_till_done()
+    assert not ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+    assert issue and issue.is_fixable and issue.translation_placeholders == {"name": "Salon"}
+
+    mqtt_mock.async_publish.reset_mock()
+    flows = repairs_flow_manager(hass)
+    result = await flows.async_init(DOMAIN, context={"issue_id": issue_id})
+    assert result["step_id"] == "confirm"
+    result = await flows.async_configure(result["flow_id"], {})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert _published(mqtt_mock) == [(f"{BASE}/discovery/set", "OFF", 1, True)]
+    assert not ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+
+    # Back again, then gone for good.
+    publish(hass, "state", state)
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+    state["link"]["ha_discovery"] = False
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert not ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+
+
+async def test_issues_go_with_the_entry(hass: HomeAssistant, setup, state) -> None:
+    state["schema"] = 2
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+    assert await hass.config_entries.async_unload(setup.entry_id)
     assert not ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
 
 

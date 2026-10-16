@@ -257,6 +257,17 @@
     "newer_schema": {
       "title": "{name} speaks a newer PlayGuard protocol",
       "description": "{name} publishes schema {schema}; this integration knows schema {known}. Update the PlayGuard integration: some values may be missing until then."
+    },
+    "native_discovery": {
+      "title": "{name} publishes its own Home Assistant device again",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name}'s entities are there twice",
+            "description": "The console's own MQTT device is back next to this integration's: it was turned on again in PlayGuard, or the console's PlayGuard is too old to take the order that turns it off. Submit to ask the console again to turn it off.\n\nIf it comes back, update PlayGuard, or turn off *Create the device in Home Assistant (MQTT discovery)* in PlayGuard › Preferences › Remote access. To keep the console's own device instead, turn off this integration's option *Replace the console's own Home Assistant device*."
+          }
+        }
+      }
     }
   },
   "selector": {

@@ -46,6 +46,11 @@ WRITE_TIMER: Final = "timer"  # also needs "Orders may change the play timer" on
 MANUFACTURER: Final = "PlayGuard"
 MODEL: Final = "Nintendo Switch"
 
+# States that may still say the console's own discovery is on after it was
+# asked off (one published before the order was handled): more mean the
+# same entities twice, and a repair issue.
+NATIVE_STATES_MAX: Final = 2
+
 # Finished days are imported as long-term statistics a moment after the last
 # one arrives (the broker hands the retained ones over in a burst).
 STATISTICS_DELAY: Final = 5.0

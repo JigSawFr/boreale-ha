@@ -31,6 +31,7 @@ from .const import (
     DOMAIN,
     MANUFACTURER,
     MODEL,
+    NATIVE_STATES_MAX,
     SCHEMA,
     STATISTICS_DELAY,
     WRITE_NONE,
@@ -78,6 +79,9 @@ class PlayGuardConsole:
         self._unsubscribe: list[CALLBACK_TYPE] = []
         self._statistics_timer: CALLBACK_TYPE | None = None
         self._discovery_sent = False
+        self._native_states = 0
+        self._issue_schema = f"newer_schema_{self.console_id}"
+        self._issue_native = f"native_discovery_{self.console_id}"
 
     # ---- topics ----
 
@@ -98,13 +102,15 @@ class PlayGuardConsole:
 
     @callback
     def async_stop(self) -> None:
-        """Unsubscribes."""
+        """Unsubscribes. Its repair issues go with it (back with the next state)."""
         for unsub in self._unsubscribe:
             unsub()
         self._unsubscribe.clear()
         if self._statistics_timer:
             self._statistics_timer()
             self._statistics_timer = None
+        for issue_id in (self._issue_schema, self._issue_native):
+            ir.async_delete_issue(self.hass, DOMAIN, issue_id)
 
     @callback
     def async_add_listener(self, listener: Callable[[], None]) -> CALLBACK_TYPE:
@@ -237,21 +243,38 @@ class PlayGuardConsole:
             ir.async_create_issue(
                 self.hass,
                 DOMAIN,
-                f"newer_schema_{self.console_id}",
+                self._issue_schema,
                 is_fixable=False,
                 severity=ir.IssueSeverity.WARNING,
                 translation_key="newer_schema",
                 translation_placeholders={"name": self.name, "schema": str(schema), "known": str(SCHEMA)},
             )
         else:
-            ir.async_delete_issue(self.hass, DOMAIN, f"newer_schema_{self.console_id}")
+            ir.async_delete_issue(self.hass, DOMAIN, self._issue_schema)
 
     @callback
     def _take_over(self) -> None:
         """Turns the console's own discovery off (these entities replace it),
-        or back on when the option says so."""
+        or back on when the option says so. Still on after it was asked off,
+        the same entities are there twice: a repair issue says so."""
         want_native = not self.entry.options.get(CONF_TAKE_OVER, True)
         have_native = bool(((self.state or {}).get("link") or {}).get("ha_discovery"))
+        if have_native and not want_native and self._discovery_sent:
+            self._native_states += 1
+            if self._native_states >= NATIVE_STATES_MAX:
+                ir.async_create_issue(
+                    self.hass,
+                    DOMAIN,
+                    self._issue_native,
+                    is_fixable=True,
+                    severity=ir.IssueSeverity.WARNING,
+                    translation_key="native_discovery",
+                    translation_placeholders={"name": self.name},
+                    data={"entry_id": self.entry.entry_id},
+                )
+        else:
+            self._native_states = 0
+            ir.async_delete_issue(self.hass, DOMAIN, self._issue_native)
         if self._discovery_sent or want_native == have_native:
             return
         self._discovery_sent = True
@@ -260,6 +283,11 @@ class PlayGuardConsole:
         self.entry.async_create_background_task(
             self.hass, self.async_send("discovery", payload), f"{DOMAIN} {self.console_id} discovery"
         )
+
+    async def async_turn_native_off(self) -> None:
+        """Asks the console again to turn its own discovery off (the repair)."""
+        self._native_states = 0
+        await self.async_send("discovery", "OFF")
 
     # ---- orders ----
 
