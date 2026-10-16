@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
+from unittest.mock import Mock
 
 from homeassistant.core import HomeAssistant
 import pytest
@@ -27,6 +28,15 @@ def fixture(name: str) -> Any:
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
     """Loads custom_components/."""
+
+
+@pytest.fixture
+async def mqtt_mock(mqtt_mock, mqtt_client_mock):
+    """Home Assistant's MQTT mock, its socket closed at the end: the mocked
+    client opens one but never closes it, which leaves MQTT's one-second
+    housekeeping timer behind (a lingering timer fails the test)."""
+    yield mqtt_mock
+    mqtt_client_mock.on_socket_close(mqtt_client_mock, None, Mock(fileno=Mock(return_value=-1)))
 
 
 @pytest.fixture

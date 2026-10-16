@@ -34,7 +34,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 
 ## Requirements
 
-- Home Assistant 2026.2 or newer, with the **MQTT** integration connected to
+- Home Assistant 2026.10 or newer, with the **MQTT** integration connected to
   the same broker as the console (the Mosquitto add-on, or any other, in
   MQTT 5.0 or 3.1.1: the console speaks 5.0 and falls back to 3.1.1, and
   Home Assistant's MQTT integration may use either).
@@ -77,7 +77,7 @@ first.
 ## Development
 
 ```sh
-python3.13 -m venv .venv && . .venv/bin/activate
+python3.14 -m venv .venv && . .venv/bin/activate
 pip install -r requirements_test.txt
 python -m pytest
 ```

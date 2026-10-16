@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from unittest.mock import call
-
 from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
@@ -15,6 +13,11 @@ import voluptuous as vol
 from custom_components.playguard.const import DOMAIN
 
 from .conftest import BASE, CONSOLE_ID, fixture, publish
+
+
+def _published(mqtt_mock) -> list[tuple]:
+    """What was published: (topic, payload, qos, retain) per message."""
+    return [c.args for c in mqtt_mock.async_publish.call_args_list]
 
 
 def _id(platform: str, key: str, hass: HomeAssistant) -> str:
@@ -50,7 +53,7 @@ async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
     assert log.attributes["games"] == {"Super Mario Odyssey": 60, "Mario Kart 8 Deluxe": 14}
 
     # The device takes the console's name and versions.
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, CONSOLE_ID)})
+    device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)
     assert device.name == "Salon" and device.sw_version == "1.1.0" and device.hw_version == "23.0.1"
 
     # Asleep: the last state stays, "online" says it.
@@ -69,7 +72,7 @@ async def test_unavailable_before_the_state(hass: HomeAssistant, mqtt_mock, entr
 
 
 async def test_takes_over_the_native_discovery(hass: HomeAssistant, setup, mqtt_mock) -> None:
-    mqtt_mock.async_publish.assert_any_call(f"{BASE}/discovery/set", "OFF", 1, True)
+    assert (f"{BASE}/discovery/set", "OFF", 1, True) in _published(mqtt_mock)
     count = mqtt_mock.async_publish.call_count
     # Once: the console clears it, its next state says so.
     publish(hass, "state", fixture("state.json"))
@@ -97,12 +100,12 @@ async def test_orders(hass: HomeAssistant, setup, mqtt_mock) -> None:
     await hass.services.async_call(
         "button", "press", {"entity_id": _id("button", "add_bonus_time_30", hass)}, blocking=True
     )
-    assert mqtt_mock.async_publish.call_args_list == [
-        call(f"{BASE}/limit_mon/set", "90", 1, True),
-        call(f"{BASE}/bedtime_alarm/set", "21:00", 1, True),
-        call(f"{BASE}/console_lock/set", "OFF", 1, True),
-        call(f"{BASE}/restriction_level/set", "teen", 1, True),
-        call(f"{BASE}/add_bonus_time_30/set", "PRESS", 1, True),
+    assert _published(mqtt_mock) == [
+        (f"{BASE}/limit_mon/set", "90", 1, True),
+        (f"{BASE}/bedtime_alarm/set", "21:00", 1, True),
+        (f"{BASE}/console_lock/set", "OFF", 1, True),
+        (f"{BASE}/restriction_level/set", "teen", 1, True),
+        (f"{BASE}/add_bonus_time_30/set", "PRESS", 1, True),
     ]
 
 
@@ -121,9 +124,9 @@ async def test_orders_the_console_would_refuse(hass: HomeAssistant, setup, mqtt_
     await hass.services.async_call(
         "switch", "turn_on", {"entity_id": _id("switch", "vr_restricted", hass)}, blocking=True
     )
-    assert mqtt_mock.async_publish.call_args_list == [
-        call(f"{BASE}/unlocked/set", "OFF", 1, True),
-        call(f"{BASE}/vr_restricted/set", "ON", 1, True),
+    assert _published(mqtt_mock) == [
+        (f"{BASE}/unlocked/set", "OFF", 1, True),
+        (f"{BASE}/vr_restricted/set", "ON", 1, True),
     ]
 
     state["console"]["read_only"] = True
@@ -176,7 +179,7 @@ async def test_week_and_names(hass: HomeAssistant, setup) -> None:
 
 
 async def test_services(hass: HomeAssistant, setup, mqtt_mock) -> None:
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, CONSOLE_ID)})
+    device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)
     mqtt_mock.async_publish.reset_mock()
     await hass.services.async_call(DOMAIN, "set_limits", {"device_id": device.id, "minutes": 60}, blocking=True)
     await hass.services.async_call(
@@ -190,13 +193,13 @@ async def test_services(hass: HomeAssistant, setup, mqtt_mock) -> None:
         DOMAIN, "apply_profile", {"device_id": device.id, "profile": "Holidays"}, blocking=True
     )
     await hass.services.async_call(DOMAIN, "request_report", {"device_id": device.id}, blocking=True)
-    assert mqtt_mock.async_publish.call_args_list == [
-        call(f"{BASE}/limit_uniform/set", "60", 1, True),
-        call(f"{BASE}/max_screentime_today/set", "45", 1, True),
-        call(f"{BASE}/limits_week/set", "60,60,60,60,60,120,120", 1, True),
-        call(f"{BASE}/add_bonus_time/set", "20", 1, True),
-        call(f"{BASE}/profile/set", "Holidays", 1, True),
-        call(f"{BASE}/export_report/set", "PRESS", 1, True),
+    assert _published(mqtt_mock) == [
+        (f"{BASE}/limit_uniform/set", "60", 1, True),
+        (f"{BASE}/max_screentime_today/set", "45", 1, True),
+        (f"{BASE}/limits_week/set", "60,60,60,60,60,120,120", 1, True),
+        (f"{BASE}/add_bonus_time/set", "20", 1, True),
+        (f"{BASE}/profile/set", "Holidays", 1, True),
+        (f"{BASE}/export_report/set", "PRESS", 1, True),
     ]
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call(
@@ -237,4 +240,4 @@ async def test_unload_and_remove(hass: HomeAssistant, setup, mqtt_mock) -> None:
     await hass.config_entries.async_remove(setup.entry_id)
     await hass.async_block_till_done()
     # The console's own discovery comes back.
-    mqtt_mock.async_publish.assert_called_once_with(f"{BASE}/discovery/set", "ON", 1, True)
+    assert _published(mqtt_mock) == [(f"{BASE}/discovery/set", "ON", 1, True)]
