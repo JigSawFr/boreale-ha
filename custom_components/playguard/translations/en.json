@@ -96,7 +96,7 @@
         "name": "Sync now"
       },
       "lock_now": {
-        "name": "Lock now"
+        "name": "Turn parental controls back on"
       },
       "export_report": {
         "name": "Export a diagnostic report"
@@ -302,7 +302,7 @@
         "name": "Bedtime alarm enabled"
       },
       "console_lock": {
-        "name": "Console lock"
+        "name": "Block all games"
       },
       "play_timer_alarm": {
         "name": "Time's up alarm"
@@ -443,8 +443,8 @@
       }
     },
     "lock_now": {
-      "name": "Lock now",
-      "description": "Locks parental controls again after a temporary unlock.",
+      "name": "Turn parental controls back on",
+      "description": "Turns parental controls back on after a temporary unlock.",
       "fields": {
         "device_id": {
           "name": "Console",

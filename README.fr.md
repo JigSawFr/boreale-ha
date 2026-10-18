@@ -19,7 +19,7 @@ ses événements sur un broker MQTT de votre réseau local, et reçoit des ordre
 par lui (*Préférences › Accès à distance*, et son agent facultatif qui garde le
 lien quand PlayGuard est fermé). Cette intégration fait de chaque console un
 appareil Home Assistant : voir le temps restant, changer les limites, donner du
-temps en plus, verrouiller la console, depuis un tableau de bord ou une
+temps en plus, bloquer tous les jeux, depuis un tableau de bord ou une
 automatisation.
 
 La console fonctionne avec Home Assistant **sans** cette intégration : elle
@@ -210,8 +210,8 @@ limite habituelle revient demain).
 **Heure** (configuration) : *Alarme du coucher* (quand l'alarme sonne), *Fin du
 coucher* (quand le jeu est de nouveau permis).
 
-**Interrupteurs** : *Verrouillage de la console* (plus de jeu du tout),
-*Déverrouillé* (désactivé, il reverrouille le contrôle parental après un
+**Interrupteurs** : *Bloquer tous les jeux* (plus de jeu du tout),
+*Déverrouillé* (désactivé, il réactive le contrôle parental après un
 déverrouillage temporaire) ; configuration : *Alarme du coucher activée*,
 *Alarme de fin de temps*, *Mode VR restreint*, *Publication sur les réseaux
 sociaux restreinte*, *Communication restreinte*.
@@ -222,8 +222,8 @@ profils enregistrés dans PlayGuard ; il n'affiche aucun choix en cours : les
 limites disent lequel s'applique).
 
 **Boutons** : *Temps en plus +15 min*, *+30 min*, *+1 h*, *Fin du jeu pour
-aujourd'hui*, *Retirer la limite*, *Verrouiller maintenant* (reverrouille le
-contrôle parental) ; diagnostic : *Synchroniser maintenant* (la console republie
+aujourd'hui*, *Retirer la limite*, *Réactiver le contrôle parental* (après un
+déverrouillage temporaire) ; diagnostic : *Synchroniser maintenant* (la console republie
 tout), *Exporter un rapport de diagnostic*.
 
 **Événement** : *Événements*, voir [événements](#événements).
@@ -254,9 +254,9 @@ et reste quand le jeu est désinstallé (avec `installed: false`) ; celui d'un
 jeu que la console ne liste plus est indisponible.
 
 Les entités qui changent le minuteur (limites, heure du coucher, temps en plus,
-verrouillage de la console, profils) demandent *Les ordres peuvent changer le
+blocage de tous les jeux, profils) demandent *Les ordres peuvent changer le
 temps de jeu* activé sur la console ; sans lui, elles sont refusées ici avec la
-raison. Reverrouiller (*Déverrouillé* désactivé) et les restrictions n'en ont
+raison. Réactiver le contrôle parental (*Déverrouillé* désactivé) et les restrictions n'en ont
 pas besoin.
 
 Home Assistant construit lui-même les identifiants d'entités, à partir des noms
@@ -279,7 +279,7 @@ PlayGuard chargée).
 | `playguard.add_bonus_time` | `minutes` (5 à 180, 30 par défaut) | Des minutes en plus aujourd'hui ; la limite habituelle revient demain. |
 | `playguard.apply_profile` | `profile` (son nom dans PlayGuard) | Applique les limites d'un profil enregistré. |
 | `playguard.stop_today` | | 0 minute aujourd'hui ; la limite habituelle revient demain. |
-| `playguard.lock_now` | | Reverrouille le contrôle parental après un déverrouillage temporaire. |
+| `playguard.lock_now` | | Réactive le contrôle parental après un déverrouillage temporaire. |
 | `playguard.sync_now` | | La console republie tout. |
 | `playguard.request_report` | | La console enregistre un rapport de diagnostic sur sa carte SD, et le publie quand *Accès à distance* le permet (il est alors dans les diagnostics de l'appareil). |
 
@@ -431,8 +431,8 @@ tap_action:
 
 - Voir d'un coup d'œil combien de temps les enfants ont joué aujourd'hui et ce
   qui reste, sur le tableau de bord familial ou un téléphone.
-- Donner du temps en plus, arrêter le jeu pour aujourd'hui ou verrouiller la
-  console depuis le canapé ou le travail, sans prendre la console ni le code PIN.
+- Donner du temps en plus, arrêter le jeu pour aujourd'hui ou bloquer tous
+  les jeux depuis le canapé ou le travail, sans prendre la console ni le code PIN.
 - Passer d'un profil semaine scolaire à un profil vacances depuis un calendrier,
   ou régler les limites du week-end le vendredi soir.
 - Récompenser les tâches ménagères ou les devoirs par du temps en plus, avec un
@@ -455,7 +455,7 @@ tap_action:
   confirme sur la console (événement `command_waiting`) ; avec *Les refuser*,
   rien n'est appliqué.
 - Sans *Les ordres peuvent changer le temps de jeu*, les limites, l'heure du
-  coucher, le temps en plus, le verrouillage de la console et les profils sont
+  coucher, le temps en plus, le blocage de tous les jeux et les profils sont
   refusés (l'appareil d'origine de la console masque plutôt ces entités).
 - Seul le préfixe `playguard` est découvert ; une console sous un autre préfixe
   s'ajoute à la main.

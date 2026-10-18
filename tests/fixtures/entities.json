@@ -406,7 +406,7 @@
       "id": "console_lock",
       "platform": "switch",
       "write": "timer",
-      "name": "Console lock",
+      "name": "Block all games",
       "value_template": "{{ value_json.timer.console_locked }}",
       "topic": "state",
       "extra": {
@@ -538,7 +538,7 @@
       "id": "lock_now",
       "platform": "button",
       "write": "free",
-      "name": "Lock now",
+      "name": "Turn parental controls back on",
       "value_template": null,
       "topic": "state",
       "extra": {

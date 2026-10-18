@@ -65,7 +65,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   page: tested on firmware 22.0.0 to 22.5.0 (Atmosphère 1.11.x); on a newer
   firmware it opens read-only, and every order is refused until a release of
   PlayGuard supports it; before firmware 21.0.0, it has no play timer
-  (limits, bedtime, extra time, console lock).
+  (limits, bedtime, extra time, blocking all games).
 - A console's **sysMMC and emuMMC** are two devices: each has its own
   parental controls and its own console id.
 - **Not supported**: the Nintendo Switch 2 (there is no Atmosphère for it),
@@ -207,7 +207,7 @@ tomorrow).
 **Time** (config): *Bedtime alarm* (when the alarm sounds), *Bedtime end
 time* (when play is allowed again).
 
-**Switches**: *Console lock* (no play at all), *Unlocked* (off locks parental
+**Switches**: *Block all games* (no play at all), *Unlocked* (off locks parental
 controls again after a temporary unlock); config: *Bedtime alarm enabled*,
 *Time's up alarm*, *VR mode restricted*, *Posting to social media
 restricted*, *Communication restricted*.
@@ -217,7 +217,7 @@ teen, custom), *Profile* (applies one of the profiles saved in PlayGuard; it
 shows no current choice: the limits say which one is in effect).
 
 **Buttons**: *Extra time +15 min*, *+30 min*, *+1 h*, *No more play today*,
-*Remove the limit*, *Lock now* (locks parental controls again);
+*Remove the limit*, *Turn parental controls back on* (after a temporary unlock);
 diagnostic: *Sync now* (the console publishes everything again), *Export a
 diagnostic report*.
 
@@ -247,9 +247,9 @@ for the long-term statistics), with attributes `installed`, `version`,
 console first lists it, and stays when the game is uninstalled (with
 `installed: false`); one the console no longer lists is unavailable.
 
-The entities that change the play timer (limits, bedtime, extra time, the
-console lock, profiles) need *Orders may change the play timer* on the
-console; without it, they are refused here with the reason. Locking again
+The entities that change the play timer (limits, bedtime, extra time,
+blocking all games, profiles) need *Orders may change the play timer* on the
+console; without it, they are refused here with the reason. Turning parental controls back on
 (*Unlocked* off) and the restrictions do not need it.
 
 Home Assistant builds the entity ids itself, from the device's and the
@@ -271,7 +271,7 @@ unknown profile, a device that is not a loaded PlayGuard console).
 | `playguard.add_bonus_time` | `minutes` (5 to 180, default 30) | Extra minutes today; the usual limit comes back tomorrow. |
 | `playguard.apply_profile` | `profile` (its name in PlayGuard) | Applies the limits of a saved profile. |
 | `playguard.stop_today` | | 0 minutes today; the usual limit comes back tomorrow. |
-| `playguard.lock_now` | | Locks parental controls again after a temporary unlock. |
+| `playguard.lock_now` | | Turns parental controls back on after a temporary unlock. |
 | `playguard.sync_now` | | The console publishes everything again. |
 | `playguard.request_report` | | The console saves a diagnostic report on its SD card, and publishes it when *Remote access* allows it (then in the device's diagnostics). |
 
@@ -439,7 +439,7 @@ tap_action:
   on the console*, an order also waits for someone to confirm it on the
   console (event `command_waiting`); under *Refuse them*, nothing is applied.
 - Without *Orders may change the play timer*, the limits, bedtime, extra time,
-  the console lock and the profiles are refused (the console's own device
+  blocking all games and the profiles are refused (the console's own device
   hides these entities instead).
 - Only the prefix `playguard` is discovered; a console under another prefix
   is added by hand.

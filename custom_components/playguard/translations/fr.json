@@ -96,7 +96,7 @@
         "name": "Synchroniser maintenant"
       },
       "lock_now": {
-        "name": "Verrouiller maintenant"
+        "name": "Réactiver le contrôle parental"
       },
       "export_report": {
         "name": "Exporter un rapport de diagnostic"
@@ -302,7 +302,7 @@
         "name": "Alarme du coucher activée"
       },
       "console_lock": {
-        "name": "Verrouillage de la console"
+        "name": "Bloquer tous les jeux"
       },
       "play_timer_alarm": {
         "name": "Alarme de fin de temps"
@@ -443,8 +443,8 @@
       }
     },
     "lock_now": {
-      "name": "Verrouiller maintenant",
-      "description": "Verrouille de nouveau le contrôle parental après un déverrouillage temporaire.",
+      "name": "Réactiver le contrôle parental",
+      "description": "Réactive le contrôle parental après un déverrouillage temporaire.",
       "fields": {
         "device_id": {
           "name": "Console",
