@@ -1,2 +1,2 @@
 # The Home Assistant release the tests run against (2026.10.1) and its test harness.
-pytest-homeassistant-custom-component==0.13.372
+pytest-homeassistant-custom-component==0.13.373
