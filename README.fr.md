@@ -16,7 +16,7 @@ le homebrew Nintendo Switch qui gère le contrôle parental de la console hors
 ligne : limites de temps de jeu, heure du coucher, restrictions, temps en plus,
 verrou de console. PlayGuard publie l'état de la console, son temps de jeu et
 ses événements sur un broker MQTT de votre réseau local, et reçoit des ordres
-par lui (*Préférences › Accès à distance*, et son agent facultatif qui garde le
+par lui (*Console › Accès à distance*, et son agent facultatif qui garde le
 lien quand PlayGuard est fermé). Cette intégration fait de chaque console un
 appareil Home Assistant : voir le temps restant, changer les limites, donner du
 temps en plus, bloquer tous les jeux, depuis un tableau de bord ou une
@@ -64,7 +64,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 ## Appareils pris en charge
 
 - Les consoles **Nintendo Switch** (le modèle d'origine, le modèle OLED, la
-  Lite) sous Atmosphère, avec un PlayGuard qui a *Préférences › Accès à
+  Lite) sous Atmosphère, avec un PlayGuard qui a *Console › Accès à
   distance*. Ce que PlayGuard lui-même prend en charge est sur sa page
   [compatibilité](https://github.com/JigSawFr/PlayGuard/blob/main/docs/fr/compatibility.md) :
   testé sur les firmwares 22.0.0 à 22.5.0 (Atmosphère 1.11.x) ; sur un firmware
@@ -92,7 +92,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
    MQTT* ; avec l'application Mosquitto, elle est proposée d'elle-même).
 2. Un utilisateur du broker pour la console (avec l'application Mosquitto, tout
    utilisateur de Home Assistant peut se connecter : créez-en un nommé `playguard`).
-3. Sur la console, le lien de PlayGuard configuré sur ce broker : *Préférences ›
+3. Sur la console, le lien de PlayGuard configuré sur ce broker : *Console ›
    Accès à distance › MQTT / Home Assistant* (adresse du broker, port, nom
    d'utilisateur et mot de passe, nom dans Home Assistant), puis *Lien à
    distance* activé. Son *État* affiche *En ligne*. Le
@@ -138,14 +138,19 @@ agent actif) apparaît dans *Paramètres › Appareils et services › Découver
 `playguard`) :
 
 1. *Paramètres › Appareils et services › Ajouter une intégration › PlayGuard*.
-2. Remplissez les champs ci-dessous, puis *Valider*. L'intégration attend
-   jusqu'à 10 secondes l'état de la console sur le broker, et crée l'entrée avec
-   le nom de la console ; s'il n'y a rien, elle le dit et vous laisse corriger
-   les champs.
+2. L'intégration écoute le broker quelques secondes, et liste les consoles
+   dont l'état y est et qui ne sont pas encore ajoutées (leur nom, leur
+   identifiant, et leur préfixe quand ce n'est pas `playguard` ; sous un
+   préfixe d'un ou deux niveaux). Choisissez-en une : elle est ajoutée.
+3. Aucune trouvée, ou *Une autre console, par son identifiant* : remplissez
+   les champs ci-dessous, puis *Valider*. L'intégration attend jusqu'à 10
+   secondes l'état de la console sur le broker, et crée l'entrée avec le nom
+   de la console ; s'il n'y a rien, elle le dit et vous laisse corriger les
+   champs.
 
 | Champ | Quoi mettre |
 |---|---|
-| **Identifiant de la console** | Les 8 caractères de la console (0 à 9, a à f), dans PlayGuard › *Préférences › Accès à distance › Identifiant de la console*. |
+| **Identifiant de la console** | Les 8 caractères de la console (0 à 9, a à f), dans PlayGuard › *Console › Accès à distance › Identifiant de la console*. |
 | **Préfixe des topics** | `playguard`, sauf si `topic_prefix` dans le `sync.conf` de la console dit autre chose. |
 
 Chaque console est une entrée et un appareil ; la même console ne peut pas être
@@ -574,10 +579,11 @@ entrée), ou dans la copie du blueprint.
 <summary>Aucune console PlayGuard dans <em>Découvertes</em></summary>
 
 La console ne publie rien sur le broker qu'utilise Home Assistant, ou publie
-sous un autre préfixe. Sur la console, *Préférences › Accès à distance › État*
+sous un autre préfixe. Sur la console, *Console › Accès à distance › État*
 doit afficher *En ligne* (PlayGuard ouvert, ou son agent actif), avec le même
 broker que l'intégration MQTT de Home Assistant. Un préfixe autre que
-`playguard` n'est jamais découvert : ajoutez la console à la main.
+`playguard` n'est jamais découvert : ajoutez la console à la main, où elle est
+listée (un préfixe d'un ou deux niveaux) ou ajoutée par son identifiant.
 </details>
 
 <details>
@@ -611,7 +617,7 @@ attendent sur le broker.
 
 La console refuserait l'ordre, donc Home Assistant ne l'envoie pas. Activez
 *Les ordres peuvent changer le temps de jeu*, ou réglez *Ordres reçus* sur autre
-chose que *Les refuser*, dans PlayGuard › *Préférences › Accès à distance*.
+chose que *Les refuser*, dans PlayGuard › *Console › Accès à distance*.
 Le mode lecture seule signifie un firmware que PlayGuard ne prend pas encore en
 charge : mettez PlayGuard à jour.
 </details>
@@ -632,7 +638,7 @@ L'appareil MQTT d'origine de la console est revenu à côté de celui de cette
 intégration, donc chaque entité apparaît deux fois. La réparation demande de
 nouveau à la console de le désactiver. S'il revient, mettez PlayGuard à jour, ou
 désactivez *Créer l'appareil dans Home Assistant (découverte MQTT)* dans
-PlayGuard › *Préférences › Accès à distance*. Pour garder plutôt l'appareil
+PlayGuard › *Console › Accès à distance*. Pour garder plutôt l'appareil
 d'origine de la console, désactivez l'option *Remplacer l'appareil Home
 Assistant d'origine de la console*.
 </details>
@@ -682,7 +688,9 @@ Elle lit `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` et `report`, et publie les mêmes
 ordres scalaires retenus que les entités natives sur
 `playguard/<id>/<entity>/set` (la console efface chacun une fois traité), et
-sa version, retenue, sur `playguard/<id>/integration`. Le contrat est le
+sa version, retenue, sur `playguard/<id>/integration`. L'ajout d'une console à
+la main écoute `+/+/state` et `+/+/+/state` quelques secondes, pour lister les
+consoles qui y sont. Le contrat est le
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md)
 de PlayGuard (en anglais).
 

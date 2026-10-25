@@ -15,7 +15,7 @@ A Home Assistant integration for [PlayGuard](https://github.com/JigSawFr/PlayGua
 the Nintendo Switch homebrew that manages the console's parental controls
 offline: play-time limits, bedtime, restrictions, extra time, the console
 lock. PlayGuard publishes the console's state, play time and events on an MQTT
-broker on your local network and takes orders from it (*Preferences › Remote
+broker on your local network and takes orders from it (*Console › Remote
 access*, and its optional agent that keeps the link up while PlayGuard is
 closed). This integration turns each console into a Home Assistant device:
 see the time left, change the limits, give extra time, lock the console, from
@@ -61,7 +61,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 ## Supported devices
 
 - **Nintendo Switch** consoles (the original, the OLED model, the Lite)
-  running Atmosphère and a PlayGuard that has *Preferences › Remote access*.
+  running Atmosphère and a PlayGuard that has *Console › Remote access*.
   What PlayGuard itself supports is in its
   [compatibility](https://github.com/JigSawFr/PlayGuard/blob/main/docs/compatibility.md)
   page: tested on firmware 22.0.0 to 22.5.0 (Atmosphère 1.11.x); on a newer
@@ -88,7 +88,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
    Mosquitto app, it is offered by itself).
 2. A broker user for the console (with the Mosquitto app, any Home
    Assistant user can log in: create one named `playguard`).
-3. On the console, PlayGuard's link set up on that broker: *Preferences ›
+3. On the console, PlayGuard's link set up on that broker: *Console ›
    Remote access › MQTT / Home Assistant* (broker address, port, user name
    and password, the name in Home Assistant), then *Remote link* on. Its
    *Status* reads *Online*. PlayGuard's
@@ -134,14 +134,18 @@ agent running) shows up in *Settings › Devices & services › Discovered*:
 `playguard`):
 
 1. *Settings › Devices & services › Add integration › PlayGuard*.
-2. Fill in the fields below, then *Submit*. The integration waits up to
-   10 seconds for the console's state on the broker, and creates the entry
-   with the console's name; nothing there, it says so and lets you correct
-   the fields.
+2. The integration listens to the broker for a few seconds, and lists the
+   consoles whose state is there and that are not set up yet (their name, id,
+   and prefix when it is not `playguard`; under a prefix of one or two
+   levels). Pick one: it is added.
+3. None found, or *Another console, by its id*: fill in the fields below,
+   then *Submit*. The integration waits up to 10 seconds for the console's
+   state on the broker, and creates the entry with the console's name;
+   nothing there, it says so and lets you correct the fields.
 
 | Field | What to put |
 |---|---|
-| **Console id** | The console's 8 characters (0 to 9, a to f), from PlayGuard › *Preferences › Remote access › Console id*. |
+| **Console id** | The console's 8 characters (0 to 9, a to f), from PlayGuard › *Console › Remote access › Console id*. |
 | **Topic prefix** | `playguard`, unless `topic_prefix` in the console's `sync.conf` says otherwise. |
 
 Each console is one entry and one device; the same console cannot be added
@@ -551,10 +555,11 @@ automation, or the blueprint's copy in `blueprints/automation/playguard/`.
 <summary>No PlayGuard console in <em>Discovered</em></summary>
 
 The console publishes nothing on the broker Home Assistant uses, or under
-another prefix. On the console, *Preferences › Remote access › Status* must
+another prefix. On the console, *Console › Remote access › Status* must
 read *Online* (PlayGuard open, or its agent running), with the same broker as
 Home Assistant's MQTT integration. A prefix other than `playguard` is never
-discovered: add the console by hand.
+discovered: add the console by hand, where it is listed (a prefix of one or
+two levels) or added by its id.
 </details>
 
 <details>
@@ -586,7 +591,7 @@ online again. Orders sent through the actions meanwhile wait on the broker.
 
 The console would refuse the order, so Home Assistant does not send it. Turn
 on *Orders may change the play timer*, or set *Orders received* to something
-other than *Refuse them*, in PlayGuard › *Preferences › Remote access*.
+other than *Refuse them*, in PlayGuard › *Console › Remote access*.
 Read-only mode means a firmware PlayGuard does not support yet: update
 PlayGuard.
 </details>
@@ -606,7 +611,7 @@ what became of it.
 The console's own MQTT device is back next to this integration's, so every
 entity is there twice. The repair asks the console again to turn it off. If
 it comes back, update PlayGuard, or turn off *Create the device in Home
-Assistant (MQTT discovery)* in PlayGuard › *Preferences › Remote access*. To
+Assistant (MQTT discovery)* in PlayGuard › *Console › Remote access*. To
 keep the console's own device instead, turn off the option *Replace the
 console's own Home Assistant device*.
 </details>
@@ -655,8 +660,9 @@ It reads `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` and `report`, and publishes the
 same retained scalar orders as the native entities on
 `playguard/<id>/<entity>/set` (the console clears each one once handled), and
-its version, retained, on `playguard/<id>/integration`. The contract is
-PlayGuard's
+its version, retained, on `playguard/<id>/integration`. Adding a console by
+hand listens to `+/+/state` and `+/+/+/state` for a few seconds, to list the
+consoles there. The contract is PlayGuard's
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md).
 
 ## Help, security and contributing

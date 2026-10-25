@@ -8,7 +8,17 @@
       },
       "user": {
         "title": "Ajouter une console PlayGuard",
-        "description": "Les consoles qui publient sur le broker sont trouvées toutes seules. Pour en ajouter une à la main : son identifiant est dans PlayGuard › Préférences › Accès à distance › Identifiant de la console.",
+        "description": "Les consoles dont l'état est sur le broker et qui ne sont pas encore ajoutées. Choisissez-en une, ou une autre console pour l'ajouter par son identifiant.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "Son nom et son identifiant, et son préfixe de topics quand ce n'est pas playguard."
+        }
+      },
+      "manual": {
+        "title": "Ajouter une console PlayGuard par son identifiant",
+        "description": "Son identifiant est dans PlayGuard › Console › Accès à distance › Identifiant de la console. L'intégration attend ensuite jusqu'à 10 secondes l'état de la console sur le broker.",
         "data": {
           "console_id": "Identifiant de la console",
           "topic_prefix": "Préfixe des topics"
@@ -32,7 +42,7 @@
     "error": {
       "invalid_console_id": "Un identifiant de console fait 8 caractères, de 0 à 9 et de a à f.",
       "invalid_prefix": "Ce préfixe ne peut pas faire partie d'un topic MQTT.",
-      "no_state": "Cette console n'a rien publié sur le broker sous ce préfixe. Vérifiez l'identifiant de la console et le préfixe, et que le lien de la console a fonctionné une fois (PlayGuard › Préférences › Accès à distance › État)."
+      "no_state": "Cette console n'a rien publié sur le broker sous ce préfixe. Vérifiez l'identifiant de la console et le préfixe, et que le lien de la console a fonctionné une fois (PlayGuard › Console › Accès à distance › État)."
     },
     "abort": {
       "already_configured": "Cette console est déjà configurée.",
@@ -364,7 +374,7 @@
         "step": {
           "confirm": {
             "title": "Les entités de {name} sont en double",
-            "description": "L'appareil MQTT d'origine de la console est revenu à côté de celui de cette intégration : il a été réactivé dans PlayGuard, ou le PlayGuard de la console est trop ancien pour accepter l'ordre qui le désactive. Validez pour demander de nouveau à la console de le désactiver.\n\nS'il revient, mettez PlayGuard à jour, ou désactivez *Créer l'appareil dans Home Assistant (découverte MQTT)* dans PlayGuard › Préférences › Accès à distance. Pour garder plutôt l'appareil d'origine de la console, désactivez l'option *Remplacer l'appareil Home Assistant d'origine de la console* de cette intégration."
+            "description": "L'appareil MQTT d'origine de la console est revenu à côté de celui de cette intégration : il a été réactivé dans PlayGuard, ou le PlayGuard de la console est trop ancien pour accepter l'ordre qui le désactive. Validez pour demander de nouveau à la console de le désactiver.\n\nS'il revient, mettez PlayGuard à jour, ou désactivez *Créer l'appareil dans Home Assistant (découverte MQTT)* dans PlayGuard › Console › Accès à distance. Pour garder plutôt l'appareil d'origine de la console, désactivez l'option *Remplacer l'appareil Home Assistant d'origine de la console* de cette intégration."
           }
         }
       }
@@ -389,6 +399,11 @@
         "none": "Aucun",
         "recent": "Les jeux joués ces 30 derniers jours",
         "all": "Tous les jeux"
+      }
+    },
+    "console": {
+      "options": {
+        "manual": "Une autre console, par son identifiant"
       }
     }
   },

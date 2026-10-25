@@ -17,7 +17,12 @@ from homeassistant.config_entries import (
     OptionsFlowWithReload,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig, SelectSelectorMode
+from homeassistant.helpers.selector import (
+    SelectOptionDict,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import voluptuous as vol
 
@@ -37,6 +42,12 @@ from .const import (
 # How long a flow waits for the console's state on the broker. Retained, it
 # comes at once when the console ever published, even asleep.
 STATE_TIMEOUT = 10.0
+# How long adding a console by hand listens for the consoles' states, retained
+# under a prefix of one level or two, before it lists them.
+SCAN_TIMEOUT = 3.0
+SCAN_TOPICS = ("+/+/state", "+/+/+/state")
+CONF_CONSOLE = "console"
+MANUAL = "manual"  # the list's last choice: another console, by its id
 
 RECONFIGURE_SCHEMA = vol.Schema({vol.Required(CONF_PREFIX): str})
 OPTIONS_SCHEMA = vol.Schema(
@@ -106,6 +117,29 @@ async def _async_wait_for_state(hass: HomeAssistant, prefix: str, console_id: st
         unsubscribe()
 
 
+async def _async_scan(hass: HomeAssistant) -> dict[str, tuple[str, str, int]]:
+    """The consoles whose state is on the broker: {id: (prefix, name, ts)},
+    the newest state when one is under two prefixes (a console moved)."""
+    found: dict[str, tuple[str, str, int]] = {}
+
+    @callback
+    def _on_state(msg: ReceiveMessage) -> None:
+        prefix, _, console_id = msg.topic.removesuffix("/state").rpartition("/")
+        if not CONSOLE_ID_RE.match(console_id) or (doc := _state(msg.payload)) is None:
+            return
+        ts = _posix(doc.get("ts")) or 0
+        if console_id not in found or found[console_id][2] < ts:
+            found[console_id] = (prefix, (doc.get("console") or {}).get("name") or "Nintendo Switch", ts)
+
+    unsubscribe = [await mqtt.async_subscribe(hass, topic, _on_state, qos=0) for topic in SCAN_TOPICS]
+    try:
+        await asyncio.sleep(SCAN_TIMEOUT)
+    finally:
+        for remove in unsubscribe:
+            remove()
+    return found
+
+
 class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
     """A console per entry, its id as the unique id."""
 
@@ -115,6 +149,7 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         self._console_id = ""
         self._prefix = DEFAULT_PREFIX
         self._name = ""
+        self._found: dict[str, tuple[str, str, int]] = {}
 
     async def async_step_mqtt(self, discovery_info: MqttServiceInfo) -> ConfigFlowResult:
         """A console published its state (`playguard/<id>/state`, retained: at
@@ -145,10 +180,36 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        """A console by its id (Preferences › Remote access › Console id),
-        once its state is seen on the broker."""
+        """The consoles on the broker not set up yet, to pick one; another one,
+        or none found: by its id."""
         if not await mqtt.async_wait_for_mqtt_client(self.hass):
             return self.async_abort(reason="mqtt_not_ready")
+        if user_input is not None:
+            if (console_id := user_input[CONF_CONSOLE]) not in self._found:
+                return await self.async_step_manual()
+            # A discovery of the same console may be waiting: this one goes on.
+            await self.async_set_unique_id(console_id, raise_on_progress=False)
+            self._abort_if_unique_id_configured()
+            self._console_id = console_id
+            self._prefix, self._name, _ = self._found[console_id]
+            return self._create()
+        configured = self._async_current_ids(include_ignore=False)
+        self._found = {k: v for k, v in (await _async_scan(self.hass)).items() if k not in configured}
+        if not self._found:
+            return await self.async_step_manual()
+        options = [
+            SelectOptionDict(value=k, label=f"{name} ({k})" + ("" if prefix == DEFAULT_PREFIX else f", {prefix}"))
+            for k, (prefix, name, _) in sorted(self._found.items(), key=lambda kv: (kv[1][1], kv[0]))
+        ]
+        options.append(SelectOptionDict(value=MANUAL, label="Another console, by its id"))
+        selector = SelectSelector(
+            SelectSelectorConfig(options=options, translation_key=CONF_CONSOLE, mode=SelectSelectorMode.LIST)
+        )
+        return self.async_show_form(step_id="user", data_schema=vol.Schema({vol.Required(CONF_CONSOLE): selector}))
+
+    async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """A console by its id (Console › Remote access › Console id), once its
+        state is seen on the broker."""
         errors: dict[str, str] = {}
         if user_input is not None:
             console_id = user_input[CONF_CONSOLE_ID].strip().lower()
@@ -168,7 +229,7 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
                     self._name = (doc.get("console") or {}).get("name") or "Nintendo Switch"
                     return self._create()
         return self.async_show_form(
-            step_id="user",
+            step_id="manual",
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_CONSOLE_ID): str,
@@ -216,9 +277,9 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class PlayGuardOptionsFlow(OptionsFlowWithReload):
-    """Whether the console's own discovery stays off, and whether the sensors
-    keep their last values while the console sleeps (the entry reloads when
-    one changes)."""
+    """Whether the console's own discovery stays off, whether the sensors
+    keep their last values while the console sleeps, which games get a
+    sensor (the entry reloads when one changes)."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:

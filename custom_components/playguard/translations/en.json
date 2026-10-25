@@ -8,7 +8,17 @@
       },
       "user": {
         "title": "Add a PlayGuard console",
-        "description": "Consoles that publish on the broker are found by themselves. To add one by hand: its id is in PlayGuard › Preferences › Remote access › Console id.",
+        "description": "The consoles whose state is on the broker and not set up yet. Pick one, or another console to add it by its id.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "Its name and id, and its topic prefix when it is not playguard."
+        }
+      },
+      "manual": {
+        "title": "Add a PlayGuard console by its id",
+        "description": "Its id is in PlayGuard › Console › Remote access › Console id. The integration then waits up to 10 seconds for the console's state on the broker.",
         "data": {
           "console_id": "Console id",
           "topic_prefix": "Topic prefix"
@@ -32,7 +42,7 @@
     "error": {
       "invalid_console_id": "A console id is 8 characters, 0 to 9 and a to f.",
       "invalid_prefix": "This prefix cannot be part of an MQTT topic.",
-      "no_state": "This console has published nothing on the broker under this prefix. Check the console id and the prefix, and that the console's link is up once (PlayGuard › Preferences › Remote access › Status)."
+      "no_state": "This console has published nothing on the broker under this prefix. Check the console id and the prefix, and that the console's link is up once (PlayGuard › Console › Remote access › Status)."
     },
     "abort": {
       "already_configured": "This console is already set up.",
@@ -364,7 +374,7 @@
         "step": {
           "confirm": {
             "title": "{name}'s entities are there twice",
-            "description": "The console's own MQTT device is back next to this integration's: it was turned on again in PlayGuard, or the console's PlayGuard is too old to take the order that turns it off. Submit to ask the console again to turn it off.\n\nIf it comes back, update PlayGuard, or turn off *Create the device in Home Assistant (MQTT discovery)* in PlayGuard › Preferences › Remote access. To keep the console's own device instead, turn off this integration's option *Replace the console's own Home Assistant device*."
+            "description": "The console's own MQTT device is back next to this integration's: it was turned on again in PlayGuard, or the console's PlayGuard is too old to take the order that turns it off. Submit to ask the console again to turn it off.\n\nIf it comes back, update PlayGuard, or turn off *Create the device in Home Assistant (MQTT discovery)* in PlayGuard › Console › Remote access. To keep the console's own device instead, turn off this integration's option *Replace the console's own Home Assistant device*."
           }
         }
       }
@@ -389,6 +399,11 @@
         "none": "None",
         "recent": "The games played in the last 30 days",
         "all": "Every game"
+      }
+    },
+    "console": {
+      "options": {
+        "manual": "Another console, by its id"
       }
     }
   },
