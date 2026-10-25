@@ -34,7 +34,13 @@ rules:
   config-entry-unloading: done
   docs-configuration-parameters: done
   docs-installation-parameters: done
-  entity-unavailable: done
+  entity-unavailable:
+    status: done
+    comment: >-
+      The controls are unavailable while the console is off the broker (its
+      last will). Its sensors keep their last values meanwhile, a console asleep
+      being the usual case; the option "Keep the sensors' last values while the
+      console sleeps" turns that off.
   integration-owner: done
   log-when-unavailable: done
   parallel-updates: done

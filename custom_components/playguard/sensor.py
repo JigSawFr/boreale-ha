@@ -58,6 +58,8 @@ def _timestamp(value: Any) -> datetime | None:
 class PlayGuardSensor(PlayGuardEntity, SensorEntity):
     """A value of the state."""
 
+    _keeps_value = True
+
     def __init__(self, console, definition) -> None:
         super().__init__(console, definition)
         if definition.unit:
@@ -121,7 +123,7 @@ class WeekSensor(PlayGuardSensor):
 
     @property
     def available(self) -> bool:
-        return self.console.week is not None and self.console.reachable
+        return self.console.week is not None and self.shown
 
     def _days(self) -> dict[str, int]:
         week = self.console.week or {}
@@ -153,6 +155,8 @@ class WeekSensor(PlayGuardSensor):
 class GameSensor(PlayGuardEntity, SensorEntity):
     """One game's play time since it was first played (every account), with
     its launches, when it was first and last played, its version."""
+
+    _keeps_value = True
 
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES

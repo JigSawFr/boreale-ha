@@ -27,6 +27,8 @@ async def async_setup_entry(
 class PlayGuardBinarySensor(PlayGuardEntity, BinarySensorEntity):
     """A true/false value of the state."""
 
+    _keeps_value = True
+
     def __init__(self, console, definition) -> None:
         super().__init__(console, definition)
         if definition.device_class:

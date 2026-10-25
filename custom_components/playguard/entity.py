@@ -17,6 +17,9 @@ class PlayGuardEntity(Entity):
 
     _attr_has_entity_name = True
     _attr_should_poll = False
+    # A value (a sensor, an event) rather than a control: it may keep showing
+    # what the console last said while the console sleeps.
+    _keeps_value = False
 
     def __init__(self, console: PlayGuardConsole, definition: EntityDef) -> None:
         self.console = console
@@ -43,10 +46,17 @@ class PlayGuardEntity(Entity):
 
     @property
     def available(self) -> bool:
-        """Known once the console's state arrived (retained: at once after a
-        restart), while the console is on the broker: its last will says when
-        it is not. The actions still send orders then (they wait on the broker)."""
-        return self.console.document(self.definition.topic) is not None and self.console.reachable
+        """Known once the console's document arrived (retained: at once after
+        a restart), while the console is shown (`shown`)."""
+        return self.console.document(self.definition.topic) is not None and self.shown
+
+    @property
+    def shown(self) -> bool:
+        """While the console is on the broker (its last will says when it is
+        not), or, for a value, while the entry keeps the last values. A control
+        is unavailable then; the actions still send orders (they wait on the
+        broker)."""
+        return self.console.reachable or (self._keeps_value and self.console.keep_values)
 
     def read(self) -> Any:
         """This entity's value in its document (not `value`: NumberEntity has one)."""

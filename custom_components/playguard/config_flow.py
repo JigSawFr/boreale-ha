@@ -20,14 +20,16 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import voluptuous as vol
 
-from .const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, CONSOLE_ID_RE, DEFAULT_PREFIX, DOMAIN
+from .const import CONF_CONSOLE_ID, CONF_KEEP_VALUES, CONF_PREFIX, CONF_TAKE_OVER, CONSOLE_ID_RE, DEFAULT_PREFIX, DOMAIN
 
 # How long a flow waits for the console's state on the broker. Retained, it
 # comes at once when the console ever published, even asleep.
 STATE_TIMEOUT = 10.0
 
 RECONFIGURE_SCHEMA = vol.Schema({vol.Required(CONF_PREFIX): str})
-OPTIONS_SCHEMA = vol.Schema({vol.Required(CONF_TAKE_OVER, default=True): bool})
+OPTIONS_SCHEMA = vol.Schema(
+    {vol.Required(CONF_TAKE_OVER, default=True): bool, vol.Required(CONF_KEEP_VALUES, default=True): bool}
+)
 
 
 def _valid_prefix(prefix: str, console_id: str) -> bool:
@@ -194,8 +196,9 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class PlayGuardOptionsFlow(OptionsFlowWithReload):
-    """Whether the console's own discovery stays off (the entry reloads when
-    it changes)."""
+    """Whether the console's own discovery stays off, and whether the sensors
+    keep their last values while the console sleeps (the entry reloads when
+    one changes)."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:

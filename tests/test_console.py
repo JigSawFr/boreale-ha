@@ -65,10 +65,10 @@ async def test_the_console_itself(hass: HomeAssistant, setup) -> None:
     assert _state(hass, "sensor", "last_boot").state == STATE_UNKNOWN
     assert _state(hass, "sensor", "battery").state == STATE_UNKNOWN
 
-    # Offline: its entities go with the console's.
+    # Offline: its sensors keep their last values (the option's default).
     publish(hass, "availability", "offline")
     await hass.async_block_till_done()
-    assert _state(hass, "sensor", "sd_free").state == STATE_UNAVAILABLE
+    assert _state(hass, "sensor", "sd_free").state == "21344"
 
 
 async def test_games(hass: HomeAssistant, setup) -> None:

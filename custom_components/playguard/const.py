@@ -21,6 +21,10 @@ CONF_PREFIX: Final = "topic_prefix"
 # Turn the console's own Home Assistant discovery off (the integration's
 # entities replace it).
 CONF_TAKE_OVER: Final = "take_over_discovery"
+# While the console is off the broker (asleep, off, out of reach), what it last
+# said keeps showing: its sensors keep their last values, its controls are
+# unavailable.
+CONF_KEEP_VALUES: Final = "keep_values_asleep"
 
 CONSOLE_ID_RE: Final = re.compile(r"^[0-9a-f]{8}$")
 

@@ -26,7 +26,7 @@ import pytest
 from pytest_homeassistant_custom_component.components.diagnostics import get_diagnostics_for_config_entry
 import voluptuous as vol
 
-from custom_components.playguard.const import DOMAIN
+from custom_components.playguard.const import CONF_KEEP_VALUES, CONF_TAKE_OVER, DOMAIN
 
 from .conftest import BASE, CONSOLE_ID, fixture, publish
 
@@ -85,15 +85,22 @@ async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
 async def test_unavailable_while_offline(
     hass: HomeAssistant, setup, mqtt_mock, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """The console's last will makes its entities unavailable, logged once;
-    the actions still send their orders, which wait on the broker."""
+    """The console's last will makes its controls unavailable, logged once,
+    while its sensors keep their last values (the option's default); the
+    actions still send their orders, which wait on the broker."""
+    used = hass.states.get(_id("sensor", "used_screen_time", hass)).state
+    asleep = hass.states.get(_id("binary_sensor", "pin_set", hass)).state
     publish(hass, "availability", "offline")
     publish(hass, "availability", "offline")
     await hass.async_block_till_done()
     assert hass.states.get(_id("binary_sensor", "online", hass)).state == STATE_OFF
-    for platform, key in (("number", "limit_mon"), ("event", "events"), ("sensor", "used_screen_time")):
+    for platform, key in (("number", "limit_mon"), ("switch", "console_lock"), ("button", "sync_now")):
         assert hass.states.get(_id(platform, key, hass)).state == STATE_UNAVAILABLE, key
+    assert hass.states.get(_id("sensor", "used_screen_time", hass)).state == used != STATE_UNAVAILABLE
+    assert hass.states.get(_id("binary_sensor", "pin_set", hass)).state == asleep != STATE_UNAVAILABLE
+    assert hass.states.get(_id("event", "events", hass)).state != STATE_UNAVAILABLE
     assert caplog.text.count("Salon is offline") == 1
+    assert "its sensors keep their last values" in caplog.text
 
     device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)
     mqtt_mock.async_publish.reset_mock()
@@ -105,6 +112,25 @@ async def test_unavailable_while_offline(
     await hass.async_block_till_done()
     assert hass.states.get(_id("number", "limit_mon", hass)).state == "120"
     assert caplog.text.count("Salon is back online") == 1
+
+
+async def test_all_unavailable_while_offline_without_the_last_values(
+    hass: HomeAssistant, setup, caplog: pytest.LogCaptureFixture
+) -> None:
+    """With the option off, every entity but *Online* is unavailable while
+    the console is off the broker."""
+    hass.config_entries.async_update_entry(setup, options={CONF_TAKE_OVER: True, CONF_KEEP_VALUES: False})
+    publish(hass, "availability", "offline")
+    await hass.async_block_till_done()
+    assert hass.states.get(_id("binary_sensor", "online", hass)).state == STATE_OFF
+    for platform, key in (
+        ("number", "limit_mon"),
+        ("event", "events"),
+        ("sensor", "used_screen_time"),
+        ("binary_sensor", "pin_set"),
+    ):
+        assert hass.states.get(_id(platform, key, hass)).state == STATE_UNAVAILABLE, key
+    assert "its entities are unavailable" in caplog.text
 
 
 async def test_unavailable_before_the_state(hass: HomeAssistant, mqtt_mock, entry) -> None:
