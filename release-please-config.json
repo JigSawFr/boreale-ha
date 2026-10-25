@@ -26,6 +26,7 @@
     ".": {
       "release-type": "simple",
       "package-name": "playguard-ha",
+      "initial-version": "0.1.0",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         { "type": "json", "path": "custom_components/playguard/manifest.json", "jsonpath": "$.version" }
