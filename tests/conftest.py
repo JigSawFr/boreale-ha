@@ -8,10 +8,12 @@ from typing import Any
 from unittest.mock import Mock
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_mqtt_message
 
 from custom_components.playguard.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, DOMAIN
+from custom_components.playguard.entities import ENTITIES
 
 pytest_plugins = "pytest_homeassistant_custom_component"
 
@@ -69,7 +71,22 @@ def publish(hass: HomeAssistant, sub: str, doc: Any, retain: bool = False) -> No
 
 @pytest.fixture
 async def setup(hass: HomeAssistant, mqtt_mock, entry: MockConfigEntry, state: dict):
-    """The integration set up, the console online with its state and activity."""
+    """The integration set up, the console online with its state and activity,
+    every entity on (those off by default turned on beforehand)."""
+    registry = er.async_get(hass)
+    for d in ENTITIES:
+        if not d.enabled:
+            registry.async_get_or_create(str(d.platform), DOMAIN, f"{CONSOLE_ID}_{d.key}", disabled_by=None)
+    return await _async_setup(hass, entry, state)
+
+
+@pytest.fixture
+async def setup_defaults(hass: HomeAssistant, mqtt_mock, entry: MockConfigEntry, state: dict):
+    """The same, with the entities as a new entry has them."""
+    return await _async_setup(hass, entry, state)
+
+
+async def _async_setup(hass: HomeAssistant, entry: MockConfigEntry, state: dict) -> MockConfigEntry:
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()

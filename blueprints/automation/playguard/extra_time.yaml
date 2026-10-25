@@ -1,0 +1,50 @@
+blueprint:
+  name: PlayGuard — extra time when…
+  description: >-
+    Extra time on a console when something happens: a helper turned on (the
+    chores done), a button or a remote pressed, a tag scanned. Needs *Orders
+    may change the play timer* on the console.
+  domain: automation
+  author: JigSawFr
+  homeassistant:
+    min_version: 2026.10.0
+  source_url: https://github.com/JigSawFr/playguard-ha/blob/main/blueprints/automation/playguard/extra_time.yaml
+  input:
+    console:
+      name: Console
+      selector:
+        device:
+          filter:
+            - integration: playguard
+    when:
+      name: When
+      description: What gives the extra time.
+      selector:
+        trigger:
+    minutes:
+      name: Extra time
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 180
+          step: 5
+          unit_of_measurement: min
+    then:
+      name: Then
+      description: What to do after (turn the helper off again, say so).
+      default: []
+      selector:
+        action:
+
+mode: single
+max_exceeded: silent
+
+triggers: !input when
+
+actions:
+  - action: playguard.add_bonus_time
+    data:
+      device_id: !input console
+      minutes: !input minutes
+  - sequence: !input then

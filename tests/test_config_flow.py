@@ -16,7 +16,14 @@ from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_mqtt_message
 
-from custom_components.playguard.const import CONF_CONSOLE_ID, CONF_KEEP_VALUES, CONF_PREFIX, CONF_TAKE_OVER, DOMAIN
+from custom_components.playguard.const import (
+    CONF_CONSOLE_ID,
+    CONF_GAME_SENSORS,
+    CONF_KEEP_VALUES,
+    CONF_PREFIX,
+    CONF_TAKE_OVER,
+    DOMAIN,
+)
 
 from .conftest import CONSOLE_ID, fixture
 
@@ -48,6 +55,43 @@ def no_wait():
     """No console answers: the flows give up at once."""
     with patch("custom_components.playguard.config_flow.STATE_TIMEOUT", 0.01):
         yield
+
+
+@pytest.fixture(autouse=True)
+def short_scan():
+    """Adding a console by hand listens for the consoles briefly."""
+    with patch("custom_components.playguard.config_flow.SCAN_TIMEOUT", 0.01):
+        yield
+
+
+async def _scanned(hass: HomeAssistant, mqtt_mock, retained: list[tuple[str, str]]) -> dict:
+    """Adding a console by hand, the broker handing these retained states over
+    once the flow listens."""
+    task = hass.async_create_task(
+        hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    )
+    with patch("custom_components.playguard.config_flow.SCAN_TIMEOUT", 0.5):
+        for _ in range(100):
+            subscribed = {c.args[0] for c in mqtt_mock.async_subscribe.call_args_list}
+            if {"+/+/state", "+/+/+/state"} <= subscribed:
+                break
+            await asyncio.sleep(0)
+        else:
+            pytest.fail("the flow did not listen")
+        for topic, payload in retained:
+            async_fire_mqtt_message(hass, topic, payload, retain=True)
+        return await task
+
+
+def _choices(result: dict) -> list[tuple[str, str]]:
+    [selector] = result["data_schema"].schema.values()
+    return [(o["value"], o["label"]) for o in selector.config["options"]]
+
+
+def _state_of(name: str | None, ts: int) -> str:
+    doc = {**fixture("state.json"), "ts": ts}
+    doc["console"] = {**doc["console"], "name": name} if name else {}
+    return json.dumps(doc)
 
 
 async def test_discovered(hass: HomeAssistant) -> None:
@@ -156,9 +200,62 @@ async def test_discovery_ignores_other_messages(hass: HomeAssistant) -> None:
         assert result["reason"] == "invalid_discovery_info"
 
 
-async def test_by_hand(hass: HomeAssistant, mqtt_mock, no_wait) -> None:
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+async def test_found_on_the_broker(hass: HomeAssistant, mqtt_mock) -> None:
+    """The consoles whose state is on the broker, under a prefix of one level
+    or two, to pick from; what is not a console's state is left out."""
+    result = await _scanned(
+        hass,
+        mqtt_mock,
+        [
+            (f"playguard/{CONSOLE_ID}/state", _state_of("Salon", 1791000000)),
+            ("home/playguard/0badc0de/state", _state_of("Chambre", 1791000000)),
+            ("old/0badc0de/state", _state_of("Chambre", 1780000000)),  # its former prefix: older
+            ("playguard/0000abcd/state", _state_of(None, 1791000000)),  # no name
+            ("zigbee2mqtt/bridge/state", json.dumps({"state": "online"})),
+            ("playguard/deadbeef/state", "not json"),
+        ],
+    )
+    assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"
+    assert _choices(result) == [
+        ("0badc0de", "Chambre (0badc0de), home/playguard"),
+        ("0000abcd", "Nintendo Switch (0000abcd)"),
+        (CONSOLE_ID, f"Salon ({CONSOLE_ID})"),
+        ("manual", "Another console, by its id"),
+    ]
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"console": "0badc0de"})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["title"] == "Chambre"
+    assert result["data"] == {CONF_CONSOLE_ID: "0badc0de", CONF_PREFIX: "home/playguard"}
+    assert result["result"].unique_id == "0badc0de"
+
+
+async def test_found_then_by_its_id(hass: HomeAssistant, mqtt_mock) -> None:
+    result = await _scanned(hass, mqtt_mock, [(f"playguard/{CONSOLE_ID}/state", _state_of("Salon", 1))])
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"console": "manual"})
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "manual"
+
+
+async def test_found_but_set_up_meanwhile(hass: HomeAssistant, mqtt_mock) -> None:
+    result = await _scanned(hass, mqtt_mock, [(f"playguard/{CONSOLE_ID}/state", _state_of("Salon", 1))])
+    MockConfigEntry(domain=DOMAIN, unique_id=CONSOLE_ID, data={CONF_CONSOLE_ID: CONSOLE_ID}).add_to_hass(hass)
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"console": CONSOLE_ID})
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+
+
+async def test_found_already_set_up(hass: HomeAssistant, setup, mqtt_mock) -> None:
+    """A console set up already is not offered: none left, its id is asked."""
+    result = await _scanned(hass, mqtt_mock, [(f"playguard/{CONSOLE_ID}/state", _state_of("Salon", 1))])
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "manual"
+
+
+async def test_by_hand(hass: HomeAssistant, mqtt_mock, no_wait) -> None:
+    # No console on the broker: its id is asked at once.
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    assert result["step_id"] == "manual"
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_CONSOLE_ID: "nope", CONF_PREFIX: "playguard"}
     )
@@ -253,8 +350,15 @@ async def test_options(hass: HomeAssistant, setup) -> None:
     result = await hass.config_entries.options.async_init(setup.entry_id)
     assert result["step_id"] == "init"
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False}
+        result["flow_id"], {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False, CONF_GAME_SENSORS: "all"}
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
-    assert setup.options == {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False}
+    assert setup.options == {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False, CONF_GAME_SENSORS: "all"}
+
+    # The games' default: those played lately.
+    result = await hass.config_entries.options.async_init(setup.entry_id)
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {CONF_TAKE_OVER: True, CONF_KEEP_VALUES: True}
+    )
+    assert setup.options[CONF_GAME_SENSORS] == "recent"

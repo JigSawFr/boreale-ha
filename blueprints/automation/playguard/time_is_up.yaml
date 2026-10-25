@@ -1,0 +1,91 @@
+blueprint:
+  name: PlayGuard — time is up, extra time from the notification
+  description: >-
+    When a console's limit for the day is reached, a notification on a phone,
+    with a button that gives extra time. Needs the Home Assistant app on the
+    phone, and *Orders may change the play timer* on the console.
+  domain: automation
+  author: JigSawFr
+  homeassistant:
+    min_version: 2026.10.0
+  source_url: https://github.com/JigSawFr/playguard-ha/blob/main/blueprints/automation/playguard/time_is_up.yaml
+  input:
+    time_is_up:
+      name: Time is up
+      description: The console's *Time is up* binary sensor.
+      selector:
+        entity:
+          filter:
+            - integration: playguard
+              domain: binary_sensor
+    phone:
+      name: Phone
+      description: The phone told (the Home Assistant app).
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+    minutes:
+      name: Extra time
+      description: What the notification's button gives.
+      default: 15
+      selector:
+        number:
+          min: 5
+          max: 180
+          step: 5
+          unit_of_measurement: min
+    message:
+      name: Message
+      default: "Time is up: today's limit is reached."
+      selector:
+        text:
+    wait:
+      name: Button valid for
+      description: How long the notification's button gives extra time.
+      default:
+        hours: 1
+        minutes: 0
+        seconds: 0
+      selector:
+        duration:
+
+mode: single
+max_exceeded: silent
+
+triggers:
+  - trigger: state
+    entity_id: !input time_is_up
+    from: "off"
+    to: "on"
+
+variables:
+  time_is_up: !input time_is_up
+  minutes: !input minutes
+  console: "{{ device_id(time_is_up) }}"
+
+actions:
+  # The button's id: this run's own, so an older notification's does nothing.
+  - variables:
+      more: "{{ 'PLAYGUARD_MORE_' ~ context.id }}"
+  - domain: mobile_app
+    type: notify
+    device_id: !input phone
+    title: "{{ device_attr(console, 'name_by_user') or device_attr(console, 'name') }}"
+    message: !input message
+    data:
+      tag: "{{ 'playguard_time_is_up_' ~ console }}"
+      actions:
+        - action: "{{ more }}"
+          title: "+{{ minutes }} min"
+  - wait_for_trigger:
+      - trigger: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ more }}"
+    timeout: !input wait
+    continue_on_timeout: false
+  - action: playguard.add_bonus_time
+    data:
+      device_id: "{{ console }}"
+      minutes: "{{ minutes }}"

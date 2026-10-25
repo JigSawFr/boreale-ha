@@ -99,6 +99,9 @@ MODELS = ("erista", "mariko", "lite", "oled", "other")
 REGIONS = ("jpn", "usa", "eur", "aus", "htk", "chn")
 
 
+# `enabled=False`: off until turned on on the device page, as in PlayGuard's
+# table: the rarely needed (what few dashboards show) and the private (the
+# serial number, the Wi-Fi network's name).
 ENTITIES: tuple[EntityDef, ...] = (
     # binary sensors
     _binary("parental_controls_enabled", ("controls", "enabled")),
@@ -107,11 +110,11 @@ ENTITIES: tuple[EntityDef, ...] = (
     _binary("companion_linked", ("controls", "companion_linked")),
     _binary("timer_enabled", ("timer", "enabled")),
     _binary("limit_reached", ("timer", "limit_reached")),
-    _binary("clock_accurate", ("clock_accurate",), category="diagnostic"),
+    _binary("clock_accurate", ("clock_accurate",), category="diagnostic", enabled=False),
     # sensors
     # A day's play time, back to 0 at midnight: a daily total.
     _minutes("used_screen_time", ("timer", "used_min"), SensorStateClass.TOTAL_INCREASING),
-    _minutes("used_screen_time_log", ("activity_today", "used_min"), SensorStateClass.TOTAL_INCREASING),
+    _minutes("used_screen_time_log", ("activity_today", "used_min"), SensorStateClass.TOTAL_INCREASING, enabled=False),
     _minutes("screen_time_remaining", ("timer", "remaining_min"), SensorStateClass.MEASUREMENT),
     _minutes("extended_screen_time", ("timer", "extended_today_min")),
     EntityDef(
@@ -120,11 +123,23 @@ ENTITIES: tuple[EntityDef, ...] = (
         path=("activity_today", "now_playing", "name"),
         fallback=("activity_today", "now_playing", "app_id"),
     ),
-    EntityDef(key="rating_age", platform=Platform.SENSOR, path=("controls", "rating_age"), category="diagnostic"),
+    EntityDef(
+        key="rating_age",
+        platform=Platform.SENSOR,
+        path=("controls", "rating_age"),
+        category="diagnostic",
+        enabled=False,
+    ),
     EntityDef(key="firmware", platform=Platform.SENSOR, path=("console", "firmware"), category="diagnostic"),
     EntityDef(key="atmosphere", platform=Platform.SENSOR, path=("console", "atmosphere"), category="diagnostic"),
     _minutes("spent_raw", ("timer", "spent_raw_min"), category="diagnostic", enabled=False),
-    EntityDef(key="last_order", platform=Platform.SENSOR, path=("link", "last_result"), category="diagnostic"),
+    EntityDef(
+        key="last_order",
+        platform=Platform.SENSOR,
+        path=("link", "last_result"),
+        category="diagnostic",
+        enabled=False,
+    ),
     # limits
     *(_limit(f"limit_{day}", ("timer", "limits", day)) for day in DAYS),
     _limit("limit_uniform", ("timer", "uniform_min")),
@@ -171,7 +186,7 @@ ENTITIES: tuple[EntityDef, ...] = (
     # buttons
     _button("sync_now", WRITE_FREE, category="diagnostic"),
     _button("lock_now", WRITE_FREE),
-    _button("export_report", WRITE_FREE, category="diagnostic"),
+    _button("export_report", WRITE_FREE, category="diagnostic", enabled=False),
     _button("add_bonus_time_15", WRITE_TIMER),
     _button("add_bonus_time_30", WRITE_TIMER),
     _button("add_bonus_time_60", WRITE_TIMER),
@@ -180,24 +195,33 @@ ENTITIES: tuple[EntityDef, ...] = (
     # events (the console's "event" topic)
     EntityDef(key="events", platform=Platform.EVENT),
     # the console itself (the system document)
-    _system("model", ("hardware", "model"), device_class="enum", options=MODELS, category="diagnostic"),
-    _system("nickname", ("hardware", "nickname"), category="diagnostic"),
-    _system("region", ("hardware", "region"), device_class="enum", options=REGIONS, category="diagnostic"),
-    _system("hekate", ("versions", "hekate"), category="diagnostic"),
+    _system("model", ("hardware", "model"), device_class="enum", options=MODELS, category="diagnostic", enabled=False),
+    _system("nickname", ("hardware", "nickname"), category="diagnostic", enabled=False),
+    _system(
+        "region", ("hardware", "region"), device_class="enum", options=REGIONS, category="diagnostic", enabled=False
+    ),
+    _system("hekate", ("versions", "hekate"), category="diagnostic", enabled=False),
     _system(
         "system_storage",
         ("hardware", "system"),
         device_class="enum",
         options=("sysmmc", "emummc"),
         category="diagnostic",
+        enabled=False,
     ),
-    _system("prodinfo_blanked", ("hardware", "prodinfo_blanked"), Platform.BINARY_SENSOR, category="diagnostic"),
+    _system(
+        "prodinfo_blanked",
+        ("hardware", "prodinfo_blanked"),
+        Platform.BINARY_SENSOR,
+        category="diagnostic",
+        enabled=False,
+    ),
     # Only with "Publish the serial number" on the console.
     _system("serial", ("hardware", "serial"), category="diagnostic", enabled=False),
     _space("sd_free", ("storage", "sd", "free_mb")),
-    _space("sd_total", ("storage", "sd", "total_mb"), category="diagnostic"),
+    _space("sd_total", ("storage", "sd", "total_mb"), category="diagnostic", enabled=False),
     _space("nand_free", ("storage", "nand", "free_mb")),
-    _space("nand_total", ("storage", "nand", "total_mb"), category="diagnostic"),
+    _space("nand_total", ("storage", "nand", "total_mb"), category="diagnostic", enabled=False),
     _system(
         "battery",
         ("power", "battery_pct"),
@@ -214,6 +238,7 @@ ENTITIES: tuple[EntityDef, ...] = (
         device_class="temperature",
         state_class=SensorStateClass.MEASUREMENT,
         category="diagnostic",
+        enabled=False,
     ),
     _system(
         "network",
@@ -221,11 +246,18 @@ ENTITIES: tuple[EntityDef, ...] = (
         device_class="enum",
         options=("none", "wifi", "ethernet"),
         category="diagnostic",
+        enabled=False,
     ),
-    _system("ip_address", ("network", "ip"), category="diagnostic"),
-    _system("wifi_signal", ("network", "wifi_bars"), state_class=SensorStateClass.MEASUREMENT, category="diagnostic"),
+    _system("ip_address", ("network", "ip"), category="diagnostic", enabled=False),
+    _system(
+        "wifi_signal",
+        ("network", "wifi_bars"),
+        state_class=SensorStateClass.MEASUREMENT,
+        category="diagnostic",
+        enabled=False,
+    ),
     _system("ssid", ("network", "ssid"), category="diagnostic", enabled=False),
-    _system("last_boot", ("boot_ts",), device_class="timestamp", category="diagnostic"),
+    _system("last_boot", ("boot_ts",), device_class="timestamp", category="diagnostic", enabled=False),
     # the games (the games document); one sensor per game besides (sensor.py)
     EntityDef(
         key="games_installed",
@@ -235,7 +267,14 @@ ENTITIES: tuple[EntityDef, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
     ),
     _minutes("play_time_total", ("total_min",), SensorStateClass.TOTAL_INCREASING, topic="games"),
-    EntityDef(key="accounts", platform=Platform.SENSOR, topic="games", path=("accounts",), category="diagnostic"),
+    EntityDef(
+        key="accounts",
+        platform=Platform.SENSOR,
+        topic="games",
+        path=("accounts",),
+        category="diagnostic",
+        enabled=False,
+    ),
     # this integration's own
     _binary("online", ("availability",), device_class="connectivity", category="diagnostic", extra=True),
     _binary("agent", ("link", "agent"), device_class="running", category="diagnostic", enabled=False, extra=True),
