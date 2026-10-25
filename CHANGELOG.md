@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/JigSawFr/playguard-ha/compare/v0.3.0...v0.4.0) (2026-10-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **entities:** the sensors "Play time · <game>" and the option "Game sensors" are removed; an automation on one of them reads the games attribute instead.
+
+### ⚠️ Changes
+
+* **entities:** no sensor per game, every game stays on one entity ([#14](https://github.com/JigSawFr/playguard-ha/issues/14)) ([3830d8f](https://github.com/JigSawFr/playguard-ha/commit/3830d8f27c5d457ea013e040580b2859f01319db))
+
 ## [0.3.0](https://github.com/JigSawFr/playguard-ha/compare/v0.2.0...v0.3.0) (2026-10-25)
 
 
