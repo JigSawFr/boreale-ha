@@ -1,4 +1,4 @@
-"""Switches: bedtime, the console lock, the alarm, the restrictions."""
+"""Switches: bedtime, blocking all games, the alarm, the restrictions."""
 
 from __future__ import annotations
 

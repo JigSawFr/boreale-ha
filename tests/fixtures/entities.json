@@ -7,6 +7,7 @@
       "write": "none",
       "name": "Parental controls",
       "value_template": "{{ value_json.controls.enabled }}",
+      "topic": "state",
       "extra": {
         "pl_on": "True",
         "pl_off": "False",
@@ -19,6 +20,7 @@
       "write": "none",
       "name": "Temporarily unlocked",
       "value_template": "{{ value_json.controls.temp_unlocked }}",
+      "topic": "state",
       "extra": {
         "pl_on": "True",
         "pl_off": "False",
@@ -31,6 +33,7 @@
       "write": "none",
       "name": "PIN set",
       "value_template": "{{ value_json.controls.pin_set }}",
+      "topic": "state",
       "extra": {
         "pl_on": "True",
         "pl_off": "False",
@@ -43,6 +46,7 @@
       "write": "none",
       "name": "Companion app linked",
       "value_template": "{{ value_json.controls.companion_linked }}",
+      "topic": "state",
       "extra": {
         "pl_on": "True",
         "pl_off": "False",
@@ -55,6 +59,7 @@
       "write": "none",
       "name": "Play timer",
       "value_template": "{{ value_json.timer.enabled }}",
+      "topic": "state",
       "extra": {
         "pl_on": "True",
         "pl_off": "False",
@@ -67,6 +72,7 @@
       "write": "none",
       "name": "Time is up",
       "value_template": "{{ value_json.timer.limit_reached }}",
+      "topic": "state",
       "extra": {
         "pl_on": "True",
         "pl_off": "False",
@@ -79,6 +85,7 @@
       "write": "none",
       "name": "Network clock accurate",
       "value_template": "{{ value_json.clock_accurate }}",
+      "topic": "state",
       "extra": {
         "pl_on": "True",
         "pl_off": "False",
@@ -91,6 +98,7 @@
       "write": "none",
       "name": "Used screen time",
       "value_template": "{{ value_json.timer.used_min }}",
+      "topic": "state",
       "extra": {
         "unit_of_meas": "min",
         "dev_cla": "duration",
@@ -103,6 +111,7 @@
       "write": "none",
       "name": "Used screen time (play log)",
       "value_template": "{{ value_json.activity_today.used_min }}",
+      "topic": "state",
       "extra": {
         "unit_of_meas": "min",
         "dev_cla": "duration",
@@ -115,6 +124,7 @@
       "write": "none",
       "name": "Screen time remaining",
       "value_template": "{{ value_json.timer.remaining_min }}",
+      "topic": "state",
       "extra": {
         "unit_of_meas": "min",
         "dev_cla": "duration",
@@ -127,6 +137,7 @@
       "write": "none",
       "name": "Extended screen time",
       "value_template": "{{ value_json.timer.extended_today_min }}",
+      "topic": "state",
       "extra": {
         "unit_of_meas": "min",
         "dev_cla": "duration"
@@ -138,6 +149,7 @@
       "write": "none",
       "name": "Now playing",
       "value_template": "{{ value_json.activity_today.now_playing.name or value_json.activity_today.now_playing.app_id }}",
+      "topic": "state",
       "extra": {
         "ic": "mdi:gamepad-variant"
       }
@@ -148,6 +160,7 @@
       "write": "none",
       "name": "Age rating",
       "value_template": "{{ value_json.controls.rating_age }}",
+      "topic": "state",
       "extra": {
         "ent_cat": "diagnostic"
       }
@@ -158,6 +171,7 @@
       "write": "none",
       "name": "Firmware",
       "value_template": "{{ value_json.console.firmware }}",
+      "topic": "state",
       "extra": {
         "ent_cat": "diagnostic"
       }
@@ -168,6 +182,7 @@
       "write": "none",
       "name": "Atmosphère",
       "value_template": "{{ value_json.console.atmosphere }}",
+      "topic": "state",
       "extra": {
         "ent_cat": "diagnostic"
       }
@@ -178,6 +193,7 @@
       "write": "none",
       "name": "Time spent (1952)",
       "value_template": "{{ value_json.timer.spent_raw_min }}",
+      "topic": "state",
       "extra": {
         "unit_of_meas": "min",
         "dev_cla": "duration",
@@ -191,6 +207,7 @@
       "write": "none",
       "name": "Last order",
       "value_template": "{{ value_json.link.last_result }}",
+      "topic": "state",
       "extra": {
         "ent_cat": "diagnostic"
       }
@@ -201,6 +218,7 @@
       "write": "timer",
       "name": "Limit Sunday",
       "value_template": "{{ value_json.timer.limits.sun }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -217,6 +235,7 @@
       "write": "timer",
       "name": "Limit Monday",
       "value_template": "{{ value_json.timer.limits.mon }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -233,6 +252,7 @@
       "write": "timer",
       "name": "Limit Tuesday",
       "value_template": "{{ value_json.timer.limits.tue }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -249,6 +269,7 @@
       "write": "timer",
       "name": "Limit Wednesday",
       "value_template": "{{ value_json.timer.limits.wed }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -265,6 +286,7 @@
       "write": "timer",
       "name": "Limit Thursday",
       "value_template": "{{ value_json.timer.limits.thu }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -281,6 +303,7 @@
       "write": "timer",
       "name": "Limit Friday",
       "value_template": "{{ value_json.timer.limits.fri }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -297,6 +320,7 @@
       "write": "timer",
       "name": "Limit Saturday",
       "value_template": "{{ value_json.timer.limits.sat }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -313,6 +337,7 @@
       "write": "timer",
       "name": "Limit every day",
       "value_template": "{{ value_json.timer.uniform_min }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -329,6 +354,7 @@
       "write": "timer",
       "name": "Max screentime today",
       "value_template": "{{ value_json.timer.limit_today_min }}",
+      "topic": "state",
       "extra": {
         "min": 0,
         "max": 1440,
@@ -345,6 +371,7 @@
       "write": "timer",
       "name": "Bedtime alarm",
       "value_template": "{{ value_json.timer.bedtime.start }}",
+      "topic": "state",
       "extra": {
         "ent_cat": "config"
       }
@@ -355,6 +382,7 @@
       "write": "timer",
       "name": "Bedtime end time",
       "value_template": "{{ value_json.timer.bedtime.end }}",
+      "topic": "state",
       "extra": {
         "ent_cat": "config"
       }
@@ -365,6 +393,7 @@
       "write": "timer",
       "name": "Bedtime alarm enabled",
       "value_template": "{{ value_json.timer.bedtime.enabled }}",
+      "topic": "state",
       "extra": {
         "stat_on": "True",
         "stat_off": "False",
@@ -377,8 +406,9 @@
       "id": "console_lock",
       "platform": "switch",
       "write": "timer",
-      "name": "Console lock",
+      "name": "Block all games",
       "value_template": "{{ value_json.timer.console_locked }}",
+      "topic": "state",
       "extra": {
         "stat_on": "True",
         "stat_off": "False",
@@ -393,6 +423,7 @@
       "write": "timer",
       "name": "Time's up alarm",
       "value_template": "{{ value_json.timer.alarm_on }}",
+      "topic": "state",
       "extra": {
         "stat_on": "True",
         "stat_off": "False",
@@ -407,6 +438,7 @@
       "write": "timer",
       "name": "Unlocked",
       "value_template": "{{ value_json.controls.temp_unlocked }}",
+      "topic": "state",
       "extra": {
         "stat_on": "True",
         "stat_off": "False",
@@ -421,6 +453,7 @@
       "write": "free",
       "name": "VR mode restricted",
       "value_template": "{{ value_json.controls.vr_restricted }}",
+      "topic": "state",
       "extra": {
         "stat_on": "True",
         "stat_off": "False",
@@ -435,6 +468,7 @@
       "write": "free",
       "name": "Posting to social media restricted",
       "value_template": "{{ value_json.controls.sns_post_restricted }}",
+      "topic": "state",
       "extra": {
         "stat_on": "True",
         "stat_off": "False",
@@ -449,6 +483,7 @@
       "write": "free",
       "name": "Communication restricted",
       "value_template": "{{ value_json.controls.free_communication_restricted }}",
+      "topic": "state",
       "extra": {
         "stat_on": "True",
         "stat_off": "False",
@@ -463,6 +498,7 @@
       "write": "free",
       "name": "Restriction level",
       "value_template": "{{ 'unrestricted' if value_json.controls.level == 'none' else value_json.controls.level }}",
+      "topic": "state",
       "extra": {
         "ops": [
           "unrestricted",
@@ -481,6 +517,7 @@
       "write": "timer",
       "name": "Profile",
       "value_template": "{{ None }}",
+      "topic": "state",
       "extra": {
         "ent_cat": "config"
       }
@@ -491,6 +528,7 @@
       "write": "free",
       "name": "Sync now",
       "value_template": null,
+      "topic": "state",
       "extra": {
         "ic": "mdi:sync",
         "ent_cat": "diagnostic"
@@ -500,8 +538,9 @@
       "id": "lock_now",
       "platform": "button",
       "write": "free",
-      "name": "Lock now",
+      "name": "Turn parental controls back on",
       "value_template": null,
+      "topic": "state",
       "extra": {
         "ic": "mdi:lock"
       }
@@ -512,6 +551,7 @@
       "write": "free",
       "name": "Export a diagnostic report",
       "value_template": null,
+      "topic": "state",
       "extra": {
         "ent_cat": "diagnostic"
       }
@@ -522,6 +562,7 @@
       "write": "timer",
       "name": "Extra time +15 min",
       "value_template": null,
+      "topic": "state",
       "extra": {
         "ic": "mdi:timer-plus-outline"
       }
@@ -532,6 +573,7 @@
       "write": "timer",
       "name": "Extra time +30 min",
       "value_template": null,
+      "topic": "state",
       "extra": {
         "ic": "mdi:timer-plus-outline"
       }
@@ -542,6 +584,7 @@
       "write": "timer",
       "name": "Extra time +1 h",
       "value_template": null,
+      "topic": "state",
       "extra": {
         "ic": "mdi:timer-plus-outline"
       }
@@ -552,6 +595,7 @@
       "write": "timer",
       "name": "No more play today",
       "value_template": null,
+      "topic": "state",
       "extra": {
         "ic": "mdi:timer-off-outline"
       }
@@ -562,6 +606,7 @@
       "write": "timer",
       "name": "Remove the limit",
       "value_template": null,
+      "topic": "state",
       "extra": {
         "ic": "mdi:timer-remove-outline"
       }
@@ -572,7 +617,327 @@
       "write": "none",
       "name": "Events",
       "value_template": null,
+      "topic": "state",
       "extra": {}
+    },
+    {
+      "id": "model",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Model",
+      "value_template": "{{ value_json.hardware.model }}",
+      "topic": "system",
+      "extra": {
+        "dev_cla": "enum",
+        "ops": [
+          "erista",
+          "mariko",
+          "lite",
+          "oled",
+          "other"
+        ],
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "nickname",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Console nickname",
+      "value_template": "{{ value_json.hardware.nickname }}",
+      "topic": "system",
+      "extra": {
+        "ic": "mdi:tag-text-outline",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "region",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Region",
+      "value_template": "{{ value_json.hardware.region }}",
+      "topic": "system",
+      "extra": {
+        "dev_cla": "enum",
+        "ops": [
+          "jpn",
+          "usa",
+          "eur",
+          "aus",
+          "htk",
+          "chn"
+        ],
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "hekate",
+      "platform": "sensor",
+      "write": "none",
+      "name": "hekate",
+      "value_template": "{{ value_json.versions.hekate }}",
+      "topic": "system",
+      "extra": {
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "system_storage",
+      "platform": "sensor",
+      "write": "none",
+      "name": "System",
+      "value_template": "{{ value_json.hardware.system }}",
+      "topic": "system",
+      "extra": {
+        "dev_cla": "enum",
+        "ops": [
+          "sysmmc",
+          "emummc"
+        ],
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "prodinfo_blanked",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "PRODINFO blanked",
+      "value_template": "{{ value_json.hardware.prodinfo_blanked }}",
+      "topic": "system",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "serial",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Serial number",
+      "value_template": "{{ value_json.hardware.serial }}",
+      "topic": "system",
+      "extra": {
+        "ent_cat": "diagnostic",
+        "en": false
+      }
+    },
+    {
+      "id": "sd_free",
+      "platform": "sensor",
+      "write": "none",
+      "name": "SD card free space",
+      "value_template": "{{ value_json.storage.sd.free_mb }}",
+      "topic": "system",
+      "extra": {
+        "unit_of_meas": "MiB",
+        "dev_cla": "data_size",
+        "stat_cla": "measurement",
+        "ic": "mdi:micro-sd"
+      }
+    },
+    {
+      "id": "sd_total",
+      "platform": "sensor",
+      "write": "none",
+      "name": "SD card size",
+      "value_template": "{{ value_json.storage.sd.total_mb }}",
+      "topic": "system",
+      "extra": {
+        "unit_of_meas": "MiB",
+        "dev_cla": "data_size",
+        "stat_cla": "measurement",
+        "ic": "mdi:micro-sd",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "nand_free",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Internal storage free space",
+      "value_template": "{{ value_json.storage.nand.free_mb }}",
+      "topic": "system",
+      "extra": {
+        "unit_of_meas": "MiB",
+        "dev_cla": "data_size",
+        "stat_cla": "measurement",
+        "ic": "mdi:harddisk"
+      }
+    },
+    {
+      "id": "nand_total",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Internal storage size",
+      "value_template": "{{ value_json.storage.nand.total_mb }}",
+      "topic": "system",
+      "extra": {
+        "unit_of_meas": "MiB",
+        "dev_cla": "data_size",
+        "stat_cla": "measurement",
+        "ic": "mdi:harddisk",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "battery",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Battery",
+      "value_template": "{{ value_json.power.battery_pct }}",
+      "topic": "system",
+      "extra": {
+        "unit_of_meas": "%",
+        "dev_cla": "battery",
+        "stat_cla": "measurement"
+      }
+    },
+    {
+      "id": "charging",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "Charging",
+      "value_template": "{{ value_json.power.charging }}",
+      "topic": "system",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "dev_cla": "battery_charging"
+      }
+    },
+    {
+      "id": "docked",
+      "platform": "binary_sensor",
+      "write": "none",
+      "name": "Docked",
+      "value_template": "{{ value_json.power.docked }}",
+      "topic": "system",
+      "extra": {
+        "pl_on": "True",
+        "pl_off": "False",
+        "ic": "mdi:television"
+      }
+    },
+    {
+      "id": "temperature",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Temperature",
+      "value_template": "{{ value_json.power.temperature_c }}",
+      "topic": "system",
+      "extra": {
+        "unit_of_meas": "°C",
+        "dev_cla": "temperature",
+        "stat_cla": "measurement",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "network",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Connection",
+      "value_template": "{{ value_json.network.type }}",
+      "topic": "system",
+      "extra": {
+        "dev_cla": "enum",
+        "ops": [
+          "none",
+          "wifi",
+          "ethernet"
+        ],
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "ip_address",
+      "platform": "sensor",
+      "write": "none",
+      "name": "IP address",
+      "value_template": "{{ value_json.network.ip }}",
+      "topic": "system",
+      "extra": {
+        "ic": "mdi:ip-network",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "wifi_signal",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Wi-Fi signal",
+      "value_template": "{{ value_json.network.wifi_bars }}",
+      "topic": "system",
+      "extra": {
+        "stat_cla": "measurement",
+        "ic": "mdi:wifi",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "ssid",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Wi-Fi network",
+      "value_template": "{{ value_json.network.ssid }}",
+      "topic": "system",
+      "extra": {
+        "ic": "mdi:wifi",
+        "ent_cat": "diagnostic",
+        "en": false
+      }
+    },
+    {
+      "id": "last_boot",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Last started",
+      "value_template": "{{ as_datetime(value_json.boot_ts) if value_json.boot_ts else None }}",
+      "topic": "system",
+      "extra": {
+        "dev_cla": "timestamp",
+        "ent_cat": "diagnostic"
+      }
+    },
+    {
+      "id": "games_installed",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Games installed",
+      "value_template": "{{ value_json.installed }}",
+      "topic": "games",
+      "extra": {
+        "stat_cla": "measurement",
+        "ic": "mdi:gamepad-square"
+      }
+    },
+    {
+      "id": "play_time_total",
+      "platform": "sensor",
+      "write": "none",
+      "name": "Play time (all time)",
+      "value_template": "{{ value_json.total_min }}",
+      "topic": "games",
+      "extra": {
+        "unit_of_meas": "min",
+        "dev_cla": "duration",
+        "stat_cla": "total_increasing",
+        "ic": "mdi:timer-sand-complete"
+      }
+    },
+    {
+      "id": "accounts",
+      "platform": "sensor",
+      "write": "none",
+      "name": "User accounts",
+      "value_template": "{{ value_json.accounts }}",
+      "topic": "games",
+      "extra": {
+        "ic": "mdi:account-multiple",
+        "ent_cat": "diagnostic"
+      }
     }
   ]
 }

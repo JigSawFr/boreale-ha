@@ -8,6 +8,9 @@
 
 [English](README.md) · **Français**
 
+[![Ouvrez votre instance Home Assistant et ouvrez un dépôt dans le Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
+[![Ouvrez votre instance Home Assistant et commencez à configurer une nouvelle intégration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
+
 Une intégration Home Assistant pour [PlayGuard](https://github.com/JigSawFr/PlayGuard),
 le homebrew Nintendo Switch qui gère le contrôle parental de la console hors
 ligne : limites de temps de jeu, heure du coucher, restrictions, temps en plus,
@@ -16,7 +19,7 @@ ses événements sur un broker MQTT de votre réseau local, et reçoit des ordre
 par lui (*Préférences › Accès à distance*, et son agent facultatif qui garde le
 lien quand PlayGuard est fermé). Cette intégration fait de chaque console un
 appareil Home Assistant : voir le temps restant, changer les limites, donner du
-temps en plus, verrouiller la console, depuis un tableau de bord ou une
+temps en plus, bloquer tous les jeux, depuis un tableau de bord ou une
 automatisation.
 
 La console fonctionne avec Home Assistant **sans** cette intégration : elle
@@ -103,7 +106,11 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 Avec [HACS](https://hacs.xyz/) :
 
 1. *HACS › ⋮ › Dépôts personnalisés* : ajoutez
-   `https://github.com/JigSawFr/playguard-ha`, type *Intégration*.
+   `https://github.com/JigSawFr/playguard-ha`, type *Intégration* ; ou le
+   premier bouton en haut de cette page (My Home Assistant ouvre le dépôt dans
+   votre HACS). Dans PlayGuard, *Accès à distance › Home Assistant ›
+   Installer l'intégration Home Assistant* affiche les deux mêmes boutons en
+   QR codes, pour un téléphone.
 2. Ouvrez **PlayGuard** dans HACS, puis *Télécharger* : HACS installe le
    `playguard.zip` de la version que vous choisissez.
 3. Redémarrez Home Assistant.
@@ -203,8 +210,8 @@ limite habituelle revient demain).
 **Heure** (configuration) : *Alarme du coucher* (quand l'alarme sonne), *Fin du
 coucher* (quand le jeu est de nouveau permis).
 
-**Interrupteurs** : *Verrouillage de la console* (plus de jeu du tout),
-*Déverrouillé* (désactivé, il reverrouille le contrôle parental après un
+**Interrupteurs** : *Bloquer tous les jeux* (plus de jeu du tout),
+*Déverrouillé* (désactivé, il réactive le contrôle parental après un
 déverrouillage temporaire) ; configuration : *Alarme du coucher activée*,
 *Alarme de fin de temps*, *Mode VR restreint*, *Publication sur les réseaux
 sociaux restreinte*, *Communication restreinte*.
@@ -215,16 +222,41 @@ profils enregistrés dans PlayGuard ; il n'affiche aucun choix en cours : les
 limites disent lequel s'applique).
 
 **Boutons** : *Temps en plus +15 min*, *+30 min*, *+1 h*, *Fin du jeu pour
-aujourd'hui*, *Retirer la limite*, *Verrouiller maintenant* (reverrouille le
-contrôle parental) ; diagnostic : *Synchroniser maintenant* (la console republie
+aujourd'hui*, *Retirer la limite*, *Réactiver le contrôle parental* (après un
+déverrouillage temporaire) ; diagnostic : *Synchroniser maintenant* (la console republie
 tout), *Exporter un rapport de diagnostic*.
 
 **Événement** : *Événements*, voir [événements](#événements).
 
+**La console elle-même** (`playguard/<id>/system`, tenu à jour par l'agent
+quand PlayGuard est fermé) :
+
+| Entité | Ce qu'elle indique | Notes |
+|---|---|---|
+| Batterie, En charge, Sur le dock | Sa charge, si un chargeur l'alimente, si elle est sur le dock. | |
+| Espace libre de la carte SD, Espace libre du stockage interne | Mio restants sur la carte SD et sur le stockage utilisateur du système (celui de l'emuMMC sur un emuMMC). | lus toutes les 5 minutes ; leurs tailles sont de diagnostic |
+| Modèle | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic |
+| Surnom de la console, Région, Système, hekate | Le surnom des Paramètres de la console, la région, sysMMC ou emuMMC, hekate sur la carte SD. | diagnostic |
+| PRODINFO masqué | Atmosphère cache l'identité de la console. | diagnostic |
+| Température, Connexion, Adresse IP, Signal Wi-Fi | Le capteur interne, Wi-Fi ou ethernet, l'adresse de la console, 0 à 3 barres. | diagnostic |
+| Dernier démarrage | Quand la console a démarré (pas quand elle est sortie de veille). | diagnostic |
+| Numéro de série | Le vrai numéro de série de la console (tiré de la sauvegarde d'Atmosphère quand le PRODINFO est masqué). | diagnostic, désactivé par défaut ; seulement avec *Publier le numéro de série* sur la console |
+| Réseau Wi-Fi | Le nom du réseau. | diagnostic, désactivé par défaut |
+
+**Jeux** (`playguard/<id>/games`, que PlayGuard publie après chaque lecture
+du journal de jeu) : *Jeux installés*, *Temps de jeu (depuis toujours)* (tous
+les jeux, tous les comptes), *Comptes utilisateurs* (diagnostic) ; et **un
+capteur par jeu**, *Temps de jeu · <jeu>* : ses minutes depuis sa première
+partie (un total croissant, pour les statistiques à long terme), avec les
+attributs `installed`, `version`, `launches`, `first_played`, `last_played`.
+Le capteur d'un jeu apparaît quand la console le liste pour la première fois,
+et reste quand le jeu est désinstallé (avec `installed: false`) ; celui d'un
+jeu que la console ne liste plus est indisponible.
+
 Les entités qui changent le minuteur (limites, heure du coucher, temps en plus,
-verrouillage de la console, profils) demandent *Les ordres peuvent changer le
+blocage de tous les jeux, profils) demandent *Les ordres peuvent changer le
 temps de jeu* activé sur la console ; sans lui, elles sont refusées ici avec la
-raison. Reverrouiller (*Déverrouillé* désactivé) et les restrictions n'en ont
+raison. Réactiver le contrôle parental (*Déverrouillé* désactivé) et les restrictions n'en ont
 pas besoin.
 
 Home Assistant construit lui-même les identifiants d'entités, à partir des noms
@@ -247,7 +279,7 @@ PlayGuard chargée).
 | `playguard.add_bonus_time` | `minutes` (5 à 180, 30 par défaut) | Des minutes en plus aujourd'hui ; la limite habituelle revient demain. |
 | `playguard.apply_profile` | `profile` (son nom dans PlayGuard) | Applique les limites d'un profil enregistré. |
 | `playguard.stop_today` | | 0 minute aujourd'hui ; la limite habituelle revient demain. |
-| `playguard.lock_now` | | Reverrouille le contrôle parental après un déverrouillage temporaire. |
+| `playguard.lock_now` | | Réactive le contrôle parental après un déverrouillage temporaire. |
 | `playguard.sync_now` | | La console republie tout. |
 | `playguard.request_report` | | La console enregistre un rapport de diagnostic sur sa carte SD, et le publie quand *Accès à distance* le permet (il est alors dans les diagnostics de l'appareil). |
 
@@ -296,6 +328,13 @@ qu'écouter.
   journée la remplace.
 - Les **ordres** sont retenus jusqu'à ce que la console les traite ; elle les
   efface alors, publie un événement et son nouvel état.
+- **La version de l'intégration** : à chaque configuration de l'entrée d'une
+  console (donc à chaque démarrage de Home Assistant), l'intégration publie
+  sa version et celle de Home Assistant, retenues, sur
+  `playguard/<id>/integration`. PlayGuard l'affiche dans *Accès à distance ›
+  Home Assistant* et, quand il cherche les mises à jour, signale dans ses
+  notifications qu'une nouvelle version de l'intégration est sortie, avec ce
+  qui change et le QR code qui l'ouvre dans HACS.
 
 ## Exemples
 
@@ -392,8 +431,8 @@ tap_action:
 
 - Voir d'un coup d'œil combien de temps les enfants ont joué aujourd'hui et ce
   qui reste, sur le tableau de bord familial ou un téléphone.
-- Donner du temps en plus, arrêter le jeu pour aujourd'hui ou verrouiller la
-  console depuis le canapé ou le travail, sans prendre la console ni le code PIN.
+- Donner du temps en plus, arrêter le jeu pour aujourd'hui ou bloquer tous
+  les jeux depuis le canapé ou le travail, sans prendre la console ni le code PIN.
 - Passer d'un profil semaine scolaire à un profil vacances depuis un calendrier,
   ou régler les limites du week-end le vendredi soir.
 - Récompenser les tâches ménagères ou les devoirs par du temps en plus, avec un
@@ -416,7 +455,7 @@ tap_action:
   confirme sur la console (événement `command_waiting`) ; avec *Les refuser*,
   rien n'est appliqué.
 - Sans *Les ordres peuvent changer le temps de jeu*, les limites, l'heure du
-  coucher, le temps en plus, le verrouillage de la console et les profils sont
+  coucher, le temps en plus, le blocage de tous les jeux et les profils sont
   refusés (l'appareil d'origine de la console masque plutôt ces entités).
 - Seul le préfixe `playguard` est découvert ; une console sous un autre préfixe
   s'ajoute à la main.
@@ -525,8 +564,10 @@ et le dernier rapport de la console, sans les noms) et ouvrez un
 1. *Paramètres › Appareils et services › PlayGuard*, puis pour chaque console
    *⋮ › Supprimer*. Supprimer l'entrée d'une console demande à la console de
    publier de nouveau son propre appareil Home Assistant (une console en veille
-   le fait quand elle sort de veille) ; pour vous en passer, désactivez *Créer
-   l'appareil dans Home Assistant* dans PlayGuard.
+   le fait quand elle sort de veille), et efface la version de l'intégration
+   sur le broker (PlayGuard ne signale plus ses nouvelles versions) ; pour vous
+   passer de l'appareil de la console, désactivez *Créer l'appareil dans Home
+   Assistant* dans PlayGuard.
 2. Avec HACS : *HACS › PlayGuard › ⋮ › Désinstaller* ; à la main : supprimez
    `custom_components/playguard`. Redémarrez Home Assistant.
 3. Les statistiques à long terme restent dans l'enregistreur : supprimez-les
@@ -538,11 +579,11 @@ distance* dans PlayGuard.
 
 ## Ce qu'elle fait sur le broker
 
-Elle lit `playguard/<id>/state`, `availability`, `activity`,
+Elle lit `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` et `report`, et publie les mêmes
 ordres scalaires retenus que les entités natives sur
-`playguard/<id>/<entity>/set` (la console efface chacun une fois traité). Le
-contrat est le
+`playguard/<id>/<entity>/set` (la console efface chacun une fois traité), et
+sa version, retenue, sur `playguard/<id>/integration`. Le contrat est le
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md)
 de PlayGuard (en anglais).
 

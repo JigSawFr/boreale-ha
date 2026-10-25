@@ -3,12 +3,20 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 from homeassistant.components.diagnostics import REDACTED
 from homeassistant.components.repairs import repairs_flow_manager
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN, EntityCategory
+from homeassistant.const import (
+    STATE_OFF,
+    STATE_ON,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+    EntityCategory,
+    __version__ as HA_VERSION,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
@@ -121,6 +129,28 @@ async def test_takes_over_the_native_discovery(hass: HomeAssistant, setup, mqtt_
     publish(hass, "state", fixture("state.json"))
     await hass.async_block_till_done()
     assert mqtt_mock.async_publish.call_count == count
+
+
+async def test_tells_the_console_its_version(hass: HomeAssistant, setup, mqtt_mock) -> None:
+    """Retained, once at set-up: PlayGuard warns of a newer release of the integration."""
+    manifest = json.loads((Path(__file__).parents[1] / "custom_components/playguard/manifest.json").read_text())
+    told = [p for p in _published(mqtt_mock) if p[0] == f"{BASE}/integration"]
+    assert len(told) == 1
+    _topic, payload, qos, retain = told[0]
+    assert (qos, retain) == (1, True)
+    assert json.loads(payload) == {"schema": 1, "version": manifest["version"], "homeassistant": HA_VERSION}
+
+
+async def test_version_not_told(hass: HomeAssistant, mqtt_mock, entry, caplog: pytest.LogCaptureFixture) -> None:
+    """The broker refusing it does not fail the set-up."""
+    entry.add_to_hass(hass)
+    with patch(
+        "custom_components.playguard.coordinator.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    assert "could not tell the console the integration's version" in caplog.text
 
 
 async def test_orders(hass: HomeAssistant, setup, mqtt_mock) -> None:
@@ -329,8 +359,17 @@ async def test_diagnostics(hass: HomeAssistant, setup, hass_client) -> None:
     activity["per_account"] = [{"uid": "00112233445566778899AABBCCDDEEFF", "s": 600, "min": 10}]
     publish(hass, "activity", activity)
     publish(hass, "report", "=== PlayGuard report ===\nfirmware 23.0.1\n")
+    system = fixture("system.json")
+    system["hardware"]["serial"] = "XAW10012345678"
+    publish(hass, "system", system)
+    publish(hass, "games", fixture("games.json"))
     await hass.async_block_till_done()
     diag = await get_diagnostics_for_config_entry(hass, hass_client, setup)
+    assert diag["system"]["hardware"]["model"] == "oled" and diag["games"] == {"installed": 2, "listed": 3}
+    for key in ("serial", "nickname"):
+        assert diag["system"]["hardware"][key] == REDACTED
+    assert diag["system"]["network"]["ssid"] == REDACTED and diag["system"]["network"]["ip"] == REDACTED
+    assert "XAW10012345678" not in json.dumps(diag) and "Maison" not in json.dumps(diag)
     assert diag["report"].startswith("=== PlayGuard report ===")
     assert diag["online"] is True
     assert diag["state"]["console"]["firmware"] == "23.0.1"
@@ -347,8 +386,8 @@ async def test_unload_and_remove(hass: HomeAssistant, setup, mqtt_mock) -> None:
     mqtt_mock.async_publish.reset_mock()
     await hass.config_entries.async_remove(setup.entry_id)
     await hass.async_block_till_done()
-    # The console's own discovery comes back.
-    assert _published(mqtt_mock) == [(f"{BASE}/discovery/set", "ON", 1, True)]
+    # The console's own discovery comes back, and it forgets the integration's version.
+    assert _published(mqtt_mock) == [(f"{BASE}/discovery/set", "ON", 1, True), (f"{BASE}/integration", "", 1, True)]
 
 
 async def test_remove_without_mqtt(hass: HomeAssistant, setup, caplog: pytest.LogCaptureFixture) -> None:

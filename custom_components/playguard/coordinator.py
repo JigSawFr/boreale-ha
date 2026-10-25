@@ -17,11 +17,13 @@ from typing import Any
 from homeassistant.components import mqtt
 from homeassistant.components.mqtt import ReceiveMessage
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr, issue_registry as ir
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.event import async_call_later
+from homeassistant.loader import async_get_integration
 
 from .const import (
     CONF_CONSOLE_ID,
@@ -34,6 +36,7 @@ from .const import (
     NATIVE_STATES_MAX,
     SCHEMA,
     STATISTICS_DELAY,
+    TOPIC_INTEGRATION,
     WRITE_NONE,
     WRITE_TIMER,
 )
@@ -66,6 +69,8 @@ class PlayGuardConsole:
         self.base = f"{self.prefix}/{self.console_id}"
 
         self.state: dict | None = None
+        self.system: dict | None = None  # the console itself (versions, storage, power, network)
+        self.games: dict | None = None  # the games installed and played, with their totals
         self.online: bool | None = None
         self.activity: dict | None = None
         self.names: dict = {}
@@ -89,6 +94,8 @@ class PlayGuardConsole:
         """Subscribes to the console's topics."""
         topics: dict[str, Callable[[ReceiveMessage], None]] = {
             "state": self._on_state,
+            "system": self._on_system,
+            "games": self._on_games,
             "availability": self._on_availability,
             "activity": self._on_activity,
             "activity/+": self._on_final,
@@ -99,6 +106,28 @@ class PlayGuardConsole:
         }
         for sub, handler in topics.items():
             self._unsubscribe.append(await mqtt.async_subscribe(self.hass, f"{self.base}/{sub}", handler, qos=1))
+        await self.async_publish_version()
+
+    async def async_publish_version(self) -> None:
+        """Tells the console which version of the integration (and of Home
+        Assistant) runs, retained: it reads it at its next connection too,
+        and PlayGuard warns of a newer release. Not worth failing the set-up."""
+        integration = await async_get_integration(self.hass, DOMAIN)
+        doc = {"schema": SCHEMA, "version": str(integration.version), "homeassistant": HA_VERSION}
+        try:
+            await mqtt.async_publish(
+                self.hass,
+                f"{self.base}/{TOPIC_INTEGRATION}",
+                json.dumps(doc, separators=(",", ":")),
+                qos=1,
+                retain=True,
+            )
+        except HomeAssistantError as err:
+            _LOGGER.warning("%s: could not tell the console the integration's version: %r", self.base, err)
+
+    async def async_clear_version(self) -> None:
+        """The integration is gone: the console no longer warns of its releases."""
+        await mqtt.async_publish(self.hass, f"{self.base}/{TOPIC_INTEGRATION}", "", qos=1, retain=True)
 
     @callback
     def async_stop(self) -> None:
@@ -139,6 +168,20 @@ class PlayGuardConsole:
         self._update_device()
         self._take_over()
         self._changed()
+
+    @callback
+    def _on_system(self, msg: ReceiveMessage) -> None:
+        self.system = _json(msg.payload)
+        self._changed()
+
+    @callback
+    def _on_games(self, msg: ReceiveMessage) -> None:
+        self.games = _json(msg.payload)
+        self._changed()
+
+    def document(self, topic: str) -> dict | None:
+        """The last document of `topic`: "state", "system" or "games"."""
+        return {"system": self.system, "games": self.games}.get(topic, self.state)
 
     @callback
     def _on_availability(self, msg: ReceiveMessage) -> None:

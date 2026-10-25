@@ -13,7 +13,7 @@ from pathlib import Path
 
 from homeassistant.util.yaml import load_yaml
 
-from custom_components.playguard.entities import BY_KEY, ENTITIES
+from custom_components.playguard.entities import BY_KEY, DYNAMIC, ENTITIES
 
 from .conftest import fixture
 
@@ -30,6 +30,8 @@ def _template(definition) -> str | None:
         expr += " or value_json." + ".".join(definition.fallback)
     for value, option in definition.renamed:
         expr = f"'{option}' if {expr} == '{value}' else {expr}"
+    if definition.device_class == "timestamp":  # POSIX seconds, null unknown
+        return "{{ as_datetime(" + expr + ") if " + expr + " else None }}"
     return "{{ " + expr + " }}"
 
 
@@ -56,6 +58,7 @@ def test_same_entities_as_playguard() -> None:
         extra = e["extra"]
         assert str(d.platform) == e["platform"], e["id"]
         assert d.write == e["write"], e["id"]
+        assert d.topic == e["topic"], e["id"]
         assert _template(d) == e["value_template"], e["id"]
         assert _command_template(d) == extra.get("cmd_tpl"), e["id"]
         assert names[e["platform"]][e["id"]]["name"] == e["name"], e["id"]
@@ -81,5 +84,6 @@ def test_icons_are_for_entities_and_actions() -> None:
     icons = json.loads(ICONS.read_text(encoding="utf-8"))
     for platform, keys in icons["entity"].items():
         for key in keys:
-            assert key in BY_KEY and str(BY_KEY[key].platform) == platform, key
+            known = BY_KEY[key].platform if key in BY_KEY else DYNAMIC.get(key)
+            assert str(known) == platform, key
     assert set(icons["services"]) == set(load_yaml(INTEGRATION / "services.yaml"))

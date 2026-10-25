@@ -46,13 +46,14 @@ class PlayGuardEntity(Entity):
         """Known once the console's state arrived (retained: at once after a
         restart), while the console is on the broker: its last will says when
         it is not. The actions still send orders then (they wait on the broker)."""
-        return self.console.state is not None and self.console.reachable
+        return self.console.document(self.definition.topic) is not None and self.console.reachable
 
     def read(self) -> Any:
-        """This entity's value in the state document (not `value`: NumberEntity has one)."""
-        value = dig(self.console.state, self.definition.path)
+        """This entity's value in its document (not `value`: NumberEntity has one)."""
+        doc = self.console.document(self.definition.topic)
+        value = dig(doc, self.definition.path)
         if value is None and self.definition.fallback:
-            value = dig(self.console.state, self.definition.fallback)
+            value = dig(doc, self.definition.fallback)
         return value
 
     async def async_order(self, payload: str) -> None:

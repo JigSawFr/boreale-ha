@@ -66,11 +66,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) -
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) -> None:
-    """The console's own discovery comes back when the integration goes."""
+    """The console's own discovery comes back when the integration goes, and
+    the console forgets the integration's version."""
     if not mqtt.mqtt_config_entry_enabled(hass):
         return
     console = PlayGuardConsole(hass, entry)
     try:
         await console.async_send("discovery", "ON")
+        await console.async_clear_version()
     except (HomeAssistantError, KeyError) as err:  # KeyError: MQTT never set up
         _LOGGER.warning("%s: the console's own discovery could not be turned back on: %r", console.base, err)

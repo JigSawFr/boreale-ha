@@ -9,22 +9,28 @@ from homeassistant.core import HomeAssistant
 
 from . import PlayGuardConfigEntry
 
-# What may name someone: the console's name (often a child's), the saved
-# profiles' names, the accounts' ids. Game names go too (the ids stay).
-TO_REDACT = {"name", "profiles", "uid"}
+# What may name someone: the console's name and nickname (often a child's),
+# the saved profiles' names, the accounts' ids; the serial number, the
+# Wi-Fi network's name and the console's address. Game names go too (the ids stay).
+TO_REDACT = {"name", "nickname", "profiles", "uid", "serial", "ssid", "ip"}
 
 
 async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: PlayGuardConfigEntry) -> dict[str, Any]:
-    """The documents as received, less what may name someone. PlayGuard
-    never publishes the PIN, the serial number or the broker's credentials;
-    the report is the one the console published (Remote access › Publish the
-    diagnostic reports)."""
+    """The documents as received, less what may name or locate someone.
+    PlayGuard never publishes the PIN or the broker's credentials, and the
+    serial number only when asked to; the report is the one the console
+    published (Remote access › Publish the diagnostic reports)."""
     console = entry.runtime_data
     return async_redact_data(
         {
             "entry": {"data": dict(entry.data), "options": dict(entry.options)},
             "online": console.online,
             "state": console.state,
+            "system": console.system,
+            "games": {
+                "installed": (console.games or {}).get("installed"),
+                "listed": len((console.games or {}).get("games") or {}),
+            },
             "activity": console.activity,
             "week": console.week,
             "names": {
