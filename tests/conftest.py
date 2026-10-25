@@ -58,6 +58,7 @@ def entry() -> MockConfigEntry:
         unique_id=CONSOLE_ID,
         data={CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"},
         options={CONF_TAKE_OVER: True},
+        minor_version=2,
     )
 
 

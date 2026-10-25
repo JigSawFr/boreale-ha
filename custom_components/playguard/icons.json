@@ -82,9 +82,6 @@
       },
       "accounts": {
         "default": "mdi:account-multiple"
-      },
-      "game": {
-        "default": "mdi:gamepad-variant-outline"
       }
     },
     "switch": {

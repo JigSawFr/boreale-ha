@@ -16,10 +16,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.typing import ConfigType
 
-from .const import DOMAIN
+from .const import CONF_CONSOLE_ID, DOMAIN
 from .coordinator import PlayGuardConsole
 from .services import async_setup_services
 
@@ -44,6 +44,20 @@ type PlayGuardConfigEntry = ConfigEntry[PlayGuardConsole]
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """The services, once for every console."""
     async_setup_services(hass)
+    return True
+
+
+async def async_migrate_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) -> bool:
+    """1.1 to 1.2: no sensor per game any more, nor its option. Each game stays
+    on Games installed (its games attribute) and in the statistics. (An entry
+    from a newer integration, Home Assistant refuses before asking.)"""
+    registry = er.async_get(hass)
+    prefix = f"{entry.data[CONF_CONSOLE_ID]}_game_"
+    for reg in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if reg.domain == Platform.SENSOR and reg.unique_id.startswith(prefix):
+            registry.async_remove(reg.entity_id)
+    options = {k: v for k, v in entry.options.items() if k != "game_sensors"}
+    hass.config_entries.async_update_entry(entry, options=options, minor_version=2)
     return True
 
 

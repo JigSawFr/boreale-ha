@@ -28,15 +28,12 @@ import voluptuous as vol
 
 from .const import (
     CONF_CONSOLE_ID,
-    CONF_GAME_SENSORS,
     CONF_KEEP_VALUES,
     CONF_PREFIX,
     CONF_TAKE_OVER,
     CONSOLE_ID_RE,
     DEFAULT_PREFIX,
     DOMAIN,
-    GAME_SENSORS,
-    GAME_SENSORS_RECENT,
 )
 
 # How long a flow waits for the console's state on the broker. Retained, it
@@ -54,11 +51,6 @@ OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_TAKE_OVER, default=True): bool,
         vol.Required(CONF_KEEP_VALUES, default=True): bool,
-        vol.Required(CONF_GAME_SENSORS, default=GAME_SENSORS_RECENT): SelectSelector(
-            SelectSelectorConfig(
-                options=list(GAME_SENSORS), translation_key=CONF_GAME_SENSORS, mode=SelectSelectorMode.LIST
-            )
-        ),
     }
 )
 
@@ -144,6 +136,8 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
     """A console per entry, its id as the unique id."""
 
     VERSION = 1
+    # 2: no sensor per game, nor its option (the migration in __init__.py).
+    MINOR_VERSION = 2
 
     def __init__(self) -> None:
         self._console_id = ""

@@ -258,7 +258,7 @@ ENTITIES: tuple[EntityDef, ...] = (
     ),
     _system("ssid", ("network", "ssid"), category="diagnostic", enabled=False),
     _system("last_boot", ("boot_ts",), device_class="timestamp", category="diagnostic", enabled=False),
-    # the games (the games document); one sensor per game besides (sensor.py)
+    # the games (the games document), each game listed on Games installed
     EntityDef(
         key="games_installed",
         platform=Platform.SENSOR,
@@ -282,10 +282,6 @@ ENTITIES: tuple[EntityDef, ...] = (
 )
 
 BY_KEY: dict[str, EntityDef] = {e.key: e for e in ENTITIES}
-
-# Entities made as the console lists what they are for: their translation
-# key, and platform. One sensor per game (sensor.py).
-DYNAMIC: dict[str, Platform] = {"game": Platform.SENSOR}
 
 
 def for_platform(platform: Platform) -> list[EntityDef]:

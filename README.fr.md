@@ -32,8 +32,8 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   options), plus **En ligne**, **Agent actif** et **Temps de jeu cette semaine**.
 - **Les noms des jeux** sur *Jeu en cours*, et le temps de chaque jeu
   aujourd'hui et cette semaine en attributs ; tous les jeux sur *Jeux
-  installés* (`games`), et un capteur pour chaque jeu joué récemment (ou aucun,
-  ou tous : une option).
+  installés* (`games`), avec leur temps de jeu : une entité pour les jeux,
+  pas une par jeu.
 - **Des statistiques à long terme** : le total de chaque journée terminée, et
   celui de chaque jeu, importés dans l'enregistreur (`playguard:<console id>_play_time`,
   `playguard:<console id>_game_<application id>`), pour des mois d'historique
@@ -164,7 +164,6 @@ ajoutée deux fois.
 |---|---|---|
 | **Remplacer l'appareil Home Assistant d'origine de la console** | activée | Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivée : la console publie de nouveau son propre appareil (à côté de celui-ci). L'entrée se recharge quand elle change. |
 | **Garder les dernières valeurs des capteurs pendant la veille** | activée | Tant que la console est hors ligne (en veille, éteinte, hors de portée), ses capteurs, capteurs binaires et événements gardent ce qu'elle a dit en dernier ; ses contrôles (interrupteurs, nombres, listes, heures, boutons) sont indisponibles. Désactivée : toutes les entités sauf *En ligne* sont alors indisponibles. |
-| **Capteurs de jeux** | les jeux joués ces 30 derniers jours | Les jeux qui ont un capteur à eux : *Aucun*, *Les jeux joués ces 30 derniers jours* (avant la dernière liste de la console) ou *Tous les jeux*. Le temps de jeu de chaque jeu est une statistique à long terme dans tous les cas, et chaque jeu est listé sur *Jeux installés*. Les capteurs des jeux qui n'y ont plus droit sont supprimés (leurs statistiques restent). |
 
 *⋮ › Reconfigurer* change le **Préfixe des topics**, quand `topic_prefix` dans
 le `sync.conf` de la console change. Comme pour l'ajout d'une console à la main,
@@ -266,16 +265,20 @@ du journal de jeu) : *Jeux installés*, avec chaque jeu que la console liste
 dans `games` (le dernier joué en premier : `app_id`, `name`, `minutes`,
 `installed`, `last_played` ; non enregistré), *Temps de jeu (depuis toujours)*
 (tous les jeux, tous les comptes), *Comptes utilisateurs* (diagnostic,
-désactivé par défaut) ; et **un capteur par jeu** selon l'option *Capteurs de
-jeux* (par défaut, les jeux joués ces 30 derniers jours), *Temps de jeu ·
-<jeu>* : ses minutes depuis sa première partie, avec les attributs
-`installed`, `version`, `launches`, `first_played`, `last_played`. Il n'a pas
-de classe d'état : la statistique à long terme du jeu est celle de
-l'intégration (plus haut), l'enregistreur n'en garde donc pas une seconde. Le
-capteur d'un jeu apparaît quand le jeu y a droit, et s'en va quand il n'y a
-plus droit (pas joué depuis 30 jours) ; avec *Tous les jeux*, il reste quand le
-jeu est désinstallé (avec `installed: false`), et celui d'un jeu que la
-console ne liste plus est indisponible.
+désactivé par défaut).
+
+Il n'y a **pas de capteur par jeu** : le temps d'un jeu aujourd'hui est dans
+l'attribut `games` du journal de jeu, celui de la semaine dans celui de *Temps
+de jeu cette semaine*, celui depuis sa première partie dans celui de *Jeux
+installés*, et son historique dans sa statistique à long terme (plus haut). La
+0.3 avait un capteur par jeu ; la mise à jour les supprime (avec leur option),
+et les statistiques restent. Pour une automatisation sur un jeu, un template
+lit l'attribut :
+
+```jinja
+{{ (state_attr('sensor.living_room_used_screen_time_play_log', 'games') or {})
+   .get('Super Mario Odyssey', 0) > 60 }}
+```
 
 Les entités qui changent le minuteur (limites, heure du coucher, temps en plus,
 blocage de tous les jeux, profils) demandent *Les ordres peuvent changer le
@@ -453,8 +456,8 @@ tap_action:
 
 Un tableau de bord familial : le temps de jeu du jour et ce qui reste, le jeu
 en cours, du temps en plus d'un geste, le blocage de tous les jeux, les 14
-derniers jours, et les derniers jeux joués (depuis *Jeux installés*, sans un
-capteur par jeu). Remplacez `living_room` et `a1b2c3d4` (l'identifiant de la
+derniers jours, et les derniers jeux joués (depuis *Jeux installés*).
+Remplacez `living_room` et `a1b2c3d4` (l'identifiant de la
 console, *Paramètres › Appareils et services › PlayGuard*) par les vôtres :
 
 ```yaml

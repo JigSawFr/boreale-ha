@@ -18,7 +18,6 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, async_
 
 from custom_components.playguard.const import (
     CONF_CONSOLE_ID,
-    CONF_GAME_SENSORS,
     CONF_KEEP_VALUES,
     CONF_PREFIX,
     CONF_TAKE_OVER,
@@ -108,6 +107,7 @@ async def test_discovered(hass: HomeAssistant) -> None:
     assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"}
     assert result["options"] == {CONF_TAKE_OVER: True}
     assert result["result"].unique_id == CONSOLE_ID
+    assert (result["result"].version, result["result"].minor_version) == (1, 2)  # nothing to migrate
 
     # The retained state comes again at every start: already set up.
     result = await hass.config_entries.flow.async_init(
@@ -350,15 +350,8 @@ async def test_options(hass: HomeAssistant, setup) -> None:
     result = await hass.config_entries.options.async_init(setup.entry_id)
     assert result["step_id"] == "init"
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False, CONF_GAME_SENSORS: "all"}
+        result["flow_id"], {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False}
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
-    assert setup.options == {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False, CONF_GAME_SENSORS: "all"}
-
-    # The games' default: those played lately.
-    result = await hass.config_entries.options.async_init(setup.entry_id)
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {CONF_TAKE_OVER: True, CONF_KEEP_VALUES: True}
-    )
-    assert setup.options[CONF_GAME_SENSORS] == "recent"
+    assert setup.options == {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False}
