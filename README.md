@@ -30,7 +30,8 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   options), replacing it (no duplicates; turn it back on in the options),
   plus **Online**, **Agent running** and **Play time this week**.
 - **Game names** on *Now playing*, and each game's time today and this week as
-  attributes.
+  attributes; every game on *Games installed* (`games`), and a sensor for each
+  game played lately (or none, or every game: an option).
 - **Long-term statistics**: every finished day's total, and each game's,
   imported into the recorder (`playguard:<console id>_play_time`,
   `playguard:<console id>_game_<application id>`), for months of history in a
@@ -154,6 +155,7 @@ twice.
 |---|---|---|
 | **Replace the console's own Home Assistant device** | on | Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again (next to this one). The entry reloads when it changes. |
 | **Keep the sensors' last values while the console sleeps** | on | While the console is offline (asleep, off, out of reach), its sensors, binary sensors and events keep showing what it last said; its controls (switches, numbers, selects, times, buttons) are unavailable. Off: every entity but *Online* is unavailable then. |
+| **Game sensors** | the games played in the last 30 days | Which games get a sensor of their own: *None*, *The games played in the last 30 days* (before the console's last list), or *Every game*. Each game's play time is a long-term statistic either way, and every game is listed on *Games installed*. The sensors of the games that no longer qualify are removed (their statistics stay). |
 
 *⋮ › Reconfigure* changes the **Topic prefix**, when `topic_prefix` in the
 console's `sync.conf` changes. As when adding a console by hand, the console
@@ -174,6 +176,10 @@ unavailable and its sensors keep their last values (*Online* says it is
 offline); with the option *Keep the sensors' last values while the console
 sleeps* off, all but *Online* are unavailable.
 
+As on the console's own device, what few dashboards need is **disabled by
+default** (marked so below): turn one on from the device page (*… entities
+not shown*), and the entry reloads with it.
+
 **Binary sensors**
 
 | Entity | What it says | Notes |
@@ -184,7 +190,7 @@ sleeps* off, all but *Online* are unavailable.
 | Play timer | The daily play-time limit is on. | |
 | Time is up | Today's limit is reached. | |
 | PIN set | A PIN is set. | diagnostic |
-| Network clock accurate | The console's clock is set from the network. | diagnostic |
+| Network clock accurate | The console's clock is set from the network. | diagnostic, disabled by default |
 | Online | The console is on the broker now (off: asleep, off, out of reach). | diagnostic, this integration's |
 | Agent running | PlayGuard's agent keeps the link up. | diagnostic, disabled by default, this integration's |
 
@@ -193,14 +199,14 @@ sleeps* off, all but *Online* are unavailable.
 | Entity | What it says | Notes |
 |---|---|---|
 | Used screen time | Today's play time, as the play timer counts it. | daily total, back to 0 at midnight |
-| Used screen time (play log) | Today's play time from the play log, with each game's minutes (`games`). | daily total |
+| Used screen time (play log) | Today's play time from the play log, with each game's minutes (`games`). | daily total, disabled by default |
 | Screen time remaining | What is left of today's limit. | |
 | Extended screen time | Extra time granted today. | |
 | Play time this week | The last 7 days, with each day's (`days`) and each game's (`games`) minutes. | this integration's; once PlayGuard itself has run |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
-| Age rating | The age rating of the restriction level. | diagnostic |
+| Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
 | Firmware, Atmosphère | The console's versions. | diagnostic |
-| Last order | The last order handled, and how. | diagnostic |
+| Last order | The last order handled, and how. | diagnostic, disabled by default |
 | Time spent (1952) | The play timer's raw count. | diagnostic, disabled by default |
 
 **Numbers** (config, minutes, 0 to 1440; 1440 means no limit):
@@ -223,7 +229,7 @@ shows no current choice: the limits say which one is in effect).
 **Buttons**: *Extra time +15 min*, *+30 min*, *+1 h*, *No more play today*,
 *Remove the limit*, *Turn parental controls back on* (after a temporary unlock);
 diagnostic: *Sync now* (the console publishes everything again), *Export a
-diagnostic report*.
+diagnostic report* (disabled by default).
 
 **Event**: *Events*, see [events](#events).
 
@@ -233,23 +239,29 @@ while PlayGuard is closed):
 | Entity | What it says | Notes |
 |---|---|---|
 | Battery, Charging, Docked | Its charge, whether a charger gives power, whether it is docked. | |
-| SD card free space, Internal storage free space | MiB left on the SD card and on the system's user storage (the emuMMC's on an emuMMC). | read every 5 minutes; their sizes are diagnostic |
-| Model | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic |
-| Console nickname, Region, System, hekate | System Settings' nickname, the region, sysMMC or emuMMC, hekate on the SD card. | diagnostic |
-| PRODINFO blanked | Atmosphère hides the console's identity. | diagnostic |
-| Temperature, Connection, IP address, Wi-Fi signal | The internal sensor, Wi-Fi or ethernet, the console's address, 0–3 bars. | diagnostic |
-| Last started | When the console started (not when it last woke up). | diagnostic |
+| SD card free space, Internal storage free space | MiB left on the SD card and on the system's user storage (the emuMMC's on an emuMMC). | read every 5 minutes; their sizes are diagnostic, disabled by default |
+| Model | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic, disabled by default |
+| Console nickname, Region, System, hekate | System Settings' nickname, the region, sysMMC or emuMMC, hekate on the SD card. | diagnostic, disabled by default |
+| PRODINFO blanked | Atmosphère hides the console's identity. | diagnostic, disabled by default |
+| Temperature, Connection, IP address, Wi-Fi signal | The internal sensor, Wi-Fi or ethernet, the console's address, 0–3 bars. | diagnostic, disabled by default |
+| Last started | When the console started (not when it last woke up). | diagnostic, disabled by default |
 | Serial number | The console's real serial number (from Atmosphère's backup when PRODINFO is blanked). | diagnostic, disabled by default; only with *Publish the serial number* on the console |
 | Wi-Fi network | The network's name. | diagnostic, disabled by default |
 
 **Games** (`playguard/<id>/games`, which PlayGuard publishes after each read
-of the play log): *Games installed*, *Play time (all time)* (every game,
-every account), *User accounts* (diagnostic); and **one sensor per game**,
-*Play time · <game>*: its minutes since it was first played (a growing total,
-for the long-term statistics), with attributes `installed`, `version`,
-`launches`, `first_played`, `last_played`. A game's sensor appears when the
-console first lists it, and stays when the game is uninstalled (with
-`installed: false`); one the console no longer lists is unavailable.
+of the play log): *Games installed*, with every game the console lists in
+`games` (the last played first: `app_id`, `name`, `minutes`, `installed`,
+`last_played`; not recorded), *Play time (all time)* (every game, every
+account), *User accounts* (diagnostic, disabled by default); and **a sensor
+per game** as the option *Game sensors* says (by default, the games played in
+the last 30 days), *Play time · <game>*: its minutes since it was first played,
+with attributes `installed`, `version`, `launches`, `first_played`,
+`last_played`. It has no state class: the game's long-term statistic is the
+integration's own (above), so the recorder does not keep a second one. A
+game's sensor appears when the game qualifies, and goes when it no longer does
+(not played for 30 days); with *Every game*, it stays when the game is
+uninstalled (with `installed: false`), and one the console no longer lists is
+unavailable.
 
 The entities that change the play timer (limits, bedtime, extra time,
 blocking all games, profiles) need *Orders may change the play timer* on the
@@ -416,6 +428,83 @@ tap_action:
   target:
     entity_id: button.living_room_extra_time_30_min
 ```
+
+A family dashboard: today's play time and what is left, the game being
+played, extra time in one tap, blocking all games, the last 14 days, and the
+games played last (from *Games installed*, without a sensor per game). Change
+`living_room` and `a1b2c3d4` (the console's id, *Settings › Devices &
+services › PlayGuard*) to yours:
+
+```yaml
+type: vertical-stack
+cards:
+  - type: tile
+    entity: sensor.living_room_used_screen_time
+  - type: tile
+    entity: sensor.living_room_screen_time_remaining
+  - type: tile
+    entity: sensor.living_room_now_playing
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: button
+        name: +15 min
+        icon: mdi:timer-plus-outline
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.living_room_extra_time_15_min
+      - type: button
+        name: +30 min
+        icon: mdi:timer-plus-outline
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.living_room_extra_time_30_min
+      - type: button
+        name: +1 h
+        icon: mdi:timer-plus-outline
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.living_room_extra_time_1_h
+  - type: tile
+    entity: switch.living_room_block_all_games
+  - type: statistics-graph
+    entities:
+      - playguard:a1b2c3d4_play_time
+    period: day
+    days_to_show: 14
+    stat_types:
+      - mean
+    chart_type: bar
+  - type: markdown
+    content: |-
+      {%- set games = state_attr('sensor.living_room_games_installed', 'games') or [] -%}
+      {%- for g in games[:5] %}
+      - **{{ g.name }}** {{ (g.minutes or 0) // 60 }} h {{ '%02d' % ((g.minutes or 0) % 60) }}
+      {%- endfor %}
+```
+
+## Blueprints
+
+Ready-made automations: import one, then *Create automation* from it and pick
+the console's entities and the phone (the Home Assistant app).
+
+| Blueprint | What it does | Import |
+|---|---|---|
+| **Time is up, extra time from the notification** | When the day's limit is reached, a notification on the phone with a button that gives extra time (*+15 min*, or what you set). | [![Import the time is up blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **Extra time when…** | Extra time when something happens: a helper turned on (the chores done), a button or a remote pressed, a tag scanned; then what you like (turn the helper off again). | [![Import the extra time blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
+| **Bedtime reminder** | A notification some minutes before *Bedtime alarm*, while a game is played (or every day). | [![Import the bedtime reminder blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
+| **Weekly summary** | Once a week, the last seven days' play time and the games played the most. | [![Import the weekly summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
+
+The ones that give extra time need *Orders may change the play timer* on the
+console. Their notifications are in English: change the text in the
+automation, or the blueprint's copy in `blueprints/automation/playguard/`.
 
 ## Use cases
 

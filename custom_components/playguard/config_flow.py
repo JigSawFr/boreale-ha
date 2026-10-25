@@ -17,10 +17,22 @@ from homeassistant.config_entries import (
     OptionsFlowWithReload,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig, SelectSelectorMode
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import voluptuous as vol
 
-from .const import CONF_CONSOLE_ID, CONF_KEEP_VALUES, CONF_PREFIX, CONF_TAKE_OVER, CONSOLE_ID_RE, DEFAULT_PREFIX, DOMAIN
+from .const import (
+    CONF_CONSOLE_ID,
+    CONF_GAME_SENSORS,
+    CONF_KEEP_VALUES,
+    CONF_PREFIX,
+    CONF_TAKE_OVER,
+    CONSOLE_ID_RE,
+    DEFAULT_PREFIX,
+    DOMAIN,
+    GAME_SENSORS,
+    GAME_SENSORS_RECENT,
+)
 
 # How long a flow waits for the console's state on the broker. Retained, it
 # comes at once when the console ever published, even asleep.
@@ -28,7 +40,15 @@ STATE_TIMEOUT = 10.0
 
 RECONFIGURE_SCHEMA = vol.Schema({vol.Required(CONF_PREFIX): str})
 OPTIONS_SCHEMA = vol.Schema(
-    {vol.Required(CONF_TAKE_OVER, default=True): bool, vol.Required(CONF_KEEP_VALUES, default=True): bool}
+    {
+        vol.Required(CONF_TAKE_OVER, default=True): bool,
+        vol.Required(CONF_KEEP_VALUES, default=True): bool,
+        vol.Required(CONF_GAME_SENSORS, default=GAME_SENSORS_RECENT): SelectSelector(
+            SelectSelectorConfig(
+                options=list(GAME_SENSORS), translation_key=CONF_GAME_SENSORS, mode=SelectSelectorMode.LIST
+            )
+        ),
+    }
 )
 
 

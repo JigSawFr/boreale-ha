@@ -31,7 +31,9 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   unités, options), à sa place (pas de doublons ; réactivez-le dans les
   options), plus **En ligne**, **Agent actif** et **Temps de jeu cette semaine**.
 - **Les noms des jeux** sur *Jeu en cours*, et le temps de chaque jeu
-  aujourd'hui et cette semaine en attributs.
+  aujourd'hui et cette semaine en attributs ; tous les jeux sur *Jeux
+  installés* (`games`), et un capteur pour chaque jeu joué récemment (ou aucun,
+  ou tous : une option).
 - **Des statistiques à long terme** : le total de chaque journée terminée, et
   celui de chaque jeu, importés dans l'enregistreur (`playguard:<console id>_play_time`,
   `playguard:<console id>_game_<application id>`), pour des mois d'historique
@@ -157,6 +159,7 @@ ajoutée deux fois.
 |---|---|---|
 | **Remplacer l'appareil Home Assistant d'origine de la console** | activée | Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivée : la console publie de nouveau son propre appareil (à côté de celui-ci). L'entrée se recharge quand elle change. |
 | **Garder les dernières valeurs des capteurs pendant la veille** | activée | Tant que la console est hors ligne (en veille, éteinte, hors de portée), ses capteurs, capteurs binaires et événements gardent ce qu'elle a dit en dernier ; ses contrôles (interrupteurs, nombres, listes, heures, boutons) sont indisponibles. Désactivée : toutes les entités sauf *En ligne* sont alors indisponibles. |
+| **Capteurs de jeux** | les jeux joués ces 30 derniers jours | Les jeux qui ont un capteur à eux : *Aucun*, *Les jeux joués ces 30 derniers jours* (avant la dernière liste de la console) ou *Tous les jeux*. Le temps de jeu de chaque jeu est une statistique à long terme dans tous les cas, et chaque jeu est listé sur *Jeux installés*. Les capteurs des jeux qui n'y ont plus droit sont supprimés (leurs statistiques restent). |
 
 *⋮ › Reconfigurer* change le **Préfixe des topics**, quand `topic_prefix` dans
 le `sync.conf` de la console change. Comme pour l'ajout d'une console à la main,
@@ -178,6 +181,11 @@ dernières valeurs (*En ligne* dit qu'elle est hors ligne) ; avec l'option
 *Garder les dernières valeurs des capteurs pendant la veille* désactivée, toutes
 sauf *En ligne* sont indisponibles.
 
+Comme sur l'appareil d'origine de la console, ce dont peu de tableaux de bord
+ont besoin est **désactivé par défaut** (indiqué ci-dessous) : activez-en un
+depuis la page de l'appareil (*… entités non affichées*), et l'entrée se
+recharge avec lui.
+
 **Capteurs binaires**
 
 | Entité | Ce qu'elle indique | Remarques |
@@ -188,7 +196,7 @@ sauf *En ligne* sont indisponibles.
 | Minuteur de jeu | La limite quotidienne de temps de jeu est activée. | |
 | Temps écoulé | La limite du jour est atteinte. | |
 | Code PIN défini | Un code PIN est défini. | diagnostic |
-| Horloge réseau exacte | L'horloge de la console est réglée depuis le réseau. | diagnostic |
+| Horloge réseau exacte | L'horloge de la console est réglée depuis le réseau. | diagnostic, désactivé par défaut |
 | En ligne | La console est sur le broker en ce moment (sinon : en veille, éteinte, hors de portée). | diagnostic, propre à cette intégration |
 | Agent actif | L'agent de PlayGuard garde le lien. | diagnostic, désactivé par défaut, propre à cette intégration |
 
@@ -197,14 +205,14 @@ sauf *En ligne* sont indisponibles.
 | Entité | Ce qu'elle indique | Remarques |
 |---|---|---|
 | Temps d'écran utilisé | Le temps de jeu du jour, tel que le minuteur le compte. | total quotidien, remis à 0 à minuit |
-| Temps d'écran utilisé (journal de jeu) | Le temps de jeu du jour d'après le journal de jeu, avec les minutes de chaque jeu (`games`). | total quotidien |
+| Temps d'écran utilisé (journal de jeu) | Le temps de jeu du jour d'après le journal de jeu, avec les minutes de chaque jeu (`games`). | total quotidien, désactivé par défaut |
 | Temps d'écran restant | Ce qui reste de la limite du jour. | |
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
 | Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`) et de chaque jeu (`games`). | propre à cette intégration ; une fois que PlayGuard lui-même a tourné |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
-| Âge de classification | L'âge de classification du niveau de restriction. | diagnostic |
+| Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
 | Firmware, Atmosphère | Les versions de la console. | diagnostic |
-| Dernier ordre | Le dernier ordre traité, et comment. | diagnostic |
+| Dernier ordre | Le dernier ordre traité, et comment. | diagnostic, désactivé par défaut |
 | Temps passé (1952) | Le décompte brut du minuteur. | diagnostic, désactivé par défaut |
 
 **Nombres** (configuration, minutes, 0 à 1440 ; 1440 signifie pas de limite) :
@@ -229,7 +237,7 @@ limites disent lequel s'applique).
 **Boutons** : *Temps en plus +15 min*, *+30 min*, *+1 h*, *Fin du jeu pour
 aujourd'hui*, *Retirer la limite*, *Réactiver le contrôle parental* (après un
 déverrouillage temporaire) ; diagnostic : *Synchroniser maintenant* (la console republie
-tout), *Exporter un rapport de diagnostic*.
+tout), *Exporter un rapport de diagnostic* (désactivé par défaut).
 
 **Événement** : *Événements*, voir [événements](#événements).
 
@@ -239,24 +247,30 @@ quand PlayGuard est fermé) :
 | Entité | Ce qu'elle indique | Notes |
 |---|---|---|
 | Batterie, En charge, Sur le dock | Sa charge, si un chargeur l'alimente, si elle est sur le dock. | |
-| Espace libre de la carte SD, Espace libre du stockage interne | Mio restants sur la carte SD et sur le stockage utilisateur du système (celui de l'emuMMC sur un emuMMC). | lus toutes les 5 minutes ; leurs tailles sont de diagnostic |
-| Modèle | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic |
-| Surnom de la console, Région, Système, hekate | Le surnom des Paramètres de la console, la région, sysMMC ou emuMMC, hekate sur la carte SD. | diagnostic |
-| PRODINFO masqué | Atmosphère cache l'identité de la console. | diagnostic |
-| Température, Connexion, Adresse IP, Signal Wi-Fi | Le capteur interne, Wi-Fi ou ethernet, l'adresse de la console, 0 à 3 barres. | diagnostic |
-| Dernier démarrage | Quand la console a démarré (pas quand elle est sortie de veille). | diagnostic |
+| Espace libre de la carte SD, Espace libre du stockage interne | Mio restants sur la carte SD et sur le stockage utilisateur du système (celui de l'emuMMC sur un emuMMC). | lus toutes les 5 minutes ; leurs tailles sont de diagnostic, désactivées par défaut |
+| Modèle | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic, désactivé par défaut |
+| Surnom de la console, Région, Système, hekate | Le surnom des Paramètres de la console, la région, sysMMC ou emuMMC, hekate sur la carte SD. | diagnostic, désactivés par défaut |
+| PRODINFO masqué | Atmosphère cache l'identité de la console. | diagnostic, désactivé par défaut |
+| Température, Connexion, Adresse IP, Signal Wi-Fi | Le capteur interne, Wi-Fi ou ethernet, l'adresse de la console, 0 à 3 barres. | diagnostic, désactivés par défaut |
+| Dernier démarrage | Quand la console a démarré (pas quand elle est sortie de veille). | diagnostic, désactivé par défaut |
 | Numéro de série | Le vrai numéro de série de la console (tiré de la sauvegarde d'Atmosphère quand le PRODINFO est masqué). | diagnostic, désactivé par défaut ; seulement avec *Publier le numéro de série* sur la console |
 | Réseau Wi-Fi | Le nom du réseau. | diagnostic, désactivé par défaut |
 
 **Jeux** (`playguard/<id>/games`, que PlayGuard publie après chaque lecture
-du journal de jeu) : *Jeux installés*, *Temps de jeu (depuis toujours)* (tous
-les jeux, tous les comptes), *Comptes utilisateurs* (diagnostic) ; et **un
-capteur par jeu**, *Temps de jeu · <jeu>* : ses minutes depuis sa première
-partie (un total croissant, pour les statistiques à long terme), avec les
-attributs `installed`, `version`, `launches`, `first_played`, `last_played`.
-Le capteur d'un jeu apparaît quand la console le liste pour la première fois,
-et reste quand le jeu est désinstallé (avec `installed: false`) ; celui d'un
-jeu que la console ne liste plus est indisponible.
+du journal de jeu) : *Jeux installés*, avec chaque jeu que la console liste
+dans `games` (le dernier joué en premier : `app_id`, `name`, `minutes`,
+`installed`, `last_played` ; non enregistré), *Temps de jeu (depuis toujours)*
+(tous les jeux, tous les comptes), *Comptes utilisateurs* (diagnostic,
+désactivé par défaut) ; et **un capteur par jeu** selon l'option *Capteurs de
+jeux* (par défaut, les jeux joués ces 30 derniers jours), *Temps de jeu ·
+<jeu>* : ses minutes depuis sa première partie, avec les attributs
+`installed`, `version`, `launches`, `first_played`, `last_played`. Il n'a pas
+de classe d'état : la statistique à long terme du jeu est celle de
+l'intégration (plus haut), l'enregistreur n'en garde donc pas une seconde. Le
+capteur d'un jeu apparaît quand le jeu y a droit, et s'en va quand il n'y a
+plus droit (pas joué depuis 30 jours) ; avec *Tous les jeux*, il reste quand le
+jeu est désinstallé (avec `installed: false`), et celui d'un jeu que la
+console ne liste plus est indisponible.
 
 Les entités qui changent le minuteur (limites, heure du coucher, temps en plus,
 blocage de tous les jeux, profils) demandent *Les ordres peuvent changer le
@@ -431,6 +445,85 @@ tap_action:
   target:
     entity_id: button.living_room_extra_time_30_min
 ```
+
+Un tableau de bord familial : le temps de jeu du jour et ce qui reste, le jeu
+en cours, du temps en plus d'un geste, le blocage de tous les jeux, les 14
+derniers jours, et les derniers jeux joués (depuis *Jeux installés*, sans un
+capteur par jeu). Remplacez `living_room` et `a1b2c3d4` (l'identifiant de la
+console, *Paramètres › Appareils et services › PlayGuard*) par les vôtres :
+
+```yaml
+type: vertical-stack
+cards:
+  - type: tile
+    entity: sensor.living_room_used_screen_time
+  - type: tile
+    entity: sensor.living_room_screen_time_remaining
+  - type: tile
+    entity: sensor.living_room_now_playing
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: button
+        name: +15 min
+        icon: mdi:timer-plus-outline
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.living_room_extra_time_15_min
+      - type: button
+        name: +30 min
+        icon: mdi:timer-plus-outline
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.living_room_extra_time_30_min
+      - type: button
+        name: +1 h
+        icon: mdi:timer-plus-outline
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.living_room_extra_time_1_h
+  - type: tile
+    entity: switch.living_room_block_all_games
+  - type: statistics-graph
+    entities:
+      - playguard:a1b2c3d4_play_time
+    period: day
+    days_to_show: 14
+    stat_types:
+      - mean
+    chart_type: bar
+  - type: markdown
+    content: |-
+      {%- set games = state_attr('sensor.living_room_games_installed', 'games') or [] -%}
+      {%- for g in games[:5] %}
+      - **{{ g.name }}** {{ (g.minutes or 0) // 60 }} h {{ '%02d' % ((g.minutes or 0) % 60) }}
+      {%- endfor %}
+```
+
+## Blueprints
+
+Des automatisations toutes prêtes : importez-en une, puis *Créer une
+automatisation* depuis elle et choisissez les entités de la console et le
+téléphone (l'application Home Assistant).
+
+| Blueprint | Ce qu'il fait | Importer |
+|---|---|---|
+| **Time is up, extra time from the notification** | Quand la limite du jour est atteinte, une notification sur le téléphone avec un bouton qui donne du temps en plus (*+15 min*, ou ce que vous choisissez). | [![Importer le blueprint de fin de temps](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **Extra time when…** | Du temps en plus quand quelque chose arrive : un assistant activé (les corvées faites), un bouton ou une télécommande pressés, un tag scanné ; puis ce que vous voulez (désactiver l'assistant). | [![Importer le blueprint de temps en plus](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
+| **Bedtime reminder** | Une notification quelques minutes avant *Alarme du coucher*, pendant qu'un jeu est joué (ou chaque jour). | [![Importer le blueprint de rappel du coucher](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
+| **Weekly summary** | Une fois par semaine, le temps de jeu des sept derniers jours et les jeux les plus joués. | [![Importer le blueprint de résumé de la semaine](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
+
+Ceux qui donnent du temps en plus demandent *Les ordres peuvent changer le
+temps de jeu* activé sur la console. Leurs notifications sont en anglais :
+changez le texte dans l'automatisation (le message de *Time is up* est une
+entrée), ou dans la copie du blueprint.
 
 ## Cas d'usage
 

@@ -27,6 +27,7 @@ from pytest_homeassistant_custom_component.components.diagnostics import get_dia
 import voluptuous as vol
 
 from custom_components.playguard.const import CONF_KEEP_VALUES, CONF_TAKE_OVER, DOMAIN
+from custom_components.playguard.entities import ENTITIES
 
 from .conftest import BASE, CONSOLE_ID, fixture, publish
 
@@ -70,16 +71,28 @@ async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
     assert log.state == "74"
     assert log.attributes["games"] == {"Super Mario Odyssey": 60, "Mario Kart 8 Deluxe": 14}
 
-    # The integration's own diagnostics: the link, and the agent (rarely needed: off).
+    # The integration's own diagnostics: the link, and the agent.
     registry = er.async_get(hass)
     assert registry.async_get(_id("binary_sensor", "online", hass)).entity_category is EntityCategory.DIAGNOSTIC
-    agent = registry.async_get(_id("binary_sensor", "agent", hass))
-    assert agent.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+    assert registry.async_get(_id("binary_sensor", "agent", hass)).entity_category is EntityCategory.DIAGNOSTIC
     assert registry.async_get(_id("button", "sync_now", hass)).entity_category is EntityCategory.DIAGNOSTIC
 
     # The device takes the console's name and versions.
     device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)
     assert device.name == "Salon" and device.sw_version == "1.1.0" and device.hw_version == "23.0.1"
+
+
+async def test_what_few_dashboards_need_is_off(hass: HomeAssistant, setup_defaults) -> None:
+    """As in PlayGuard's own discovery: the rarely needed and the private are
+    off until turned on on the device page, the rest is on."""
+    registry = er.async_get(hass)
+    entries = er.async_entries_for_config_entry(registry, setup_defaults.entry_id)
+    off = {e.unique_id.removeprefix(f"{CONSOLE_ID}_") for e in entries if e.disabled_by}
+    assert off == {d.key for d in ENTITIES if not d.enabled}
+    assert {"serial", "ssid", "agent", "model", "ip_address", "last_order"} <= off
+    assert not {"battery", "sd_free", "used_screen_time", "console_lock", "games_installed"} & off
+    assert hass.states.get(_id("sensor", "battery", hass)) is not None
+    assert hass.states.get(_id("sensor", "model", hass)) is None
 
 
 async def test_unavailable_while_offline(
