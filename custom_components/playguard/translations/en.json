@@ -44,10 +44,12 @@
     "step": {
       "init": {
         "data": {
-          "take_over_discovery": "Replace the console's own Home Assistant device"
+          "take_over_discovery": "Replace the console's own Home Assistant device",
+          "keep_values_asleep": "Keep the sensors' last values while the console sleeps"
         },
         "data_description": {
-          "take_over_discovery": "Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again."
+          "take_over_discovery": "Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again.",
+          "keep_values_asleep": "While the console is off the broker (asleep, off, out of reach), its sensors keep showing what it last said; its controls are unavailable. Off: every entity but Online is unavailable then."
         }
       }
     }

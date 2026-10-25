@@ -16,7 +16,7 @@ from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_mqtt_message
 
-from custom_components.playguard.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, DOMAIN
+from custom_components.playguard.const import CONF_CONSOLE_ID, CONF_KEEP_VALUES, CONF_PREFIX, CONF_TAKE_OVER, DOMAIN
 
 from .conftest import CONSOLE_ID, fixture
 
@@ -252,7 +252,9 @@ async def test_reconfigure_without_mqtt(hass: HomeAssistant, entry) -> None:
 async def test_options(hass: HomeAssistant, setup) -> None:
     result = await hass.config_entries.options.async_init(setup.entry_id)
     assert result["step_id"] == "init"
-    result = await hass.config_entries.options.async_configure(result["flow_id"], {CONF_TAKE_OVER: False})
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False}
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
-    assert setup.options == {CONF_TAKE_OVER: False}
+    assert setup.options == {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False}

@@ -36,10 +36,11 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   celui de chaque jeu, importés dans l'enregistreur (`playguard:<console id>_play_time`,
   `playguard:<console id>_game_<application id>`), pour des mois d'historique
   dans une carte *Graphique des statistiques*.
-- **Des ordres pendant que la console est en veille** : ses entités sont alors
-  indisponibles (son message de testament dit qu'elle est partie), mais les
-  actions envoient quand même leurs ordres, qui attendent sur le broker et sont
-  exécutés quand la console sort de veille.
+- **Des ordres pendant que la console est en veille** : ses contrôles sont
+  alors indisponibles (son message de testament dit qu'elle est partie) et ses
+  capteurs gardent leurs dernières valeurs, mais les actions envoient quand
+  même leurs ordres, qui attendent sur le broker et sont exécutés quand la
+  console sort de veille.
 - **Des actions** : `set_limits`, `add_bonus_time`, `apply_profile`,
   `stop_today`, `lock_now`, `sync_now`, `request_report`.
 - Une **entité d'événement** pour chaque ordre traité (exécuté, refusé avec la
@@ -155,6 +156,7 @@ ajoutée deux fois.
 | Option | Par défaut | Ce qu'elle fait |
 |---|---|---|
 | **Remplacer l'appareil Home Assistant d'origine de la console** | activée | Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivée : la console publie de nouveau son propre appareil (à côté de celui-ci). L'entrée se recharge quand elle change. |
+| **Garder les dernières valeurs des capteurs pendant la veille** | activée | Tant que la console est hors ligne (en veille, éteinte, hors de portée), ses capteurs, capteurs binaires et événements gardent ce qu'elle a dit en dernier ; ses contrôles (interrupteurs, nombres, listes, heures, boutons) sont indisponibles. Désactivée : toutes les entités sauf *En ligne* sont alors indisponibles. |
 
 *⋮ › Reconfigurer* change le **Préfixe des topics**, quand `topic_prefix` dans
 le `sync.conf` de la console change. Comme pour l'ajout d'une console à la main,
@@ -170,8 +172,11 @@ sous l'ancien préfixe ne la fait pas revenir en arrière.
 Un appareil par console, au nom de la console (*Nom dans Home Assistant* dans
 PlayGuard), avec son firmware et la version de PlayGuard. Les entités de
 *configuration* et de *diagnostic* sont dans leurs propres sections de la page
-de l'appareil et hors des tableaux de bord par défaut. Toutes sont indisponibles
-tant que la console est hors ligne, sauf *En ligne*.
+de l'appareil et hors des tableaux de bord par défaut. Tant que la console est
+hors ligne, ses contrôles sont indisponibles et ses capteurs gardent leurs
+dernières valeurs (*En ligne* dit qu'elle est hors ligne) ; avec l'option
+*Garder les dernières valeurs des capteurs pendant la veille* désactivée, toutes
+sauf *En ligne* sont indisponibles.
 
 **Capteurs binaires**
 
@@ -449,8 +454,9 @@ tap_action:
 - Certaines choses ne sont jamais possibles depuis Home Assistant, par
   conception de PlayGuard : lire, définir ou changer le code PIN, supprimer le
   contrôle parental, dissocier l'application mobile.
-- Tant que la console est hors ligne, ses entités sont indisponibles : seules
-  les actions peuvent alors envoyer des ordres, et ceux-ci attendent la console.
+- Tant que la console est hors ligne, ses contrôles sont indisponibles (ses
+  capteurs gardent leurs dernières valeurs) : seules les actions peuvent alors
+  envoyer des ordres, et ceux-ci attendent la console.
   Avec *Demander sur la console*, un ordre attend aussi que quelqu'un le
   confirme sur la console (événement `command_waiting`) ; avec *Les refuser*,
   rien n'est appliqué.

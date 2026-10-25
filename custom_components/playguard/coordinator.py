@@ -27,6 +27,7 @@ from homeassistant.loader import async_get_integration
 
 from .const import (
     CONF_CONSOLE_ID,
+    CONF_KEEP_VALUES,
     CONF_PREFIX,
     CONF_TAKE_OVER,
     DEFAULT_PREFIX,
@@ -190,7 +191,13 @@ class PlayGuardConsole:
         online = msg.payload == "online"
         # Once when it goes, once when it is back: not on every message.
         if not online and self.online is not False:
-            _LOGGER.info("%s is offline (asleep, off or out of reach): its entities are unavailable", self.name)
+            _LOGGER.info(
+                "%s is offline (asleep, off or out of reach): %s",
+                self.name,
+                "its controls are unavailable, its sensors keep their last values"
+                if self.keep_values
+                else "its entities are unavailable",
+            )
         elif online and self.online is False:
             _LOGGER.info("%s is back online", self.name)
         self.online = online
@@ -200,6 +207,12 @@ class PlayGuardConsole:
     def reachable(self) -> bool:
         """On the broker, as its availability topic says (not known yet: yes)."""
         return self.online is not False
+
+    @property
+    def keep_values(self) -> bool:
+        """Whether the sensors keep their last values while the console is off
+        the broker (the entry's option, on by default)."""
+        return self.entry.options.get(CONF_KEEP_VALUES, True)
 
     @callback
     def _on_activity(self, msg: ReceiveMessage) -> None:

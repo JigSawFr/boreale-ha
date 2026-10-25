@@ -26,6 +26,7 @@ class PlayGuardEvent(PlayGuardEntity, EventEntity):
     """One event per order the console handled (the `event` topic, not retained)."""
 
     _attr_event_types = list(EVENT_TYPES)
+    _keeps_value = True
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
@@ -38,7 +39,7 @@ class PlayGuardEvent(PlayGuardEntity, EventEntity):
 
     @property
     def available(self) -> bool:
-        return self.console.reachable
+        return self.shown
 
     @callback
     def _handle_event(self, doc: dict) -> None:
