@@ -1,13 +1,15 @@
-"""The console itself (the system document) and its games: the totals, the
-list, and a sensor per game as the option says."""
+"""The console itself (the system document) and its games: the totals and
+the list (no sensor per game since 0.4)."""
 
 from __future__ import annotations
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.playguard.const import CONF_GAME_SENSORS, DOMAIN
+from custom_components.playguard.const import CONF_TAKE_OVER, DOMAIN
 
 from .conftest import CONSOLE_ID, fixture, publish
 
@@ -89,23 +91,8 @@ async def test_games(hass: HomeAssistant, setup) -> None:
     assert total.state == "2400" and total.attributes["state_class"] == "total_increasing"
     assert _state(hass, "sensor", "accounts").state == "3"
 
-    # A sensor for each game played in the 30 days before the console's list
-    # (the option's default): not Xenoblade, last played two years before.
-    odyssey = _state(hass, "sensor", "game_0100000000010000")
-    assert odyssey.state == "1234"
-    assert odyssey.name == "Salon Play time · Super Mario Odyssey"
-    assert odyssey.attributes["unit_of_measurement"] == "min"
-    assert "state_class" not in odyssey.attributes  # its statistic is the integration's own
-    assert odyssey.attributes["installed"] is True and odyssey.attributes["version"] == "1.3.0"
-    assert odyssey.attributes["launches"] == 56
-    assert odyssey.attributes["first_played"] == "2023-11-14T22:13:20+00:00"
-    assert odyssey.attributes["last_played"] == "2026-09-21T14:13:20+00:00"
-    assert _state(hass, "sensor", "game_01000a10041ea000").state == "980"
-    registry = er.async_get(hass)
-    assert registry.async_get_entity_id("sensor", DOMAIN, f"{CONSOLE_ID}_game_0100e95004038000") is None
-
-    # Xenoblade played again: its sensor appears. Odyssey, not played in the
-    # 30 days before this list, goes; a new game never played gets none.
+    # Xenoblade played again: first on the list. A new game never played,
+    # last; none gets a sensor of its own.
     doc = fixture("games.json")
     doc["ts"] = 1793000000
     doc["games"]["0100E95004038000"]["last_played"] = 1792990000
@@ -120,69 +107,50 @@ async def test_games(hass: HomeAssistant, setup) -> None:
     }
     publish(hass, "games", doc)
     await hass.async_block_till_done()
-    assert _state(hass, "sensor", "game_0100e95004038000").state == "186"
-    assert registry.async_get_entity_id("sensor", DOMAIN, f"{CONSOLE_ID}_game_0100000000010000") is None
-    assert hass.states.get(odyssey.entity_id) is None
-    assert registry.async_get_entity_id("sensor", DOMAIN, f"{CONSOLE_ID}_game_0100f8f0000a2000") is None
-    assert _state(hass, "sensor", "games_installed").attributes["games"][0]["name"] == "Xenoblade Chronicles 2"
-
-    # Played again later: it comes back.
-    doc["games"]["0100000000010000"]["last_played"] = 1792999000
-    publish(hass, "games", doc)
-    await hass.async_block_till_done()
-    assert _state(hass, "sensor", "game_0100000000010000").state == "1234"
-
-    # A document that is not one: no game, nothing breaks, nothing goes.
-    publish(hass, "games", {"schema": 1, "games": ["not", "a", "table"]})
-    await hass.async_block_till_done()
-    assert _state(hass, "sensor", "game_0100000000010000").state == STATE_UNAVAILABLE
-    assert _state(hass, "sensor", "games_installed").attributes["games"] == []
-
-
-async def _with_game_sensors(hass: HomeAssistant, entry, option: str) -> None:
-    """The entry set up again with this option, the games listed again."""
-    hass.config_entries.async_update_entry(entry, options={**entry.options, CONF_GAME_SENSORS: option})
-    assert await hass.config_entries.async_reload(entry.entry_id)
-    await hass.async_block_till_done()
-    publish(hass, "games", fixture("games.json"), retain=True)
-    await hass.async_block_till_done()
-
-
-async def test_every_game(hass: HomeAssistant, setup) -> None:
-    await _with_game_sensors(hass, setup, "all")
-
-    # One sensor per game, uninstalled ones too.
-    xeno = _state(hass, "sensor", "game_0100e95004038000")
-    assert xeno.state == "186" and xeno.attributes["installed"] is False and xeno.attributes["version"] is None
-
-    # A new game: its sensor appears; one no longer listed keeps its sensor, unavailable.
-    doc = fixture("games.json")
-    del doc["games"]["0100E95004038000"]
-    doc["games"]["0100F8F0000A2000"] = {
-        "name": "Splatoon 3",
-        "version": "9.1.0",
-        "installed": True,
-        "total_min": 12,
-        "launches": None,
-        "first_played": None,
-        "last_played": None,
-    }
-    publish(hass, "games", doc)
-    await hass.async_block_till_done()
-    splatoon = _state(hass, "sensor", "game_0100f8f0000a2000")
-    assert splatoon.state == "12" and splatoon.attributes["first_played"] is None
-    assert splatoon.attributes["launches"] is None
-    assert _state(hass, "sensor", "game_0100e95004038000").state == STATE_UNAVAILABLE
-
-
-async def test_no_game_sensor(hass: HomeAssistant, setup) -> None:
-    publish(hass, "games", fixture("games.json"), retain=True)
-    await hass.async_block_till_done()
-    assert _state(hass, "sensor", "game_0100000000010000").state == "1234"
-
-    # The option set to none: the game sensors go, the list stays.
-    await _with_game_sensors(hass, setup, "none")
+    games = _state(hass, "sensor", "games_installed").attributes["games"]
+    assert games[0]["name"] == "Xenoblade Chronicles 2"
+    assert games[-1]["name"] == "Splatoon 3" and games[-1]["last_played"] is None and games[-1]["minutes"] == 0
     registry = er.async_get(hass)
     entries = er.async_entries_for_config_entry(registry, setup.entry_id)
     assert not [e for e in entries if e.unique_id.startswith(f"{CONSOLE_ID}_game_")]
-    assert len(_state(hass, "sensor", "games_installed").attributes["games"]) == 3
+
+    # A document that is not one: no game, nothing breaks.
+    publish(hass, "games", {"schema": 1, "games": ["not", "a", "table"]})
+    await hass.async_block_till_done()
+    assert _state(hass, "sensor", "games_installed").attributes["games"] == []
+
+
+async def test_game_sensors_go(hass: HomeAssistant, mqtt_mock, entry) -> None:
+    """An entry from 0.3 or before (1.1): its sensors per game leave the
+    registry, and their option the entry; the list and the rest stay."""
+    old = MockConfigEntry(
+        domain=DOMAIN,
+        title="Salon",
+        unique_id=CONSOLE_ID,
+        data=dict(entry.data),
+        options={**entry.options, "game_sensors": "all"},
+        minor_version=1,
+    )
+    registry = er.async_get(hass)
+    old.add_to_hass(hass)
+    odyssey = registry.async_get_or_create("sensor", DOMAIN, f"{CONSOLE_ID}_game_0100000000010000", config_entry=old)
+    installed = registry.async_get_or_create("sensor", DOMAIN, f"{CONSOLE_ID}_games_installed", config_entry=old)
+    other = registry.async_get_or_create("sensor", DOMAIN, "0badc0de_game_0100000000010000")
+    assert await hass.config_entries.async_setup(old.entry_id)
+    await hass.async_block_till_done()
+    assert old.minor_version == 2 and "game_sensors" not in old.options
+    assert old.options[CONF_TAKE_OVER] is True
+    assert registry.async_get(odyssey.entity_id) is None
+    assert registry.async_get(installed.entity_id) is not None
+    assert registry.async_get(other.entity_id) is not None  # not this entry's
+    publish(hass, "games", fixture("games.json"), retain=True)
+    await hass.async_block_till_done()
+    assert len(hass.states.get(installed.entity_id).attributes["games"]) == 3
+
+
+async def test_newer_entry(hass: HomeAssistant, mqtt_mock, entry) -> None:
+    """An entry a newer integration wrote (2.x): not set up, left as it is."""
+    newer = MockConfigEntry(domain=DOMAIN, unique_id=CONSOLE_ID, data=dict(entry.data), version=2)
+    newer.add_to_hass(hass)
+    assert not await hass.config_entries.async_setup(newer.entry_id)
+    assert newer.state is ConfigEntryState.MIGRATION_ERROR

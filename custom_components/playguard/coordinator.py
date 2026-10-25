@@ -27,13 +27,11 @@ from homeassistant.loader import async_get_integration
 
 from .const import (
     CONF_CONSOLE_ID,
-    CONF_GAME_SENSORS,
     CONF_KEEP_VALUES,
     CONF_PREFIX,
     CONF_TAKE_OVER,
     DEFAULT_PREFIX,
     DOMAIN,
-    GAME_SENSORS_RECENT,
     MANUFACTURER,
     MODEL,
     NATIVE_STATES_MAX,
@@ -215,11 +213,6 @@ class PlayGuardConsole:
         """Whether the sensors keep their last values while the console is off
         the broker (the entry's option, on by default)."""
         return self.entry.options.get(CONF_KEEP_VALUES, True)
-
-    @property
-    def game_sensors(self) -> str:
-        """Which games get a sensor of their own (the entry's option)."""
-        return self.entry.options.get(CONF_GAME_SENSORS, GAME_SENSORS_RECENT)
 
     @callback
     def _on_activity(self, msg: ReceiveMessage) -> None:

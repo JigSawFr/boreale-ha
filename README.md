@@ -30,8 +30,8 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   options), replacing it (no duplicates; turn it back on in the options),
   plus **Online**, **Agent running** and **Play time this week**.
 - **Game names** on *Now playing*, and each game's time today and this week as
-  attributes; every game on *Games installed* (`games`), and a sensor for each
-  game played lately (or none, or every game: an option).
+  attributes; every game on *Games installed* (`games`), with its play time:
+  one entity for the games, not one per game.
 - **Long-term statistics**: every finished day's total, and each game's,
   imported into the recorder (`playguard:<console id>_play_time`,
   `playguard:<console id>_game_<application id>`), for months of history in a
@@ -159,7 +159,6 @@ twice.
 |---|---|---|
 | **Replace the console's own Home Assistant device** | on | Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again (next to this one). The entry reloads when it changes. |
 | **Keep the sensors' last values while the console sleeps** | on | While the console is offline (asleep, off, out of reach), its sensors, binary sensors and events keep showing what it last said; its controls (switches, numbers, selects, times, buttons) are unavailable. Off: every entity but *Online* is unavailable then. |
-| **Game sensors** | the games played in the last 30 days | Which games get a sensor of their own: *None*, *The games played in the last 30 days* (before the console's last list), or *Every game*. Each game's play time is a long-term statistic either way, and every game is listed on *Games installed*. The sensors of the games that no longer qualify are removed (their statistics stay). |
 
 *⋮ › Reconfigure* changes the **Topic prefix**, when `topic_prefix` in the
 console's `sync.conf` changes. As when adding a console by hand, the console
@@ -256,16 +255,19 @@ while PlayGuard is closed):
 of the play log): *Games installed*, with every game the console lists in
 `games` (the last played first: `app_id`, `name`, `minutes`, `installed`,
 `last_played`; not recorded), *Play time (all time)* (every game, every
-account), *User accounts* (diagnostic, disabled by default); and **a sensor
-per game** as the option *Game sensors* says (by default, the games played in
-the last 30 days), *Play time · <game>*: its minutes since it was first played,
-with attributes `installed`, `version`, `launches`, `first_played`,
-`last_played`. It has no state class: the game's long-term statistic is the
-integration's own (above), so the recorder does not keep a second one. A
-game's sensor appears when the game qualifies, and goes when it no longer does
-(not played for 30 days); with *Every game*, it stays when the game is
-uninstalled (with `installed: false`), and one the console no longer lists is
-unavailable.
+account), *User accounts* (diagnostic, disabled by default).
+
+There is **no sensor per game**: a game's time today is in the play log's
+`games` attribute, this week's in *Play time this week*'s, since it was first
+played in *Games installed*'s, and its history in its long-term statistic
+(above). 0.3 had a sensor per game; updating removes them (and their option),
+and the statistics stay. For an automation on one game, a template reads the
+attribute:
+
+```jinja
+{{ (state_attr('sensor.living_room_used_screen_time_play_log', 'games') or {})
+   .get('Super Mario Odyssey', 0) > 60 }}
+```
 
 The entities that change the play timer (limits, bedtime, extra time,
 blocking all games, profiles) need *Orders may change the play timer* on the
@@ -435,7 +437,7 @@ tap_action:
 
 A family dashboard: today's play time and what is left, the game being
 played, extra time in one tap, blocking all games, the last 14 days, and the
-games played last (from *Games installed*, without a sensor per game). Change
+games played last (from *Games installed*). Change
 `living_room` and `a1b2c3d4` (the console's id, *Settings › Devices &
 services › PlayGuard*) to yours:
 

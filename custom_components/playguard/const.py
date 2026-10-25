@@ -25,16 +25,6 @@ CONF_TAKE_OVER: Final = "take_over_discovery"
 # said keeps showing: its sensors keep their last values, its controls are
 # unavailable.
 CONF_KEEP_VALUES: Final = "keep_values_asleep"
-# Which games get a sensor of their own: none, those played in the
-# RECENT_DAYS before the console's last list (the default), or every game it
-# lists. Each game's play time is a long-term statistic either way
-# (statistics.py), and the whole list is on Games installed.
-CONF_GAME_SENSORS: Final = "game_sensors"
-GAME_SENSORS_NONE: Final = "none"
-GAME_SENSORS_RECENT: Final = "recent"
-GAME_SENSORS_ALL: Final = "all"
-GAME_SENSORS: Final = (GAME_SENSORS_NONE, GAME_SENSORS_RECENT, GAME_SENSORS_ALL)
-RECENT_DAYS: Final = 30
 
 CONSOLE_ID_RE: Final = re.compile(r"^[0-9a-f]{8}$")
 
