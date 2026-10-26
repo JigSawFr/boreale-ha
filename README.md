@@ -263,7 +263,7 @@ the play timer*); lock it to turn them back on, always allowed.
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
-| Firmware, Atmosphère | The console's versions. | diagnostic |
+| Firmware, Atmosphère | The console's versions (the device's info shows them too). | diagnostic, disabled by default |
 | Last order | The last order handled, and how. | diagnostic, disabled by default |
 | Time spent (1952) | The play timer's raw count. | diagnostic, disabled by default |
 
