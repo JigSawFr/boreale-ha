@@ -13,7 +13,8 @@ from pathlib import Path
 
 from homeassistant.util.yaml import load_yaml
 
-from custom_components.playguard.entities import BY_KEY, ENTITIES
+from custom_components.playguard.const import RETIRED
+from custom_components.playguard.entities import BY_KEY, ENTITIES, EntityDef
 
 from .conftest import fixture
 
@@ -22,10 +23,12 @@ STRINGS = INTEGRATION / "translations" / "en.json"
 ICONS = INTEGRATION / "icons.json"
 
 
-def _template(definition) -> str | None:
+def _template(definition: EntityDef) -> str | None:
     if definition.path is None:
-        return "{{ None }}" if definition.platform in ("select",) else None
+        return None
     expr = "value_json." + ".".join(definition.path)
+    if definition.platform == "lock":  # locked while set up and not unlocked for now
+        return "{{ 'LOCKED' if value_json.controls.enabled and not " + expr + " else 'UNLOCKED' }}"
     if definition.fallback:
         expr += " or value_json." + ".".join(definition.fallback)
     for value, option in definition.renamed:
@@ -35,7 +38,7 @@ def _template(definition) -> str | None:
     return "{{ " + expr + " }}"
 
 
-def _command_template(definition) -> str | None:
+def _command_template(definition: EntityDef) -> str | None:
     """The order of an option shown under another name is still the value's."""
     if not definition.renamed:
         return None
@@ -59,6 +62,7 @@ def test_same_entities_as_playguard() -> None:
         assert str(d.platform) == e["platform"], e["id"]
         assert d.write == e["write"], e["id"]
         assert d.topic == e["topic"], e["id"]
+        assert d.publish == e["publish"], e["id"]
         assert _template(d) == e["value_template"], e["id"]
         assert _command_template(d) == extra.get("cmd_tpl"), e["id"]
         assert names[e["platform"]][e["id"]]["name"] == e["name"], e["id"]
@@ -70,8 +74,17 @@ def test_same_entities_as_playguard() -> None:
         assert d.state_class == extra.get("stat_cla"), e["id"]
         if "ops" in extra:
             assert list(d.options or ()) == extra["ops"], e["id"]
+        if "sug_dsp_prc" in extra:
+            assert d.precision == extra["sug_dsp_prc"], e["id"]
         for ours_attr, key in (("minimum", "min"), ("maximum", "max"), ("step", "step")):
             assert getattr(d, ours_attr) == extra.get(key), (e["id"], key)
+
+
+def test_retired_as_playguard() -> None:
+    """What the migration removes is what PlayGuard's discovery removes."""
+    retired = {(r["platform"], r["id"]) for r in fixture("entities.json")["retired"]}
+    assert set(RETIRED) == retired
+    assert not {key for _platform, key in RETIRED} & set(BY_KEY)
 
 
 def test_every_entity_is_named() -> None:

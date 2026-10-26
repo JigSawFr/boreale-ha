@@ -24,7 +24,7 @@ from homeassistant.helpers.selector import (
     SelectSelectorMode,
 )
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
-import voluptuous as vol
+import probatio
 
 from .const import (
     CONF_CONSOLE_ID,
@@ -46,11 +46,11 @@ SCAN_TOPICS = ("+/+/state", "+/+/+/state")
 CONF_CONSOLE = "console"
 MANUAL = "manual"  # the list's last choice: another console, by its id
 
-RECONFIGURE_SCHEMA = vol.Schema({vol.Required(CONF_PREFIX): str})
-OPTIONS_SCHEMA = vol.Schema(
+RECONFIGURE_SCHEMA = probatio.Schema({probatio.Required(CONF_PREFIX): str})
+OPTIONS_SCHEMA = probatio.Schema(
     {
-        vol.Required(CONF_TAKE_OVER, default=True): bool,
-        vol.Required(CONF_KEEP_VALUES, default=True): bool,
+        probatio.Required(CONF_TAKE_OVER, default=True): bool,
+        probatio.Required(CONF_KEEP_VALUES, default=True): bool,
     }
 )
 
@@ -58,12 +58,12 @@ OPTIONS_SCHEMA = vol.Schema(
 def _valid_prefix(prefix: str, console_id: str) -> bool:
     try:
         valid_publish_topic(f"{prefix}/{console_id}/state")
-    except vol.Invalid:
+    except probatio.Invalid:
         return False
     return True
 
 
-def _state(payload: str | bytes) -> dict | None:
+def _state(payload: str | bytes | bytearray) -> dict[str, Any] | None:
     """A PlayGuard state document, else None."""
     try:
         doc = json.loads(payload) if payload else None
@@ -77,7 +77,7 @@ def _posix(value: Any) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
-def _moved_back(entry: ConfigEntry | None, prefix: str, doc: dict) -> bool:
+def _moved_back(entry: ConfigEntry | None, prefix: str, doc: dict[str, Any]) -> bool:
     """Whether a known console's entry follows it to `prefix`: only for a
     state newer than the last one its coordinator read. A state left
     retained under the console's former prefix is older, and an entry not
@@ -90,9 +90,9 @@ def _moved_back(entry: ConfigEntry | None, prefix: str, doc: dict) -> bool:
     return found is not None and last is not None and last < found
 
 
-async def _async_wait_for_state(hass: HomeAssistant, prefix: str, console_id: str) -> dict | None:
+async def _async_wait_for_state(hass: HomeAssistant, prefix: str, console_id: str) -> dict[str, Any] | None:
     """The console's state on the broker under this prefix, or None."""
-    received: asyncio.Future[dict] = hass.loop.create_future()
+    received: asyncio.Future[dict[str, Any]] = hass.loop.create_future()
 
     @callback
     def _on_state(msg: ReceiveMessage) -> None:
@@ -137,7 +137,7 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
     # 2: no sensor per game, nor its option (the migration in __init__.py).
-    MINOR_VERSION = 2
+    MINOR_VERSION = 3
 
     def __init__(self) -> None:
         self._console_id = ""
@@ -199,7 +199,9 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         selector = SelectSelector(
             SelectSelectorConfig(options=options, translation_key=CONF_CONSOLE, mode=SelectSelectorMode.LIST)
         )
-        return self.async_show_form(step_id="user", data_schema=vol.Schema({vol.Required(CONF_CONSOLE): selector}))
+        return self.async_show_form(
+            step_id="user", data_schema=probatio.Schema({probatio.Required(CONF_CONSOLE): selector})
+        )
 
     async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """A console by its id (Console › Remote access › Console id), once its
@@ -224,10 +226,10 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self._create()
         return self.async_show_form(
             step_id="manual",
-            data_schema=vol.Schema(
+            data_schema=probatio.Schema(
                 {
-                    vol.Required(CONF_CONSOLE_ID): str,
-                    vol.Required(CONF_PREFIX, default=DEFAULT_PREFIX): str,
+                    probatio.Required(CONF_CONSOLE_ID): str,
+                    probatio.Required(CONF_PREFIX, default=DEFAULT_PREFIX): str,
                 }
             ),
             errors=errors,

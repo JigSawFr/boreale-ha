@@ -19,7 +19,7 @@ from homeassistant.exceptions import ConfigEntryNotReady, HomeAssistantError
 from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.typing import ConfigType
 
-from .const import CONF_CONSOLE_ID, DOMAIN
+from .const import CONF_CONSOLE_ID, DOMAIN, RETIRED
 from .coordinator import PlayGuardConsole
 from .services import async_setup_services
 
@@ -29,6 +29,7 @@ PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
     Platform.EVENT,
+    Platform.LOCK,
     Platform.NUMBER,
     Platform.SELECT,
     Platform.SENSOR,
@@ -49,15 +50,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) -> bool:
     """1.1 to 1.2: no sensor per game any more, nor its option. Each game stays
-    on Games installed (its games attribute) and in the statistics. (An entry
-    from a newer integration, Home Assistant refuses before asking.)"""
+    on Games installed (its games attribute) and in the statistics.
+    1.2 to 1.3: the lock Parental controls replaces the switch Unlocked, the
+    button Turn parental controls back on and the binary sensor Temporarily
+    unlocked. (An entry from a newer integration, Home Assistant refuses
+    before asking.)"""
     registry = er.async_get(hass)
-    prefix = f"{entry.data[CONF_CONSOLE_ID]}_game_"
+    console_id = entry.data[CONF_CONSOLE_ID]
+    retired = {f"{console_id}_{key}": platform for platform, key in RETIRED}
     for reg in er.async_entries_for_config_entry(registry, entry.entry_id):
-        if reg.domain == Platform.SENSOR and reg.unique_id.startswith(prefix):
+        game = entry.minor_version < 2 and reg.unique_id.startswith(f"{console_id}_game_")
+        if (game and reg.domain == Platform.SENSOR) or retired.get(reg.unique_id) == reg.domain:
             registry.async_remove(reg.entity_id)
     options = {k: v for k, v in entry.options.items() if k != "game_sensors"}
-    hass.config_entries.async_update_entry(entry, options=options, minor_version=2)
+    hass.config_entries.async_update_entry(entry, options=options, minor_version=3)
     return True
 
 

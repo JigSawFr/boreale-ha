@@ -9,9 +9,9 @@ Importing the same day again replaces it.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
@@ -35,7 +35,7 @@ def game_id(console_id: str, app_id: str) -> str:
     return f"{DOMAIN}:{console_id}_game_{app_id.lower()}"
 
 
-def day_start(date: str, time_zone) -> datetime | None:
+def day_start(date: str, time_zone: tzinfo) -> datetime | None:
     """A date's local midnight, in UTC, on a whole hour (statistics are hourly)."""
     try:
         day = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=time_zone)
@@ -45,7 +45,7 @@ def day_start(date: str, time_zone) -> datetime | None:
     return start - timedelta(minutes=start.minute, seconds=start.second, microseconds=start.microsecond)
 
 
-def _minutes(value) -> float | None:
+def _minutes(value: Any) -> float | None:
     return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
 
 
@@ -63,7 +63,7 @@ async def async_import_days(hass: HomeAssistant, console: PlayGuardConsole) -> N
     )
 
     time_zone = dt_util.get_time_zone(hass.config.time_zone) or dt_util.DEFAULT_TIME_ZONE
-    days: list[tuple[datetime, dict]] = []
+    days: list[tuple[datetime, dict[str, Any]]] = []
     for date, doc in sorted(console.finals.items()):
         start = day_start(date, time_zone)
         if start is not None and doc.get("final", True):

@@ -22,9 +22,9 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr, entity_registry as er, issue_registry as ir
 from homeassistant.setup import async_setup_component
+import probatio
 import pytest
 from pytest_homeassistant_custom_component.components.diagnostics import get_diagnostics_for_config_entry
-import voluptuous as vol
 
 from custom_components.playguard.const import CONF_KEEP_VALUES, CONF_TAKE_OVER, DOMAIN
 from custom_components.playguard.entities import ENTITIES
@@ -77,9 +77,16 @@ async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
     assert registry.async_get(_id("binary_sensor", "agent", hass)).entity_category is EntityCategory.DIAGNOSTIC
     assert registry.async_get(_id("button", "sync_now", hass)).entity_category is EntityCategory.DIAGNOSTIC
 
-    # The device takes the console's name and versions.
+    # The device is the console as Nintendo names it, its system as its
+    # software (the model comes with the system document).
     device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)
-    assert device.name == "Salon" and device.sw_version == "1.1.0" and device.hw_version == "23.0.1"
+    assert (device.name, device.manufacturer, device.model, device.model_id) == (
+        "Salon",
+        "Nintendo",
+        "Nintendo Switch",
+        None,
+    )
+    assert device.sw_version == "23.0.1 · Atmosphère 1.12.0" and device.hw_version is None
 
 
 async def test_what_few_dashboards_need_is_off(hass: HomeAssistant, setup_defaults) -> None:
@@ -89,8 +96,8 @@ async def test_what_few_dashboards_need_is_off(hass: HomeAssistant, setup_defaul
     entries = er.async_entries_for_config_entry(registry, setup_defaults.entry_id)
     off = {e.unique_id.removeprefix(f"{CONSOLE_ID}_") for e in entries if e.disabled_by}
     assert off == {d.key for d in ENTITIES if not d.enabled}
-    assert {"serial", "ssid", "agent", "model", "ip_address", "last_order"} <= off
-    assert not {"battery", "sd_free", "used_screen_time", "console_lock", "games_installed"} & off
+    assert {"serial", "ssid", "agent", "model", "ip_address", "last_order", "used_screen_time", "limit_mon"} <= off
+    assert not {"battery", "sd_free", "used_screen_time_log", "console_lock", "games_installed", "last_seen"} & off
     assert hass.states.get(_id("sensor", "battery", hass)) is not None
     assert hass.states.get(_id("sensor", "model", hass)) is None
 
@@ -150,7 +157,7 @@ async def test_unavailable_before_the_state(hass: HomeAssistant, mqtt_mock, entr
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert hass.states.get(_id("number", "limit_mon", hass)).state == STATE_UNAVAILABLE
+    assert hass.states.get(_id("number", "limit_uniform", hass)).state == STATE_UNAVAILABLE
     assert hass.states.get(_id("binary_sensor", "online", hass)).state == STATE_UNAVAILABLE
 
 
@@ -246,13 +253,17 @@ async def test_orders_the_console_would_refuse(hass: HomeAssistant, setup, mqtt_
             "number", "set_value", {"entity_id": _id("number", "limit_mon", hass), "value": 90}, blocking=True
         )
     assert err.value.translation_key == "timer_writes_disabled"
-    # Locking again and the restrictions need no timer writes.
-    await hass.services.async_call("switch", "turn_off", {"entity_id": _id("switch", "unlocked", hass)}, blocking=True)
+    # Unlocking needs them; locking again and the restrictions do not.
+    lock = _id("lock", "parental_controls", hass)
+    with pytest.raises(ServiceValidationError) as err:
+        await hass.services.async_call("lock", "unlock", {"entity_id": lock}, blocking=True)
+    assert err.value.translation_key == "timer_writes_disabled"
+    await hass.services.async_call("lock", "lock", {"entity_id": lock}, blocking=True)
     await hass.services.async_call(
         "switch", "turn_on", {"entity_id": _id("switch", "vr_restricted", hass)}, blocking=True
     )
     assert _published(mqtt_mock) == [
-        (f"{BASE}/unlocked/set", "OFF", 1, True),
+        (f"{BASE}/parental_controls/set", "LOCK", 1, True),
         (f"{BASE}/vr_restricted/set", "ON", 1, True),
     ]
 
@@ -300,7 +311,7 @@ async def test_week_and_names(hass: HomeAssistant, setup) -> None:
     )
     await hass.async_block_till_done()
     week = hass.states.get(_id("sensor", "week_play_time", hass))
-    assert week.state == "105"
+    assert week.state == "1.75" and week.attributes["unit_of_measurement"] == "h"  # minutes, shown in hours
     assert week.attributes["days"] == {"2026-10-03": 30, "2026-10-04": 75}
     assert week.attributes["games"] == {"Super Mario Odyssey": 90, "Mario Kart 8 Deluxe": 15}
 
@@ -335,7 +346,7 @@ async def test_services(hass: HomeAssistant, setup, mqtt_mock) -> None:
     with pytest.raises(ServiceValidationError) as err:
         await hass.services.async_call(DOMAIN, "sync_now", {"device_id": "not-a-device"}, blocking=True)
     assert err.value.translation_key == "service_device_not_found"
-    with pytest.raises(vol.Invalid):  # out of bounds: the schema refuses it
+    with pytest.raises(probatio.Invalid):  # out of bounds: the schema refuses it
         await hass.services.async_call(
             DOMAIN, "add_bonus_time", {"device_id": device.id, "minutes": 500}, blocking=True
         )

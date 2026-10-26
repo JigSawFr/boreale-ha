@@ -2,8 +2,9 @@ blueprint:
   name: PlayGuard — time is up, extra time from the notification
   description: >-
     When a console's limit for the day is reached, a notification on a phone,
-    with a button that gives extra time. Needs the Home Assistant app on the
-    phone, and *Orders may change the play timer* on the console.
+    with a button that gives extra time. Not at bedtime, which extra time does
+    not lift. Needs the Home Assistant app on the phone, and *Orders may change
+    the play timer* on the console.
   domain: automation
   author: JigSawFr
   homeassistant:
@@ -11,8 +12,8 @@ blueprint:
   source_url: https://github.com/JigSawFr/playguard-ha/blob/main/blueprints/automation/playguard/time_is_up.yaml
   input:
     time_is_up:
-      name: Time is up
-      description: The console's *Time is up* binary sensor.
+      name: Playing blocked
+      description: The console's *Playing blocked* binary sensor.
       selector:
         entity:
           filter:
@@ -63,6 +64,11 @@ variables:
   time_is_up: !input time_is_up
   minutes: !input minutes
   console: "{{ device_id(time_is_up) }}"
+
+conditions:
+  # Blocked by the day's limit, not by the bedtime alarm's hours.
+  - condition: template
+    value_template: "{{ state_attr(time_is_up, 'reason') != 'bedtime' }}"
 
 actions:
   # The button's id: this run's own, so an older notification's does nothing.

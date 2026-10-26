@@ -37,8 +37,8 @@ class PlayGuardEntity(Entity):
     @callback
     def async_entity_id_changed(self, old_entity_id: str) -> None:
         """Nothing here depends on the entity id: it may change in place
-        (Home Assistant 2026.11 and later)."""
-        super().async_entity_id_changed(old_entity_id)
+        (Home Assistant 2026.11 and later; not called before)."""
+        super().async_entity_id_changed(old_entity_id)  # type: ignore[misc]  # 2026.11's Entity
 
     @callback
     def _handle_update(self) -> None:

@@ -79,7 +79,7 @@ async def test_odd_activity_and_week(hass: HomeAssistant, setup) -> None:
     entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{CONSOLE_ID}_used_screen_time_log")
     assert hass.states.get(entity_id).attributes["games"] == {"Super Mario Odyssey": 60, "Mario Kart 8 Deluxe": 14}
     week = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{CONSOLE_ID}_week_play_time")
-    assert hass.states.get(week).state == "30"
+    assert hass.states.get(week).state == "0.5"  # hours
     assert hass.states.get(week).attributes["days"] == {"2026-10-03": 30}
 
 

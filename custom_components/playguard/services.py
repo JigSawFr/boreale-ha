@@ -5,7 +5,7 @@ from __future__ import annotations
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv, service
-import voluptuous as vol
+import probatio
 
 from .const import DAYS, DOMAIN, WRITE_FREE, WRITE_TIMER
 from .coordinator import PlayGuardConsole
@@ -16,32 +16,32 @@ ATTR_DAY = "day"
 ATTR_WEEK = "week"
 ATTR_PROFILE = "profile"
 
-_LIMIT = vol.All(vol.Coerce(int), vol.Range(min=0, max=1440))
+_LIMIT = probatio.All(probatio.Coerce(int), probatio.Range(min=0, max=1440))
 
-SET_LIMITS_SCHEMA = vol.All(
-    vol.Schema(
+SET_LIMITS_SCHEMA = probatio.All(
+    probatio.Schema(
         {
-            vol.Required(ATTR_DEVICE_ID): cv.string,
-            vol.Optional(ATTR_MINUTES): _LIMIT,
-            vol.Optional(ATTR_DAY, default="all"): vol.In(("all", "today", *DAYS)),
-            vol.Optional(ATTR_WEEK): vol.All(cv.ensure_list, [_LIMIT], vol.Length(min=7, max=7)),
+            probatio.Required(ATTR_DEVICE_ID): cv.string,
+            probatio.Optional(ATTR_MINUTES): _LIMIT,
+            probatio.Optional(ATTR_DAY, default="all"): probatio.In(("all", "today", *DAYS)),
+            probatio.Optional(ATTR_WEEK): probatio.All(cv.ensure_list, [_LIMIT], probatio.Length(min=7, max=7)),
         }
     ),
     cv.has_at_least_one_key(ATTR_MINUTES, ATTR_WEEK),
 )
-BONUS_SCHEMA = vol.Schema(
+BONUS_SCHEMA = probatio.Schema(
     {
-        vol.Required(ATTR_DEVICE_ID): cv.string,
-        vol.Required(ATTR_MINUTES): vol.All(vol.Coerce(int), vol.Range(min=5, max=180)),
+        probatio.Required(ATTR_DEVICE_ID): cv.string,
+        probatio.Required(ATTR_MINUTES): probatio.All(probatio.Coerce(int), probatio.Range(min=5, max=180)),
     }
 )
-PROFILE_SCHEMA = vol.Schema(
+PROFILE_SCHEMA = probatio.Schema(
     {
-        vol.Required(ATTR_DEVICE_ID): cv.string,
-        vol.Required(ATTR_PROFILE): vol.All(cv.string, vol.Length(min=1, max=32)),
+        probatio.Required(ATTR_DEVICE_ID): cv.string,
+        probatio.Required(ATTR_PROFILE): probatio.All(cv.string, probatio.Length(min=1, max=32)),
     }
 )
-DEVICE_SCHEMA = vol.Schema({vol.Required(ATTR_DEVICE_ID): cv.string})
+DEVICE_SCHEMA = probatio.Schema({probatio.Required(ATTR_DEVICE_ID): cv.string})
 
 # Service -> (order, write class) for the ones that take no value.
 PRESS = {
@@ -56,7 +56,8 @@ def _console(hass: HomeAssistant, device_id: str) -> PlayGuardConsole:
     """The console of a device. Home Assistant refuses, saying why, a device
     that is not a PlayGuard console's or whose entry is not loaded."""
     _device, entry = service.async_get_device_and_config_entry(hass, DOMAIN, device_id)
-    return entry.runtime_data
+    console: PlayGuardConsole = entry.runtime_data
+    return console
 
 
 @callback

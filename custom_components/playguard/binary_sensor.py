@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntity
+from typing import Any
+
+from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.binary_sensor.const import BinarySensorDeviceClass
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import PlayGuardConfigEntry
-from .entities import for_platform
+from .coordinator import PlayGuardConsole
+from .entities import EntityDef, dig, for_platform
 from .entity import PlayGuardEntity
 
 PARALLEL_UPDATES = 0
@@ -18,9 +22,10 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     console = entry.runtime_data
+    classes: dict[str, type[PlayGuardBinarySensor]] = {"online": OnlineSensor, "limit_reached": BlockedSensor}
     async_add_entities(
-        (OnlineSensor if d.key == "online" else PlayGuardBinarySensor)(console, d)
-        for d in for_platform(Platform.BINARY_SENSOR)
+        classes.get(d.key, PlayGuardBinarySensor)(console, d)
+        for d in for_platform(Platform.BINARY_SENSOR, console.unpublished)
     )
 
 
@@ -29,7 +34,7 @@ class PlayGuardBinarySensor(PlayGuardEntity, BinarySensorEntity):
 
     _keeps_value = True
 
-    def __init__(self, console, definition) -> None:
+    def __init__(self, console: PlayGuardConsole, definition: EntityDef) -> None:
         super().__init__(console, definition)
         if definition.device_class:
             self._attr_device_class = BinarySensorDeviceClass(definition.device_class)
@@ -38,6 +43,16 @@ class PlayGuardBinarySensor(PlayGuardEntity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         value = self.read()
         return value if isinstance(value, bool) else None
+
+
+class BlockedSensor(PlayGuardBinarySensor):
+    """Games are blocked: the day's limit, or the bedtime alarm's hours (the
+    play timer blocks during both). Its reason says which."""
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        reason = dig(self.console.state, ("timer", "blocked_by"))
+        return {"reason": reason if reason in ("limit", "bedtime") else None}
 
 
 class OnlineSensor(PlayGuardBinarySensor):

@@ -166,7 +166,19 @@ async def test_time_is_up(hass: HomeAssistant, setup, mqtt_mock, state, phone, n
     await _automation(
         hass, "time_is_up.yaml", {"time_is_up": _id(hass, "binary_sensor", "limit_reached"), "phone": phone}
     )
+    # Bedtime: extra time would not lift it, nobody is told.
     state["timer"]["limit_reached"] = True
+    state["timer"]["blocked_by"] = "bedtime"
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert notified == []
+    state["timer"]["limit_reached"] = False
+    state["timer"]["blocked_by"] = None
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    # The day's limit.
+    state["timer"]["limit_reached"] = True
+    state["timer"]["blocked_by"] = "limit"
     publish(hass, "state", state)
     await _soon(lambda: notified)
 

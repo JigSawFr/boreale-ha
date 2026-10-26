@@ -3,7 +3,7 @@
 [![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
 [![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
 [![HACS: custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![quality scale: gold](https://img.shields.io/badge/quality%20scale-gold-d4af37.svg)](custom_components/playguard/quality_scale.yaml)
+[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](custom_components/playguard/quality_scale.yaml)
 [![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 
 **English** · [Français](README.fr.md)
@@ -172,7 +172,9 @@ former prefix does not move it back.
 ## Entities
 
 One device per console, named after the console (*Name in Home Assistant*
-in PlayGuard), with its firmware and PlayGuard's version. *Config* and
+in PlayGuard): the console as Nintendo names it, its model and model number
+(*Nintendo Switch – OLED Model*, HEG-001) and the system it runs as its
+software (*23.0.1 · Atmosphère 1.10.1*). *Config* and
 *diagnostic* entities are in their own sections of the device page and out of
 the default dashboards. While the console is offline, its controls are
 unavailable and its sensors keep their last values (*Online* says it is
@@ -187,52 +189,55 @@ not shown*), and the entry reloads with it.
 
 | Entity | What it says | Notes |
 |---|---|---|
-| Parental controls | Parental controls are set on the console. | |
-| Temporarily unlocked | Parental controls are unlocked for now (the PIN was entered). | lock device class: *unlocked* when on |
+| Parental controls set up | Parental controls are set on the console. | |
 | Companion app linked | Nintendo's phone app is linked to the console. | |
 | Play timer | The daily play-time limit is on. | |
-| Time is up | Today's limit is reached. | |
+| Playing blocked | The play timer blocks games: today's limit is reached, or it is bedtime. | its `reason`: `limit` or `bedtime` |
 | PIN set | A PIN is set. | diagnostic |
 | Network clock accurate | The console's clock is set from the network. | diagnostic, disabled by default |
 | Online | The console is on the broker now (off: asleep, off, out of reach). | diagnostic, this integration's |
 | Agent running | PlayGuard's agent keeps the link up. | diagnostic, disabled by default, this integration's |
 
-**Sensors** (minutes)
+**Lock**: *Parental controls*, locked while they are in effect. Unlock it to
+unlock them for now with the PIN PlayGuard keeps (it needs *Orders may change
+the play timer*); lock it to turn them back on, always allowed.
+
+**Sensors** (minutes; the week and all time are shown in hours)
 
 | Entity | What it says | Notes |
 |---|---|---|
-| Used screen time | Today's play time, as the play timer counts it. | daily total, back to 0 at midnight |
-| Used screen time (play log) | Today's play time from the play log, with each game's minutes (`games`). | daily total, disabled by default |
+| Play time today | Today's play time from the play log (every game, with or without a limit), with each game's minutes (`games`). | daily total, back to 0 at midnight |
+| Used screen time | Today's play time, as the play timer counts it (only while a limit is set). | daily total, disabled by default |
 | Screen time remaining | What is left of today's limit. | |
 | Extended screen time | Extra time granted today. | |
 | Play time this week | The last 7 days, with each day's (`days`) and each game's (`games`) minutes. | this integration's; once PlayGuard itself has run |
+| Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
 | Firmware, Atmosphère | The console's versions. | diagnostic |
 | Last order | The last order handled, and how. | diagnostic, disabled by default |
 | Time spent (1952) | The play timer's raw count. | diagnostic, disabled by default |
 
-**Numbers** (config, minutes, 0 to 1440; 1440 means no limit):
-*Limit Sunday* … *Limit Saturday*, *Limit every day* (unknown when the days
-differ), *Max screentime today* (today only; the usual limit comes back
-tomorrow).
+**Numbers** (config, minutes, 0 to 1440; 1440 means no limit): *Limit every
+day* (unknown when the days differ), *Max screentime today* (today only; the
+usual limit comes back tomorrow), *Limit Sunday* … *Limit Saturday*
+(disabled by default).
 
-**Time** (config): *Bedtime alarm* (when the alarm sounds), *Bedtime end
-time* (when play is allowed again).
+**Time** (config): *Bedtime* (when the alarm sounds), *Wake-up time* (when
+play is allowed again).
 
-**Switches**: *Block all games* (no play at all), *Unlocked* (off locks parental
-controls again after a temporary unlock); config: *Bedtime alarm enabled*,
+**Switches**: *Block all games* (no play at all); config: *Bedtime alarm*,
 *Time's up alarm*, *VR mode restricted*, *Posting to social media
 restricted*, *Communication restricted*.
 
 **Selects** (config): *Restriction level* (unrestricted, young child, child,
-teen, custom), *Profile* (applies one of the profiles saved in PlayGuard; it
-shows no current choice: the limits say which one is in effect).
+teen, custom), *Profile* (applies one of the profiles saved in PlayGuard, and
+shows the one in effect: the saved profile whose limits are the console's;
+unknown when none is).
 
 **Buttons**: *Extra time +15 min*, *+30 min*, *+1 h*, *No more play today*,
-*Remove the limit*, *Turn parental controls back on* (after a temporary unlock);
-diagnostic: *Sync now* (the console publishes everything again), *Export a
-diagnostic report* (disabled by default).
+*Remove the limit*; diagnostic: *Sync now* (the console publishes everything
+again), *Export a diagnostic report* (disabled by default).
 
 **Event**: *Events*, see [events](#events).
 
@@ -242,7 +247,7 @@ while PlayGuard is closed):
 | Entity | What it says | Notes |
 |---|---|---|
 | Battery, Charging, Docked | Its charge, whether a charger gives power, whether it is docked. | |
-| SD card free space, Internal storage free space | MiB left on the SD card and on the system's user storage (the emuMMC's on an emuMMC). | read every 5 minutes; their sizes are diagnostic, disabled by default |
+| SD card free space, Internal storage free space | The space left on the SD card and on the system's user storage (the emuMMC's on an emuMMC), shown in GiB. | read every 5 minutes; their sizes are diagnostic, disabled by default |
 | Model | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic, disabled by default |
 | Console nickname, Region, System, hekate | System Settings' nickname, the region, sysMMC or emuMMC, hekate on the SD card. | diagnostic, disabled by default |
 | PRODINFO blanked | Atmosphère hides the console's identity. | diagnostic, disabled by default |
@@ -265,14 +270,25 @@ and the statistics stay. For an automation on one game, a template reads the
 attribute:
 
 ```jinja
-{{ (state_attr('sensor.living_room_used_screen_time_play_log', 'games') or {})
+{{ (state_attr('sensor.living_room_play_time_today', 'games') or {})
    .get('Super Mario Odyssey', 0) > 60 }}
 ```
 
 The entities that change the play timer (limits, bedtime, extra time,
 blocking all games, profiles) need *Orders may change the play timer* on the
-console; without it, they are refused here with the reason. Turning parental controls back on
-(*Unlocked* off) and the restrictions do not need it.
+console; without it, they are refused here with the reason, and so is
+unlocking the lock. Locking it again and the restrictions do not need it.
+
+**What PlayGuard publishes**: its *Remote access › What is published* turns
+off the play time, the games, the console's state, the network, the versions
+and hardware, the serial number or the reports. Their entities then leave
+Home Assistant (and are not created again at the next start); turned back
+on, the entry reloads and they come back. The parental controls are always
+published.
+
+0.5 replaces *Unlocked*, *Turn parental controls back on* and *Temporarily
+unlocked* with the lock: updating removes them, so check the automations that
+used them.
 
 Home Assistant builds the entity ids itself, from the device's and the
 entities' names, when they are first registered, and you can change them: they
@@ -335,6 +351,12 @@ listens.
   (`activity/<date>`) at the first cycle after midnight, the console keeping
   the last 14. The **game names** and the **week** come when PlayGuard itself
   runs (not the agent).
+- **Last seen** is the time of the last document the console published while
+  Home Assistant listened (its state comes every `poll_s` seconds while it is
+  awake), else, after a restart, the time of its last state.
+- **What is published** (the state's `link.publishes`): the entities of what
+  PlayGuard stops publishing go at once; those of what it publishes again come
+  back with a reload of the entry.
 - **Statistics**: the finished days are imported 5 seconds after the last one
   arrives (they come in a burst); importing a day again replaces it.
 - **Orders** are retained until the console handles them; it then clears
@@ -372,14 +394,19 @@ actions:
         {{ trigger.to_state.attributes.reason }}
 ```
 
-Time is up: say so on the phone.
+Time is up: say so on the phone (not at bedtime, which blocks games too).
 
 ```yaml
 alias: Switch time is up
 triggers:
   - trigger: state
-    entity_id: binary_sensor.living_room_time_is_up
+    entity_id: binary_sensor.living_room_playing_blocked
     to: "on"
+conditions:
+  - condition: state
+    entity_id: binary_sensor.living_room_playing_blocked
+    attribute: reason
+    state: limit
 actions:
   - action: notify.notify
     data:
@@ -445,7 +472,7 @@ services › PlayGuard*) to yours:
 type: vertical-stack
 cards:
   - type: tile
-    entity: sensor.living_room_used_screen_time
+    entity: sensor.living_room_play_time_today
   - type: tile
     entity: sensor.living_room_screen_time_remaining
   - type: tile
@@ -503,7 +530,7 @@ the console's entities and the phone (the Home Assistant app).
 
 | Blueprint | What it does | Import |
 |---|---|---|
-| **Time is up, extra time from the notification** | When the day's limit is reached, a notification on the phone with a button that gives extra time (*+15 min*, or what you set). | [![Import the time is up blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **Time is up, extra time from the notification** | When the day's limit is reached (not at bedtime), a notification on the phone with a button that gives extra time (*+15 min*, or what you set). | [![Import the time is up blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
 | **Extra time when…** | Extra time when something happens: a helper turned on (the chores done), a button or a remote pressed, a tag scanned; then what you like (turn the helper off again). | [![Import the extra time blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
 | **Bedtime reminder** | A notification some minutes before *Bedtime alarm*, while a game is played (or every day). | [![Import the bedtime reminder blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
 | **Weekly summary** | Once a week, the last seven days' play time and the games played the most. | [![Import the weekly summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |

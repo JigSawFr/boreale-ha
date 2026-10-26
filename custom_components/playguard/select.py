@@ -8,7 +8,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import PlayGuardConfigEntry
-from .entities import for_platform
+from .coordinator import PlayGuardConsole
+from .entities import EntityDef, for_platform
 from .entity import PlayGuardEntity
 
 PARALLEL_UPDATES = 0
@@ -19,14 +20,15 @@ async def async_setup_entry(
 ) -> None:
     console = entry.runtime_data
     async_add_entities(
-        (ProfileSelect if d.key == "profile" else PlayGuardSelect)(console, d) for d in for_platform(Platform.SELECT)
+        (ProfileSelect if d.key == "profile" else PlayGuardSelect)(console, d)
+        for d in for_platform(Platform.SELECT, console.unpublished)
     )
 
 
 class PlayGuardSelect(PlayGuardEntity, SelectEntity):
     """One of a fixed list."""
 
-    def __init__(self, console, definition) -> None:
+    def __init__(self, console: PlayGuardConsole, definition: EntityDef) -> None:
         super().__init__(console, definition)
         self._attr_options = list(definition.options or ())
         self._option_of = dict(definition.renamed)
@@ -45,8 +47,8 @@ class PlayGuardSelect(PlayGuardEntity, SelectEntity):
 
 
 class ProfileSelect(PlayGuardSelect):
-    """Applies a profile saved in PlayGuard. Which one is in effect is not
-    known: the limits say it."""
+    """Applies a profile saved in PlayGuard; shows the one in effect (the
+    saved profile whose limits are the timer's), else none."""
 
     @property
     def options(self) -> list[str]:
@@ -55,4 +57,5 @@ class ProfileSelect(PlayGuardSelect):
 
     @property
     def current_option(self) -> str | None:
-        return None
+        value = self.read()
+        return value if isinstance(value, str) and value in self.options else None
