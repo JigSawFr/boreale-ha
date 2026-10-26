@@ -424,7 +424,8 @@ qu'écouter.
   gardant les 14 dernières. Les **noms des jeux** et le tableau de la **semaine**
   arrivent quand PlayGuard lui-même tourne (pas l'agent) ; *Temps de jeu cette
   semaine* avance sans lui, jour après jour, avec le journal de jeu et les
-  journées terminées (le temps de chaque compte, seulement avec le tableau).
+  journées terminées (le temps de chaque compte aussi, avec un agent qui le
+  lit).
 - **Vu pour la dernière fois** est l'heure du dernier document publié par la
   console pendant que Home Assistant écoutait (son état arrive toutes les
   `poll_s` secondes tant qu'elle est réveillée), sinon, après un redémarrage,

@@ -404,8 +404,8 @@ listens.
   (`activity/<date>`) at the first cycle after midnight, the console keeping
   the last 14. The **game names** and the **week** table come when PlayGuard
   itself runs (not the agent); *Play time this week* moves on without it, day
-  by day, from the play log and the finished days (each account's time only
-  from the table).
+  by day, from the play log and the finished days (each account's time too,
+  from an agent that reads it).
 - **Last seen** is the time of the last document the console published while
   Home Assistant listened (its state comes every `poll_s` seconds while it is
   awake), else, after a restart, the time of its last state.
