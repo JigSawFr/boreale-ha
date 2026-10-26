@@ -241,6 +241,12 @@
       "play_ends": {
         "name": "Play ends"
       },
+      "account_today": {
+        "name": "{account}'s play time today"
+      },
+      "account_week": {
+        "name": "{account}'s play time this week"
+      },
       "model": {
         "name": "Model",
         "state": {

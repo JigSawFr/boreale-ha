@@ -241,6 +241,12 @@
       "play_ends": {
         "name": "Fin de partie prévue"
       },
+      "account_today": {
+        "name": "Temps de jeu aujourd'hui de {account}"
+      },
+      "account_week": {
+        "name": "Temps de jeu cette semaine de {account}"
+      },
       "model": {
         "name": "Modèle",
         "state": {
