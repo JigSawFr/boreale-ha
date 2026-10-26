@@ -31,6 +31,7 @@
     "supported": true,
     "enabled": true,
     "limit_reached": false,
+    "blocked_by": null,
     "limits": {
       "sun": 180,
       "mon": 120,
@@ -61,7 +62,8 @@
       "end": "06:00:00"
     },
     "extended_today_min": 30,
-    "console_locked": false
+    "console_locked": false,
+    "profile": null
   },
   "activity_today": {
     "used_min": 74,
@@ -76,7 +78,16 @@
     "remote_timer_writes": false,
     "ha_discovery": true,
     "agent": false,
-    "last_result": null
+    "last_result": null,
+    "publishes": {
+      "activity": true,
+      "games": true,
+      "console": true,
+      "network": true,
+      "hardware": true,
+      "serial": false,
+      "report": false
+    }
   },
   "profiles": [
     "School week",

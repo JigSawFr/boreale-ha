@@ -94,9 +94,4 @@ rules:
   inject-websession:
     status: exempt
     comment: No library, and no HTTP.
-  strict-typing:
-    status: todo
-    comment: >-
-      mypy --strict still reports errors on Home Assistant 2026.10: untyped
-      platform constructors, bare dict types, and voluptuous schemas where Home
-      Assistant's types now expect Probatio's.
+  strict-typing: done

@@ -67,10 +67,7 @@
   "entity": {
     "binary_sensor": {
       "parental_controls_enabled": {
-        "name": "Contrôle parental"
-      },
-      "temp_unlocked": {
-        "name": "Déverrouillé temporairement"
+        "name": "Contrôle parental configuré"
       },
       "pin_set": {
         "name": "Code PIN défini"
@@ -82,7 +79,16 @@
         "name": "Minuteur de jeu"
       },
       "limit_reached": {
-        "name": "Temps écoulé"
+        "name": "Jeu bloqué",
+        "state_attributes": {
+          "reason": {
+            "name": "Raison",
+            "state": {
+              "limit": "La limite du jour",
+              "bedtime": "Le coucher"
+            }
+          }
+        }
       },
       "clock_accurate": {
         "name": "Horloge réseau exacte"
@@ -106,9 +112,6 @@
     "button": {
       "sync_now": {
         "name": "Synchroniser maintenant"
-      },
-      "lock_now": {
-        "name": "Réactiver le contrôle parental"
       },
       "export_report": {
         "name": "Exporter un rapport de diagnostic"
@@ -141,6 +144,11 @@
             }
           }
         }
+      }
+    },
+    "lock": {
+      "parental_controls": {
+        "name": "Contrôle parental"
       }
     },
     "number": {
@@ -192,7 +200,7 @@
         "name": "Temps d'écran utilisé"
       },
       "used_screen_time_log": {
-        "name": "Temps d'écran utilisé (journal de jeu)"
+        "name": "Temps de jeu aujourd'hui"
       },
       "screen_time_remaining": {
         "name": "Temps d'écran restant"
@@ -304,20 +312,20 @@
       },
       "accounts": {
         "name": "Comptes utilisateurs"
+      },
+      "last_seen": {
+        "name": "Vu pour la dernière fois"
       }
     },
     "switch": {
       "bedtime_enabled": {
-        "name": "Alarme du coucher activée"
+        "name": "Alarme du coucher"
       },
       "console_lock": {
         "name": "Bloquer tous les jeux"
       },
       "play_timer_alarm": {
         "name": "Alarme de fin de temps"
-      },
-      "unlocked": {
-        "name": "Déverrouillé"
       },
       "vr_restricted": {
         "name": "Mode VR restreint"
@@ -331,10 +339,10 @@
     },
     "time": {
       "bedtime_alarm": {
-        "name": "Alarme du coucher"
+        "name": "Coucher"
       },
       "bedtime_end_time": {
-        "name": "Fin du coucher"
+        "name": "Lever"
       }
     }
   },

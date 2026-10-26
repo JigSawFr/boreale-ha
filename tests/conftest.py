@@ -46,6 +46,7 @@ def state() -> dict:
     """PlayGuard's example state, orders allowed to change the timer, with profiles."""
     doc = fixture("state.json")
     doc["link"]["remote_timer_writes"] = True
+    doc["link"]["publishes"] = dict.fromkeys(doc["link"]["publishes"], True)  # everything, the serial number too
     doc["profiles"] = ["School week", "Holidays"]
     return doc
 
@@ -58,7 +59,7 @@ def entry() -> MockConfigEntry:
         unique_id=CONSOLE_ID,
         data={CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"},
         options={CONF_TAKE_OVER: True},
-        minor_version=2,
+        minor_version=3,
     )
 
 

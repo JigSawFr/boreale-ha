@@ -67,10 +67,7 @@
   "entity": {
     "binary_sensor": {
       "parental_controls_enabled": {
-        "name": "Parental controls"
-      },
-      "temp_unlocked": {
-        "name": "Temporarily unlocked"
+        "name": "Parental controls set up"
       },
       "pin_set": {
         "name": "PIN set"
@@ -82,7 +79,16 @@
         "name": "Play timer"
       },
       "limit_reached": {
-        "name": "Time is up"
+        "name": "Playing blocked",
+        "state_attributes": {
+          "reason": {
+            "name": "Reason",
+            "state": {
+              "limit": "The day's limit",
+              "bedtime": "Bedtime"
+            }
+          }
+        }
       },
       "clock_accurate": {
         "name": "Network clock accurate"
@@ -106,9 +112,6 @@
     "button": {
       "sync_now": {
         "name": "Sync now"
-      },
-      "lock_now": {
-        "name": "Turn parental controls back on"
       },
       "export_report": {
         "name": "Export a diagnostic report"
@@ -141,6 +144,11 @@
             }
           }
         }
+      }
+    },
+    "lock": {
+      "parental_controls": {
+        "name": "Parental controls"
       }
     },
     "number": {
@@ -192,7 +200,7 @@
         "name": "Used screen time"
       },
       "used_screen_time_log": {
-        "name": "Used screen time (play log)"
+        "name": "Play time today"
       },
       "screen_time_remaining": {
         "name": "Screen time remaining"
@@ -304,20 +312,20 @@
       },
       "accounts": {
         "name": "User accounts"
+      },
+      "last_seen": {
+        "name": "Last seen"
       }
     },
     "switch": {
       "bedtime_enabled": {
-        "name": "Bedtime alarm enabled"
+        "name": "Bedtime alarm"
       },
       "console_lock": {
         "name": "Block all games"
       },
       "play_timer_alarm": {
         "name": "Time's up alarm"
-      },
-      "unlocked": {
-        "name": "Unlocked"
       },
       "vr_restricted": {
         "name": "VR mode restricted"
@@ -331,10 +339,10 @@
     },
     "time": {
       "bedtime_alarm": {
-        "name": "Bedtime alarm"
+        "name": "Bedtime"
       },
       "bedtime_end_time": {
-        "name": "Bedtime end time"
+        "name": "Wake-up time"
       }
     }
   },

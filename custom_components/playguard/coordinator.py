@@ -10,6 +10,7 @@ handled).
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
 import json
 import logging
 from typing import Any
@@ -20,34 +21,40 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
-from homeassistant.helpers import device_registry as dr, issue_registry as ir
+from homeassistant.helpers import device_registry as dr, entity_registry as er, issue_registry as ir
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.event import async_call_later
 from homeassistant.loader import async_get_integration
+from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_CONSOLE_ID,
     CONF_KEEP_VALUES,
     CONF_PREFIX,
     CONF_TAKE_OVER,
+    CONF_UNPUBLISHED,
     DEFAULT_PREFIX,
     DOMAIN,
     MANUFACTURER,
     MODEL,
+    MODEL_NAMES,
     NATIVE_STATES_MAX,
+    PUBLISH_HARDWARE,
+    PUBLISH_SERIAL,
     SCHEMA,
     STATISTICS_DELAY,
     TOPIC_INTEGRATION,
     WRITE_NONE,
     WRITE_TIMER,
 )
+from .entities import ENTITIES, dig
 
 _LOGGER = logging.getLogger(__name__)
 
 REPORT_MAX = 128 * 1024
 
 
-def _json(payload: str | bytes) -> dict | None:
+def _json(payload: str | bytes | bytearray) -> dict[str, Any] | None:
     """A document, or None (an empty retained message clears the topic)."""
     if not payload:
         return None
@@ -69,19 +76,24 @@ class PlayGuardConsole:
         self.prefix: str = entry.data.get(CONF_PREFIX, DEFAULT_PREFIX)
         self.base = f"{self.prefix}/{self.console_id}"
 
-        self.state: dict | None = None
-        self.system: dict | None = None  # the console itself (versions, storage, power, network)
-        self.games: dict | None = None  # the games installed and played, with their totals
+        self.state: dict[str, Any] | None = None
+        self.system: dict[str, Any] | None = None  # the console itself (versions, storage, power, network)
+        self.games: dict[str, Any] | None = None  # the games installed and played, with their totals
         self.online: bool | None = None
-        self.activity: dict | None = None
-        self.names: dict = {}
-        self.week: dict | None = None
-        self.finals: dict[str, dict] = {}  # "YYYY-MM-DD" -> a finished day's activity
+        self.activity: dict[str, Any] | None = None
+        self.names: dict[str, Any] = {}
+        self.week: dict[str, Any] | None = None
+        self.finals: dict[str, dict[str, Any]] = {}  # "YYYY-MM-DD" -> a finished day's activity
         self.report: str | None = None
-        self.last_event: dict | None = None
+        self.last_event: dict[str, Any] | None = None
+        self.last_seen: datetime | None = None  # the last document it published while we listened
+        # What PlayGuard does not publish (the state's link.publishes), as the
+        # last state said it: kept in the entry, so the entities of what is
+        # off are not created again at the next start.
+        self.unpublished: frozenset[str] = frozenset(entry.data.get(CONF_UNPUBLISHED, ()))
 
         self._listeners: list[Callable[[], None]] = []
-        self._event_listeners: list[Callable[[dict], None]] = []
+        self._event_listeners: list[Callable[[dict[str, Any]], None]] = []
         self._unsubscribe: list[CALLBACK_TYPE] = []
         self._statistics_timer: CALLBACK_TYPE | None = None
         self._discovery_sent = False
@@ -149,7 +161,7 @@ class PlayGuardConsole:
         return lambda: self._listeners.remove(listener)
 
     @callback
-    def async_add_event_listener(self, listener: Callable[[dict], None]) -> CALLBACK_TYPE:
+    def async_add_event_listener(self, listener: Callable[[dict[str, Any]], None]) -> CALLBACK_TYPE:
         """Called with every event the console publishes."""
         self._event_listeners.append(listener)
         return lambda: self._event_listeners.remove(listener)
@@ -160,27 +172,39 @@ class PlayGuardConsole:
             listener()
 
     @callback
+    def _seen(self, msg: ReceiveMessage) -> None:
+        """The console spoke now: a message published while we listen (a
+        retained one handed over at subscription may be hours old)."""
+        if not msg.retain:
+            self.last_seen = dt_util.utcnow()
+
+    @callback
     def _on_state(self, msg: ReceiveMessage) -> None:
         doc = _json(msg.payload)
         if doc is None:
             return
+        self._seen(msg)
         self._check_schema(doc)
         self.state = doc
         self._update_device()
         self._take_over()
+        self._follow_publishes()
         self._changed()
 
     @callback
     def _on_system(self, msg: ReceiveMessage) -> None:
+        self._seen(msg)
         self.system = _json(msg.payload)
+        self._update_device()
         self._changed()
 
     @callback
     def _on_games(self, msg: ReceiveMessage) -> None:
+        self._seen(msg)
         self.games = _json(msg.payload)
         self._changed()
 
-    def document(self, topic: str) -> dict | None:
+    def document(self, topic: str) -> dict[str, Any] | None:
         """The last document of `topic`: "state", "system" or "games"."""
         return {"system": self.system, "games": self.games}.get(topic, self.state)
 
@@ -200,6 +224,8 @@ class PlayGuardConsole:
             )
         elif online and self.online is False:
             _LOGGER.info("%s is back online", self.name)
+        if online:
+            self._seen(msg)
         self.online = online
         self._changed()
 
@@ -212,10 +238,11 @@ class PlayGuardConsole:
     def keep_values(self) -> bool:
         """Whether the sensors keep their last values while the console is off
         the broker (the entry's option, on by default)."""
-        return self.entry.options.get(CONF_KEEP_VALUES, True)
+        return bool(self.entry.options.get(CONF_KEEP_VALUES, True))
 
     @callback
     def _on_activity(self, msg: ReceiveMessage) -> None:
+        self._seen(msg)
         self.activity = _json(msg.payload)
         self._changed()
 
@@ -231,11 +258,13 @@ class PlayGuardConsole:
 
     @callback
     def _on_names(self, msg: ReceiveMessage) -> None:
+        self._seen(msg)
         self.names = _json(msg.payload) or {}
         self._changed()
 
     @callback
     def _on_week(self, msg: ReceiveMessage) -> None:
+        self._seen(msg)
         self.week = _json(msg.payload)
         self._changed()
 
@@ -244,6 +273,7 @@ class PlayGuardConsole:
         doc = _json(msg.payload)
         if doc is None:
             return
+        self._seen(msg)
         self.last_event = doc
         for listener in list(self._event_listeners):
             listener(doc)
@@ -261,22 +291,31 @@ class PlayGuardConsole:
         name = ((self.state or {}).get("console") or {}).get("name")
         return name or self.entry.title
 
-    def _device_details(self) -> tuple[str, str | None, str | None]:
-        """The device's name, software and hardware versions, from the state."""
-        console = (self.state or {}).get("console") or {}
-        return self.name, console.get("app_version") or console.get("agent_version"), console.get("firmware")
+    def _device_details(self) -> dict[str, str | None]:
+        """The console as Nintendo names it, as PlayGuard's discovery does:
+        its model and model number (the system document), the system it
+        runs as its software ("23.0.1 · Atmosphère 1.10.1"). Unknown while
+        PlayGuard does not publish its versions and hardware."""
+        model = dig(self.system, ("hardware", "model"))
+        name, number = MODEL_NAMES.get(model, (MODEL, None)) if isinstance(model, str) else (MODEL, None)
+        firmware = dig(self.system, ("versions", "firmware")) or dig(self.state, ("console", "firmware"))
+        atmosphere = dig(self.system, ("versions", "atmosphere")) or dig(self.state, ("console", "atmosphere"))
+        system = None
+        if isinstance(firmware, str):
+            system = f"{firmware} \u00b7 Atmosph\u00e8re {atmosphere}" if isinstance(atmosphere, str) else firmware
+        return {"name": self.name, "model": name, "model_id": number, "sw_version": system, "hw_version": None}
 
     @property
     def device_info(self) -> DeviceInfo:
         """The device all the entities belong to."""
-        name, sw_version, hw_version = self._device_details()
+        details = self._device_details()
         return DeviceInfo(
             identifiers={(DOMAIN, self.console_id)},
-            name=name,
+            name=details["name"],
             manufacturer=MANUFACTURER,
-            model=MODEL,
-            sw_version=sw_version,
-            hw_version=hw_version,
+            model=details["model"],
+            model_id=details["model_id"],
+            sw_version=details["sw_version"],
         )
 
     @callback
@@ -285,15 +324,63 @@ class PlayGuardConsole:
         device = registry.async_get_device_by_identifier((DOMAIN, self.console_id), self.entry.entry_id)
         if device is None:
             return
-        name, sw_version, hw_version = self._device_details()
-        changes: dict[str, str | None] = {"sw_version": sw_version, "hw_version": hw_version}
-        if device.name_by_user is None and device.name != name:
-            changes["name"] = name
-        if any(getattr(device, k) != v for k, v in changes.items()):
-            registry.async_update_device(device.id, **changes)
+        details = self._device_details()
+        name = details["name"] if device.name_by_user is None else device.name
+        wanted = {**details, "name": name, "manufacturer": MANUFACTURER}
+        if any(getattr(device, k) != v for k, v in wanted.items()):
+            registry.async_update_device(
+                device.id,
+                name=name,
+                manufacturer=MANUFACTURER,
+                model=details["model"],
+                model_id=details["model_id"],
+                sw_version=details["sw_version"],
+                hw_version=details["hw_version"],
+            )
+
+    # ---- what is published ----
 
     @callback
-    def _check_schema(self, doc: dict) -> None:
+    def _follow_publishes(self) -> None:
+        """PlayGuard says what it publishes (link.publishes; an older one does
+        not: everything). The entities of what it turned off go; what it
+        turned back on comes back with a reload of the entry."""
+        publishes = dig(self.state, ("link", "publishes"))
+        if not isinstance(publishes, dict):
+            return
+        off = {k for k, v in publishes.items() if v is False}
+        if PUBLISH_HARDWARE in off:
+            off.add(PUBLISH_SERIAL)  # the serial number goes with the hardware
+        unpublished = frozenset(off)
+        if unpublished == self.unpublished:
+            self._remove_unpublished()
+            return
+        back = self.unpublished - unpublished
+        self.unpublished = unpublished
+        self.hass.config_entries.async_update_entry(
+            self.entry, data={**self.entry.data, CONF_UNPUBLISHED: sorted(unpublished)}
+        )
+        self._remove_unpublished()
+        if back:
+            _LOGGER.debug("%s publishes %s again: its entities come back", self.base, ", ".join(sorted(back)))
+            self.hass.config_entries.async_schedule_reload(self.entry.entry_id)
+
+    @callback
+    def _remove_unpublished(self) -> None:
+        """Removes the entities of what PlayGuard does not publish."""
+        if not self.unpublished:
+            return
+        registry = er.async_get(self.hass)
+        for definition in ENTITIES:
+            if definition.publish not in self.unpublished:
+                continue
+            unique_id = f"{self.console_id}_{definition.key}"
+            entity_id = registry.async_get_entity_id(definition.platform, DOMAIN, unique_id)
+            if entity_id:
+                registry.async_remove(entity_id)
+
+    @callback
+    def _check_schema(self, doc: dict[str, Any]) -> None:
         schema = doc.get("schema")
         if isinstance(schema, int) and schema > SCHEMA:
             ir.async_create_issue(
@@ -358,8 +445,9 @@ class PlayGuardConsole:
         link = self.state.get("link") or {}
         if link.get("policy") == "off":
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="policy_off")
-        locking = key == "unlocked" and payload == "OFF"
-        if write == WRITE_TIMER and not link.get("remote_timer_writes") and not locking:
+        # Unlocking parental controls needs it too; locking them again never does.
+        unlocking = key == "parental_controls" and payload == "UNLOCK"
+        if (write == WRITE_TIMER or unlocking) and not link.get("remote_timer_writes"):
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="timer_writes_disabled")
 
     async def async_send(self, key: str, payload: str) -> None:

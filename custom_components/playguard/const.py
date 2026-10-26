@@ -25,6 +25,9 @@ CONF_TAKE_OVER: Final = "take_over_discovery"
 # said keeps showing: its sensors keep their last values, its controls are
 # unavailable.
 CONF_KEEP_VALUES: Final = "keep_values_asleep"
+# What PlayGuard last said it does not publish (in the entry's data, kept
+# across restarts): those entities are not created.
+CONF_UNPUBLISHED: Final = "unpublished"
 
 CONSOLE_ID_RE: Final = re.compile(r"^[0-9a-f]{8}$")
 
@@ -47,8 +50,26 @@ WRITE_NONE: Final = "none"
 WRITE_FREE: Final = "free"  # an order, refused only in read-only mode or under the "off" policy
 WRITE_TIMER: Final = "timer"  # also needs "Orders may change the play timer" on the console
 
-MANUFACTURER: Final = "PlayGuard"
+# What an entity shows (PlayGuard's sync.conf publish_* switches, the state's
+# link.publishes): the parental controls always, the rest while published.
+PUBLISH_CONTROLS: Final = "controls"
+PUBLISH_ACTIVITY: Final = "activity"
+PUBLISH_GAMES: Final = "games"
+PUBLISH_CONSOLE: Final = "console"
+PUBLISH_NETWORK: Final = "network"
+PUBLISH_HARDWARE: Final = "hardware"
+PUBLISH_SERIAL: Final = "serial"
+
+# The device is the console as Nintendo names it (PlayGuard's discovery):
+# hardware.model -> (model, model number).
+MANUFACTURER: Final = "Nintendo"
 MODEL: Final = "Nintendo Switch"
+MODEL_NAMES: Final = {
+    "erista": ("Nintendo Switch", "HAC-001"),
+    "mariko": ("Nintendo Switch", "HAC-001(-01)"),
+    "lite": ("Nintendo Switch Lite", "HDH-001"),
+    "oled": ("Nintendo Switch \u2013 OLED Model", "HEG-001"),
+}
 
 # States that may still say the console's own discovery is on after it was
 # asked off (one published before the order was handled): more mean the
@@ -58,6 +79,10 @@ NATIVE_STATES_MAX: Final = 2
 # Finished days are imported as long-term statistics a moment after the last
 # one arrives (the broker hands the retained ones over in a burst).
 STATISTICS_DELAY: Final = 5.0
+
+# Entities an earlier version had, removed by the migration to 1.3 (the
+# lock Parental controls does all three): (platform, key).
+RETIRED: Final = (("binary_sensor", "temp_unlocked"), ("switch", "unlocked"), ("button", "lock_now"))
 
 # Where the integration tells the console which version runs (retained, at
 # every set-up; cleared when the entry is removed): PlayGuard warns of a

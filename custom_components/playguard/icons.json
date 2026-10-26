@@ -11,21 +11,24 @@
         "default": "mdi:timer-outline"
       },
       "limit_reached": {
-        "default": "mdi:timer-alert-outline"
+        "default": "mdi:block-helper"
       },
       "agent": {
         "default": "mdi:server-network"
       },
       "docked": {
         "default": "mdi:television"
+      },
+      "pin_set": {
+        "default": "mdi:form-textbox-password"
+      },
+      "clock_accurate": {
+        "default": "mdi:clock-check-outline"
       }
     },
     "button": {
       "sync_now": {
         "default": "mdi:sync"
-      },
-      "lock_now": {
-        "default": "mdi:lock"
       },
       "add_bonus_time_15": {
         "default": "mdi:timer-plus-outline"
@@ -41,6 +44,9 @@
       },
       "remove_limit": {
         "default": "mdi:timer-remove-outline"
+      },
+      "export_report": {
+        "default": "mdi:file-document-outline"
       }
     },
     "sensor": {
@@ -88,8 +94,36 @@
       "console_lock": {
         "default": "mdi:lock"
       },
-      "unlocked": {
-        "default": "mdi:lock-open-variant"
+      "bedtime_enabled": {
+        "default": "mdi:bed-clock"
+      },
+      "play_timer_alarm": {
+        "default": "mdi:alarm"
+      },
+      "vr_restricted": {
+        "default": "mdi:virtual-reality"
+      },
+      "sns_post_restricted": {
+        "default": "mdi:share-off"
+      },
+      "free_communication_restricted": {
+        "default": "mdi:message-lock"
+      }
+    },
+    "time": {
+      "bedtime_alarm": {
+        "default": "mdi:weather-night"
+      },
+      "bedtime_end_time": {
+        "default": "mdi:weather-sunset-up"
+      }
+    },
+    "select": {
+      "restriction_level": {
+        "default": "mdi:account-child-circle"
+      },
+      "profile": {
+        "default": "mdi:account-switch"
       }
     }
   },

@@ -107,7 +107,7 @@ async def test_discovered(hass: HomeAssistant) -> None:
     assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"}
     assert result["options"] == {CONF_TAKE_OVER: True}
     assert result["result"].unique_id == CONSOLE_ID
-    assert (result["result"].version, result["result"].minor_version) == (1, 2)  # nothing to migrate
+    assert (result["result"].version, result["result"].minor_version) == (1, 3)  # nothing to migrate
 
     # The retained state comes again at every start: already set up.
     result = await hass.config_entries.flow.async_init(

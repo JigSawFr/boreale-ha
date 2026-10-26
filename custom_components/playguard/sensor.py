@@ -12,7 +12,8 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import PlayGuardConfigEntry
-from .entities import for_platform
+from .coordinator import PlayGuardConsole
+from .entities import EntityDef, for_platform
 from .entity import PlayGuardEntity
 
 PARALLEL_UPDATES = 0
@@ -27,8 +28,11 @@ async def async_setup_entry(
         "used_screen_time_log": PlayLogSensor,
         "week_play_time": WeekSensor,
         "games_installed": GamesInstalledSensor,
+        "last_seen": LastSeenSensor,
     }
-    async_add_entities(classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR))
+    async_add_entities(
+        classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR, console.unpublished)
+    )
 
 
 def _posix(value: Any) -> int:
@@ -46,7 +50,7 @@ class PlayGuardSensor(PlayGuardEntity, SensorEntity):
 
     _keeps_value = True
 
-    def __init__(self, console, definition) -> None:
+    def __init__(self, console: PlayGuardConsole, definition: EntityDef) -> None:
         super().__init__(console, definition)
         if definition.unit:
             self._attr_native_unit_of_measurement = definition.unit
@@ -56,6 +60,10 @@ class PlayGuardSensor(PlayGuardEntity, SensorEntity):
             self._attr_state_class = SensorStateClass(definition.state_class)
         if definition.options:
             self._attr_options = list(definition.options)
+        if definition.suggested_unit:
+            self._attr_suggested_unit_of_measurement = definition.suggested_unit
+        if definition.precision is not None:
+            self._attr_suggested_display_precision = definition.precision
 
     @property
     def native_value(self) -> Any:
@@ -67,7 +75,7 @@ class PlayGuardSensor(PlayGuardEntity, SensorEntity):
         return value if isinstance(value, (int, float, str)) and not isinstance(value, bool) else None
 
 
-def _games(console, per_app: list | None) -> dict[str, int]:
+def _games(console: PlayGuardConsole, per_app: list[Any] | None) -> dict[str, int]:
     """{game: minutes}, the most played first."""
     out: dict[str, int] = {}
     for app in sorted(per_app or [], key=lambda a: -(a.get("s") or 0) if isinstance(a, dict) else 0):
@@ -136,6 +144,24 @@ class WeekSensor(PlayGuardSensor):
             if isinstance(g, dict) and g.get("app_id")
         }
         return {"days": self._days(), "games": dict(sorted(games.items(), key=lambda kv: -kv[1]))}
+
+
+class LastSeenSensor(PlayGuardSensor):
+    """When the console last said something: the last document it published
+    while Home Assistant listened, else (after a restart) the time of its
+    last state. Shown while it sleeps too: that is when it is wanted."""
+
+    @property
+    def available(self) -> bool:
+        return self.native_value is not None
+
+    @property
+    def native_value(self) -> datetime | None:
+        state_ts = _timestamp((self.console.state or {}).get("ts"))
+        seen = self.console.last_seen
+        if seen and state_ts:
+            return max(seen, state_ts)
+        return seen or state_ts
 
 
 class GamesInstalledSensor(PlayGuardSensor):

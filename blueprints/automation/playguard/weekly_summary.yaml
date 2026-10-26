@@ -83,7 +83,7 @@ actions:
       {{ (m // 60) ~ ' h ' ~ '%02d' % (m % 60) if m >= 60 else m ~ ' min' }}
       {%- endmacro -%}
       {%- set games = (state_attr(week, 'games') or {}).items() | list -%}
-      Play this week: {{ hm(states(week) | int(0)) }}.
+      Play this week: {{ hm((state_attr(week, 'days') or {}).values() | sum) }}.
       {%- if games and top | int > 0 %} Most played:
       {%- for name, m in games[:top | int] %} {{ name }} {{ hm(m) }}{{ ',' if not loop.last else '.' }}
       {%- endfor %}

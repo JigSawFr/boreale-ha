@@ -40,7 +40,10 @@ async def test_the_console_itself(hass: HomeAssistant, setup) -> None:
     battery = _state(hass, "sensor", "battery")
     assert battery.state == "87" and battery.attributes["device_class"] == "battery"
     sd = _state(hass, "sensor", "sd_free")
-    assert sd.state == "21344" and sd.attributes["unit_of_measurement"] == "MiB"
+    # MiB from PlayGuard, shown in GiB (Home Assistant converts).
+    assert sd.state == "20.84375" and sd.attributes["unit_of_measurement"] == "GiB"
+    # Registered beforehand (the fixture turns it on): an existing entity
+    # keeps its unit.
     assert _state(hass, "sensor", "nand_total").state == "26592"
     assert _state(hass, "binary_sensor", "charging").state == STATE_ON
     assert _state(hass, "binary_sensor", "docked").state == STATE_OFF
@@ -65,7 +68,7 @@ async def test_the_console_itself(hass: HomeAssistant, setup) -> None:
     # Offline: its sensors keep their last values (the option's default).
     publish(hass, "availability", "offline")
     await hass.async_block_till_done()
-    assert _state(hass, "sensor", "sd_free").state == "21344"
+    assert _state(hass, "sensor", "sd_free").state == "20.84375"
 
 
 async def test_games(hass: HomeAssistant, setup) -> None:
@@ -88,7 +91,9 @@ async def test_games(hass: HomeAssistant, setup) -> None:
         "last_played": "2024-10-27T03:33:20+00:00",
     }
     total = _state(hass, "sensor", "play_time_total")
-    assert total.state == "2400" and total.attributes["state_class"] == "total_increasing"
+    # Minutes from PlayGuard, shown in hours.
+    assert total.state == "40.0" and total.attributes["state_class"] == "total_increasing"
+    assert total.attributes["unit_of_measurement"] == "h"
     assert _state(hass, "sensor", "accounts").state == "3"
 
     # Xenoblade played again: first on the list. A new game never played,
@@ -138,7 +143,7 @@ async def test_game_sensors_go(hass: HomeAssistant, mqtt_mock, entry) -> None:
     other = registry.async_get_or_create("sensor", DOMAIN, "0badc0de_game_0100000000010000")
     assert await hass.config_entries.async_setup(old.entry_id)
     await hass.async_block_till_done()
-    assert old.minor_version == 2 and "game_sensors" not in old.options
+    assert old.minor_version == 3 and "game_sensors" not in old.options
     assert old.options[CONF_TAKE_OVER] is True
     assert registry.async_get(odyssey.entity_id) is None
     assert registry.async_get(installed.entity_id) is not None

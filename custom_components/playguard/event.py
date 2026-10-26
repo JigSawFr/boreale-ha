@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from homeassistant.components.event import EventEntity
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, callback
@@ -19,7 +21,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     console = entry.runtime_data
-    async_add_entities(PlayGuardEvent(console, d) for d in for_platform(Platform.EVENT))
+    async_add_entities(PlayGuardEvent(console, d) for d in for_platform(Platform.EVENT, console.unpublished))
 
 
 class PlayGuardEvent(PlayGuardEntity, EventEntity):
@@ -42,7 +44,7 @@ class PlayGuardEvent(PlayGuardEntity, EventEntity):
         return self.shown
 
     @callback
-    def _handle_event(self, doc: dict) -> None:
+    def _handle_event(self, doc: dict[str, Any]) -> None:
         event_type = doc.get("event_type")
         if event_type not in EVENT_TYPES:
             return

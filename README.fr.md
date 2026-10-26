@@ -3,7 +3,7 @@
 [![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
 [![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
 [![HACS: custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![quality scale: gold](https://img.shields.io/badge/quality%20scale-gold-d4af37.svg)](custom_components/playguard/quality_scale.yaml)
+[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](custom_components/playguard/quality_scale.yaml)
 [![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 
 [English](README.md) · **Français**
@@ -177,7 +177,9 @@ sous l'ancien préfixe ne la fait pas revenir en arrière.
 ## Entités
 
 Un appareil par console, au nom de la console (*Nom dans Home Assistant* dans
-PlayGuard), avec son firmware et la version de PlayGuard. Les entités de
+PlayGuard) : la console telle que Nintendo la nomme, son modèle et son numéro
+de modèle (*Nintendo Switch – OLED Model*, HEG-001) et le système qu'elle fait
+tourner comme logiciel (*23.0.1 · Atmosphère 1.10.1*). Les entités de
 *configuration* et de *diagnostic* sont dans leurs propres sections de la page
 de l'appareil et hors des tableaux de bord par défaut. Tant que la console est
 hors ligne, ses contrôles sont indisponibles et ses capteurs gardent leurs
@@ -194,25 +196,31 @@ recharge avec lui.
 
 | Entité | Ce qu'elle indique | Remarques |
 |---|---|---|
-| Contrôle parental | Le contrôle parental est configuré sur la console. | |
-| Déverrouillé temporairement | Le contrôle parental est déverrouillé pour l'instant (le code PIN a été saisi). | classe d'appareil *Serrure* : *Déverrouillé* quand il est actif |
+| Contrôle parental configuré | Le contrôle parental est configuré sur la console. | |
 | Application mobile liée | L'application mobile de Nintendo est liée à la console. | |
 | Minuteur de jeu | La limite quotidienne de temps de jeu est activée. | |
-| Temps écoulé | La limite du jour est atteinte. | |
+| Jeu bloqué | Le minuteur bloque les jeux : la limite du jour est atteinte, ou c'est l'heure du coucher. | son `reason` : `limit` ou `bedtime` |
 | Code PIN défini | Un code PIN est défini. | diagnostic |
 | Horloge réseau exacte | L'horloge de la console est réglée depuis le réseau. | diagnostic, désactivé par défaut |
 | En ligne | La console est sur le broker en ce moment (sinon : en veille, éteinte, hors de portée). | diagnostic, propre à cette intégration |
 | Agent actif | L'agent de PlayGuard garde le lien. | diagnostic, désactivé par défaut, propre à cette intégration |
 
-**Capteurs** (minutes)
+**Verrou** : *Contrôle parental*, verrouillé tant qu'il s'applique.
+Déverrouillez-le pour le suspendre avec le code PIN que PlayGuard garde (il
+faut *Les ordres peuvent changer le temps de jeu*) ; verrouillez-le pour le
+réactiver, toujours permis.
+
+**Capteurs** (minutes ; la semaine et le total depuis toujours sont affichés
+en heures)
 
 | Entité | Ce qu'elle indique | Remarques |
 |---|---|---|
-| Temps d'écran utilisé | Le temps de jeu du jour, tel que le minuteur le compte. | total quotidien, remis à 0 à minuit |
-| Temps d'écran utilisé (journal de jeu) | Le temps de jeu du jour d'après le journal de jeu, avec les minutes de chaque jeu (`games`). | total quotidien, désactivé par défaut |
+| Temps de jeu aujourd'hui | Le temps de jeu du jour d'après le journal de jeu (chaque jeu, avec ou sans limite), avec les minutes de chaque jeu (`games`). | total quotidien, remis à 0 à minuit |
+| Temps d'écran utilisé | Le temps de jeu du jour, tel que le minuteur le compte (seulement avec une limite). | total quotidien, désactivé par défaut |
 | Temps d'écran restant | Ce qui reste de la limite du jour. | |
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
 | Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`) et de chaque jeu (`games`). | propre à cette intégration ; une fois que PlayGuard lui-même a tourné |
+| Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
 | Firmware, Atmosphère | Les versions de la console. | diagnostic |
@@ -220,28 +228,27 @@ recharge avec lui.
 | Temps passé (1952) | Le décompte brut du minuteur. | diagnostic, désactivé par défaut |
 
 **Nombres** (configuration, minutes, 0 à 1440 ; 1440 signifie pas de limite) :
-*Limite dimanche* … *Limite samedi*, *Limite tous les jours* (inconnue quand les
-jours diffèrent), *Temps d'écran max aujourd'hui* (aujourd'hui seulement ; la
-limite habituelle revient demain).
+*Limite tous les jours* (inconnue quand les jours diffèrent), *Temps d'écran
+max aujourd'hui* (aujourd'hui seulement ; la limite habituelle revient demain),
+*Limite dimanche* … *Limite samedi* (désactivées par défaut).
 
-**Heure** (configuration) : *Alarme du coucher* (quand l'alarme sonne), *Fin du
-coucher* (quand le jeu est de nouveau permis).
+**Heure** (configuration) : *Coucher* (quand l'alarme sonne), *Lever* (quand le
+jeu est de nouveau permis).
 
-**Interrupteurs** : *Bloquer tous les jeux* (plus de jeu du tout),
-*Déverrouillé* (désactivé, il réactive le contrôle parental après un
-déverrouillage temporaire) ; configuration : *Alarme du coucher activée*,
-*Alarme de fin de temps*, *Mode VR restreint*, *Publication sur les réseaux
-sociaux restreinte*, *Communication restreinte*.
+**Interrupteurs** : *Bloquer tous les jeux* (plus de jeu du tout) ;
+configuration : *Alarme du coucher*, *Alarme de fin de temps*, *Mode VR
+restreint*, *Publication sur les réseaux sociaux restreinte*, *Communication
+restreinte*.
 
 **Sélecteurs** (configuration) : *Niveau de restriction* (sans restriction,
 jeune enfant, enfant, adolescent, personnalisé), *Profil* (applique l'un des
-profils enregistrés dans PlayGuard ; il n'affiche aucun choix en cours : les
-limites disent lequel s'applique).
+profils enregistrés dans PlayGuard, et affiche celui qui s'applique : le profil
+enregistré dont les limites sont celles de la console ; inconnu sinon).
 
 **Boutons** : *Temps en plus +15 min*, *+30 min*, *+1 h*, *Fin du jeu pour
-aujourd'hui*, *Retirer la limite*, *Réactiver le contrôle parental* (après un
-déverrouillage temporaire) ; diagnostic : *Synchroniser maintenant* (la console republie
-tout), *Exporter un rapport de diagnostic* (désactivé par défaut).
+aujourd'hui*, *Retirer la limite* ; diagnostic : *Synchroniser maintenant* (la
+console republie tout), *Exporter un rapport de diagnostic* (désactivé par
+défaut).
 
 **Événement** : *Événements*, voir [événements](#événements).
 
@@ -251,7 +258,7 @@ quand PlayGuard est fermé) :
 | Entité | Ce qu'elle indique | Notes |
 |---|---|---|
 | Batterie, En charge, Sur le dock | Sa charge, si un chargeur l'alimente, si elle est sur le dock. | |
-| Espace libre de la carte SD, Espace libre du stockage interne | Mio restants sur la carte SD et sur le stockage utilisateur du système (celui de l'emuMMC sur un emuMMC). | lus toutes les 5 minutes ; leurs tailles sont de diagnostic, désactivées par défaut |
+| Espace libre de la carte SD, Espace libre du stockage interne | L'espace restant sur la carte SD et sur le stockage utilisateur du système (celui de l'emuMMC sur un emuMMC), affiché en Gio. | lus toutes les 5 minutes ; leurs tailles sont de diagnostic, désactivées par défaut |
 | Modèle | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic, désactivé par défaut |
 | Surnom de la console, Région, Système, hekate | Le surnom des Paramètres de la console, la région, sysMMC ou emuMMC, hekate sur la carte SD. | diagnostic, désactivés par défaut |
 | PRODINFO masqué | Atmosphère cache l'identité de la console. | diagnostic, désactivé par défaut |
@@ -276,15 +283,26 @@ et les statistiques restent. Pour une automatisation sur un jeu, un template
 lit l'attribut :
 
 ```jinja
-{{ (state_attr('sensor.living_room_used_screen_time_play_log', 'games') or {})
+{{ (state_attr('sensor.living_room_play_time_today', 'games') or {})
    .get('Super Mario Odyssey', 0) > 60 }}
 ```
 
 Les entités qui changent le minuteur (limites, heure du coucher, temps en plus,
 blocage de tous les jeux, profils) demandent *Les ordres peuvent changer le
 temps de jeu* activé sur la console ; sans lui, elles sont refusées ici avec la
-raison. Réactiver le contrôle parental (*Déverrouillé* désactivé) et les restrictions n'en ont
-pas besoin.
+raison, tout comme le déverrouillage du verrou. Le verrouiller de nouveau et
+les restrictions n'en ont pas besoin.
+
+**Ce que PlayGuard publie** : son *Accès à distance › Ce qui est publié*
+désactive le temps de jeu, les jeux, l'état de la console, le réseau, les
+versions et le matériel, le numéro de série ou les rapports. Leurs entités
+quittent alors Home Assistant (et ne sont pas recréées au prochain démarrage) ;
+réactivé, l'entrée se recharge et elles reviennent. Le contrôle parental est
+toujours publié.
+
+La 0.5 remplace *Déverrouillé*, *Réactiver le contrôle parental* et
+*Déverrouillé temporairement* par le verrou : la mise à jour les supprime,
+vérifiez donc les automatisations qui les utilisaient.
 
 Home Assistant construit lui-même les identifiants d'entités, à partir des noms
 de l'appareil et des entités, lors de leur premier enregistrement, et vous
@@ -350,6 +368,13 @@ qu'écouter.
   terminée (`activity/<date>`) au premier cycle après minuit, la console
   gardant les 14 dernières. Les **noms des jeux** et la **semaine** arrivent
   quand PlayGuard lui-même tourne (pas l'agent).
+- **Vu pour la dernière fois** est l'heure du dernier document publié par la
+  console pendant que Home Assistant écoutait (son état arrive toutes les
+  `poll_s` secondes tant qu'elle est réveillée), sinon, après un redémarrage,
+  l'heure de son dernier état.
+- **Ce qui est publié** (le `link.publishes` de l'état) : les entités de ce que
+  PlayGuard cesse de publier partent aussitôt ; celles de ce qu'il publie de
+  nouveau reviennent avec un rechargement de l'entrée.
 - **Statistiques** : les journées terminées sont importées 5 secondes après
   l'arrivée de la dernière (elles arrivent en rafale) ; importer de nouveau une
   journée la remplace.
@@ -390,14 +415,19 @@ actions:
         {{ trigger.to_state.attributes.reason }}
 ```
 
-Le temps est écoulé : le dire sur le téléphone.
+Le temps est écoulé : le dire sur le téléphone (pas à l'heure du coucher, qui bloque aussi les jeux).
 
 ```yaml
 alias: Temps de Switch écoulé
 triggers:
   - trigger: state
-    entity_id: binary_sensor.living_room_time_is_up
+    entity_id: binary_sensor.living_room_playing_blocked
     to: "on"
+conditions:
+  - condition: state
+    entity_id: binary_sensor.living_room_playing_blocked
+    attribute: reason
+    state: limit
 actions:
   - action: notify.notify
     data:
@@ -464,7 +494,7 @@ console, *Paramètres › Appareils et services › PlayGuard*) par les vôtres 
 type: vertical-stack
 cards:
   - type: tile
-    entity: sensor.living_room_used_screen_time
+    entity: sensor.living_room_play_time_today
   - type: tile
     entity: sensor.living_room_screen_time_remaining
   - type: tile
@@ -523,7 +553,7 @@ téléphone (l'application Home Assistant).
 
 | Blueprint | Ce qu'il fait | Importer |
 |---|---|---|
-| **Time is up, extra time from the notification** | Quand la limite du jour est atteinte, une notification sur le téléphone avec un bouton qui donne du temps en plus (*+15 min*, ou ce que vous choisissez). | [![Importer le blueprint de fin de temps](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **Time is up, extra time from the notification** | Quand la limite du jour est atteinte (pas à l'heure du coucher), une notification sur le téléphone avec un bouton qui donne du temps en plus (*+15 min*, ou ce que vous choisissez). | [![Importer le blueprint de fin de temps](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
 | **Extra time when…** | Du temps en plus quand quelque chose arrive : un assistant activé (les corvées faites), un bouton ou une télécommande pressés, un tag scanné ; puis ce que vous voulez (désactiver l'assistant). | [![Importer le blueprint de temps en plus](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
 | **Bedtime reminder** | Une notification quelques minutes avant *Alarme du coucher*, pendant qu'un jeu est joué (ou chaque jour). | [![Importer le blueprint de rappel du coucher](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
 | **Weekly summary** | Une fois par semaine, le temps de jeu des sept derniers jours et les jeux les plus joués. | [![Importer le blueprint de résumé de la semaine](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |

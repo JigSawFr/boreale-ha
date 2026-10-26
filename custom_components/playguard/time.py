@@ -20,7 +20,7 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     console = entry.runtime_data
-    async_add_entities(PlayGuardTime(console, d) for d in for_platform(Platform.TIME))
+    async_add_entities(PlayGuardTime(console, d) for d in for_platform(Platform.TIME, console.unpublished))
 
 
 class PlayGuardTime(PlayGuardEntity, TimeEntity):
