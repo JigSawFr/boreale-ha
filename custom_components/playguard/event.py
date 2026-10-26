@@ -31,7 +31,6 @@ class PlayGuardEvent(PlayGuardEntity, EventEntity):
     own (the `event` topic, not retained)."""
 
     _attr_event_types = list(EVENT_TYPES)
-    _keeps_value = True
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
