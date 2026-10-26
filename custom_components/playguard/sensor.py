@@ -135,7 +135,9 @@ class PlayLogSensor(PlayGuardSensor):
 
 
 class WeekSensor(PlayGuardSensor):
-    """The last seven days' play time (PlayGuard's week table), with each day's."""
+    """The last seven days' play time (PlayGuard's week table), with each day's.
+    The app writes the week; until it runs again, today's column comes from
+    today's activity, which the agent keeps up to date."""
 
     _unrecorded_attributes = frozenset({"days", "games", "accounts"})
 
@@ -143,14 +145,30 @@ class WeekSensor(PlayGuardSensor):
     def available(self) -> bool:
         return self.console.week is not None and self.shown
 
-    def _days(self) -> dict[str, int]:
+    def _games(self) -> dict[str, list[int]]:
+        """Each game's minutes per day, today's from the activity when it is newer."""
         week = self.console.week or {}
         days = week.get("days") or []
-        totals = [0] * len(days)
+        games: dict[str, list[int]] = {}
         for game in week.get("games") or []:
-            for i, minutes in enumerate((game or {}).get("min") or []):
-                if i < len(totals) and isinstance(minutes, int):
-                    totals[i] += minutes
+            if not isinstance(game, dict) or not isinstance(game.get("app_id"), str) or not game["app_id"]:
+                continue
+            minutes = [m if isinstance(m, int) and not isinstance(m, bool) else 0 for m in game.get("min") or []]
+            games[game["app_id"]] = (minutes + [0] * len(days))[: len(days)]
+        activity = self.console.activity or {}
+        if days and activity.get("local_date") == days[-1]:
+            for app in activity.get("per_app") or []:
+                if not isinstance(app, dict) or not isinstance(app.get("app_id"), str) or not app["app_id"]:
+                    continue
+                played = app.get("min")
+                if isinstance(played, int) and not isinstance(played, bool):
+                    minutes = games.setdefault(app["app_id"], [0] * len(days))
+                    minutes[-1] = max(minutes[-1], played)
+        return games
+
+    def _days(self) -> dict[str, int]:
+        days = (self.console.week or {}).get("days") or []
+        totals = [sum(day) for day in zip(*self._games().values(), strict=True)] or [0] * len(days)
         return dict(zip(days, totals, strict=False))
 
     @property
@@ -160,13 +178,7 @@ class WeekSensor(PlayGuardSensor):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         week = self.console.week or {}
-        games = {
-            self.console.game_name(g.get("app_id")) or g.get("app_id"): sum(
-                m for m in (g.get("min") or []) if isinstance(m, int)
-            )
-            for g in week.get("games") or []
-            if isinstance(g, dict) and g.get("app_id")
-        }
+        games = {self.console.game_name(app_id) or app_id: sum(m) for app_id, m in self._games().items()}
         return {
             "days": self._days(),
             "games": dict(sorted(games.items(), key=lambda kv: -kv[1])),

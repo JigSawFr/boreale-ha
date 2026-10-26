@@ -424,7 +424,8 @@ qu'écouter.
 - Le **journal de jeu** du jour (`activity`) arrive avec l'état ; une journée
   terminée (`activity/<date>`) au premier cycle après minuit, la console
   gardant les 14 dernières. Les **noms des jeux** et la **semaine** arrivent
-  quand PlayGuard lui-même tourne (pas l'agent).
+  quand PlayGuard lui-même tourne (pas l'agent) ; d'ici là, le jour même de la
+  semaine est celui du journal de jeu.
 - **Vu pour la dernière fois** est l'heure du dernier document publié par la
   console pendant que Home Assistant écoutait (son état arrive toutes les
   `poll_s` secondes tant qu'elle est réveillée), sinon, après un redémarrage,

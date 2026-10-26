@@ -329,6 +329,21 @@ async def test_week_and_names(hass: HomeAssistant, setup) -> None:
     assert week.attributes["days"] == {"2026-10-03": 30, "2026-10-04": 75}
     assert week.attributes["games"] == {"Super Mario Odyssey": 90, "Mario Kart 8 Deluxe": 15}
 
+    activity = fixture("activity.json")  # played since the app wrote the week: the agent's count for today
+    activity["local_date"] = "2026-10-04"
+    activity["per_app"] = [{"app_id": "0100000000010000", "min": 70}, {"app_id": "01000A10041EA000", "min": 5}]
+    activity["per_app"] += [{"app_id": "0100000000020000", "min": 12}, {"app_id": "0100000000010000", "min": "x"}]
+    publish(hass, "activity", activity)
+    await hass.async_block_till_done()
+    week = hass.states.get(_id("sensor", "week_play_time", hass))
+    assert week.attributes["days"] == {"2026-10-03": 30, "2026-10-04": 97}  # 70 + 15 (the week's is more) + 12
+    assert week.attributes["games"]["Super Mario Odyssey"] == 100
+
+    activity["local_date"] = "2026-10-05"  # another day: not this week's last
+    publish(hass, "activity", activity)
+    await hass.async_block_till_done()
+    assert hass.states.get(_id("sensor", "week_play_time", hass)).attributes["days"]["2026-10-04"] == 75
+
 
 async def test_services(hass: HomeAssistant, setup, mqtt_mock) -> None:
     device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)
