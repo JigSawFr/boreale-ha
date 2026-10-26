@@ -367,6 +367,9 @@ ENTITIES: tuple[EntityDef, ...] = (
         publish=PUBLISH_ACTIVITY,
         extra=True,
     ),
+    # Each game played, when: a calendar of the sessions, from the
+    # recorder's history of Now playing while the console was online.
+    EntityDef(key="play_sessions", platform=Platform.CALENDAR, publish=PUBLISH_ACTIVITY, extra=True),
     # When play has to stop: the end of today's limit or bedtime, whichever
     # comes first, while a game is played.
     EntityDef(key="play_ends", platform=Platform.SENSOR, device_class="timestamp", extra=True),
@@ -382,6 +385,22 @@ ENTITIES: tuple[EntityDef, ...] = (
 )
 
 BY_KEY: dict[str, EntityDef] = {e.key: e for e in ENTITIES}
+
+# Each user account's play time, today and this week: this integration's,
+# a pair for every account the console speaks of, created as they appear.
+ACCOUNT_ENTITIES: tuple[EntityDef, ...] = (
+    _minutes(
+        "account_today", ("per_account",), SensorStateClass.TOTAL_INCREASING, publish=PUBLISH_ACTIVITY, extra=True
+    ),
+    _minutes(
+        "account_week",
+        ("per_account",),
+        suggested_unit=UnitOfTime.HOURS,
+        precision=1,
+        publish=PUBLISH_ACTIVITY,
+        extra=True,
+    ),
+)
 
 
 def for_platform(platform: Platform, unpublished: frozenset[str] = frozenset()) -> list[EntityDef]:

@@ -132,6 +132,11 @@
         "name": "Remove the limit"
       }
     },
+    "calendar": {
+      "play_sessions": {
+        "name": "Play sessions"
+      }
+    },
     "event": {
       "events": {
         "name": "Events",
@@ -235,6 +240,12 @@
       },
       "play_ends": {
         "name": "Play ends"
+      },
+      "account_today": {
+        "name": "{account}'s play time today"
+      },
+      "account_week": {
+        "name": "{account}'s play time this week"
       },
       "model": {
         "name": "Model",

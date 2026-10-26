@@ -49,13 +49,15 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   proposée à la configuration, sans identifiant à saisir.
 - **Les mêmes entités** que l'appareil MQTT d'origine de la console (noms,
   unités, options), à sa place (pas de doublons ; réactivez-le dans les
-  options), plus **En ligne**, **Agent actif**, **Temps de jeu cette semaine** et **Fin de partie prévue**.
+  options), plus **En ligne**, **Agent actif**, **Temps de jeu cette semaine**,
+  **Fin de partie prévue** et le calendrier **Parties**.
 - **Les noms des jeux** sur *Jeu en cours*, et le temps de chaque jeu
   aujourd'hui et cette semaine en attributs ; tous les jeux sur *Jeux
   installés* (`games`), avec leur temps de jeu : une entité pour les jeux,
   pas une par jeu.
-- **Le temps de jeu de chaque compte** (de chaque enfant) : aujourd'hui et
-  cette semaine en attributs, sous le nom du compte sur la console.
+- **Le temps de jeu de chaque compte** (de chaque enfant) : un capteur pour
+  aujourd'hui et un pour cette semaine par compte, au nom du compte sur la
+  console, et les deux en attributs du temps de jeu de la console.
 - **Des statistiques à long terme** : le total de chaque journée terminée,
   celui de chaque jeu et celui de chaque compte, importés dans l'enregistreur
   (`playguard:<console id>_play_time`,
@@ -267,6 +269,8 @@ en heures)
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
 | Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; dès que PlayGuard ou son agent a publié du temps de jeu |
 | Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, avec le minuteur de jeu désactivé, ou sans limite ni coucher |
+| Temps de jeu aujourd'hui de *Compte*, Temps de jeu cette semaine de *Compte* | Une paire par compte utilisateur, créée dès que la console en parle (son nom, ou son temps de jeu). En minutes, celui de la semaine affiché en heures. | propres à cette intégration ; inconnus tant que le temps des comptes n'a pas été lu (l'app lit les comptes à la demande, l'agent d'après le journal de jeu) |
+| Parties (calendrier) | Chaque jeu joué et quand : un événement par période où le jeu était au premier plan pendant que la console était en ligne, au nom du jeu ; celui en cours se lit *activé*. Tiré de l'historique de *Jeu en cours* et *En ligne* dans l'enregistreur, il remonte donc aussi loin que l'enregistreur les garde (10 jours par défaut). | propre à cette intégration ; vide sans l'enregistreur ou avec *Jeu en cours* désactivé |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |

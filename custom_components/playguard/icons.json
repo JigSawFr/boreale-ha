@@ -49,6 +49,11 @@
         "default": "mdi:file-document-outline"
       }
     },
+    "calendar": {
+      "play_sessions": {
+        "default": "mdi:calendar-clock"
+      }
+    },
     "sensor": {
       "now_playing": {
         "default": "mdi:gamepad-variant"
@@ -58,6 +63,12 @@
       },
       "play_ends": {
         "default": "mdi:timer-sand"
+      },
+      "account_today": {
+        "default": "mdi:account-clock"
+      },
+      "account_week": {
+        "default": "mdi:account-clock-outline"
       },
       "nickname": {
         "default": "mdi:tag-text-outline"
