@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0](https://github.com/JigSawFr/playguard-ha/compare/v0.6.0...v0.7.0) (2026-10-26)
+
+
+### 🚀 Features
+
+* **accounts:** a play time sensor per account, today and this week ([#28](https://github.com/JigSawFr/playguard-ha/issues/28)) ([073b51e](https://github.com/JigSawFr/playguard-ha/commit/073b51e09927893b491d452e6c4ae18a5002e98d))
+* **blueprints:** still playing after bedtime, and an evening summary ([#30](https://github.com/JigSawFr/playguard-ha/issues/30)) ([b79557f](https://github.com/JigSawFr/playguard-ha/commit/b79557f673441e1af4c22930826723a7b4a98712))
+* **calendar:** the play sessions as a calendar ([#29](https://github.com/JigSawFr/playguard-ha/issues/29)) ([723dd39](https://github.com/JigSawFr/playguard-ha/commit/723dd39326a4ef6fa3fe8b5396b36262422b7bdf))
+* **device:** a 10-minute warning blueprint, a repair for an older agent, truer agent and play ends ([#26](https://github.com/JigSawFr/playguard-ha/issues/26)) ([9274447](https://github.com/JigSawFr/playguard-ha/commit/927444744cd4f48d0a3625f0b84b2b8f2c924b98))
+
+
+### 🐞 Bug Fixes
+
+* **availability:** keep the controls while the console sleeps ([#24](https://github.com/JigSawFr/playguard-ha/issues/24)) ([61d3a68](https://github.com/JigSawFr/playguard-ha/commit/61d3a6814e688c14d8618bdabeeba21682546dd2))
+* **week:** count today's play since PlayGuard last wrote the week ([#23](https://github.com/JigSawFr/playguard-ha/issues/23)) ([008274a](https://github.com/JigSawFr/playguard-ha/commit/008274a8a64a067ef54962547728da8ff6846697))
+* **week:** move the week on from the agent's play log and finished days, accounts included ([#27](https://github.com/JigSawFr/playguard-ha/issues/27)) ([824ac5b](https://github.com/JigSawFr/playguard-ha/commit/824ac5b1b7c1c198adc07f1db7b6ce00e5332765))
+
 ## [0.6.0](https://github.com/JigSawFr/playguard-ha/compare/v0.5.0...v0.6.0) (2026-10-26)
 
 
