@@ -97,4 +97,13 @@ async def test_accounts(hass: HomeAssistant, setup) -> None:
     )
     await hass.async_block_till_done()
     assert hass.states.get(today).attributes["accounts"] == {"Léa": 64, TOM: 10}  # by name, else by id
-    assert hass.states.get(week).attributes["accounts"] == {"Léa": 75, TOM: 15}
+    # The table's two days, and today's log (5 October) on the third.
+    assert hass.states.get(week).attributes["accounts"] == {"Léa": 30 + 45 + 64, TOM: 15 + 10}
+
+    # The agent's finished day says it too: no table needed.
+    final = fixture("activity.json") | {"local_date": "2026-10-04", "final": True}
+    final["per_account"] = [{"uid": LEA, "min": 50}]
+    publish(hass, "activity/2026-10-04", final)
+    publish(hass, "week", {"schema": 1, "ts": 2, "days": ["2026-10-04"], "games": []})
+    await hass.async_block_till_done()
+    assert hass.states.get(week).attributes["accounts"] == {"Léa": 50 + 64, TOM: 10}

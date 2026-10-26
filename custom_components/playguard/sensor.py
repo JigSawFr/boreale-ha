@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
@@ -83,9 +83,22 @@ def _games(console: PlayGuardConsole, per_app: list[Any] | None) -> dict[str, in
     return out
 
 
+def _minutes(value: Any) -> int | None:
+    """A count of minutes: an int, not a bool."""
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _date(value: Any) -> date | None:
+    """A "YYYY-MM-DD" date, else None."""
+    try:
+        return date.fromisoformat(value) if isinstance(value, str) and len(value) == 10 else None
+    except ValueError:
+        return None
+
+
 def _accounts(console: PlayGuardConsole, rows: Any) -> dict[str, int] | None:
     """{account: minutes}, the most played first; None when the console did
-    not say (PlayGuard reads the accounts only when asked to, the agent never)."""
+    not say (the app reads the accounts only when asked to, an older agent never)."""
     if not isinstance(rows, list):
         return None
     out: dict[str, int] = {}
@@ -133,54 +146,84 @@ class PlayLogSensor(PlayGuardSensor):
 
 
 class WeekSensor(PlayGuardSensor):
-    """The last seven days' play time (PlayGuard's week table), with each day's.
-    The app writes the week; until it runs again, today's column comes from
-    today's activity, which the agent keeps up to date."""
+    """The last seven days' play time, with each day's, each game's and each
+    account's. The app writes the week table; the agent alone does not, but
+    it publishes today's play log and every finished day: the window moves on
+    with them, and each day takes the larger count."""
 
     _unrecorded_attributes = frozenset({"days", "games", "accounts"})
 
     @property
     def available(self) -> bool:
-        return self.console.week is not None and self.shown
+        return bool(self._window()) and self.shown
+
+    def _window(self) -> list[str]:
+        """The seven days shown: the week table's, or the seven up to today's
+        play log when it is later."""
+        days = [d for d in (self.console.week or {}).get("days") or [] if isinstance(d, str)]
+        today = _date((self.console.activity or {}).get("local_date"))
+        if today is not None and (not days or today.isoformat() > days[-1]):
+            return [(today - timedelta(days=k)).isoformat() for k in range(6, -1, -1)]
+        return days
+
+    def _table(self, rows_key: str, id_key: str, log_key: str) -> dict[str, list[int]] | None:
+        """Minutes per day of the window, by game (`app_id`) or by account
+        (`uid`): the week table's rows, then the finished days' and today's
+        play log, each day the larger count. None when none of them says
+        (the accounts, from a PlayGuard whose agent does not read them)."""
+        days = self._window()
+        at = {day: i for i, day in enumerate(days)}
+        table: dict[str, list[int]] = {}
+        known = False
+
+        def count(key: Any, day: Any, minutes: Any) -> None:
+            if isinstance(key, str) and key and day in at and _minutes(minutes) is not None:
+                row = table.setdefault(key, [0] * len(days))
+                row[at[day]] = max(row[at[day]], minutes)
+
+        week = self.console.week or {}
+        if isinstance(week.get(rows_key), list):
+            known = True
+            for row in week[rows_key]:
+                if isinstance(row, dict):
+                    for day, minutes in zip(week.get("days") or [], row.get("min") or [], strict=False):
+                        count(row.get(id_key), day, minutes)
+        activity = self.console.activity or {}
+        logs = [*((doc.get("local_date") or day, doc) for day, doc in self.console.finals.items())]
+        logs.append((activity.get("local_date"), activity))
+        for day, doc in logs:
+            if day in at and isinstance(doc.get(log_key), list):
+                known = True
+                for item in doc[log_key]:
+                    if isinstance(item, dict):
+                        count(item.get(id_key), day, item.get("min"))
+        return table if known else None
 
     def _games(self) -> dict[str, list[int]]:
-        """Each game's minutes per day, today's from the activity when it is newer."""
-        week = self.console.week or {}
-        days = week.get("days") or []
-        games: dict[str, list[int]] = {}
-        for game in week.get("games") or []:
-            if not isinstance(game, dict) or not isinstance(game.get("app_id"), str) or not game["app_id"]:
-                continue
-            minutes = [m if isinstance(m, int) and not isinstance(m, bool) else 0 for m in game.get("min") or []]
-            games[game["app_id"]] = (minutes + [0] * len(days))[: len(days)]
-        activity = self.console.activity or {}
-        if days and activity.get("local_date") == days[-1]:
-            for app in activity.get("per_app") or []:
-                if not isinstance(app, dict) or not isinstance(app.get("app_id"), str) or not app["app_id"]:
-                    continue
-                played = app.get("min")
-                if isinstance(played, int) and not isinstance(played, bool):
-                    minutes = games.setdefault(app["app_id"], [0] * len(days))
-                    minutes[-1] = max(minutes[-1], played)
-        return games
+        return self._table("games", "app_id", "per_app") or {}
 
     def _days(self) -> dict[str, int]:
-        days = (self.console.week or {}).get("days") or []
+        days = self._window()
         totals = [sum(day) for day in zip(*self._games().values(), strict=True)] or [0] * len(days)
         return dict(zip(days, totals, strict=False))
 
+    def _accounts(self) -> dict[str, int] | None:
+        table = self._table("accounts", "uid", "per_account")
+        if table is None:
+            return None
+        return _accounts(self.console, [{"uid": uid, "min": sum(minutes)} for uid, minutes in table.items()])
+
     @property
     def native_value(self) -> int | None:
-        return sum(self._days().values()) if self.console.week else None
+        return sum(self._days().values()) if self._window() else None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        week = self.console.week or {}
         games = {self.console.game_name(app_id) or app_id: sum(m) for app_id, m in self._games().items()}
         return {
             "days": self._days(),
             "games": dict(sorted(games.items(), key=lambda kv: -kv[1])),
-            "accounts": _accounts(self.console, week.get("accounts")),
+            "accounts": self._accounts(),
         }
 
 
