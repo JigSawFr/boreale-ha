@@ -22,7 +22,11 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     console = entry.runtime_data
-    classes: dict[str, type[PlayGuardBinarySensor]] = {"online": OnlineSensor, "limit_reached": BlockedSensor}
+    classes: dict[str, type[PlayGuardBinarySensor]] = {
+        "online": OnlineSensor,
+        "limit_reached": BlockedSensor,
+        "agent": AgentSensor,
+    }
     async_add_entities(
         classes.get(d.key, PlayGuardBinarySensor)(console, d)
         for d in for_platform(Platform.BINARY_SENSOR, console.unpublished)
@@ -63,3 +67,12 @@ class OnlineSensor(PlayGuardBinarySensor):
     @property
     def is_on(self) -> bool | None:
         return self.console.online
+
+
+class AgentSensor(PlayGuardBinarySensor):
+    """Whether the agent runs: not while the console is off the broker (the
+    agent sleeps with it), whatever its last state said."""
+
+    @property
+    def is_on(self) -> bool | None:
+        return False if self.console.online is False else super().is_on

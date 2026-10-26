@@ -249,7 +249,7 @@ recharge avec lui.
 | Code PIN défini | Un code PIN est défini. | diagnostic |
 | Horloge réseau exacte | L'horloge de la console est réglée depuis le réseau. | diagnostic, désactivé par défaut |
 | En ligne | La console est sur le broker en ce moment (sinon : en veille, éteinte, hors de portée). | diagnostic, propre à cette intégration |
-| Agent actif | L'agent de PlayGuard garde le lien. | diagnostic, désactivé par défaut, propre à cette intégration |
+| Agent actif | L'agent de PlayGuard garde le lien (désactivé tant que la console est hors ligne : il dort avec elle). | diagnostic, désactivé par défaut, propre à cette intégration |
 
 **Verrou** : *Contrôle parental*, verrouillé tant qu'il s'applique.
 Déverrouillez-le pour le suspendre avec le code PIN que PlayGuard garde (il
@@ -266,7 +266,7 @@ en heures)
 | Temps d'écran restant | Ce qui reste de la limite du jour. | |
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
 | Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; une fois que PlayGuard lui-même a tourné |
-| Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, ou sans limite ni coucher |
+| Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, avec le minuteur de jeu désactivé, ou sans limite ni coucher |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
@@ -610,6 +610,7 @@ téléphone (l'application Home Assistant).
 | Blueprint | Ce qu'il fait | Importer |
 |---|---|---|
 | **Time is up, extra time from the notification** | Quand la limite du jour est atteinte (pas à l'heure du coucher), une notification sur le téléphone avec un bouton qui donne du temps en plus (*+15 min*, ou ce que vous choisissez). | [![Importer le blueprint de fin de temps](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **A few minutes left, extra time from the notification** | Quand il reste 10 minutes de jeu avant la limite du jour (l'événement *Temps de jeu bientôt écoulé*), une notification sur le téléphone avec le jeu, les minutes restantes et un bouton qui donne du temps en plus. | [![Importer le blueprint des dernières minutes](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
 | **Extra time when…** | Du temps en plus quand quelque chose arrive : un assistant activé (les corvées faites), un bouton ou une télécommande pressés, un tag scanné ; puis ce que vous voulez (désactiver l'assistant). | [![Importer le blueprint de temps en plus](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
 | **Bedtime reminder** | Une notification quelques minutes avant *Alarme du coucher*, pendant qu'un jeu est joué (ou chaque jour). | [![Importer le blueprint de rappel du coucher](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
 | **Weekly summary** | Une fois par semaine, le temps de jeu des sept derniers jours et les jeux les plus joués. | [![Importer le blueprint de résumé de la semaine](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
@@ -731,6 +732,15 @@ désactivez *Créer l'appareil dans Home Assistant (découverte MQTT)* dans
 PlayGuard › *Console › Accès à distance*. Pour garder plutôt l'appareil
 d'origine de la console, désactivez l'option *Remplacer l'appareil Home
 Assistant d'origine de la console*.
+</details>
+
+<details>
+<summary>Réparation : « … fait tourner un ancien agent PlayGuard »</summary>
+
+PlayGuard a été mis à jour sur la console, mais pas son agent : sa mise à jour,
+proposée au démarrage, a été remise à plus tard. Mettez-le à jour dans
+PlayGuard › *Console › Modules facultatifs › Agent du lien*. La réparation
+disparaît quand les deux versions sont les mêmes.
 </details>
 
 <details>
