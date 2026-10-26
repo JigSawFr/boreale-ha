@@ -68,10 +68,10 @@ the coverage gate is per module, not the total.
 | `services.py`, `services.yaml` | The actions |
 | `statistics.py` | Finished days into the recorder's long-term statistics |
 | `repairs.py`, `diagnostics.py` | The fixable repair, the redacted diagnostics |
-| `brand/` | The integration's icon and logo (Home Assistant 2026.3+) |
+| `brand/` | The integration's icon and logos (Home Assistant 2026.3+), rendered from `branding/` by `scripts/render_branding.mjs` |
 | `tests/` | One test module per part, PlayGuard's fixtures, the parity and quality-scale checks |
 | `scripts/` | The per-module coverage gate, the release zip, the README's branding |
-| `branding/` | The icon, the README's banner and the social preview, as SVG, in Aurore's aurora (its sky, its colours, Sora): `node scripts/render_branding.mjs` (Node and Playwright) renders them to `.github/readme/` |
+| `branding/` | The icon (a house around Aurore's night and PlayGuard's play sign), the logos, the README's banner and the social preview, as SVG, in Aurore's aurora (its sky, its colours, Sora): `node scripts/render_branding.mjs` (Node and Playwright) renders them to `brand/` and `.github/readme/` |
 | `.github/readme/` | The README's images: the banner, the social preview (uploaded by hand in *Settings › General*), the screenshots (a demo console in a real Home Assistant) |
 
 ## Pull requests and releases
