@@ -49,8 +49,6 @@ def _timestamp(value: Any) -> datetime | None:
 class PlayGuardSensor(PlayGuardEntity, SensorEntity):
     """A value of the state."""
 
-    _keeps_value = True
-
     def __init__(self, console: PlayGuardConsole, definition: EntityDef) -> None:
         super().__init__(console, definition)
         if definition.unit:

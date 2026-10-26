@@ -218,7 +218,7 @@ class PlayGuardConsole:
             _LOGGER.info(
                 "%s is offline (asleep, off or out of reach): %s",
                 self.name,
-                "its controls are unavailable, its sensors keep their last values"
+                "its entities keep their last values, its orders wait for it"
                 if self.keep_values
                 else "its entities are unavailable",
             )
@@ -236,7 +236,7 @@ class PlayGuardConsole:
 
     @property
     def keep_values(self) -> bool:
-        """Whether the sensors keep their last values while the console is off
+        """Whether the entities keep their last values while the console is off
         the broker (the entry's option, on by default)."""
         return bool(self.entry.options.get(CONF_KEEP_VALUES, True))
 

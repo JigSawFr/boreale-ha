@@ -102,30 +102,36 @@ async def test_what_few_dashboards_need_is_off(hass: HomeAssistant, setup_defaul
     assert hass.states.get(_id("sensor", "model", hass)) is None
 
 
-async def test_unavailable_while_offline(
+async def test_last_values_while_offline(
     hass: HomeAssistant, setup, mqtt_mock, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """The console's last will makes its controls unavailable, logged once,
-    while its sensors keep their last values (the option's default); the
-    actions still send their orders, which wait on the broker."""
+    """The console's last will, logged once: its entities keep their last
+    values (the option's default), controls included, whose orders wait on
+    the broker, as the actions' do."""
     used = hass.states.get(_id("sensor", "used_screen_time", hass)).state
     asleep = hass.states.get(_id("binary_sensor", "pin_set", hass)).state
     publish(hass, "availability", "offline")
     publish(hass, "availability", "offline")
     await hass.async_block_till_done()
     assert hass.states.get(_id("binary_sensor", "online", hass)).state == STATE_OFF
-    for platform, key in (("number", "limit_mon"), ("switch", "console_lock"), ("button", "sync_now")):
-        assert hass.states.get(_id(platform, key, hass)).state == STATE_UNAVAILABLE, key
+    assert hass.states.get(_id("number", "limit_mon", hass)).state == "120"
+    for platform, key in (("switch", "console_lock"), ("button", "sync_now")):
+        assert hass.states.get(_id(platform, key, hass)).state != STATE_UNAVAILABLE, key
     assert hass.states.get(_id("sensor", "used_screen_time", hass)).state == used != STATE_UNAVAILABLE
     assert hass.states.get(_id("binary_sensor", "pin_set", hass)).state == asleep != STATE_UNAVAILABLE
     assert hass.states.get(_id("event", "events", hass)).state != STATE_UNAVAILABLE
     assert caplog.text.count("Salon is offline") == 1
-    assert "its sensors keep their last values" in caplog.text
+    assert "its entities keep their last values" in caplog.text
 
     device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)
     mqtt_mock.async_publish.reset_mock()
     await hass.services.async_call(DOMAIN, "add_bonus_time", {"device_id": device.id, "minutes": 15}, blocking=True)
-    assert _published(mqtt_mock) == [(f"{BASE}/add_bonus_time/set", "15", 1, True)]
+    await hass.services.async_call(
+        "number", "set_value", {"entity_id": _id("number", "limit_mon", hass), "value": 90}, blocking=True
+    )
+    published = _published(mqtt_mock)
+    assert published[0] == (f"{BASE}/add_bonus_time/set", "15", 1, True)
+    assert len(published) == 2 and published[1][1:] == ("90", 1, True)  # retained: it waits for the console
 
     publish(hass, "availability", "online")
     publish(hass, "availability", "online")

@@ -37,10 +37,12 @@ rules:
   entity-unavailable:
     status: done
     comment: >-
-      The controls are unavailable while the console is off the broker (its
-      last will). Its sensors keep their last values meanwhile, a console asleep
-      being the usual case; the option "Keep the sensors' last values while the
-      console sleeps" turns that off.
+      Every entity but Online is unavailable while the console is off the
+      broker (its last will), with the option "Keep the last values while the
+      console sleeps" off. On, by default, a console asleep being the usual
+      case, its entities keep their last values, and a control's order waits
+      on the broker, retained, until the console wakes up; Online says it is
+      gone.
   integration-owner: done
   log-when-unavailable: done
   parallel-updates: done

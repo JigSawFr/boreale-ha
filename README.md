@@ -59,10 +59,9 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   `playguard:<console id>_game_<application id>`,
   `playguard:<console id>_account_<account id>`), for months of history in a
   *Statistics graph* card.
-- **Orders while the console sleeps**: its controls are unavailable then
-  (its last will says it is gone) and its sensors keep their last values, but
-  the actions still send their orders, which wait on the broker and are
-  carried out when the console wakes up.
+- **Orders while the console sleeps**: its entities keep their last values
+  (*Online* says it is gone), and a change made to a control or an action
+  waits on the broker and is carried out when the console wakes up.
 - **Actions**: `set_limits`, `add_bonus_time`, `apply_profile`, `stop_today`,
   `lock_now`, `sync_now`, `request_report`.
 - An **event entity** for every order handled (applied, refused with the
@@ -204,7 +203,7 @@ twice.
 | Option | Default | What it does |
 |---|---|---|
 | **Replace the console's own Home Assistant device** | on | Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again (next to this one). The entry reloads when it changes. |
-| **Keep the sensors' last values while the console sleeps** | on | While the console is offline (asleep, off, out of reach), its sensors, binary sensors and events keep showing what it last said; its controls (switches, numbers, selects, times, buttons) are unavailable. Off: every entity but *Online* is unavailable then. |
+| **Keep the last values while the console sleeps** | on | While the console is offline (asleep, off, out of reach), its entities keep showing what it last said, controls included: a change made to one waits on the broker and is carried out when the console wakes up. Off: every entity but *Online* is unavailable then. |
 
 *⋮ › Reconfigure* changes the **Topic prefix**, when `topic_prefix` in the
 console's `sync.conf` changes. As when adding a console by hand, the console
@@ -222,10 +221,9 @@ in PlayGuard): the console as Nintendo names it, its model and model number
 (*Nintendo Switch – OLED Model*, HEG-001) and the system it runs as its
 software (*23.0.1 · Atmosphère 1.10.1*). *Config* and
 *diagnostic* entities are in their own sections of the device page and out of
-the default dashboards. While the console is offline, its controls are
-unavailable and its sensors keep their last values (*Online* says it is
-offline); with the option *Keep the sensors' last values while the console
-sleeps* off, all but *Online* are unavailable.
+the default dashboards. While the console is offline, its entities keep their
+last values (*Online* says it is offline); with the option *Keep the last
+values while the console sleeps* off, all but *Online* are unavailable.
 
 As on the console's own device, what few dashboards need is **disabled by
 default** (marked so below): turn one on from the device page (*… entities
@@ -615,9 +613,9 @@ automation, or the blueprint's copy in `blueprints/automation/playguard/`.
 - Some things are never possible from Home Assistant, by PlayGuard's design:
   reading, setting or changing the PIN, deleting parental controls, unlinking
   the phone app.
-- While the console is offline its controls are unavailable (its sensors
-  keep their last values): only the actions can send orders then, and these
-  wait for the console. Under *Ask
+- While the console is offline, a control shows its last value until the
+  console wakes up and carries out what was changed (the order waits on the
+  broker). Under *Ask
   on the console*, an order also waits for someone to confirm it on the
   console (event `command_waiting`); under *Refuse them*, nothing is applied.
 - Without *Orders may change the play timer*, the limits, bedtime, extra time,
