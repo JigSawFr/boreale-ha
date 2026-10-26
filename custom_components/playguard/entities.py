@@ -383,6 +383,22 @@ ENTITIES: tuple[EntityDef, ...] = (
 
 BY_KEY: dict[str, EntityDef] = {e.key: e for e in ENTITIES}
 
+# Each user account's play time, today and this week: this integration's,
+# a pair for every account the console speaks of, created as they appear.
+ACCOUNT_ENTITIES: tuple[EntityDef, ...] = (
+    _minutes(
+        "account_today", ("per_account",), SensorStateClass.TOTAL_INCREASING, publish=PUBLISH_ACTIVITY, extra=True
+    ),
+    _minutes(
+        "account_week",
+        ("per_account",),
+        suggested_unit=UnitOfTime.HOURS,
+        precision=1,
+        publish=PUBLISH_ACTIVITY,
+        extra=True,
+    ),
+)
+
 
 def for_platform(platform: Platform, unpublished: frozenset[str] = frozenset()) -> list[EntityDef]:
     """The entities of one platform, but those of what is not published."""
