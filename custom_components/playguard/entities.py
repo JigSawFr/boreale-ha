@@ -168,6 +168,7 @@ ENTITIES: tuple[EntityDef, ...] = (
         platform=Platform.SENSOR,
         path=("console", "firmware"),
         category="diagnostic",
+        enabled=False,
         publish=PUBLISH_HARDWARE,
     ),
     EntityDef(
@@ -175,6 +176,7 @@ ENTITIES: tuple[EntityDef, ...] = (
         platform=Platform.SENSOR,
         path=("console", "atmosphere"),
         category="diagnostic",
+        enabled=False,
         publish=PUBLISH_HARDWARE,
     ),
     _minutes("spent_raw", ("timer", "spent_raw_min"), category="diagnostic", enabled=False),

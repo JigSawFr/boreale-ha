@@ -270,7 +270,7 @@ en heures)
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
-| Firmware, Atmosphère | Les versions de la console. | diagnostic |
+| Firmware, Atmosphère | Les versions de la console (les infos de l'appareil les montrent aussi). | diagnostic, désactivé par défaut |
 | Dernier ordre | Le dernier ordre traité, et comment. | diagnostic, désactivé par défaut |
 | Temps passé (1952) | Le décompte brut du minuteur. | diagnostic, désactivé par défaut |
 

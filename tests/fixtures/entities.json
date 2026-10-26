@@ -179,7 +179,8 @@
       "topic": "state",
       "publish": "hardware",
       "extra": {
-        "ent_cat": "diagnostic"
+        "ent_cat": "diagnostic",
+        "en": false
       }
     },
     {
@@ -191,7 +192,8 @@
       "topic": "state",
       "publish": "hardware",
       "extra": {
-        "ent_cat": "diagnostic"
+        "ent_cat": "diagnostic",
+        "en": false
       }
     },
     {
