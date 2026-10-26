@@ -132,6 +132,11 @@
         "name": "Retirer la limite"
       }
     },
+    "calendar": {
+      "play_sessions": {
+        "name": "Parties"
+      }
+    },
     "event": {
       "events": {
         "name": "Événements",

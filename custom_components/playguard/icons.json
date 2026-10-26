@@ -49,6 +49,11 @@
         "default": "mdi:file-document-outline"
       }
     },
+    "calendar": {
+      "play_sessions": {
+        "default": "mdi:calendar-clock"
+      }
+    },
     "sensor": {
       "now_playing": {
         "default": "mdi:gamepad-variant"

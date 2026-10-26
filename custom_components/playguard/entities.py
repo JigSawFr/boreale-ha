@@ -367,6 +367,9 @@ ENTITIES: tuple[EntityDef, ...] = (
         publish=PUBLISH_ACTIVITY,
         extra=True,
     ),
+    # Each game played, when: a calendar of the sessions, from the
+    # recorder's history of Now playing while the console was online.
+    EntityDef(key="play_sessions", platform=Platform.CALENDAR, publish=PUBLISH_ACTIVITY, extra=True),
     # When play has to stop: the end of today's limit or bedtime, whichever
     # comes first, while a game is played.
     EntityDef(key="play_ends", platform=Platform.SENSOR, device_class="timestamp", extra=True),
