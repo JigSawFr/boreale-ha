@@ -324,6 +324,97 @@ async def test_bedtime_reminder_every_day(
     assert [n["message"] for n in notified] == ["Bedtime in 30 minutes."]
 
 
+async def test_after_bedtime(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, setup, state, phone, notified
+) -> None:
+    """Bedtime at 21:30, wake-up at 06:00 (the state's), a game on."""
+    _local(freezer, hass, "21:00:00")
+    inputs = {
+        "bedtime": _id(hass, "time", "bedtime_alarm"),
+        "wake": _id(hass, "time", "bedtime_end_time"),
+        "now_playing": _id(hass, "sensor", "now_playing"),
+        "phone": phone,
+    }
+    await _automation(hass, "after_bedtime.yaml", inputs)
+    _local(freezer, hass, "21:29:00")
+    await hass.async_block_till_done()
+    assert notified == []
+    _local(freezer, hass, "21:30:00")  # bedtime, the game still on
+    await hass.async_block_till_done()
+    assert notified == [
+        {"title": "Salon", "message": "Super Mario Odyssey is still being played after bedtime (21:30).", "data": None}
+    ]
+    _local(freezer, hass, "21:45:00")
+    await hass.async_block_till_done()
+    assert len(notified) == 1  # once while it lasts
+
+    playing = state["activity_today"]["now_playing"]
+    state["activity_today"]["now_playing"] = None  # stopped
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    state["activity_today"]["now_playing"] = playing  # and started again in the night
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert len(notified) == 2
+
+
+async def test_after_bedtime_not_at_night(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, setup, phone, notified
+) -> None:
+    """In the day, and without a wake-up time: the night ends at midnight."""
+    _local(freezer, hass, "12:00:00")
+    inputs = {"bedtime": _id(hass, "time", "bedtime_alarm"), "now_playing": _id(hass, "sensor", "now_playing")}
+    await _automation(hass, "after_bedtime.yaml", inputs | {"phone": phone})
+    _local(freezer, hass, "12:30:00")
+    await hass.async_block_till_done()
+    assert notified == []
+    _local(freezer, hass, "23:00:00")
+    await hass.async_block_till_done()
+    assert len(notified) == 1
+
+
+async def test_evening_summary(hass: HomeAssistant, freezer: FrozenDateTimeFactory, setup, phone, notified) -> None:
+    activity = fixture("activity.json")
+    activity["per_account"] = [
+        {"uid": "00112233445566778899AABBCCDDEEFF", "min": 64},
+        {"uid": "FFEEDDCCBBAA99887766554433221100", "min": 10},
+    ]
+    publish(hass, "activity", activity)
+    names = {"accounts": {"00112233445566778899AABBCCDDEEFF": "Léa", "FFEEDDCCBBAA99887766554433221100": "Tom"}}
+    names["games"] = {"0100000000010000": "Super Mario Odyssey", "01000A10041EA000": "Mario Kart 8 Deluxe"}
+    publish(hass, "names", {"schema": 1, "ts": 1, **names})
+    _local(freezer, hass, "20:00:00")
+    inputs = {"today": _id(hass, "sensor", "used_screen_time_log"), "phone": phone, "top": 1}
+    await _automation(hass, "evening_summary.yaml", inputs)
+    _local(freezer, hass, "20:30:00")
+    await hass.async_block_till_done()
+    assert notified == [
+        {
+            "title": "Salon",
+            "message": "Play today: 1 h 14. Léa 1 h 04, Tom 10 min. Most played: Super Mario Odyssey 1 h 00.",
+            "data": None,
+        }
+    ]
+
+
+@pytest.mark.parametrize(("skip_idle", "sent"), [(True, []), (False, ["Play today: 0 min."])])
+async def test_evening_summary_idle(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, setup, phone, notified, skip_idle: bool, sent: list[str]
+) -> None:
+    """Nothing played: no notification, unless asked for."""
+    activity = fixture("activity.json") | {"per_app": [], "total_min": 0}
+    state = fixture("state.json")
+    state["activity_today"]["used_min"] = 0
+    publish(hass, "state", state)
+    publish(hass, "activity", activity)
+    _local(freezer, hass, "20:00:00")
+    today = _id(hass, "sensor", "used_screen_time_log")
+    await _automation(hass, "evening_summary.yaml", {"today": today, "phone": phone, "skip_idle": skip_idle})
+    _local(freezer, hass, "20:30:00")
+    await hass.async_block_till_done()
+    assert [n["message"] for n in notified] == sent
+
+
 async def test_weekly_summary(hass: HomeAssistant, freezer: FrozenDateTimeFactory, setup, phone, notified) -> None:
     week = {
         "schema": 1,
