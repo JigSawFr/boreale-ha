@@ -48,7 +48,8 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   for set-up, no id to type.
 - **The same entities** as the console's own MQTT device (names, units,
   options), replacing it (no duplicates; turn it back on in the options),
-  plus **Online**, **Agent running**, **Play time this week** and **Play ends**.
+  plus **Online**, **Agent running**, **Play time this week**, **Play ends**
+  and the **Play sessions** calendar.
 - **Game names** on *Now playing*, and each game's time today and this week as
   attributes; every game on *Games installed* (`games`), with its play time:
   one entity for the games, not one per game.
@@ -258,6 +259,7 @@ the play timer*); lock it to turn them back on, always allowed.
 | Play time this week | The last 7 days, with each day's (`days`), each game's (`games`) and each account's (`accounts`) minutes. | this integration's; once PlayGuard or its agent has published play time |
 | Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, with the play timer off, or with neither a limit nor bedtime |
 | *Account*'s play time today, *Account*'s play time this week | One pair per user account, created as the console speaks of it (its name, or its play time). Minutes, the week's shown in hours. | this integration's; unknown when nobody's time was read (the app reads the accounts when asked, the agent from the play log) |
+| Play sessions (calendar) | Each game played and when: one event per stretch the game was in front while the console was online, named after the game; the one going on reads *on*. Built from the recorder's history of *Now playing* and *Online*, so it goes back as far as the recorder keeps them (10 days by default). | this integration's; empty without the recorder or with *Now playing* off |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |

@@ -132,6 +132,11 @@
         "name": "Remove the limit"
       }
     },
+    "calendar": {
+      "play_sessions": {
+        "name": "Play sessions"
+      }
+    },
     "event": {
       "events": {
         "name": "Events",
