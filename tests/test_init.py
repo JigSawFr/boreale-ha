@@ -381,6 +381,36 @@ async def test_services(hass: HomeAssistant, setup, mqtt_mock) -> None:
         )
 
 
+async def test_agent_version(hass: HomeAssistant, setup) -> None:
+    """PlayGuard updated, its agent not (the update put off): a repair issue."""
+    issue_id = f"agent_version_{CONSOLE_ID}"
+    system = fixture("system.json")
+    system["versions"]["app"] = "1.5.0"
+    publish(hass, "system", system)
+    await hass.async_block_till_done()
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+    assert issue and issue.translation_placeholders == {"name": "Salon", "app": "1.5.0", "agent": "1.2.0"}
+    system["versions"]["agent"] = None  # no agent: nothing to update
+    publish(hass, "system", system)
+    await hass.async_block_till_done()
+    assert not ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+
+
+async def test_agent_asleep(hass: HomeAssistant, setup, state) -> None:
+    """The agent sleeps with the console, whatever its last state said."""
+    agent = _id("binary_sensor", "agent", hass)
+    state["link"]["agent"] = True
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert hass.states.get(agent).state == STATE_ON
+    publish(hass, "availability", "offline")
+    await hass.async_block_till_done()
+    assert hass.states.get(agent).state == STATE_OFF
+    publish(hass, "availability", "online")
+    await hass.async_block_till_done()
+    assert hass.states.get(agent).state == STATE_ON
+
+
 async def test_newer_schema(hass: HomeAssistant, setup, state) -> None:
     state["schema"] = 2
     publish(hass, "state", state)

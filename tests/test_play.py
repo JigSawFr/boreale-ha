@@ -48,6 +48,7 @@ async def test_play_ends(hass: HomeAssistant, setup, state: dict) -> None:
         {"limit_reached": True},  # already blocked
         {"limit_today_min": 1440, "bedtime": {"enabled": False, "start": None, "end": None}},  # nothing ends it
         {"supported": False},
+        {"enabled": False},  # the play timer off: its bedtime does not block either
     ):
         await _state(hass, state, **timer)
         assert hass.states.get(ends).state == STATE_UNKNOWN, timer

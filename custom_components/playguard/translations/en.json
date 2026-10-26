@@ -388,6 +388,10 @@
           }
         }
       }
+    },
+    "agent_version": {
+      "title": "{name} runs an older PlayGuard agent",
+      "description": "PlayGuard {app} is installed on {name}, but its agent, which works while PlayGuard is closed, is still {agent}: its update was put off. Update it in PlayGuard › Console › Optional modules › Link agent (PlayGuard also offers it when it starts)."
     }
   },
   "selector": {

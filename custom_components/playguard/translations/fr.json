@@ -388,6 +388,10 @@
           }
         }
       }
+    },
+    "agent_version": {
+      "title": "{name} fait tourner un ancien agent PlayGuard",
+      "description": "PlayGuard {app} est installé sur {name}, mais son agent, qui travaille quand PlayGuard est fermé, est encore en {agent} : sa mise à jour a été remise à plus tard. Mettez-le à jour dans PlayGuard › Console › Modules facultatifs › Agent du lien (PlayGuard le propose aussi à son démarrage)."
     }
   },
   "selector": {

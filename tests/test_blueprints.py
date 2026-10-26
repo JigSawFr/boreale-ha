@@ -202,6 +202,27 @@ async def test_time_is_up(hass: HomeAssistant, setup, mqtt_mock, state, phone, n
     assert _orders(mqtt_mock, "add_bonus_time") == ["15"]
 
 
+async def test_time_warning(hass: HomeAssistant, setup, mqtt_mock, phone, notified) -> None:
+    publish(hass, "names", {"schema": 1, "ts": 1, "games": {"0100000000010000": "Super Mario Odyssey"}})
+    await _automation(hass, "time_warning.yaml", {"events": _id(hass, "event", "events"), "phone": phone})
+    started = {"schema": 1, "source": "agent", "ts": 1, "event_type": "play_started", "app_id": "0100000000010000"}
+    publish(hass, "event", started)
+    await hass.async_block_till_done()
+    assert notified == []  # another event
+    publish(hass, "event", started | {"ts": 2, "event_type": "time_warning", "minutes_left": 10})
+    await _soon(lambda: notified)
+
+    [sent] = notified
+    assert sent["title"] == "Salon"
+    assert sent["message"] == "10 min left on Super Mario Odyssey."
+    assert sent["data"]["tag"].startswith("playguard_time_warning_")
+    [button] = sent["data"]["actions"]
+    assert button["title"] == "+15 min" and button["action"].startswith("PLAYGUARD_MORE_")
+    hass.bus.async_fire("mobile_app_notification_action", {"action": button["action"]})
+    await hass.async_block_till_done()
+    assert _orders(mqtt_mock, "add_bonus_time") == ["15"]
+
+
 async def test_extra_time(hass: HomeAssistant, setup, mqtt_mock) -> None:
     assert await async_setup_component(hass, "input_boolean", {"input_boolean": {"chores": {}, "homework": {}}})
     console = er.async_get(hass).async_get(_id(hass, "binary_sensor", "limit_reached")).device_id

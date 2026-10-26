@@ -242,7 +242,7 @@ not shown*), and the entry reloads with it.
 | PIN set | A PIN is set. | diagnostic |
 | Network clock accurate | The console's clock is set from the network. | diagnostic, disabled by default |
 | Online | The console is on the broker now (off: asleep, off, out of reach). | diagnostic, this integration's |
-| Agent running | PlayGuard's agent keeps the link up. | diagnostic, disabled by default, this integration's |
+| Agent running | PlayGuard's agent keeps the link up (off while the console is offline: it sleeps with it). | diagnostic, disabled by default, this integration's |
 
 **Lock**: *Parental controls*, locked while they are in effect. Unlock it to
 unlock them for now with the PIN PlayGuard keeps (it needs *Orders may change
@@ -257,7 +257,7 @@ the play timer*); lock it to turn them back on, always allowed.
 | Screen time remaining | What is left of today's limit. | |
 | Extended screen time | Extra time granted today. | |
 | Play time this week | The last 7 days, with each day's (`days`), each game's (`games`) and each account's (`accounts`) minutes. | this integration's; once PlayGuard itself has run |
-| Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, or with neither a limit nor bedtime |
+| Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, with the play timer off, or with neither a limit nor bedtime |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
@@ -587,6 +587,7 @@ the console's entities and the phone (the Home Assistant app).
 | Blueprint | What it does | Import |
 |---|---|---|
 | **Time is up, extra time from the notification** | When the day's limit is reached (not at bedtime), a notification on the phone with a button that gives extra time (*+15 min*, or what you set). | [![Import the time is up blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **A few minutes left, extra time from the notification** | When a game has 10 minutes left before the day's limit (the event *Play time almost over*), a notification on the phone with the game, the minutes left and a button that gives extra time. | [![Import the time warning blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
 | **Extra time when…** | Extra time when something happens: a helper turned on (the chores done), a button or a remote pressed, a tag scanned; then what you like (turn the helper off again). | [![Import the extra time blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
 | **Bedtime reminder** | A notification some minutes before *Bedtime alarm*, while a game is played (or every day). | [![Import the bedtime reminder blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
 | **Weekly summary** | Once a week, the last seven days' play time and the games played the most. | [![Import the weekly summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
@@ -699,6 +700,14 @@ it comes back, update PlayGuard, or turn off *Create the device in Home
 Assistant (MQTT discovery)* in PlayGuard › *Console › Remote access*. To
 keep the console's own device instead, turn off the option *Replace the
 console's own Home Assistant device*.
+</details>
+
+<details>
+<summary>Repair: "… runs an older PlayGuard agent"</summary>
+
+PlayGuard was updated on the console, but its agent was not: the offer to
+update it at start-up was put off. Update it in PlayGuard › *Console ›
+Optional modules › Link agent*. The repair goes once both versions match.
 </details>
 
 <details>
