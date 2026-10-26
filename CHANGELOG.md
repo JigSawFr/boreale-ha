@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/JigSawFr/playguard-ha/compare/v0.4.0...v0.5.0) (2026-10-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **entities:** Unlocked, Turn parental controls back on and Temporarily unlocked are gone, replaced by the lock Parental controls; Time is up is named Playing blocked (its entity id stays); Used screen time and each day's limit are disabled by default for new entries.
+
+### 🚀 Features
+
+* **entities:** the console as Nintendo names it, a lock for parental controls, what PlayGuard publishes, platinum ([#16](https://github.com/JigSawFr/playguard-ha/issues/16)) ([a6ad3fe](https://github.com/JigSawFr/playguard-ha/commit/a6ad3fec8ed914345eaba7406c5bfc78ef60f4a0))
+
 ## [0.4.0](https://github.com/JigSawFr/playguard-ha/compare/v0.3.0...v0.4.0) (2026-10-25)
 
 
