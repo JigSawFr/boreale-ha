@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/JigSawFr/playguard-ha/compare/v0.5.0...v0.6.0) (2026-10-26)
+
+
+### 🚀 Features
+
+* **brand:** Aurore's aurora, a house for an icon, and a README with screenshots ([#22](https://github.com/JigSawFr/playguard-ha/issues/22)) ([4ccdb3e](https://github.com/JigSawFr/playguard-ha/commit/4ccdb3e3197227438e8c5d0cc8135228866a2a0c))
+* **events:** a game started or stopped, 10 minutes left, games blocked ([#21](https://github.com/JigSawFr/playguard-ha/issues/21)) ([2c160ef](https://github.com/JigSawFr/playguard-ha/commit/2c160ef4fe3746ccf942484d5d6d83d49daf428f))
+* **sensors:** each account's play time, and when play ends ([#19](https://github.com/JigSawFr/playguard-ha/issues/19)) ([3500ba6](https://github.com/JigSawFr/playguard-ha/commit/3500ba6e013696854bbec97bc478add511d12148))
+
+
+### 📚 Documentation
+
+* **readme:** links that work in HACS, how to get an update at once, the profile in effect ([#18](https://github.com/JigSawFr/playguard-ha/issues/18)) ([d40f3df](https://github.com/JigSawFr/playguard-ha/commit/d40f3df203f30f9565b7c45417be954ec7eadd9d))
+
 ## [0.5.0](https://github.com/JigSawFr/playguard-ha/compare/v0.4.0...v0.5.0) (2026-10-26)
 
 
