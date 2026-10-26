@@ -132,6 +132,11 @@
         "name": "Retirer la limite"
       }
     },
+    "calendar": {
+      "play_sessions": {
+        "name": "Parties"
+      }
+    },
     "event": {
       "events": {
         "name": "Événements",
@@ -235,6 +240,12 @@
       },
       "play_ends": {
         "name": "Fin de partie prévue"
+      },
+      "account_today": {
+        "name": "Temps de jeu aujourd'hui de {account}"
+      },
+      "account_week": {
+        "name": "Temps de jeu cette semaine de {account}"
       },
       "model": {
         "name": "Modèle",

@@ -48,12 +48,14 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   for set-up, no id to type.
 - **The same entities** as the console's own MQTT device (names, units,
   options), replacing it (no duplicates; turn it back on in the options),
-  plus **Online**, **Agent running**, **Play time this week** and **Play ends**.
+  plus **Online**, **Agent running**, **Play time this week**, **Play ends**
+  and the **Play sessions** calendar.
 - **Game names** on *Now playing*, and each game's time today and this week as
   attributes; every game on *Games installed* (`games`), with its play time:
   one entity for the games, not one per game.
-- **Each account's play time** (each child's): today and this week as
-  attributes, by the account's name on the console.
+- **Each account's play time** (each child's): a sensor for today and one
+  for this week per account, named after the account on the console, and
+  both as attributes of the console's play time.
 - **Long-term statistics**: every finished day's total, each game's and each
   account's, imported into the recorder (`playguard:<console id>_play_time`,
   `playguard:<console id>_game_<application id>`,
@@ -254,8 +256,10 @@ the play timer*); lock it to turn them back on, always allowed.
 | Used screen time | Today's play time, as the play timer counts it (only while a limit is set). | daily total, disabled by default |
 | Screen time remaining | What is left of today's limit. | |
 | Extended screen time | Extra time granted today. | |
-| Play time this week | The last 7 days, with each day's (`days`), each game's (`games`) and each account's (`accounts`) minutes. | this integration's; once PlayGuard itself has run |
+| Play time this week | The last 7 days, with each day's (`days`), each game's (`games`) and each account's (`accounts`) minutes. | this integration's; once PlayGuard or its agent has published play time |
 | Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, with the play timer off, or with neither a limit nor bedtime |
+| *Account*'s play time today, *Account*'s play time this week | One pair per user account, created as the console speaks of it (its name, or its play time). Minutes, the week's shown in hours. | this integration's; unknown when nobody's time was read (the app reads the accounts when asked, the agent from the play log) |
+| Play sessions (calendar) | Each game played and when: one event per stretch the game was in front while the console was online, named after the game; the one going on reads *on*. Built from the recorder's history of *Now playing* and *Online*, so it goes back as far as the recorder keeps them (10 days by default). | this integration's; empty without the recorder or with *Now playing* off |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
@@ -402,9 +406,10 @@ listens.
   30 s). The integration logs it once when it goes, once when it is back.
 - Today's **play log** (`activity`) comes with the state; a finished day
   (`activity/<date>`) at the first cycle after midnight, the console keeping
-  the last 14. The **game names** and the **week** come when PlayGuard itself
-  runs (not the agent); until it runs again, the week's today is today's play
-  log.
+  the last 14. The **game names** and the **week** table come when PlayGuard
+  itself runs (not the agent); *Play time this week* moves on without it, day
+  by day, from the play log and the finished days (each account's time too,
+  from an agent that reads it).
 - **Last seen** is the time of the last document the console published while
   Home Assistant listened (its state comes every `poll_s` seconds while it is
   awake), else, after a restart, the time of its last state.
@@ -588,6 +593,8 @@ the console's entities and the phone (the Home Assistant app).
 | **A few minutes left, extra time from the notification** | When a game has 10 minutes left before the day's limit (the event *Play time almost over*), a notification on the phone with the game, the minutes left and a button that gives extra time. | [![Import the time warning blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
 | **Extra time when…** | Extra time when something happens: a helper turned on (the chores done), a button or a remote pressed, a tag scanned; then what you like (turn the helper off again). | [![Import the extra time blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
 | **Bedtime reminder** | A notification some minutes before *Bedtime alarm*, while a game is played (or every day). | [![Import the bedtime reminder blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
+| **Still playing after bedtime** | When a game is played between *Bedtime* and *Wake-up time*: bedtime came with a game on, or one started in the night. For when the play timer is off, or the alarm only warns. | [![Import the still playing after bedtime blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fafter_bedtime.yaml) |
+| **Evening summary** | Today's play time at a set time: the total, each child's (when the console read the accounts) and the games played the most; nothing on a day without play. | [![Import the evening summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fevening_summary.yaml) |
 | **Weekly summary** | Once a week, the last seven days' play time and the games played the most. | [![Import the weekly summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
 
 The ones that give extra time need *Orders may change the play timer* on the
