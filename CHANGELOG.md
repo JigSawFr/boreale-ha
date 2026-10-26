@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/JigSawFr/playguard-ha/compare/v0.7.0...v0.8.0) (2026-10-26)
+
+
+### 🚀 Features
+
+* **entities:** Firmware and Atmosphère off by default, as on the console ([#31](https://github.com/JigSawFr/playguard-ha/issues/31)) ([710e65e](https://github.com/JigSawFr/playguard-ha/commit/710e65ee21e119c9b2fa0fcad799fdd500d5692e))
+
 ## [0.7.0](https://github.com/JigSawFr/playguard-ha/compare/v0.6.0...v0.7.0) (2026-10-26)
 
 
