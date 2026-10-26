@@ -296,6 +296,20 @@ async def test_events(hass: HomeAssistant, setup) -> None:
     event = hass.states.get(entity_id)
     assert event.attributes["event_type"] == "command_rejected"
     assert event.attributes["reason"] == "out_of_range" and event.attributes["entity"] == "limit_mon"
+    assert "game" not in event.attributes  # an order's event: no game
+
+    # What the console did on its own: the game by its name.
+    warning = {"schema": 1, "source": "agent", "ts": 2, "event_type": "time_warning", "app_id": "0100000000010000"}
+    publish(hass, "event", {**warning, "minutes_left": 10, "blocked_by": None})
+    await hass.async_block_till_done()
+    event = hass.states.get(entity_id)
+    assert event.attributes["event_type"] == "time_warning" and event.attributes["minutes_left"] == 10
+    assert event.attributes["game"] == "Super Mario Odyssey" and event.attributes["app_id"] == "0100000000010000"
+    blocked = {"schema": 1, "source": "agent", "ts": 3, "event_type": "play_blocked", "app_id": None}
+    publish(hass, "event", {**blocked, "minutes_left": None, "blocked_by": "bedtime"})
+    await hass.async_block_till_done()
+    event = hass.states.get(entity_id)
+    assert event.attributes["blocked_by"] == "bedtime" and event.attributes["game"] is None
 
 
 async def test_week_and_names(hass: HomeAssistant, setup) -> None:

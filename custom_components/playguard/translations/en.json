@@ -140,7 +140,11 @@
             "state": {
               "command_applied": "Order applied",
               "command_rejected": "Order refused",
-              "command_waiting": "Order waiting for PlayGuard"
+              "command_waiting": "Order waiting for PlayGuard",
+              "play_started": "Game started",
+              "play_stopped": "Game stopped",
+              "time_warning": "Play time almost over",
+              "play_blocked": "Playing blocked"
             }
           }
         }

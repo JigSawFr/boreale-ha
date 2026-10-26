@@ -1,4 +1,6 @@
-"""The console's events: an order applied, refused, or waiting for PlayGuard."""
+"""The console's events: an order applied, refused, or waiting for PlayGuard;
+and what the console does on its own (a game started or stopped, a few
+minutes left, games blocked)."""
 
 from __future__ import annotations
 
@@ -25,7 +27,8 @@ async def async_setup_entry(
 
 
 class PlayGuardEvent(PlayGuardEntity, EventEntity):
-    """One event per order the console handled (the `event` topic, not retained)."""
+    """One event per order the console handled, and per thing it did on its
+    own (the `event` topic, not retained)."""
 
     _attr_event_types = list(EVENT_TYPES)
     _keeps_value = True
@@ -48,8 +51,14 @@ class PlayGuardEvent(PlayGuardEntity, EventEntity):
         event_type = doc.get("event_type")
         if event_type not in EVENT_TYPES:
             return
-        self._trigger_event(
-            event_type,
-            {k: doc.get(k) for k in ("entity", "payload", "reason", "rc", "source", "ts")},
-        )
+        attributes = {k: doc.get(k) for k in ("entity", "payload", "reason", "rc", "source", "ts")}
+        if event_type.startswith("play_") or event_type == "time_warning":
+            app_id = doc.get("app_id")
+            attributes |= {
+                "app_id": app_id,
+                "game": self.console.game_name(app_id) if isinstance(app_id, str) else None,
+                "minutes_left": doc.get("minutes_left"),
+                "blocked_by": doc.get("blocked_by"),
+            }
+        self._trigger_event(event_type, attributes)
         self.async_write_ha_state()
