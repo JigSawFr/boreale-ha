@@ -3,10 +3,10 @@
 [![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
 [![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
 [![HACS: custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](custom_components/playguard/quality_scale.yaml)
-[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](https://github.com/JigSawFr/playguard-ha/blob/main/custom_components/playguard/quality_scale.yaml)
+[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)
 
-**English** · [Français](README.fr.md)
+**English** · [Français](https://github.com/JigSawFr/playguard-ha/blob/main/README.fr.md)
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
@@ -113,6 +113,10 @@ With [HACS](https://hacs.xyz/):
 2. Open **PlayGuard** in HACS and *Download* it: HACS installs the
    `playguard.zip` of the release you pick.
 3. Restart Home Assistant.
+
+A new release shows up in HACS by itself, within a few hours (HACS checks
+GitHub on a schedule); to see it at once, *HACS › PlayGuard › ⋮ › Update
+information*. Then *Update*, and restart Home Assistant.
 
 By hand: download `playguard.zip` from the
 [latest release](https://github.com/JigSawFr/playguard-ha/releases/latest),
@@ -575,8 +579,6 @@ automation, or the blueprint's copy in `blueprints/automation/playguard/`.
 - The statistics only have the finished days the console still held (the
   last 14) once the integration was set up.
 - The entity ids may differ from those of the console's own MQTT device.
-- *Profile* has no current choice: the console does not say which profile is
-  in effect.
 
 ## Troubleshooting
 
@@ -696,18 +698,18 @@ consoles there. The contract is PlayGuard's
 
 ## Help, security and contributing
 
-- A problem with the integration: [Getting help](.github/SUPPORT.md) says
+- A problem with the integration: [Getting help](https://github.com/JigSawFr/playguard-ha/blob/main/.github/SUPPORT.md) says
   where to ask; a bug report wants the console's diagnostics (the device's
   page, *⋮ › Download diagnostics*: names and account ids left out).
-- A security problem: privately, as [SECURITY.md](SECURITY.md) says, never in
+- A security problem: privately, as [SECURITY.md](https://github.com/JigSawFr/playguard-ha/blob/main/SECURITY.md) says, never in
   a public issue.
 - Working on the integration (tests, coverage, the quality scale, the parity
   with PlayGuard's entity table, translations, releases):
-  [CONTRIBUTING.md](CONTRIBUTING.md). Changes are listed in
-  [CHANGELOG.md](CHANGELOG.md).
+  [CONTRIBUTING.md](https://github.com/JigSawFr/playguard-ha/blob/main/CONTRIBUTING.md). Changes are listed in
+  [CHANGELOG.md](https://github.com/JigSawFr/playguard-ha/blob/main/CHANGELOG.md).
 - Support PlayGuard: [GitHub Sponsors](https://github.com/sponsors/JigSawFr)
   or [Ko-fi](https://ko-fi.com/jigsawfr).
 
 ## License
 
-GPLv3 (see [`LICENSE`](LICENSE)), as PlayGuard.
+GPLv3 (see [`LICENSE`](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)), as PlayGuard.

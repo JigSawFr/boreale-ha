@@ -3,10 +3,10 @@
 [![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
 [![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
 [![HACS: custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](custom_components/playguard/quality_scale.yaml)
-[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](https://github.com/JigSawFr/playguard-ha/blob/main/custom_components/playguard/quality_scale.yaml)
+[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)
 
-[English](README.md) · **Français**
+[English](https://github.com/JigSawFr/playguard-ha/blob/main/README.md) · **Français**
 
 [![Ouvrez votre instance Home Assistant et ouvrez un dépôt dans le Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
 [![Ouvrez votre instance Home Assistant et commencez à configurer une nouvelle intégration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
@@ -117,6 +117,11 @@ Avec [HACS](https://hacs.xyz/) :
 2. Ouvrez **PlayGuard** dans HACS, puis *Télécharger* : HACS installe le
    `playguard.zip` de la version que vous choisissez.
 3. Redémarrez Home Assistant.
+
+Une nouvelle version apparaît d'elle-même dans HACS, en quelques heures (HACS
+interroge GitHub à intervalles réguliers) ; pour la voir tout de suite,
+*HACS › PlayGuard › ⋮ › Mettre à jour les informations*. Puis *Mettre à jour*,
+et redémarrez Home Assistant.
 
 À la main : téléchargez `playguard.zip` depuis la
 [dernière version](https://github.com/JigSawFr/playguard-ha/releases/latest),
@@ -603,8 +608,6 @@ entrée), ou dans la copie du blueprint.
   encore (les 14 dernières) au moment où l'intégration a été configurée.
 - Les identifiants d'entités peuvent différer de ceux de l'appareil MQTT
   d'origine de la console.
-- *Profil* n'a pas de choix en cours : la console ne dit pas quel profil
-  s'applique.
 
 ## Dépannage
 
@@ -729,19 +732,19 @@ de PlayGuard (en anglais).
 
 ## Aide, sécurité et contribution
 
-- Un problème avec l'intégration : [Obtenir de l'aide](.github/SUPPORT.md) (en
+- Un problème avec l'intégration : [Obtenir de l'aide](https://github.com/JigSawFr/playguard-ha/blob/main/.github/SUPPORT.md) (en
   anglais) dit où demander ; un rapport de bug demande les diagnostics de la
   console (la page de l'appareil, *⋮ › Télécharger les diagnostics* : sans les
   noms ni les identifiants de compte).
-- Un problème de sécurité : en privé, comme le dit [SECURITY.md](SECURITY.md)
+- Un problème de sécurité : en privé, comme le dit [SECURITY.md](https://github.com/JigSawFr/playguard-ha/blob/main/SECURITY.md)
   (en anglais), jamais dans un ticket public.
 - Travailler sur l'intégration (tests, couverture, échelle de qualité, parité
   avec la table des entités de PlayGuard, traductions, versions) :
-  [CONTRIBUTING.md](CONTRIBUTING.md) (en anglais). Les changements sont listés
-  dans [CHANGELOG.md](CHANGELOG.md).
+  [CONTRIBUTING.md](https://github.com/JigSawFr/playguard-ha/blob/main/CONTRIBUTING.md) (en anglais). Les changements sont listés
+  dans [CHANGELOG.md](https://github.com/JigSawFr/playguard-ha/blob/main/CHANGELOG.md).
 - Soutenir PlayGuard : [GitHub Sponsors](https://github.com/sponsors/JigSawFr)
   ou [Ko-fi](https://ko-fi.com/jigsawfr).
 
 ## Licence
 
-GPLv3 (voir [`LICENSE`](LICENSE)), comme PlayGuard.
+GPLv3 (voir [`LICENSE`](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)), comme PlayGuard.
