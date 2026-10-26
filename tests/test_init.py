@@ -313,6 +313,11 @@ async def test_events(hass: HomeAssistant, setup) -> None:
 
 
 async def test_week_and_names(hass: HomeAssistant, setup) -> None:
+    activity = fixture("activity.json")  # the agent's play log: today's, until the app writes the week
+    activity["local_date"] = "2026-10-04"
+    activity["per_app"] = [{"app_id": "0100000000010000", "min": 70}, {"app_id": "01000A10041EA000", "min": 5}]
+    activity["per_app"] += [{"app_id": "0100000000020000", "min": 12}, {"app_id": "0100000000010000", "min": "x"}]
+    publish(hass, "activity", activity)
     publish(
         hass,
         "week",
@@ -325,24 +330,29 @@ async def test_week_and_names(hass: HomeAssistant, setup) -> None:
     )
     await hass.async_block_till_done()
     week = hass.states.get(_id("sensor", "week_play_time", hass))
-    assert week.state == "1.75" and week.attributes["unit_of_measurement"] == "h"  # minutes, shown in hours
-    assert week.attributes["days"] == {"2026-10-03": 30, "2026-10-04": 75}
-    assert week.attributes["games"] == {"Super Mario Odyssey": 90, "Mario Kart 8 Deluxe": 15}
+    assert week.attributes["unit_of_measurement"] == "h"  # minutes, shown in hours
+    assert week.attributes["days"] == {"2026-10-03": 30, "2026-10-04": 97}  # 70 + 15 (the week's is more) + 12
+    assert week.attributes["games"] == {"Super Mario Odyssey": 100, "Mario Kart 8 Deluxe": 15, "0100000000020000": 12}
 
-    activity = fixture("activity.json")  # played since the app wrote the week: the agent's count for today
-    activity["local_date"] = "2026-10-04"
-    activity["per_app"] = [{"app_id": "0100000000010000", "min": 70}, {"app_id": "01000A10041EA000", "min": 5}]
-    activity["per_app"] += [{"app_id": "0100000000020000", "min": 12}, {"app_id": "0100000000010000", "min": "x"}]
+    # The app no longer runs: the agent's finished day and today's log move the week on.
+    final = fixture("activity.json") | {"local_date": "2026-10-05", "final": True}
+    final["per_app"] = [{"app_id": "0100000000010000", "min": 40}]
+    publish(hass, "activity/2026-10-05", final)
+    activity["local_date"] = "2026-10-06"
+    activity["per_app"] = [{"app_id": "01000A10041EA000", "min": 20}]
     publish(hass, "activity", activity)
     await hass.async_block_till_done()
     week = hass.states.get(_id("sensor", "week_play_time", hass))
-    assert week.attributes["days"] == {"2026-10-03": 30, "2026-10-04": 97}  # 70 + 15 (the week's is more) + 12
-    assert week.attributes["games"]["Super Mario Odyssey"] == 100
+    days = week.attributes["days"]
+    assert list(days) == [f"2026-09-{d}" for d in (30,)] + [f"2026-10-0{d}" for d in range(1, 7)]
+    assert days == {"2026-09-30": 0, "2026-10-01": 0, "2026-10-02": 0, "2026-10-03": 30, "2026-10-04": 75,
+                    "2026-10-05": 40, "2026-10-06": 20}  # fmt: skip
+    assert week.state == "2.75"
+    assert week.attributes["games"]["Super Mario Odyssey"] == 130
 
-    activity["local_date"] = "2026-10-05"  # another day: not this week's last
-    publish(hass, "activity", activity)
+    publish(hass, "activity/2026-10-05", "")  # cleared by the console
     await hass.async_block_till_done()
-    assert hass.states.get(_id("sensor", "week_play_time", hass)).attributes["days"]["2026-10-04"] == 75
+    assert hass.states.get(_id("sensor", "week_play_time", hass)).attributes["days"]["2026-10-05"] == 0
 
 
 async def test_services(hass: HomeAssistant, setup, mqtt_mock) -> None:

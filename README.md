@@ -256,7 +256,7 @@ the play timer*); lock it to turn them back on, always allowed.
 | Used screen time | Today's play time, as the play timer counts it (only while a limit is set). | daily total, disabled by default |
 | Screen time remaining | What is left of today's limit. | |
 | Extended screen time | Extra time granted today. | |
-| Play time this week | The last 7 days, with each day's (`days`), each game's (`games`) and each account's (`accounts`) minutes. | this integration's; once PlayGuard itself has run |
+| Play time this week | The last 7 days, with each day's (`days`), each game's (`games`) and each account's (`accounts`) minutes. | this integration's; once PlayGuard or its agent has published play time |
 | Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, or with neither a limit nor bedtime |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
@@ -404,9 +404,10 @@ listens.
   30 s). The integration logs it once when it goes, once when it is back.
 - Today's **play log** (`activity`) comes with the state; a finished day
   (`activity/<date>`) at the first cycle after midnight, the console keeping
-  the last 14. The **game names** and the **week** come when PlayGuard itself
-  runs (not the agent); until it runs again, the week's today is today's play
-  log.
+  the last 14. The **game names** and the **week** table come when PlayGuard
+  itself runs (not the agent); *Play time this week* moves on without it, day
+  by day, from the play log and the finished days (each account's time only
+  from the table).
 - **Last seen** is the time of the last document the console published while
   Home Assistant listened (its state comes every `poll_s` seconds while it is
   awake), else, after a restart, the time of its last state.

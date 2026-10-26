@@ -252,9 +252,11 @@ class PlayGuardConsole:
         doc = _json(msg.payload)
         if doc is None:
             self.finals.pop(date, None)  # the console keeps 14 days and clears the older ones
+            self._changed()
             return
         self.finals[date] = doc
         self._schedule_statistics()
+        self._changed()  # the week moves on with it
 
     @callback
     def _on_names(self, msg: ReceiveMessage) -> None:

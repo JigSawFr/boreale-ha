@@ -69,6 +69,7 @@ async def test_odd_activity_and_week(hass: HomeAssistant, setup) -> None:
     """Entries that are not a game, minutes that are not a number, a short week."""
     activity = fixture("activity.json")
     activity["per_app"] += ["junk", {"app_id": 5, "min": 3}]
+    activity["local_date"] = "2026-10-02"  # before the week's: no day of it
     publish(hass, "activity", activity)
     publish(
         hass,

@@ -267,7 +267,7 @@ en heures)
 | Temps d'écran utilisé | Le temps de jeu du jour, tel que le minuteur le compte (seulement avec une limite). | total quotidien, désactivé par défaut |
 | Temps d'écran restant | Ce qui reste de la limite du jour. | |
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
-| Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; une fois que PlayGuard lui-même a tourné |
+| Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; dès que PlayGuard ou son agent a publié du temps de jeu |
 | Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, ou sans limite ni coucher |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
@@ -423,9 +423,10 @@ qu'écouter.
   fois quand elle part, une fois quand elle revient.
 - Le **journal de jeu** du jour (`activity`) arrive avec l'état ; une journée
   terminée (`activity/<date>`) au premier cycle après minuit, la console
-  gardant les 14 dernières. Les **noms des jeux** et la **semaine** arrivent
-  quand PlayGuard lui-même tourne (pas l'agent) ; d'ici là, le jour même de la
-  semaine est celui du journal de jeu.
+  gardant les 14 dernières. Les **noms des jeux** et le tableau de la **semaine**
+  arrivent quand PlayGuard lui-même tourne (pas l'agent) ; *Temps de jeu cette
+  semaine* avance sans lui, jour après jour, avec le journal de jeu et les
+  journées terminées (le temps de chaque compte, seulement avec le tableau).
 - **Vu pour la dernière fois** est l'heure du dernier document publié par la
   console pendant que Home Assistant écoutait (son état arrive toutes les
   `poll_s` secondes tant qu'elle est réveillée), sinon, après un redémarrage,
