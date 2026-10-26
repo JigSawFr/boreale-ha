@@ -43,7 +43,16 @@ RESTRICTION_OPTIONS: Final = ("unrestricted", "young_child", "child", "teen", "c
 RESTRICTION_RENAMED: Final = (("none", "unrestricted"),)
 # The events PlayGuard sends (sync_engine.c's event_type(), the ones its
 # discovery declares).
-EVENT_TYPES: Final = ("command_applied", "command_rejected", "command_waiting")
+EVENT_TYPES: Final = (
+    "command_applied",
+    "command_rejected",
+    "command_waiting",
+    # What the console does on its own (PlayGuard's sync_watch, from its agent).
+    "play_started",
+    "play_stopped",
+    "time_warning",
+    "play_blocked",
+)
 
 # Write classes of the entity table (source/sync/sync_entities.c).
 WRITE_NONE: Final = "none"

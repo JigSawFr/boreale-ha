@@ -29,7 +29,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   proposée à la configuration, sans identifiant à saisir.
 - **Les mêmes entités** que l'appareil MQTT d'origine de la console (noms,
   unités, options), à sa place (pas de doublons ; réactivez-le dans les
-  options), plus **En ligne**, **Agent actif**, **Temps de jeu cette semaine** et **Fin du jeu**.
+  options), plus **En ligne**, **Agent actif**, **Temps de jeu cette semaine** et **Fin de partie prévue**.
 - **Les noms des jeux** sur *Jeu en cours*, et le temps de chaque jeu
   aujourd'hui et cette semaine en attributs ; tous les jeux sur *Jeux
   installés* (`games`), avec leur temps de jeu : une entité pour les jeux,
@@ -229,7 +229,7 @@ en heures)
 | Temps d'écran restant | Ce qui reste de la limite du jour. | |
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
 | Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; une fois que PlayGuard lui-même a tourné |
-| Fin du jeu | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, ou sans limite ni coucher |
+| Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, ou sans limite ni coucher |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
@@ -344,17 +344,25 @@ PlayGuard chargée).
 ## Événements
 
 L'entité *Événements* se déclenche une fois par ordre traité par la console,
-avec l'un de ces types d'événements :
+et une fois par chose que la console fait d'elle-même (envoyée par son agent,
+dans un PlayGuard qui les a), avec l'un de ces types d'événements :
 
 | Type d'événement | Quand |
 |---|---|
 | `command_applied` | L'ordre a été exécuté. |
 | `command_rejected` | L'ordre a été refusé ; `reason` dit pourquoi (`policy_off`, `timer_writes_disabled`, `read_only`, `not_confirmed`, `out_of_range`, `no_such_profile`…, voir le [protocole](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md) de PlayGuard, en anglais). |
 | `command_waiting` | L'ordre attend PlayGuard (l'agent le garde jusqu'à ce que PlayGuard le confirme, avec *Demander sur la console*). |
+| `play_started` | Un jeu est lancé (`game`, `app_id`). |
+| `play_stopped` | Le jeu s'arrête : fermé, suspendu, ou un autre lancé (`play_stopped` vient d'abord). |
+| `time_warning` | 10 minutes ou moins restantes sur la limite du jour pendant une partie (`minutes_left`) ; une fois, puis de nouveau quand du temps en plus la fait repasser au-dessus de 10. |
+| `play_blocked` | Les jeux sont bloqués : `blocked_by` vaut `limit` (la limite du jour, ou *Fin du jeu pour aujourd'hui*) ou `bedtime` (le coucher). |
 
 Attributs : `entity` (l'entité de l'ordre), `payload` (sa valeur), `reason`,
 `rc` (le code de résultat de la console, `0x…`, quand elle a répondu), `source`
-(`app` ou `agent`), `ts` (quand, en temps POSIX). Les événements ne sont pas
+(`app` ou `agent`), `ts` (quand, en temps POSIX) ; et pour ce que la console a
+fait d'elle-même, `app_id`, `game` (son nom), `minutes_left`, `blocked_by`. La
+console construit son état toutes les 30 secondes pendant une partie : ils
+arrivent dans ce délai. Les événements ne sont pas
 retenus : un événement envoyé pendant que Home Assistant était absent n'est pas
 vu ; *Dernier ordre* garde le dernier résultat.
 

@@ -140,7 +140,11 @@
             "state": {
               "command_applied": "Ordre exécuté",
               "command_rejected": "Ordre refusé",
-              "command_waiting": "Ordre en attente de PlayGuard"
+              "command_waiting": "Ordre en attente de PlayGuard",
+              "play_started": "Jeu lancé",
+              "play_stopped": "Jeu arrêté",
+              "time_warning": "Temps de jeu bientôt écoulé",
+              "play_blocked": "Jeu bloqué"
             }
           }
         }
@@ -230,7 +234,7 @@
         "name": "Temps de jeu cette semaine"
       },
       "play_ends": {
-        "name": "Fin du jeu"
+        "name": "Fin de partie prévue"
       },
       "model": {
         "name": "Modèle",

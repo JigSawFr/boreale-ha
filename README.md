@@ -326,18 +326,26 @@ unknown profile, a device that is not a loaded PlayGuard console).
 
 ## Events
 
-The *Events* entity fires once per order the console handled, with one of
-these event types:
+The *Events* entity fires once per order the console handled, and once per
+thing the console does on its own (sent by its agent, in a PlayGuard that has
+them), with one of these event types:
 
 | Event type | When |
 |---|---|
 | `command_applied` | The order was carried out. |
 | `command_rejected` | The order was refused; `reason` says why (`policy_off`, `timer_writes_disabled`, `read_only`, `not_confirmed`, `out_of_range`, `no_such_profile` …, see PlayGuard's [protocol](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md)). |
 | `command_waiting` | The order waits for PlayGuard (the agent keeps it until PlayGuard confirms it, under *Ask on the console*). |
+| `play_started` | A game started (`game`, `app_id`). |
+| `play_stopped` | The game stopped: closed, suspended, or another one started (`play_stopped` comes first). |
+| `time_warning` | 10 minutes or fewer left of today's limit while a game is played (`minutes_left`); once, and again after extra time takes it back above 10. |
+| `play_blocked` | Games are blocked: `blocked_by` is `limit` (the day's limit, or *No more play today*) or `bedtime`. |
 
 Attributes: `entity` (the order's entity), `payload` (its value), `reason`,
 `rc` (the console's result code, `0x…`, when it answered), `source` (`app`
-or `agent`), `ts` (when, POSIX time). Events are not retained: one sent while
+or `agent`), `ts` (when, POSIX time); and for what the console did on its
+own, `app_id`, `game` (its name), `minutes_left`, `blocked_by`. The console
+builds its state every 30 seconds while a game is played, so these come
+within that. Events are not retained: one sent while
 Home Assistant was away is not seen; *Last order* keeps the last result.
 
 ## Data updates
