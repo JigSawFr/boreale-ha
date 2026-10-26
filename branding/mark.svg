@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- The mark: PlayGuard's ring and play sign under a roof, PlayGuard at home.
+       Copied as is into banner.svg and social-preview.svg. -->
+  <path d="M28 124 L128 34 L228 124" fill="none" stroke="#FFB547" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="128" cy="152" r="78" fill="#0B1424"/>
+  <circle cx="128" cy="152" r="62" fill="none" stroke="#1F3355" stroke-width="16"/>
+  <circle cx="128" cy="152" r="62" fill="none" stroke="#2EC4A6" stroke-width="16" stroke-linecap="round" stroke-dasharray="292 390" transform="rotate(-90 128 152)"/>
+  <path d="M112 124 L160 152 L112 180 Z" fill="#E8EEF7" stroke="#E8EEF7" stroke-width="8" stroke-linejoin="round"/>
+</svg>

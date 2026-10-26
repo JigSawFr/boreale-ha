@@ -1,4 +1,10 @@
-# PlayGuard for Home Assistant
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/banner.png" alt="PlayGuard for Home Assistant" width="100%">
+
+### Nintendo Switch parental controls, in Home Assistant
+
+**Play&nbsp;time · Limits · Extra&nbsp;time · Bedtime · Statistics · Local&nbsp;MQTT**
 
 [![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
 [![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
@@ -11,6 +17,18 @@
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
 
+[**Install**](#-installation) ·
+[**Set&nbsp;up**](#-set-up) ·
+[**Entities**](#-entities) ·
+[**Examples**](#-examples) ·
+[**PlayGuard**](https://github.com/JigSawFr/PlayGuard)
+
+<img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/dashboard.png" alt="A family dashboard: today's play time and what is left, the game being played, extra time in one tap, the last two weeks per child, the rules" width="100%">
+
+</div>
+
+---
+
 A Home Assistant integration for [PlayGuard](https://github.com/JigSawFr/PlayGuard),
 the Nintendo Switch homebrew that manages the console's parental controls
 offline: play-time limits, bedtime, restrictions, extra time, the console
@@ -20,6 +38,8 @@ access*, and its optional agent that keeps the link up while PlayGuard is
 closed). This integration turns each console into a Home Assistant device:
 see the time left, change the limits, give extra time, lock the console, from
 a dashboard or an automation.
+
+## ✨ Features
 
 The console works with Home Assistant **without** this integration: it
 publishes Home Assistant's MQTT discovery itself. The integration adds:
@@ -52,16 +72,35 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 - **Repairs** when you need to act, and **diagnostics** with the console's
   last state and its last diagnostic report, names left out.
 
-**Contents**: [supported devices](#supported-devices) ·
-[prerequisites](#prerequisites) · [installation](#installation) ·
-[set-up](#set-up) · [options and reconfiguration](#options-and-reconfiguration) ·
-[entities](#entities) · [actions](#actions) · [events](#events) ·
-[data updates](#data-updates) · [examples](#examples) ·
-[use cases](#use-cases) · [known limitations](#known-limitations) ·
-[troubleshooting](#troubleshooting) · [removal](#removal) ·
-[help, security and contributing](#help-security-and-contributing)
+<details>
+<summary><b>📸 Screenshots</b></summary>
+<br>
 
-## Supported devices
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/device.png" alt="The console's device page: its controls, sensors and activity" width="72%">
+  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/phone.png" alt="The family dashboard on a phone" width="24%">
+  <br><sub><b>The console's device</b> · <b>On a phone</b></sub>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/discovered.png" alt="A console found on the broker, offered under Discovered" width="72%">
+  <br><sub><b>Found on the broker</b></sub>
+</p>
+
+<sub>A demo console in Home Assistant 2026.10, dark theme; the dashboard is the family dashboard of the examples below, per child added.</sub>
+
+</details>
+
+**Contents**: [supported devices](#-supported-devices) ·
+[prerequisites](#-prerequisites) · [installation](#-installation) ·
+[set-up](#-set-up) · [options and reconfiguration](#-options-and-reconfiguration) ·
+[entities](#-entities) · [actions](#-actions) · [events](#-events) ·
+[data updates](#-data-updates) · [examples](#-examples) ·
+[use cases](#-use-cases) · [known limitations](#-known-limitations) ·
+[troubleshooting](#-troubleshooting) · [removal](#-removal) ·
+[help, security and contributing](#-help-security-and-contributing)
+
+## 🎮 Supported devices
 
 - **Nintendo Switch** consoles (the original, the OLED model, the Lite)
   running Atmosphère and a PlayGuard that has *Console › Remote access*.
@@ -84,7 +123,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   a repair, *MQTT protocol migration failed* (Home Assistant drops 3.1.1 in
   2027.1).
 
-## Prerequisites
+## ✅ Prerequisites
 
 1. An MQTT broker, and Home Assistant's **MQTT** integration set up on it
    (*Settings › Devices & services › Add integration › MQTT*; with the
@@ -103,7 +142,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
    whether the console asks before carrying an order out (the default), does
    it at once, or refuses it.
 
-## Installation
+## 📦 Installation
 
 With [HACS](https://hacs.xyz/):
 
@@ -129,7 +168,7 @@ attestation: `gh attestation verify playguard.zip -R JigSawFr/playguard-ha`
 checks that it was built by this repository's CI (`SHA256SUMS.txt`, next to
 it, has its checksum).
 
-## Set-up
+## 🔌 Set-up
 
 **Found on the broker.** Each console that publishes (PlayGuard open, or its
 agent running) shows up in *Settings › Devices & services › Discovered*:
@@ -158,7 +197,7 @@ agent running) shows up in *Settings › Devices & services › Discovered*:
 Each console is one entry and one device; the same console cannot be added
 twice.
 
-## Options and reconfiguration
+## 🔧 Options and reconfiguration
 
 *Settings › Devices & services › PlayGuard › ⚙ (Configure)*:
 
@@ -176,7 +215,7 @@ and its entry follows it (and reloads) once the console publishes a state
 newer than the last one the entry read; a state left on the broker under the
 former prefix does not move it back.
 
-## Entities
+## 🧩 Entities
 
 One device per console, named after the console (*Name in Home Assistant*
 in PlayGuard): the console as Nintendo names it, its model and model number
@@ -247,7 +286,7 @@ unknown when none is).
 *Remove the limit*; diagnostic: *Sync now* (the console publishes everything
 again), *Export a diagnostic report* (disabled by default).
 
-**Event**: *Events*, see [events](#events).
+**Event**: *Events*, see [events](#-events).
 
 **The console itself** (`playguard/<id>/system`, kept fresh by the agent
 while PlayGuard is closed):
@@ -303,7 +342,7 @@ entities' names, when they are first registered, and you can change them: they
 may differ from those of the console's own MQTT device, so check the
 automations that used those.
 
-## Actions
+## ⚡ Actions
 
 Each action takes the console's **device** (`device_id`), and sends a retained
 order: when the console is asleep, it waits on the broker and is carried out
@@ -324,7 +363,7 @@ unknown profile, a device that is not a loaded PlayGuard console).
 `set_limits`, `add_bonus_time`, `apply_profile` and `stop_today` need
 *Orders may change the play timer*.
 
-## Events
+## 🔔 Events
 
 The *Events* entity fires once per order the console handled, and once per
 thing the console does on its own (sent by its agent, in a PlayGuard that has
@@ -348,7 +387,7 @@ builds its state every 30 seconds while a game is played, so these come
 within that. Events are not retained: one sent while
 Home Assistant was away is not seen; *Last order* keeps the last result.
 
-## Data updates
+## 🔄 Data updates
 
 Nothing is polled: the console pushes over MQTT, and Home Assistant only
 listens.
@@ -384,7 +423,7 @@ listens.
   updates, says in its notifications that a newer release of the integration
   is out, with what changed and the QR code that opens it in HACS.
 
-## Examples
+## 💡 Examples
 
 Entity ids depend on the console's name (here *Living room*): check them on
 the device's page. The actions' device is picked in the UI; in YAML, it is the
@@ -539,7 +578,7 @@ cards:
       {%- endfor %}
 ```
 
-## Blueprints
+## 📘 Blueprints
 
 Ready-made automations: import one, then *Create automation* from it and pick
 the console's entities and the phone (the Home Assistant app).
@@ -555,7 +594,7 @@ The ones that give extra time need *Orders may change the play timer* on the
 console. Their notifications are in English: change the text in the
 automation, or the blueprint's copy in `blueprints/automation/playguard/`.
 
-## Use cases
+## 🏡 Use cases
 
 - See at a glance how long the children played today and what is left, on
   the family dashboard or a phone.
@@ -569,7 +608,7 @@ automation, or the blueprint's copy in `blueprints/automation/playguard/`.
 - Keep months of play history, per day and per game, in a *Statistics graph*
   card, long after the console forgot them.
 
-## Known limitations
+## 🚧 Known limitations
 
 - PlayGuard runs on a console with custom firmware (Atmosphère); there is
   none for the Nintendo Switch 2.
@@ -594,7 +633,7 @@ automation, or the blueprint's copy in `blueprints/automation/playguard/`.
   without PlayGuard leaves a gap.
 - The entity ids may differ from those of the console's own MQTT device.
 
-## Troubleshooting
+## 🩺 Troubleshooting
 
 <details>
 <summary>No PlayGuard console in <em>Discovered</em></summary>
@@ -683,7 +722,7 @@ For anything else, download the diagnostics (*Settings › Devices & services
 report, names left out) and open an
 [issue](https://github.com/JigSawFr/playguard-ha/issues).
 
-## Removal
+## 🧹 Removal
 
 1. *Settings › Devices & services › PlayGuard*, then for each console *⋮ ›
    Delete*. Removing a console's entry asks the console to publish its own
@@ -700,7 +739,7 @@ Nothing else is left on the broker: the console clears each order once
 handled. To stop the console publishing at all, turn *Remote link* off in
 PlayGuard.
 
-## What it does on the broker
+## 📡 What it does on the broker
 
 It reads `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` and `report`, and publishes the
@@ -711,7 +750,7 @@ hand listens to `+/+/state` and `+/+/+/state` for a few seconds, to list the
 consoles there. The contract is PlayGuard's
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md).
 
-## Help, security and contributing
+## 🤝 Help, security and contributing
 
 - A problem with the integration: [Getting help](https://github.com/JigSawFr/playguard-ha/blob/main/.github/SUPPORT.md) says
   where to ask; a bug report wants the console's diagnostics (the device's
@@ -725,6 +764,8 @@ consoles there. The contract is PlayGuard's
 - Support PlayGuard: [GitHub Sponsors](https://github.com/sponsors/JigSawFr)
   or [Ko-fi](https://ko-fi.com/jigsawfr).
 
-## License
+## 📜 License
 
-GPLv3 (see [`LICENSE`](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)), as PlayGuard.
+**GPLv3** (see [`LICENSE`](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)), as PlayGuard. Maintained by [JigSawFr](https://github.com/JigSawFr).
+
+<sub>Not affiliated with or endorsed by Nintendo or the Home Assistant project. Nintendo Switch is a trademark of Nintendo.</sub>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <!-- GitHub social preview (1280x640), rendered to .github/readme/social-preview.png
+       (uploaded by hand in Settings › General). -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1424"/><stop offset="1" stop-color="#122440"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#2EC4A6" stop-opacity="0.22"/><stop offset="1" stop-color="#2EC4A6" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="#1F3355"/></pattern>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#dots)" opacity="0.6"/>
+  <rect width="1280" height="8" fill="#FFB547"/>
+  <circle cx="250" cy="320" r="260" fill="url(#glow)"/>
+  <g transform="translate(90 160) scale(1.25)">
+<g>
+  <path d="M28 124 L128 34 L228 124" fill="none" stroke="#FFB547" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="128" cy="152" r="78" fill="#0B1424"/>
+  <circle cx="128" cy="152" r="62" fill="none" stroke="#1F3355" stroke-width="16"/>
+  <circle cx="128" cy="152" r="62" fill="none" stroke="#2EC4A6" stroke-width="16" stroke-linecap="round" stroke-dasharray="292 390" transform="rotate(-90 128 152)"/>
+  <path d="M112 124 L160 152 L112 180 Z" fill="#E8EEF7" stroke="#E8EEF7" stroke-width="8" stroke-linejoin="round"/>
+</g>
+
+  </g>
+  <text x="456" y="290" font-family="Sora" font-weight="700" font-size="112" letter-spacing="-3" fill="#E8EEF7">Play<tspan fill="#2EC4A6">Guard</tspan></text>
+  <text x="460" y="348" font-family="Sora" font-weight="600" font-size="38" fill="#FFB547">for Home Assistant</text>
+  <text x="460" y="414" font-family="Sora" font-weight="400" font-size="28" fill="#A9B6CC">The Nintendo Switch's parental controls,</text>
+  <text x="460" y="452" font-family="Sora" font-weight="400" font-size="28" fill="#A9B6CC">on your dashboards and in your automations.</text>
+  <text x="460" y="516" font-family="Sora" font-weight="400" font-size="22" fill="#2EC4A6">Play time · Limits · Extra time · Bedtime · Statistics · MQTT</text>
+</svg>

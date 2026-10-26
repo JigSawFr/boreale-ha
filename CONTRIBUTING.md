@@ -70,7 +70,9 @@ the coverage gate is per module, not the total.
 | `repairs.py`, `diagnostics.py` | The fixable repair, the redacted diagnostics |
 | `brand/` | The integration's icon and logo (Home Assistant 2026.3+) |
 | `tests/` | One test module per part, PlayGuard's fixtures, the parity and quality-scale checks |
-| `scripts/` | The per-module coverage gate, the release zip |
+| `scripts/` | The per-module coverage gate, the release zip, the README's branding |
+| `branding/` | The mark, the README's banner and the social preview, as SVG: `node scripts/render_branding.mjs` (Node and Playwright) renders them to `.github/readme/` |
+| `.github/readme/` | The README's images: the banner, the social preview (uploaded by hand in *Settings › General*), the screenshots (a demo console in a real Home Assistant) |
 
 ## Pull requests and releases
 

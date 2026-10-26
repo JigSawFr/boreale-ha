@@ -1,4 +1,10 @@
-# PlayGuard pour Home Assistant
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/banner.png" alt="PlayGuard for Home Assistant" width="100%">
+
+### Le contrôle parental de la Nintendo Switch, dans Home Assistant
+
+**Temps&nbsp;de&nbsp;jeu · Limites · Temps&nbsp;en&nbsp;plus · Coucher · Statistiques · MQTT&nbsp;local**
 
 [![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
 [![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
@@ -11,6 +17,18 @@
 [![Ouvrez votre instance Home Assistant et ouvrez un dépôt dans le Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
 [![Ouvrez votre instance Home Assistant et commencez à configurer une nouvelle intégration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
 
+[**Installer**](#-installation) ·
+[**Configurer**](#-configuration) ·
+[**Entités**](#-entités) ·
+[**Exemples**](#-exemples) ·
+[**PlayGuard**](https://github.com/JigSawFr/PlayGuard)
+
+<img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/dashboard.png" alt="Un tableau de bord familial : le temps de jeu du jour et ce qui reste, le jeu en cours, du temps en plus en un geste, les deux dernières semaines par enfant, les règles" width="100%">
+
+</div>
+
+---
+
 Une intégration Home Assistant pour [PlayGuard](https://github.com/JigSawFr/PlayGuard),
 le homebrew Nintendo Switch qui gère le contrôle parental de la console hors
 ligne : limites de temps de jeu, heure du coucher, restrictions, temps en plus,
@@ -21,6 +39,8 @@ lien quand PlayGuard est fermé). Cette intégration fait de chaque console un
 appareil Home Assistant : voir le temps restant, changer les limites, donner du
 temps en plus, bloquer tous les jeux, depuis un tableau de bord ou une
 automatisation.
+
+## ✨ Fonctionnalités
 
 La console fonctionne avec Home Assistant **sans** cette intégration : elle
 publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
@@ -56,16 +76,35 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 - Des **réparations** quand vous devez agir, et des **diagnostics** avec le
   dernier état de la console et son dernier rapport de diagnostic, sans les noms.
 
-**Sommaire** : [appareils pris en charge](#appareils-pris-en-charge) ·
-[prérequis](#prérequis) · [installation](#installation) ·
-[configuration](#configuration) · [options et reconfiguration](#options-et-reconfiguration) ·
-[entités](#entités) · [actions](#actions) · [événements](#événements) ·
-[mise à jour des données](#mise-à-jour-des-données) · [exemples](#exemples) ·
-[cas d'usage](#cas-dusage) · [limites connues](#limites-connues) ·
-[dépannage](#dépannage) · [désinstallation](#désinstallation) ·
-[aide, sécurité et contribution](#aide-sécurité-et-contribution)
+<details>
+<summary><b>📸 Captures d'écran</b></summary>
+<br>
 
-## Appareils pris en charge
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/device.png" alt="La page de l'appareil de la console : ses contrôles, ses capteurs et son activité" width="72%">
+  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/phone.png" alt="Le tableau de bord familial sur un téléphone" width="24%">
+  <br><sub><b>L'appareil de la console</b> · <b>Sur un téléphone</b></sub>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/discovered.png" alt="Une console trouvée sur le broker, proposée sous Découvertes" width="72%">
+  <br><sub><b>Trouvée sur le broker</b></sub>
+</p>
+
+<sub>Une console de démonstration dans Home Assistant 2026.10, thème sombre ; le tableau de bord est le tableau de bord familial des exemples plus bas, avec le graphique par enfant.</sub>
+
+</details>
+
+**Sommaire** : [appareils pris en charge](#-appareils-pris-en-charge) ·
+[prérequis](#-prérequis) · [installation](#-installation) ·
+[configuration](#-configuration) · [options et reconfiguration](#-options-et-reconfiguration) ·
+[entités](#-entités) · [actions](#-actions) · [événements](#-événements) ·
+[mise à jour des données](#-mise-à-jour-des-données) · [exemples](#-exemples) ·
+[cas d'usage](#-cas-dusage) · [limites connues](#-limites-connues) ·
+[dépannage](#-dépannage) · [désinstallation](#-désinstallation) ·
+[aide, sécurité et contribution](#-aide-sécurité-et-contribution)
+
+## 🎮 Appareils pris en charge
 
 - Les consoles **Nintendo Switch** (le modèle d'origine, le modèle OLED, la
   Lite) sous Atmosphère, avec un PlayGuard qui a *Console › Accès à
@@ -89,7 +128,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   l'accepte, sinon elle signale une réparation, *Échec de la migration du
   protocole MQTT* (Home Assistant abandonne 3.1.1 avec la 2027.1).
 
-## Prérequis
+## ✅ Prérequis
 
 1. Un broker MQTT, et l'intégration **MQTT** de Home Assistant configurée
    dessus (*Paramètres › Appareils et services › Ajouter une intégration ›
@@ -108,7 +147,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
    écran. *Ordres reçus* dit si la console demande avant d'exécuter un ordre
    (par défaut), l'exécute aussitôt, ou le refuse.
 
-## Installation
+## 📦 Installation
 
 Avec [HACS](https://hacs.xyz/) :
 
@@ -135,7 +174,7 @@ attestation de provenance de build : `gh attestation verify playguard.zip -R Jig
 vérifie qu'il a été construit par la CI de ce dépôt (`SHA256SUMS.txt`, à côté,
 donne sa somme de contrôle).
 
-## Configuration
+## 🔌 Configuration
 
 **Trouvée sur le broker.** Chaque console qui publie (PlayGuard ouvert, ou son
 agent actif) apparaît dans *Paramètres › Appareils et services › Découvertes* :
@@ -165,7 +204,7 @@ agent actif) apparaît dans *Paramètres › Appareils et services › Découver
 Chaque console est une entrée et un appareil ; la même console ne peut pas être
 ajoutée deux fois.
 
-## Options et reconfiguration
+## 🔧 Options et reconfiguration
 
 *Paramètres › Appareils et services › PlayGuard › ⚙ (Configurer)* :
 
@@ -183,7 +222,7 @@ découverte, et son entrée la suit (et se recharge) dès que la console publie 
 état plus récent que le dernier lu par l'entrée ; un état resté sur le broker
 sous l'ancien préfixe ne la fait pas revenir en arrière.
 
-## Entités
+## 🧩 Entités
 
 Un appareil par console, au nom de la console (*Nom dans Home Assistant* dans
 PlayGuard) : la console telle que Nintendo la nomme, son modèle et son numéro
@@ -260,7 +299,7 @@ aujourd'hui*, *Retirer la limite* ; diagnostic : *Synchroniser maintenant* (la
 console republie tout), *Exporter un rapport de diagnostic* (désactivé par
 défaut).
 
-**Événement** : *Événements*, voir [événements](#événements).
+**Événement** : *Événements*, voir [événements](#-événements).
 
 **La console elle-même** (`playguard/<id>/system`, tenu à jour par l'agent
 quand PlayGuard est fermé) :
@@ -319,7 +358,7 @@ de l'appareil et des entités, lors de leur premier enregistrement, et vous
 pouvez les changer : ils peuvent différer de ceux de l'appareil MQTT d'origine
 de la console, vérifiez donc les automatisations qui utilisaient ceux-là.
 
-## Actions
+## ⚡ Actions
 
 Chaque action prend l'**appareil** de la console (`device_id`), et envoie un
 ordre retenu : quand la console est en veille, il attend sur le broker et est
@@ -341,7 +380,7 @@ PlayGuard chargée).
 `set_limits`, `add_bonus_time`, `apply_profile` et `stop_today` demandent
 *Les ordres peuvent changer le temps de jeu*.
 
-## Événements
+## 🔔 Événements
 
 L'entité *Événements* se déclenche une fois par ordre traité par la console,
 et une fois par chose que la console fait d'elle-même (envoyée par son agent,
@@ -366,7 +405,7 @@ arrivent dans ce délai. Les événements ne sont pas
 retenus : un événement envoyé pendant que Home Assistant était absent n'est pas
 vu ; *Dernier ordre* garde le dernier résultat.
 
-## Mise à jour des données
+## 🔄 Mise à jour des données
 
 Rien n'est interrogé : la console pousse par MQTT, et Home Assistant ne fait
 qu'écouter.
@@ -406,7 +445,7 @@ qu'écouter.
   notifications qu'une nouvelle version de l'intégration est sortie, avec ce
   qui change et le QR code qui l'ouvre dans HACS.
 
-## Exemples
+## 💡 Exemples
 
 Les identifiants d'entités dépendent du nom de la console (ici *Living room*) :
 vérifiez-les sur la page de l'appareil. L'appareil des actions se choisit dans
@@ -563,7 +602,7 @@ cards:
       {%- endfor %}
 ```
 
-## Blueprints
+## 📘 Blueprints
 
 Des automatisations toutes prêtes : importez-en une, puis *Créer une
 automatisation* depuis elle et choisissez les entités de la console et le
@@ -581,7 +620,7 @@ temps de jeu* activé sur la console. Leurs notifications sont en anglais :
 changez le texte dans l'automatisation (le message de *Time is up* est une
 entrée), ou dans la copie du blueprint.
 
-## Cas d'usage
+## 🏡 Cas d'usage
 
 - Voir d'un coup d'œil combien de temps les enfants ont joué aujourd'hui et ce
   qui reste, sur le tableau de bord familial ou un téléphone.
@@ -596,7 +635,7 @@ entrée), ou dans la copie du blueprint.
 - Garder des mois d'historique de jeu, par jour et par jeu, dans une carte
   *Graphique des statistiques*, longtemps après que la console les a oubliés.
 
-## Limites connues
+## 🚧 Limites connues
 
 - PlayGuard tourne sur une console sous firmware personnalisé (Atmosphère) ; il
   n'y en a pas pour la Nintendo Switch 2.
@@ -625,7 +664,7 @@ entrée), ou dans la copie du blueprint.
 - Les identifiants d'entités peuvent différer de ceux de l'appareil MQTT
   d'origine de la console.
 
-## Dépannage
+## 🩺 Dépannage
 
 <details>
 <summary>Aucune console PlayGuard dans <em>Découvertes</em></summary>
@@ -716,7 +755,7 @@ services › PlayGuard › ⋮ › Télécharger les diagnostics* : les derniers
 et le dernier rapport de la console, sans les noms) et ouvrez un
 [ticket](https://github.com/JigSawFr/playguard-ha/issues).
 
-## Désinstallation
+## 🧹 Désinstallation
 
 1. *Paramètres › Appareils et services › PlayGuard*, puis pour chaque console
    *⋮ › Supprimer*. Supprimer l'entrée d'une console demande à la console de
@@ -734,7 +773,7 @@ Rien d'autre ne reste sur le broker : la console efface chaque ordre une fois
 traité. Pour que la console arrête complètement de publier, désactivez *Lien à
 distance* dans PlayGuard.
 
-## Ce qu'elle fait sur le broker
+## 📡 Ce qu'elle fait sur le broker
 
 Elle lit `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` et `report`, et publie les mêmes
@@ -746,7 +785,7 @@ consoles qui y sont. Le contrat est le
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md)
 de PlayGuard (en anglais).
 
-## Aide, sécurité et contribution
+## 🤝 Aide, sécurité et contribution
 
 - Un problème avec l'intégration : [Obtenir de l'aide](https://github.com/JigSawFr/playguard-ha/blob/main/.github/SUPPORT.md) (en
   anglais) dit où demander ; un rapport de bug demande les diagnostics de la
@@ -761,6 +800,8 @@ de PlayGuard (en anglais).
 - Soutenir PlayGuard : [GitHub Sponsors](https://github.com/sponsors/JigSawFr)
   ou [Ko-fi](https://ko-fi.com/jigsawfr).
 
-## Licence
+## 📜 Licence
 
-GPLv3 (voir [`LICENSE`](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)), comme PlayGuard.
+**GPLv3** (voir [`LICENSE`](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)), comme PlayGuard. Maintenu par [JigSawFr](https://github.com/JigSawFr).
+
+<sub>Ni affilié à Nintendo ni au projet Home Assistant, ni approuvé par eux. Nintendo Switch est une marque de Nintendo.</sub>
