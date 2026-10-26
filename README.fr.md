@@ -54,8 +54,9 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   aujourd'hui et cette semaine en attributs ; tous les jeux sur *Jeux
   installés* (`games`), avec leur temps de jeu : une entité pour les jeux,
   pas une par jeu.
-- **Le temps de jeu de chaque compte** (de chaque enfant) : aujourd'hui et
-  cette semaine en attributs, sous le nom du compte sur la console.
+- **Le temps de jeu de chaque compte** (de chaque enfant) : un capteur pour
+  aujourd'hui et un pour cette semaine par compte, au nom du compte sur la
+  console, et les deux en attributs du temps de jeu de la console.
 - **Des statistiques à long terme** : le total de chaque journée terminée,
   celui de chaque jeu et celui de chaque compte, importés dans l'enregistreur
   (`playguard:<console id>_play_time`,
@@ -267,6 +268,7 @@ en heures)
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
 | Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; dès que PlayGuard ou son agent a publié du temps de jeu |
 | Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, avec le minuteur de jeu désactivé, ou sans limite ni coucher |
+| Temps de jeu aujourd'hui de *Compte*, Temps de jeu cette semaine de *Compte* | Une paire par compte utilisateur, créée dès que la console en parle (son nom, ou son temps de jeu). En minutes, celui de la semaine affiché en heures. | propres à cette intégration ; inconnus tant que le temps des comptes n'a pas été lu (l'app lit les comptes à la demande, l'agent d'après le journal de jeu) |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |

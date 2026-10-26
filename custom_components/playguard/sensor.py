@@ -7,13 +7,15 @@ from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import PlayGuardConfigEntry
+from .const import PUBLISH_ACTIVITY
 from .coordinator import PlayGuardConsole
-from .entities import EntityDef, for_platform
+from .entities import ACCOUNT_ENTITIES, EntityDef, for_platform
 from .entity import PlayGuardEntity
 
 PARALLEL_UPDATES = 0
@@ -34,6 +36,30 @@ async def async_setup_entry(
     async_add_entities(
         classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR, console.unpublished)
     )
+    if PUBLISH_ACTIVITY in console.unpublished:
+        return
+
+    # Each account's pair: the ones already in the registry at once, the
+    # others as the console speaks of them.
+    added: set[str] = set()
+    prefix = f"{console.console_id}_account_"
+
+    @callback
+    def add_accounts(uids: set[str]) -> None:
+        new = sorted(uids - added)
+        added.update(new)
+        async_add_entities(AccountSensor(console, d, uid) for uid in new for d in ACCOUNT_ENTITIES)
+
+    registry = er.async_get(hass)
+    add_accounts(
+        {
+            e.unique_id.removeprefix(prefix).rsplit("_", 1)[0]
+            for e in er.async_entries_for_config_entry(registry, entry.entry_id)
+            if e.domain == Platform.SENSOR and e.unique_id.startswith(prefix)
+        }
+    )
+    add_accounts(_account_ids(console))
+    entry.async_on_unload(console.async_add_listener(lambda: add_accounts(_account_ids(console))))
 
 
 def _posix(value: Any) -> int:
@@ -115,6 +141,50 @@ def _accounts(console: PlayGuardConsole, rows: Any) -> dict[str, int] | None:
     return dict(sorted(out.items(), key=lambda kv: -kv[1]))
 
 
+def _window(console: PlayGuardConsole) -> list[str]:
+    """The week's seven days: the week table's, or the seven up to today's
+    play log when it is later."""
+    days = [d for d in (console.week or {}).get("days") or [] if isinstance(d, str)]
+    today = _date((console.activity or {}).get("local_date"))
+    if today is not None and (not days or today.isoformat() > days[-1]):
+        return [(today - timedelta(days=k)).isoformat() for k in range(6, -1, -1)]
+    return days
+
+
+def _table(console: PlayGuardConsole, rows_key: str, id_key: str, log_key: str) -> dict[str, list[int]] | None:
+    """Minutes per day of the week, by game (`app_id`) or by account (`uid`,
+    upper case): the week table's rows, then the finished days' and today's
+    play log, each day the larger count. None when none of them says (the
+    accounts, from a PlayGuard whose agent does not read them)."""
+    days = _window(console)
+    at = {day: i for i, day in enumerate(days)}
+    table: dict[str, list[int]] = {}
+    known = False
+
+    def count(key: Any, day: Any, minutes: Any) -> None:
+        if isinstance(key, str) and key and day in at and _minutes(minutes) is not None:
+            row = table.setdefault(key.upper() if id_key == "uid" else key, [0] * len(days))
+            row[at[day]] = max(row[at[day]], minutes)
+
+    week = console.week or {}
+    if isinstance(week.get(rows_key), list):
+        known = True
+        for row in week[rows_key]:
+            if isinstance(row, dict):
+                for day, minutes in zip(week.get("days") or [], row.get("min") or [], strict=False):
+                    count(row.get(id_key), day, minutes)
+    activity = console.activity or {}
+    logs = [*((doc.get("local_date") or day, doc) for day, doc in console.finals.items())]
+    logs.append((activity.get("local_date"), activity))
+    for day, doc in logs:
+        if day in at and isinstance(doc.get(log_key), list):
+            known = True
+            for item in doc[log_key]:
+                if isinstance(item, dict):
+                    count(item.get(id_key), day, item.get("min"))
+    return table if known else None
+
+
 class NowPlayingSensor(PlayGuardSensor):
     """The game being played: its name (from the names PlayGuard publishes), else its id."""
 
@@ -155,67 +225,25 @@ class WeekSensor(PlayGuardSensor):
 
     @property
     def available(self) -> bool:
-        return bool(self._window()) and self.shown
-
-    def _window(self) -> list[str]:
-        """The seven days shown: the week table's, or the seven up to today's
-        play log when it is later."""
-        days = [d for d in (self.console.week or {}).get("days") or [] if isinstance(d, str)]
-        today = _date((self.console.activity or {}).get("local_date"))
-        if today is not None and (not days or today.isoformat() > days[-1]):
-            return [(today - timedelta(days=k)).isoformat() for k in range(6, -1, -1)]
-        return days
-
-    def _table(self, rows_key: str, id_key: str, log_key: str) -> dict[str, list[int]] | None:
-        """Minutes per day of the window, by game (`app_id`) or by account
-        (`uid`): the week table's rows, then the finished days' and today's
-        play log, each day the larger count. None when none of them says
-        (the accounts, from a PlayGuard whose agent does not read them)."""
-        days = self._window()
-        at = {day: i for i, day in enumerate(days)}
-        table: dict[str, list[int]] = {}
-        known = False
-
-        def count(key: Any, day: Any, minutes: Any) -> None:
-            if isinstance(key, str) and key and day in at and _minutes(minutes) is not None:
-                row = table.setdefault(key, [0] * len(days))
-                row[at[day]] = max(row[at[day]], minutes)
-
-        week = self.console.week or {}
-        if isinstance(week.get(rows_key), list):
-            known = True
-            for row in week[rows_key]:
-                if isinstance(row, dict):
-                    for day, minutes in zip(week.get("days") or [], row.get("min") or [], strict=False):
-                        count(row.get(id_key), day, minutes)
-        activity = self.console.activity or {}
-        logs = [*((doc.get("local_date") or day, doc) for day, doc in self.console.finals.items())]
-        logs.append((activity.get("local_date"), activity))
-        for day, doc in logs:
-            if day in at and isinstance(doc.get(log_key), list):
-                known = True
-                for item in doc[log_key]:
-                    if isinstance(item, dict):
-                        count(item.get(id_key), day, item.get("min"))
-        return table if known else None
+        return bool(_window(self.console)) and self.shown
 
     def _games(self) -> dict[str, list[int]]:
-        return self._table("games", "app_id", "per_app") or {}
+        return _table(self.console, "games", "app_id", "per_app") or {}
 
     def _days(self) -> dict[str, int]:
-        days = self._window()
+        days = _window(self.console)
         totals = [sum(day) for day in zip(*self._games().values(), strict=True)] or [0] * len(days)
         return dict(zip(days, totals, strict=False))
 
     def _accounts(self) -> dict[str, int] | None:
-        table = self._table("accounts", "uid", "per_account")
+        table = _table(self.console, "accounts", "uid", "per_account")
         if table is None:
             return None
         return _accounts(self.console, [{"uid": uid, "min": sum(minutes)} for uid, minutes in table.items()])
 
     @property
     def native_value(self) -> int | None:
-        return sum(self._days().values()) if self._window() else None
+        return sum(self._days().values()) if _window(self.console) else None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -321,3 +349,57 @@ class GamesInstalledSensor(PlayGuardSensor):
                 }
             )
         return {"games": rows}
+
+
+def _account_ids(console: PlayGuardConsole) -> set[str]:
+    """The accounts the console speaks of (upper case): named, or with play
+    time in the play log or the week."""
+    uids: set[Any] = set(console.names.get("accounts") or {})
+    for doc in [console.activity or {}, *console.finals.values()]:
+        uids |= {a.get("uid") for a in doc.get("per_account") or [] if isinstance(a, dict)}
+    uids |= {a.get("uid") for a in (console.week or {}).get("accounts") or [] if isinstance(a, dict)}
+    return {u.upper() for u in uids if isinstance(u, str) and len(u) == 32}
+
+
+class AccountSensor(PlayGuardSensor):
+    """One account's play time, today or this week, named after the account
+    (its nickname on the console, from the names PlayGuard publishes; the
+    start of its id until then)."""
+
+    def __init__(self, console: PlayGuardConsole, definition: EntityDef, uid: str) -> None:
+        super().__init__(console, definition)
+        self.uid = uid
+        self._attr_unique_id = f"{console.console_id}_account_{uid}_{definition.key.removeprefix('account_')}"
+        self._attr_translation_placeholders = self._placeholders()
+
+    def _placeholders(self) -> dict[str, str]:
+        return {"account": self.console.account_name(self.uid) or self.uid[:8]}
+
+    @callback
+    def _handle_update(self) -> None:
+        placeholders = self._placeholders()
+        if placeholders != self._attr_translation_placeholders:  # named once the names arrive
+            self._attr_translation_placeholders = placeholders
+            self.__dict__.pop("name", None)  # Entity.name is cached; HA's own _attr_ setters clear it so
+        super()._handle_update()
+
+    @property
+    def available(self) -> bool:
+        known = self.console.activity is not None if self.definition.key == "account_today" else _window(self.console)
+        return bool(known) and self.shown
+
+    @property
+    def native_value(self) -> int | None:
+        if self.definition.key == "account_today":
+            rows = (self.console.activity or {}).get("per_account")
+            if not isinstance(rows, list):
+                return None  # not read
+            return sum(
+                m
+                for r in rows
+                if isinstance(r, dict)
+                and str(r.get("uid")).upper() == self.uid
+                and (m := _minutes(r.get("min"))) is not None
+            )
+        table = _table(self.console, "accounts", "uid", "per_account")
+        return None if table is None else sum(table.get(self.uid, []))
