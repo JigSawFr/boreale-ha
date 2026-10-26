@@ -62,11 +62,10 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   `playguard:<console id>_game_<application id>`,
   `playguard:<console id>_account_<account id>`), pour des mois d'historique
   dans une carte *Graphique des statistiques*.
-- **Des ordres pendant que la console est en veille** : ses contrôles sont
-  alors indisponibles (son message de testament dit qu'elle est partie) et ses
-  capteurs gardent leurs dernières valeurs, mais les actions envoient quand
-  même leurs ordres, qui attendent sur le broker et sont exécutés quand la
-  console sort de veille.
+- **Des ordres pendant que la console est en veille** : ses entités gardent
+  leurs dernières valeurs (*En ligne* dit qu'elle est partie), et un
+  changement fait sur un contrôle ou par une action attend sur le broker et
+  est exécuté quand la console sort de veille.
 - **Des actions** : `set_limits`, `add_bonus_time`, `apply_profile`,
   `stop_today`, `lock_now`, `sync_now`, `request_report`.
 - Une **entité d'événement** pour chaque ordre traité (exécuté, refusé avec la
@@ -211,7 +210,7 @@ ajoutée deux fois.
 | Option | Par défaut | Ce qu'elle fait |
 |---|---|---|
 | **Remplacer l'appareil Home Assistant d'origine de la console** | activée | Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivée : la console publie de nouveau son propre appareil (à côté de celui-ci). L'entrée se recharge quand elle change. |
-| **Garder les dernières valeurs des capteurs pendant la veille** | activée | Tant que la console est hors ligne (en veille, éteinte, hors de portée), ses capteurs, capteurs binaires et événements gardent ce qu'elle a dit en dernier ; ses contrôles (interrupteurs, nombres, listes, heures, boutons) sont indisponibles. Désactivée : toutes les entités sauf *En ligne* sont alors indisponibles. |
+| **Garder les dernières valeurs pendant la veille** | activée | Tant que la console est hors ligne (en veille, éteinte, hors de portée), ses entités gardent ce qu'elle a dit en dernier, contrôles compris : un changement fait sur l'un d'eux attend sur le broker et est exécuté quand la console sort de veille. Désactivée : toutes les entités sauf *En ligne* sont alors indisponibles. |
 
 *⋮ › Reconfigurer* change le **Préfixe des topics**, quand `topic_prefix` dans
 le `sync.conf` de la console change. Comme pour l'ajout d'une console à la main,
@@ -230,10 +229,9 @@ de modèle (*Nintendo Switch – OLED Model*, HEG-001) et le système qu'elle fa
 tourner comme logiciel (*23.0.1 · Atmosphère 1.10.1*). Les entités de
 *configuration* et de *diagnostic* sont dans leurs propres sections de la page
 de l'appareil et hors des tableaux de bord par défaut. Tant que la console est
-hors ligne, ses contrôles sont indisponibles et ses capteurs gardent leurs
-dernières valeurs (*En ligne* dit qu'elle est hors ligne) ; avec l'option
-*Garder les dernières valeurs des capteurs pendant la veille* désactivée, toutes
-sauf *En ligne* sont indisponibles.
+hors ligne, ses entités gardent leurs dernières valeurs (*En ligne* dit
+qu'elle est hors ligne) ; avec l'option *Garder les dernières valeurs pendant
+la veille* désactivée, toutes sauf *En ligne* sont indisponibles.
 
 Comme sur l'appareil d'origine de la console, ce dont peu de tableaux de bord
 ont besoin est **désactivé par défaut** (indiqué ci-dessous) : activez-en un
@@ -251,7 +249,7 @@ recharge avec lui.
 | Code PIN défini | Un code PIN est défini. | diagnostic |
 | Horloge réseau exacte | L'horloge de la console est réglée depuis le réseau. | diagnostic, désactivé par défaut |
 | En ligne | La console est sur le broker en ce moment (sinon : en veille, éteinte, hors de portée). | diagnostic, propre à cette intégration |
-| Agent actif | L'agent de PlayGuard garde le lien. | diagnostic, désactivé par défaut, propre à cette intégration |
+| Agent actif | L'agent de PlayGuard garde le lien (désactivé tant que la console est hors ligne : il dort avec elle). | diagnostic, désactivé par défaut, propre à cette intégration |
 
 **Verrou** : *Contrôle parental*, verrouillé tant qu'il s'applique.
 Déverrouillez-le pour le suspendre avec le code PIN que PlayGuard garde (il
@@ -268,7 +266,7 @@ en heures)
 | Temps d'écran restant | Ce qui reste de la limite du jour. | |
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
 | Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; dès que PlayGuard ou son agent a publié du temps de jeu |
-| Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, ou sans limite ni coucher |
+| Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, avec le minuteur de jeu désactivé, ou sans limite ni coucher |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
@@ -613,6 +611,7 @@ téléphone (l'application Home Assistant).
 | Blueprint | Ce qu'il fait | Importer |
 |---|---|---|
 | **Time is up, extra time from the notification** | Quand la limite du jour est atteinte (pas à l'heure du coucher), une notification sur le téléphone avec un bouton qui donne du temps en plus (*+15 min*, ou ce que vous choisissez). | [![Importer le blueprint de fin de temps](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **A few minutes left, extra time from the notification** | Quand il reste 10 minutes de jeu avant la limite du jour (l'événement *Temps de jeu bientôt écoulé*), une notification sur le téléphone avec le jeu, les minutes restantes et un bouton qui donne du temps en plus. | [![Importer le blueprint des dernières minutes](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
 | **Extra time when…** | Du temps en plus quand quelque chose arrive : un assistant activé (les corvées faites), un bouton ou une télécommande pressés, un tag scanné ; puis ce que vous voulez (désactiver l'assistant). | [![Importer le blueprint de temps en plus](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
 | **Bedtime reminder** | Une notification quelques minutes avant *Alarme du coucher*, pendant qu'un jeu est joué (ou chaque jour). | [![Importer le blueprint de rappel du coucher](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
 | **Weekly summary** | Une fois par semaine, le temps de jeu des sept derniers jours et les jeux les plus joués. | [![Importer le blueprint de résumé de la semaine](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
@@ -644,9 +643,9 @@ entrée), ou dans la copie du blueprint.
 - Certaines choses ne sont jamais possibles depuis Home Assistant, par
   conception de PlayGuard : lire, définir ou changer le code PIN, supprimer le
   contrôle parental, dissocier l'application mobile.
-- Tant que la console est hors ligne, ses contrôles sont indisponibles (ses
-  capteurs gardent leurs dernières valeurs) : seules les actions peuvent alors
-  envoyer des ordres, et ceux-ci attendent la console.
+- Tant que la console est hors ligne, un contrôle montre sa dernière valeur
+  jusqu'à ce que la console sorte de veille et exécute ce qui a été changé
+  (l'ordre attend sur le broker).
   Avec *Demander sur la console*, un ordre attend aussi que quelqu'un le
   confirme sur la console (événement `command_waiting`) ; avec *Les refuser*,
   rien n'est appliqué.
@@ -734,6 +733,15 @@ désactivez *Créer l'appareil dans Home Assistant (découverte MQTT)* dans
 PlayGuard › *Console › Accès à distance*. Pour garder plutôt l'appareil
 d'origine de la console, désactivez l'option *Remplacer l'appareil Home
 Assistant d'origine de la console*.
+</details>
+
+<details>
+<summary>Réparation : « … fait tourner un ancien agent PlayGuard »</summary>
+
+PlayGuard a été mis à jour sur la console, mais pas son agent : sa mise à jour,
+proposée au démarrage, a été remise à plus tard. Mettez-le à jour dans
+PlayGuard › *Console › Modules facultatifs › Agent du lien*. La réparation
+disparaît quand les deux versions sont les mêmes.
 </details>
 
 <details>

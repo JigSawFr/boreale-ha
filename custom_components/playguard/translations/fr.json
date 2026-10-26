@@ -55,11 +55,11 @@
       "init": {
         "data": {
           "take_over_discovery": "Remplacer l'appareil Home Assistant d'origine de la console",
-          "keep_values_asleep": "Garder les dernières valeurs des capteurs pendant la veille"
+          "keep_values_asleep": "Garder les dernières valeurs pendant la veille"
         },
         "data_description": {
           "take_over_discovery": "Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivé : la console publie de nouveau son propre appareil.",
-          "keep_values_asleep": "Tant que la console n'est pas sur le broker (en veille, éteinte, hors de portée), ses capteurs gardent ce qu'elle a dit en dernier ; ses contrôles sont indisponibles. Désactivé : toutes les entités sauf En ligne sont alors indisponibles."
+          "keep_values_asleep": "Tant que la console n'est pas sur le broker (en veille, éteinte, hors de portée), ses entités gardent ce qu'elle a dit en dernier, et un changement fait sur un contrôle l'attend sur le broker. Désactivé : toutes les entités sauf En ligne sont alors indisponibles."
         }
       }
     }
@@ -388,6 +388,10 @@
           }
         }
       }
+    },
+    "agent_version": {
+      "title": "{name} fait tourner un ancien agent PlayGuard",
+      "description": "PlayGuard {app} est installé sur {name}, mais son agent, qui travaille quand PlayGuard est fermé, est encore en {agent} : sa mise à jour a été remise à plus tard. Mettez-le à jour dans PlayGuard › Console › Modules facultatifs › Agent du lien (PlayGuard le propose aussi à son démarrage)."
     }
   },
   "selector": {

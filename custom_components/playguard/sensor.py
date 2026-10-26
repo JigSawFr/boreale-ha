@@ -49,8 +49,6 @@ def _timestamp(value: Any) -> datetime | None:
 class PlayGuardSensor(PlayGuardEntity, SensorEntity):
     """A value of the state."""
 
-    _keeps_value = True
-
     def __init__(self, console: PlayGuardConsole, definition: EntityDef) -> None:
         super().__init__(console, definition)
         if definition.unit:
@@ -232,7 +230,7 @@ class PlayEndsSensor(PlayGuardSensor):
     limit or bedtime, whichever comes first (`ends_by`: `limit` or
     `bedtime`). Unknown when no game is played (the timer only counts then,
     and PlayGuard in front means nobody plays), when games are already
-    blocked, or with neither a limit nor bedtime. Counted from the state's
+    blocked, with the play timer off, or with neither a limit nor bedtime. Counted from the state's
     time, so it holds still between two states."""
 
     def _end(self) -> tuple[datetime, str] | None:
@@ -240,6 +238,8 @@ class PlayEndsSensor(PlayGuardSensor):
         timer = state.get("timer") or {}
         playing = (state.get("activity_today") or {}).get("now_playing") or {}
         if not playing.get("app_id") or not timer.get("supported") or timer.get("limit_reached"):
+            return None
+        if timer.get("enabled") is False:  # the play timer off: neither its limit nor its bedtime blocks
             return None
         base = _timestamp(state.get("ts")) or self.console.last_seen
         if base is None:

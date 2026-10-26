@@ -100,6 +100,7 @@ class PlayGuardConsole:
         self._native_states = 0
         self._issue_schema = f"newer_schema_{self.console_id}"
         self._issue_native = f"native_discovery_{self.console_id}"
+        self._issue_agent = f"agent_version_{self.console_id}"
 
     # ---- topics ----
 
@@ -151,7 +152,7 @@ class PlayGuardConsole:
         if self._statistics_timer:
             self._statistics_timer()
             self._statistics_timer = None
-        for issue_id in (self._issue_schema, self._issue_native):
+        for issue_id in (self._issue_schema, self._issue_native, self._issue_agent):
             ir.async_delete_issue(self.hass, DOMAIN, issue_id)
 
     @callback
@@ -195,6 +196,7 @@ class PlayGuardConsole:
     def _on_system(self, msg: ReceiveMessage) -> None:
         self._seen(msg)
         self.system = _json(msg.payload)
+        self._check_agent()
         self._update_device()
         self._changed()
 
@@ -218,7 +220,7 @@ class PlayGuardConsole:
             _LOGGER.info(
                 "%s is offline (asleep, off or out of reach): %s",
                 self.name,
-                "its controls are unavailable, its sensors keep their last values"
+                "its entities keep their last values, its orders wait for it"
                 if self.keep_values
                 else "its entities are unavailable",
             )
@@ -236,7 +238,7 @@ class PlayGuardConsole:
 
     @property
     def keep_values(self) -> bool:
-        """Whether the sensors keep their last values while the console is off
+        """Whether the entities keep their last values while the console is off
         the broker (the entry's option, on by default)."""
         return bool(self.entry.options.get(CONF_KEEP_VALUES, True))
 
@@ -398,6 +400,25 @@ class PlayGuardConsole:
             )
         else:
             ir.async_delete_issue(self.hass, DOMAIN, self._issue_schema)
+
+    @callback
+    def _check_agent(self) -> None:
+        """PlayGuard offers to update its agent when it starts after an update;
+        put off, the console runs an older agent: a repair issue says so."""
+        versions = (self.system or {}).get("versions") or {}
+        app, agent = versions.get("app"), versions.get("agent")
+        if isinstance(app, str) and isinstance(agent, str) and app and agent and app != agent:
+            ir.async_create_issue(
+                self.hass,
+                DOMAIN,
+                self._issue_agent,
+                is_fixable=False,
+                severity=ir.IssueSeverity.WARNING,
+                translation_key="agent_version",
+                translation_placeholders={"name": self.name, "app": app, "agent": agent},
+            )
+        else:
+            ir.async_delete_issue(self.hass, DOMAIN, self._issue_agent)
 
     @callback
     def _take_over(self) -> None:

@@ -59,10 +59,9 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   `playguard:<console id>_game_<application id>`,
   `playguard:<console id>_account_<account id>`), for months of history in a
   *Statistics graph* card.
-- **Orders while the console sleeps**: its controls are unavailable then
-  (its last will says it is gone) and its sensors keep their last values, but
-  the actions still send their orders, which wait on the broker and are
-  carried out when the console wakes up.
+- **Orders while the console sleeps**: its entities keep their last values
+  (*Online* says it is gone), and a change made to a control or an action
+  waits on the broker and is carried out when the console wakes up.
 - **Actions**: `set_limits`, `add_bonus_time`, `apply_profile`, `stop_today`,
   `lock_now`, `sync_now`, `request_report`.
 - An **event entity** for every order handled (applied, refused with the
@@ -204,7 +203,7 @@ twice.
 | Option | Default | What it does |
 |---|---|---|
 | **Replace the console's own Home Assistant device** | on | Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again (next to this one). The entry reloads when it changes. |
-| **Keep the sensors' last values while the console sleeps** | on | While the console is offline (asleep, off, out of reach), its sensors, binary sensors and events keep showing what it last said; its controls (switches, numbers, selects, times, buttons) are unavailable. Off: every entity but *Online* is unavailable then. |
+| **Keep the last values while the console sleeps** | on | While the console is offline (asleep, off, out of reach), its entities keep showing what it last said, controls included: a change made to one waits on the broker and is carried out when the console wakes up. Off: every entity but *Online* is unavailable then. |
 
 *⋮ › Reconfigure* changes the **Topic prefix**, when `topic_prefix` in the
 console's `sync.conf` changes. As when adding a console by hand, the console
@@ -222,10 +221,9 @@ in PlayGuard): the console as Nintendo names it, its model and model number
 (*Nintendo Switch – OLED Model*, HEG-001) and the system it runs as its
 software (*23.0.1 · Atmosphère 1.10.1*). *Config* and
 *diagnostic* entities are in their own sections of the device page and out of
-the default dashboards. While the console is offline, its controls are
-unavailable and its sensors keep their last values (*Online* says it is
-offline); with the option *Keep the sensors' last values while the console
-sleeps* off, all but *Online* are unavailable.
+the default dashboards. While the console is offline, its entities keep their
+last values (*Online* says it is offline); with the option *Keep the last
+values while the console sleeps* off, all but *Online* are unavailable.
 
 As on the console's own device, what few dashboards need is **disabled by
 default** (marked so below): turn one on from the device page (*… entities
@@ -242,7 +240,7 @@ not shown*), and the entry reloads with it.
 | PIN set | A PIN is set. | diagnostic |
 | Network clock accurate | The console's clock is set from the network. | diagnostic, disabled by default |
 | Online | The console is on the broker now (off: asleep, off, out of reach). | diagnostic, this integration's |
-| Agent running | PlayGuard's agent keeps the link up. | diagnostic, disabled by default, this integration's |
+| Agent running | PlayGuard's agent keeps the link up (off while the console is offline: it sleeps with it). | diagnostic, disabled by default, this integration's |
 
 **Lock**: *Parental controls*, locked while they are in effect. Unlock it to
 unlock them for now with the PIN PlayGuard keeps (it needs *Orders may change
@@ -257,7 +255,7 @@ the play timer*); lock it to turn them back on, always allowed.
 | Screen time remaining | What is left of today's limit. | |
 | Extended screen time | Extra time granted today. | |
 | Play time this week | The last 7 days, with each day's (`days`), each game's (`games`) and each account's (`accounts`) minutes. | this integration's; once PlayGuard or its agent has published play time |
-| Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, or with neither a limit nor bedtime |
+| Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, with the play timer off, or with neither a limit nor bedtime |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
@@ -588,6 +586,7 @@ the console's entities and the phone (the Home Assistant app).
 | Blueprint | What it does | Import |
 |---|---|---|
 | **Time is up, extra time from the notification** | When the day's limit is reached (not at bedtime), a notification on the phone with a button that gives extra time (*+15 min*, or what you set). | [![Import the time is up blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **A few minutes left, extra time from the notification** | When a game has 10 minutes left before the day's limit (the event *Play time almost over*), a notification on the phone with the game, the minutes left and a button that gives extra time. | [![Import the time warning blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
 | **Extra time when…** | Extra time when something happens: a helper turned on (the chores done), a button or a remote pressed, a tag scanned; then what you like (turn the helper off again). | [![Import the extra time blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
 | **Bedtime reminder** | A notification some minutes before *Bedtime alarm*, while a game is played (or every day). | [![Import the bedtime reminder blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
 | **Weekly summary** | Once a week, the last seven days' play time and the games played the most. | [![Import the weekly summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
@@ -617,9 +616,9 @@ automation, or the blueprint's copy in `blueprints/automation/playguard/`.
 - Some things are never possible from Home Assistant, by PlayGuard's design:
   reading, setting or changing the PIN, deleting parental controls, unlinking
   the phone app.
-- While the console is offline its controls are unavailable (its sensors
-  keep their last values): only the actions can send orders then, and these
-  wait for the console. Under *Ask
+- While the console is offline, a control shows its last value until the
+  console wakes up and carries out what was changed (the order waits on the
+  broker). Under *Ask
   on the console*, an order also waits for someone to confirm it on the
   console (event `command_waiting`); under *Refuse them*, nothing is applied.
 - Without *Orders may change the play timer*, the limits, bedtime, extra time,
@@ -700,6 +699,14 @@ it comes back, update PlayGuard, or turn off *Create the device in Home
 Assistant (MQTT discovery)* in PlayGuard › *Console › Remote access*. To
 keep the console's own device instead, turn off the option *Replace the
 console's own Home Assistant device*.
+</details>
+
+<details>
+<summary>Repair: "… runs an older PlayGuard agent"</summary>
+
+PlayGuard was updated on the console, but its agent was not: the offer to
+update it at start-up was put off. Update it in PlayGuard › *Console ›
+Optional modules › Link agent*. The repair goes once both versions match.
 </details>
 
 <details>
