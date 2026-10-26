@@ -367,6 +367,9 @@ ENTITIES: tuple[EntityDef, ...] = (
         publish=PUBLISH_ACTIVITY,
         extra=True,
     ),
+    # When play has to stop: the end of today's limit or bedtime, whichever
+    # comes first, while a game is played.
+    EntityDef(key="play_ends", platform=Platform.SENSOR, device_class="timestamp", extra=True),
     # When the console last said something (any of its documents): it
     # publishes its state every poll_s seconds while awake.
     EntityDef(

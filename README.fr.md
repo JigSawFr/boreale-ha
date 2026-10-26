@@ -29,14 +29,18 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   proposée à la configuration, sans identifiant à saisir.
 - **Les mêmes entités** que l'appareil MQTT d'origine de la console (noms,
   unités, options), à sa place (pas de doublons ; réactivez-le dans les
-  options), plus **En ligne**, **Agent actif** et **Temps de jeu cette semaine**.
+  options), plus **En ligne**, **Agent actif**, **Temps de jeu cette semaine** et **Fin du jeu**.
 - **Les noms des jeux** sur *Jeu en cours*, et le temps de chaque jeu
   aujourd'hui et cette semaine en attributs ; tous les jeux sur *Jeux
   installés* (`games`), avec leur temps de jeu : une entité pour les jeux,
   pas une par jeu.
-- **Des statistiques à long terme** : le total de chaque journée terminée, et
-  celui de chaque jeu, importés dans l'enregistreur (`playguard:<console id>_play_time`,
-  `playguard:<console id>_game_<application id>`), pour des mois d'historique
+- **Le temps de jeu de chaque compte** (de chaque enfant) : aujourd'hui et
+  cette semaine en attributs, sous le nom du compte sur la console.
+- **Des statistiques à long terme** : le total de chaque journée terminée,
+  celui de chaque jeu et celui de chaque compte, importés dans l'enregistreur
+  (`playguard:<console id>_play_time`,
+  `playguard:<console id>_game_<application id>`,
+  `playguard:<console id>_account_<account id>`), pour des mois d'historique
   dans une carte *Graphique des statistiques*.
 - **Des ordres pendant que la console est en veille** : ses contrôles sont
   alors indisponibles (son message de testament dit qu'elle est partie) et ses
@@ -215,11 +219,12 @@ en heures)
 
 | Entité | Ce qu'elle indique | Remarques |
 |---|---|---|
-| Temps de jeu aujourd'hui | Le temps de jeu du jour d'après le journal de jeu (chaque jeu, avec ou sans limite), avec les minutes de chaque jeu (`games`). | total quotidien, remis à 0 à minuit |
+| Temps de jeu aujourd'hui | Le temps de jeu du jour d'après le journal de jeu (chaque jeu, avec ou sans limite), avec les minutes de chaque jeu (`games`) et de chaque compte (`accounts`). | total quotidien, remis à 0 à minuit ; `accounts` seulement quand PlayGuard a lu les comptes (le filtre par compte de son onglet Activité), sinon aucun |
 | Temps d'écran utilisé | Le temps de jeu du jour, tel que le minuteur le compte (seulement avec une limite). | total quotidien, désactivé par défaut |
 | Temps d'écran restant | Ce qui reste de la limite du jour. | |
 | Temps d'écran prolongé | Le temps en plus accordé aujourd'hui. | |
-| Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`) et de chaque jeu (`games`). | propre à cette intégration ; une fois que PlayGuard lui-même a tourné |
+| Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; une fois que PlayGuard lui-même a tourné |
+| Fin du jeu | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, ou sans limite ni coucher |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
@@ -601,6 +606,9 @@ entrée), ou dans la copie du blueprint.
   lui-même ait tourné.
 - Les statistiques n'ont que les journées terminées que la console gardait
   encore (les 14 dernières) au moment où l'intégration a été configurée.
+  Celles de chaque compte viennent de la semaine de PlayGuard (ses 7 derniers
+  jours, PlayGuard lui-même doit avoir tourné) : une semaine sans PlayGuard
+  laisse un trou.
 - Les identifiants d'entités peuvent différer de ceux de l'appareil MQTT
   d'origine de la console.
 - *Profil* n'a pas de choix en cours : la console ne dit pas quel profil
@@ -689,7 +697,7 @@ l'intégration PlayGuard (HACS). D'ici là, certaines valeurs peuvent manquer.
 Les statistiques demandent l'enregistreur (actif par défaut), et ne contiennent
 que les journées terminées : la première apparaît après le premier cycle de la
 console passé minuit. Choisissez la statistique `playguard:<console id>_play_time`
-(ou celle d'un jeu) dans une carte *Graphique des statistiques*.
+(ou celle d'un jeu, ou d'un compte) dans une carte *Graphique des statistiques*.
 </details>
 
 Pour tout le reste, téléchargez les diagnostics (*Paramètres › Appareils et
