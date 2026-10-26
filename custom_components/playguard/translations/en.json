@@ -229,6 +229,9 @@
       "week_play_time": {
         "name": "Play time this week"
       },
+      "play_ends": {
+        "name": "Play ends"
+      },
       "model": {
         "name": "Model",
         "state": {

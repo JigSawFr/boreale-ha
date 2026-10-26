@@ -56,6 +56,9 @@
       "week_play_time": {
         "default": "mdi:calendar-week"
       },
+      "play_ends": {
+        "default": "mdi:timer-sand"
+      },
       "nickname": {
         "default": "mdi:tag-text-outline"
       },

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
@@ -29,6 +29,7 @@ async def async_setup_entry(
         "week_play_time": WeekSensor,
         "games_installed": GamesInstalledSensor,
         "last_seen": LastSeenSensor,
+        "play_ends": PlayEndsSensor,
     }
     async_add_entities(
         classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR, console.unpublished)
@@ -84,6 +85,25 @@ def _games(console: PlayGuardConsole, per_app: list[Any] | None) -> dict[str, in
     return out
 
 
+def _accounts(console: PlayGuardConsole, rows: Any) -> dict[str, int] | None:
+    """{account: minutes}, the most played first; None when the console did
+    not say (PlayGuard reads the accounts only when asked to, the agent never)."""
+    if not isinstance(rows, list):
+        return None
+    out: dict[str, int] = {}
+    for row in rows:
+        uid = row.get("uid") if isinstance(row, dict) else None
+        if not isinstance(uid, str):
+            continue
+        minutes = row.get("min")
+        if isinstance(minutes, list):  # the week: a day each
+            minutes = sum(m for m in minutes if isinstance(m, int) and not isinstance(m, bool))
+        if isinstance(minutes, int) and not isinstance(minutes, bool):
+            name = console.account_name(uid) or uid
+            out[name] = out.get(name, 0) + minutes
+    return dict(sorted(out.items(), key=lambda kv: -kv[1]))
+
+
 class NowPlayingSensor(PlayGuardSensor):
     """The game being played: its name (from the names PlayGuard publishes), else its id."""
 
@@ -103,17 +123,21 @@ class PlayLogSensor(PlayGuardSensor):
     """Today's play time from the play log, with each game's."""
 
     # Each game's minutes change as it is played: not worth recording.
-    _unrecorded_attributes = frozenset({"games"})
+    _unrecorded_attributes = frozenset({"games", "accounts"})
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        return {"games": _games(self.console, (self.console.activity or {}).get("per_app"))}
+        activity = self.console.activity or {}
+        return {
+            "games": _games(self.console, activity.get("per_app")),
+            "accounts": _accounts(self.console, activity.get("per_account")),
+        }
 
 
 class WeekSensor(PlayGuardSensor):
     """The last seven days' play time (PlayGuard's week table), with each day's."""
 
-    _unrecorded_attributes = frozenset({"days", "games"})
+    _unrecorded_attributes = frozenset({"days", "games", "accounts"})
 
     @property
     def available(self) -> bool:
@@ -143,7 +167,59 @@ class WeekSensor(PlayGuardSensor):
             for g in week.get("games") or []
             if isinstance(g, dict) and g.get("app_id")
         }
-        return {"days": self._days(), "games": dict(sorted(games.items(), key=lambda kv: -kv[1]))}
+        return {
+            "days": self._days(),
+            "games": dict(sorted(games.items(), key=lambda kv: -kv[1])),
+            "accounts": _accounts(self.console, week.get("accounts")),
+        }
+
+
+class PlayEndsSensor(PlayGuardSensor):
+    """When play has to stop, while a game is played: the end of today's
+    limit or bedtime, whichever comes first (`ends_by`: `limit` or
+    `bedtime`). Unknown when no game is played (the timer only counts then,
+    and PlayGuard in front means nobody plays), when games are already
+    blocked, or with neither a limit nor bedtime. Counted from the state's
+    time, so it holds still between two states."""
+
+    def _end(self) -> tuple[datetime, str] | None:
+        state = self.console.state or {}
+        timer = state.get("timer") or {}
+        playing = (state.get("activity_today") or {}).get("now_playing") or {}
+        if not playing.get("app_id") or not timer.get("supported") or timer.get("limit_reached"):
+            return None
+        base = _timestamp(state.get("ts")) or self.console.last_seen
+        if base is None:
+            return None
+        ends: list[tuple[datetime, str]] = []
+        limit, remaining = timer.get("limit_today_min"), timer.get("remaining_min")
+        if (
+            isinstance(limit, int)
+            and isinstance(remaining, int)
+            and not isinstance(remaining, bool)
+            and 0 <= limit < 1440
+            and remaining >= 0
+        ):
+            ends.append((base + timedelta(minutes=remaining), "limit"))
+        bedtime = timer.get("bedtime") or {}
+        start = dt_util.parse_time(bedtime.get("start") or "") if bedtime.get("enabled") else None
+        if start is not None:
+            local = dt_util.as_local(base)
+            alarm = local.replace(hour=start.hour, minute=start.minute, second=start.second, microsecond=0)
+            if alarm <= local:
+                alarm += timedelta(days=1)
+            ends.append((dt_util.as_utc(alarm), "bedtime"))
+        return min(ends) if ends else None
+
+    @property
+    def native_value(self) -> datetime | None:
+        end = self._end()
+        return end[0] if end else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        end = self._end()
+        return {"ends_by": end[1] if end else None}
 
 
 class LastSeenSensor(PlayGuardSensor):

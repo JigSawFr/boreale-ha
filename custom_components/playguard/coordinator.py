@@ -267,6 +267,8 @@ class PlayGuardConsole:
         self._seen(msg)
         self.week = _json(msg.payload)
         self._changed()
+        if self.week:
+            self._schedule_statistics()  # its finished days, per account
 
     @callback
     def _on_event(self, msg: ReceiveMessage) -> None:
@@ -484,3 +486,9 @@ class PlayGuardConsole:
         if not app_id:
             return None
         return (self.names.get("games") or {}).get(app_id.upper())
+
+    def account_name(self, uid: str | None) -> str | None:
+        """An account's name (its nickname on the console) from the names document, else None."""
+        if not uid:
+            return None
+        return (self.names.get("accounts") or {}).get(uid.upper())

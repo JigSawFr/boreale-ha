@@ -28,13 +28,16 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   for set-up, no id to type.
 - **The same entities** as the console's own MQTT device (names, units,
   options), replacing it (no duplicates; turn it back on in the options),
-  plus **Online**, **Agent running** and **Play time this week**.
+  plus **Online**, **Agent running**, **Play time this week** and **Play ends**.
 - **Game names** on *Now playing*, and each game's time today and this week as
   attributes; every game on *Games installed* (`games`), with its play time:
   one entity for the games, not one per game.
-- **Long-term statistics**: every finished day's total, and each game's,
-  imported into the recorder (`playguard:<console id>_play_time`,
-  `playguard:<console id>_game_<application id>`), for months of history in a
+- **Each account's play time** (each child's): today and this week as
+  attributes, by the account's name on the console.
+- **Long-term statistics**: every finished day's total, each game's and each
+  account's, imported into the recorder (`playguard:<console id>_play_time`,
+  `playguard:<console id>_game_<application id>`,
+  `playguard:<console id>_account_<account id>`), for months of history in a
   *Statistics graph* card.
 - **Orders while the console sleeps**: its controls are unavailable then
   (its last will says it is gone) and its sensors keep their last values, but
@@ -210,11 +213,12 @@ the play timer*); lock it to turn them back on, always allowed.
 
 | Entity | What it says | Notes |
 |---|---|---|
-| Play time today | Today's play time from the play log (every game, with or without a limit), with each game's minutes (`games`). | daily total, back to 0 at midnight |
+| Play time today | Today's play time from the play log (every game, with or without a limit), with each game's minutes (`games`) and each account's (`accounts`). | daily total, back to 0 at midnight; `accounts` only when PlayGuard read the accounts (its Activity tab's account filter), else none |
 | Used screen time | Today's play time, as the play timer counts it (only while a limit is set). | daily total, disabled by default |
 | Screen time remaining | What is left of today's limit. | |
 | Extended screen time | Extra time granted today. | |
-| Play time this week | The last 7 days, with each day's (`days`) and each game's (`games`) minutes. | this integration's; once PlayGuard itself has run |
+| Play time this week | The last 7 days, with each day's (`days`), each game's (`games`) and each account's (`accounts`) minutes. | this integration's; once PlayGuard itself has run |
+| Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, or with neither a limit nor bedtime |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
 | Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
@@ -577,7 +581,9 @@ automation, or the blueprint's copy in `blueprints/automation/playguard/`.
 - *Now playing* is unknown while PlayGuard is open (and filled by the agent
   otherwise); the week and the game names need PlayGuard itself to have run.
 - The statistics only have the finished days the console still held (the
-  last 14) once the integration was set up.
+  last 14) once the integration was set up. Each account's come from
+  PlayGuard's week (its last 7 days, PlayGuard itself must have run): a week
+  without PlayGuard leaves a gap.
 - The entity ids may differ from those of the console's own MQTT device.
 
 ## Troubleshooting
@@ -659,7 +665,8 @@ integration (HACS). Until then, some values may be missing.
 
 The statistics need the recorder (on by default), and only hold finished
 days: the first appears after the console's first cycle past midnight. Pick
-the statistic `playguard:<console id>_play_time` (or a game's) in a
+the statistic `playguard:<console id>_play_time` (or a game's, or an
+account's) in a
 *Statistics graph* card.
 </details>
 
