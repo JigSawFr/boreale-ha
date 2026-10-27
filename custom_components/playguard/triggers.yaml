@@ -1,0 +1,31 @@
+# The console's triggers, on its Events entity (the console's device or the
+# entity itself as the target).
+
+.events: &events
+  target:
+    entity:
+      - integration: playguard
+        domain: event
+
+game_started: *events
+game_stopped: *events
+time_running_out: *events
+order_refused: *events
+games_blocked:
+  target:
+    entity:
+      - integration: playguard
+        domain: event
+  fields:
+    blocked_by:
+      required: false
+      default:
+        - limit
+        - bedtime
+      selector:
+        select:
+          translation_key: blocked_by
+          multiple: true
+          options:
+            - limit
+            - bedtime

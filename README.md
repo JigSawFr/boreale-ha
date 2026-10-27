@@ -68,6 +68,9 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   `lock_now`, `sync_now`, `request_report`.
 - An **event entity** for every order handled (applied, refused with the
   reason, waiting for PlayGuard's confirmation), for automations.
+- **Triggers and conditions** of its own in the automation editor: a game
+  started or stopped, time running out, games blocked, an order refused; a
+  game played, the limit reached, parental controls on.
 - An order the console would refuse (read-only mode, orders off, timer writes
   not allowed) is refused here, with the reason.
 - **The console's answer**: an order the console refuses makes its action
@@ -99,6 +102,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 [prerequisites](#-prerequisites) · [installation](#-installation) ·
 [set-up](#-set-up) · [options and reconfiguration](#-options-and-reconfiguration) ·
 [entities](#-entities) · [actions](#-actions) · [events](#-events) ·
+[triggers and conditions](#-triggers-and-conditions) ·
 [data updates](#-data-updates) · [examples](#-examples) ·
 [use cases](#-use-cases) · [known limitations](#-known-limitations) ·
 [troubleshooting](#-troubleshooting) · [removal](#-removal) ·
@@ -399,6 +403,42 @@ own, `app_id`, `game` (its name), `minutes_left`, `blocked_by`. The console
 builds its state every 30 seconds while a game is played, so these come
 within that. Events are not retained: one sent while
 Home Assistant was away is not seen; *Last order* keeps the last result.
+
+## 🎯 Triggers and conditions
+
+In the automation editor, *Add trigger* and *Add condition* offer the
+console's own, under PlayGuard; their target is the console's device (or its
+area, or the entity itself).
+
+| Trigger | When |
+|---|---|
+| `playguard.game_started` | A game starts. |
+| `playguard.game_stopped` | The game stops: closed, suspended, or another one started. |
+| `playguard.time_running_out` | 10 minutes or fewer are left of today's limit while a game is played. |
+| `playguard.games_blocked` | Games are blocked; `blocked_by`: `limit` (the day's limit, or *No more play today*), `bedtime`, or both (the default). |
+| `playguard.order_refused` | The console refuses an order. |
+
+The trigger's `trigger.to_state` is the *Events* entity's state, with the
+event's attributes (`game`, `minutes_left`, `reason` …, see [events](#-events)).
+
+| Condition | Passes when |
+|---|---|
+| `playguard.is_playing` | A game is played (*Now playing* names one). |
+| `playguard.limit_reached` | Today's limit is reached. |
+| `playguard.parental_controls_on` | Parental controls are on, not unlocked for now. |
+
+```yaml
+triggers:
+  - trigger: playguard.time_running_out
+    target:
+      device_id: 0123456789abcdef0123456789abcdef
+conditions:
+  - condition: playguard.is_playing
+    target:
+      device_id: 0123456789abcdef0123456789abcdef
+    options:
+      behavior: any
+```
 
 ## 🔄 Data updates
 

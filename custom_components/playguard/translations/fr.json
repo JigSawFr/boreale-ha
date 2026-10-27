@@ -488,6 +488,12 @@
       "options": {
         "manual": "Une autre console, par son identifiant"
       }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "La limite du jour",
+        "bedtime": "L'heure du coucher"
+      }
     }
   },
   "services": {
@@ -578,6 +584,72 @@
         "device_id": {
           "name": "Console",
           "description": "La console."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "Jeu lancé",
+      "description": "Se déclenche quand un jeu démarre sur la console."
+    },
+    "game_stopped": {
+      "name": "Jeu arrêté",
+      "description": "Se déclenche quand le jeu s'arrête : fermé, mis en veille, ou un autre lancé."
+    },
+    "time_running_out": {
+      "name": "Temps bientôt écoulé",
+      "description": "Se déclenche quand il reste 10 minutes ou moins de la limite du jour pendant qu'un jeu est lancé."
+    },
+    "games_blocked": {
+      "name": "Jeux bloqués",
+      "description": "Se déclenche quand les jeux sont bloqués : par la limite du jour (ou Plus de jeu aujourd'hui), ou par l'heure du coucher.",
+      "fields": {
+        "blocked_by": {
+          "name": "Bloqués par",
+          "description": "Ce qui a bloqué les jeux."
+        }
+      }
+    },
+    "order_refused": {
+      "name": "Ordre refusé",
+      "description": "Se déclenche quand la console refuse un ordre."
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "Un jeu est lancé",
+      "description": "Teste si un jeu est lancé sur la console.",
+      "fields": {
+        "behavior": {
+          "name": "La condition est remplie si"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "Limite atteinte",
+      "description": "Teste si la limite du jour est atteinte sur la console.",
+      "fields": {
+        "behavior": {
+          "name": "La condition est remplie si"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "Contrôle parental activé",
+      "description": "Teste si le contrôle parental de la console est activé (pas déverrouillé pour le moment).",
+      "fields": {
+        "behavior": {
+          "name": "La condition est remplie si"
+        },
+        "for": {
+          "name": "Pendant au moins"
         }
       }
     }

@@ -72,6 +72,9 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   `stop_today`, `lock_now`, `sync_now`, `request_report`.
 - Une **entité d'événement** pour chaque ordre traité (exécuté, refusé avec la
   raison, en attente de la confirmation de PlayGuard), pour les automatisations.
+- Des **déclencheurs et conditions** propres dans l'éditeur d'automatisations :
+  jeu lancé ou arrêté, temps bientôt écoulé, jeux bloqués, ordre refusé ; jeu
+  en cours, limite atteinte, contrôle parental activé.
 - Un ordre que la console refuserait (mode lecture seule, ordres refusés,
   écriture du minuteur non autorisée) est refusé ici, avec la raison.
 - **La réponse de la console** : un ordre que la console refuse fait échouer
@@ -103,6 +106,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 [prérequis](#-prérequis) · [installation](#-installation) ·
 [configuration](#-configuration) · [options et reconfiguration](#-options-et-reconfiguration) ·
 [entités](#-entités) · [actions](#-actions) · [événements](#-événements) ·
+[déclencheurs et conditions](#-déclencheurs-et-conditions) ·
 [mise à jour des données](#-mise-à-jour-des-données) · [exemples](#-exemples) ·
 [cas d'usage](#-cas-dusage) · [limites connues](#-limites-connues) ·
 [dépannage](#-dépannage) · [désinstallation](#-désinstallation) ·
@@ -418,6 +422,43 @@ console construit son état toutes les 30 secondes pendant une partie : ils
 arrivent dans ce délai. Les événements ne sont pas
 retenus : un événement envoyé pendant que Home Assistant était absent n'est pas
 vu ; *Dernier ordre* garde le dernier résultat.
+
+## 🎯 Déclencheurs et conditions
+
+Dans l'éditeur d'automatisations, *Ajouter un déclencheur* et *Ajouter une
+condition* proposent ceux de la console, sous PlayGuard ; leur cible est
+l'appareil de la console (ou sa pièce, ou l'entité elle-même).
+
+| Déclencheur | Quand |
+|---|---|
+| `playguard.game_started` | Un jeu démarre. |
+| `playguard.game_stopped` | Le jeu s'arrête : fermé, mis en veille, ou un autre lancé. |
+| `playguard.time_running_out` | Il reste 10 minutes ou moins de la limite du jour pendant qu'un jeu est lancé. |
+| `playguard.games_blocked` | Les jeux sont bloqués ; `blocked_by` : `limit` (la limite du jour, ou *Plus de jeu aujourd'hui*), `bedtime`, ou les deux (par défaut). |
+| `playguard.order_refused` | La console refuse un ordre. |
+
+Le `trigger.to_state` du déclencheur est l'état de l'entité *Événements*, avec
+les attributs de l'événement (`game`, `minutes_left`, `reason`…, voir
+[événements](#-événements)).
+
+| Condition | Remplie quand |
+|---|---|
+| `playguard.is_playing` | Un jeu est lancé (*En cours* en nomme un). |
+| `playguard.limit_reached` | La limite du jour est atteinte. |
+| `playguard.parental_controls_on` | Le contrôle parental est activé, pas déverrouillé pour le moment. |
+
+```yaml
+triggers:
+  - trigger: playguard.time_running_out
+    target:
+      device_id: 0123456789abcdef0123456789abcdef
+conditions:
+  - condition: playguard.is_playing
+    target:
+      device_id: 0123456789abcdef0123456789abcdef
+    options:
+      behavior: any
+```
 
 ## 🔄 Mise à jour des données
 

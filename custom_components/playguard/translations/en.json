@@ -488,6 +488,12 @@
       "options": {
         "manual": "Another console, by its id"
       }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "The day's limit",
+        "bedtime": "Bedtime"
+      }
     }
   },
   "services": {
@@ -578,6 +584,72 @@
         "device_id": {
           "name": "Console",
           "description": "The console."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "Game started",
+      "description": "Triggers when a game starts on the console."
+    },
+    "game_stopped": {
+      "name": "Game stopped",
+      "description": "Triggers when the game stops: closed, suspended, or another one started."
+    },
+    "time_running_out": {
+      "name": "Time running out",
+      "description": "Triggers when 10 minutes or fewer are left of today's limit while a game is played."
+    },
+    "games_blocked": {
+      "name": "Games blocked",
+      "description": "Triggers when games are blocked: by the day's limit (or No more play today), or by bedtime.",
+      "fields": {
+        "blocked_by": {
+          "name": "Blocked by",
+          "description": "What blocked the games."
+        }
+      }
+    },
+    "order_refused": {
+      "name": "Order refused",
+      "description": "Triggers when the console refuses an order."
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "A game is played",
+      "description": "Tests if a game is played on the console.",
+      "fields": {
+        "behavior": {
+          "name": "Condition passes if"
+        },
+        "for": {
+          "name": "For at least"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "Limit reached",
+      "description": "Tests if today's limit is reached on the console.",
+      "fields": {
+        "behavior": {
+          "name": "Condition passes if"
+        },
+        "for": {
+          "name": "For at least"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "Parental controls on",
+      "description": "Tests if the console's parental controls are on (not unlocked for now).",
+      "fields": {
+        "behavior": {
+          "name": "Condition passes if"
+        },
+        "for": {
+          "name": "For at least"
         }
       }
     }
