@@ -83,6 +83,10 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 - **La réponse de la console** : un ordre que la console refuse fait échouer
   son action, avec la raison de la console ; un ordre refusé plus tard (envoyé
   pendant sa veille, ou en attente de PlayGuard) crée une notification.
+- **En 14 langues** : français, anglais, allemand, espagnol (Espagne et
+  Amérique latine), italien, japonais, coréen, néerlandais, portugais (Portugal
+  et Brésil), russe, chinois (simplifié et traditionnel), avec les libellés de
+  la console.
 - Des **réparations** quand vous devez agir (un réglage de la console qui
   refuse les ordres compris), des **diagnostics** avec le dernier état de la
   console et son dernier rapport de diagnostic, sans les noms (sur l'entrée et

@@ -1,0 +1,750 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": {
+        "title": "找到 PlayGuard 主機",
+        "description": "要新增 **{name}**（主機 ID `{console_id}`）嗎？主機本身的 Home Assistant 裝置（MQTT 探索）將由本整合的裝置取代，實體、遊戲名稱、本週遊玩時間和長期統計都會保留。"
+      },
+      "user": {
+        "title": "新增 PlayGuard 主機",
+        "description": "以下主機的狀態已在 Broker 上，但尚未設定。請選擇一台，或選擇其他主機並以 ID 新增。",
+        "data": {
+          "console": "主機"
+        },
+        "data_description": {
+          "console": "名稱和 ID；主題前綴不是 playguard 時也會顯示。"
+        }
+      },
+      "manual": {
+        "title": "以 ID 新增 PlayGuard 主機",
+        "description": "ID 位於 PlayGuard › 主機 › 遠端存取 › 主機 ID。之後整合會在 Broker 上等待主機狀態，最多 10 秒。",
+        "data": {
+          "console_id": "主機 ID",
+          "topic_prefix": "主題前綴"
+        },
+        "data_description": {
+          "console_id": "8 個字元，例如 5a0c3e11。",
+          "topic_prefix": "除非 sync.conf 另有設定，否則為 playguard。"
+        }
+      },
+      "reconfigure": {
+        "title": "變更主題前綴",
+        "description": "{name} 發布時使用的前綴：PlayGuard 的 sync.conf 中的 `topic_prefix`。",
+        "data": {
+          "topic_prefix": "主題前綴"
+        },
+        "data_description": {
+          "topic_prefix": "除非 sync.conf 另有設定，否則為 playguard。"
+        }
+      }
+    },
+    "error": {
+      "invalid_console_id": "主機 ID 為 8 個字元，由 0 至 9 和 a 至 f 組成。",
+      "invalid_prefix": "此前綴不能用於 MQTT 主題。",
+      "no_state": "此主機未在 Broker 上以此前綴發布任何內容。請檢查主機 ID 和前綴，並確認主機的連線至少建立過一次（PlayGuard › 主機 › 遠端存取 › 狀態）。"
+    },
+    "abort": {
+      "already_configured": "此主機已設定。",
+      "invalid_discovery_info": "此訊息不是 PlayGuard 狀態。",
+      "mqtt_not_ready": "MQTT 整合尚未設定：PlayGuard 透過它與 Home Assistant 溝通。請先設定它，並使用與主機相同的 Broker。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "take_over_discovery": "取代主機本身的 Home Assistant 裝置",
+          "keep_values_asleep": "主機休眠時保留最後的值",
+          "notify_refused": "通知稍後遭拒絕的指令"
+        },
+        "data_description": {
+          "take_over_discovery": "關閉主機的 MQTT 探索，避免實體出現兩次。關閉時：主機會重新發布自己的裝置。",
+          "keep_values_asleep": "主機不在 Broker 上時（休眠、關機、不在範圍內），其實體仍顯示主機最後回報的值，對控制項所做的變更會在 Broker 上等待主機。關閉時：此期間除「線上」外的所有實體皆無法使用。",
+          "notify_refused": "主機休眠時傳送的指令，或正在等待 PlayGuard 確認的指令，會在其動作結束後才收到回覆：此時若遭拒絕，會發出一則通知，下一條被執行的指令會將其清除。若在動作等待回覆期間（最多 10 秒）遭拒絕，無論此選項為何，動作都會失敗並說明原因。"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "parental_controls_enabled": {
+        "name": "已設定家長監護"
+      },
+      "pin_set": {
+        "name": "已設定 PIN碼"
+      },
+      "companion_linked": {
+        "name": "已連結手機應用程式"
+      },
+      "timer_enabled": {
+        "name": "遊玩時間限制"
+      },
+      "limit_reached": {
+        "name": "禁止遊玩",
+        "state_attributes": {
+          "reason": {
+            "name": "原因",
+            "state": {
+              "limit": "當天的上限",
+              "bedtime": "就寢時間"
+            }
+          }
+        }
+      },
+      "clock_accurate": {
+        "name": "網路時鐘準確"
+      },
+      "online": {
+        "name": "線上"
+      },
+      "agent": {
+        "name": "代理程式執行中"
+      },
+      "prodinfo_blanked": {
+        "name": "PRODINFO 已清空"
+      },
+      "charging": {
+        "name": "充電中"
+      },
+      "docked": {
+        "name": "已插入底座"
+      }
+    },
+    "button": {
+      "sync_now": {
+        "name": "立即同步"
+      },
+      "export_report": {
+        "name": "匯出診斷報告"
+      },
+      "add_bonus_time_15": {
+        "name": "延長時間 +15 分鐘"
+      },
+      "add_bonus_time_30": {
+        "name": "延長時間 +30 分鐘"
+      },
+      "add_bonus_time_60": {
+        "name": "延長時間 +1 小時"
+      },
+      "stop_today": {
+        "name": "停止今天的遊玩"
+      },
+      "remove_limit": {
+        "name": "移除上限"
+      }
+    },
+    "calendar": {
+      "play_sessions": {
+        "name": "遊玩紀錄"
+      }
+    },
+    "event": {
+      "events": {
+        "name": "事件",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "command_applied": "指令已執行",
+              "command_rejected": "指令遭拒絕",
+              "command_waiting": "指令等待 PlayGuard 確認",
+              "play_started": "遊戲開始",
+              "play_stopped": "遊戲結束",
+              "time_warning": "遊玩時間即將結束",
+              "play_blocked": "禁止遊玩"
+            }
+          }
+        }
+      }
+    },
+    "lock": {
+      "parental_controls": {
+        "name": "家長監護"
+      }
+    },
+    "number": {
+      "limit_sun": {
+        "name": "上限 星期日"
+      },
+      "limit_mon": {
+        "name": "上限 星期一"
+      },
+      "limit_tue": {
+        "name": "上限 星期二"
+      },
+      "limit_wed": {
+        "name": "上限 星期三"
+      },
+      "limit_thu": {
+        "name": "上限 星期四"
+      },
+      "limit_fri": {
+        "name": "上限 星期五"
+      },
+      "limit_sat": {
+        "name": "上限 星期六"
+      },
+      "limit_uniform": {
+        "name": "上限 每天"
+      },
+      "max_screentime_today": {
+        "name": "今天最長螢幕時間"
+      }
+    },
+    "select": {
+      "restriction_level": {
+        "name": "限制等級",
+        "state": {
+          "unrestricted": "無限制",
+          "young_child": "幼兒",
+          "child": "兒童",
+          "teen": "青少年",
+          "custom": "自訂"
+        }
+      },
+      "profile": {
+        "name": "設定檔"
+      }
+    },
+    "sensor": {
+      "used_screen_time": {
+        "name": "已用螢幕時間"
+      },
+      "used_screen_time_log": {
+        "name": "今天的遊玩時間"
+      },
+      "screen_time_remaining": {
+        "name": "剩餘螢幕時間"
+      },
+      "extended_screen_time": {
+        "name": "延長的螢幕時間"
+      },
+      "now_playing": {
+        "name": "正在遊玩"
+      },
+      "rating_age": {
+        "name": "年齡分級"
+      },
+      "firmware": {
+        "name": "韌體"
+      },
+      "atmosphere": {
+        "name": "Atmosphère"
+      },
+      "spent_raw": {
+        "name": "已用時間 (1952)"
+      },
+      "last_order": {
+        "name": "最後一條指令"
+      },
+      "week_play_time": {
+        "name": "本週遊玩時間"
+      },
+      "play_ends": {
+        "name": "遊玩結束時間"
+      },
+      "account_today": {
+        "name": "{account} 今天的遊玩時間"
+      },
+      "account_week": {
+        "name": "{account} 本週的遊玩時間"
+      },
+      "model": {
+        "name": "型號",
+        "state": {
+          "erista": "Switch (2017)",
+          "mariko": "Switch (2019)",
+          "lite": "Switch Lite",
+          "oled": "Switch OLED款式",
+          "other": "開發機"
+        }
+      },
+      "nickname": {
+        "name": "主機暱稱"
+      },
+      "region": {
+        "name": "地區",
+        "state": {
+          "jpn": "日本",
+          "usa": "美洲",
+          "eur": "歐洲",
+          "aus": "澳洲和紐西蘭",
+          "htk": "香港、台灣、韓國",
+          "chn": "中國"
+        }
+      },
+      "hekate": {
+        "name": "hekate"
+      },
+      "system_storage": {
+        "name": "系統",
+        "state": {
+          "sysmmc": "sysMMC",
+          "emummc": "emuMMC"
+        }
+      },
+      "serial": {
+        "name": "序號"
+      },
+      "sd_free": {
+        "name": "SD 卡可用空間"
+      },
+      "sd_total": {
+        "name": "SD 卡容量"
+      },
+      "nand_free": {
+        "name": "主機儲存空間可用空間"
+      },
+      "nand_total": {
+        "name": "主機儲存空間容量"
+      },
+      "battery": {
+        "name": "電池"
+      },
+      "temperature": {
+        "name": "溫度"
+      },
+      "network": {
+        "name": "連線",
+        "state": {
+          "none": "無",
+          "wifi": "Wi-Fi",
+          "ethernet": "有線網路"
+        }
+      },
+      "ip_address": {
+        "name": "IP 位址"
+      },
+      "wifi_signal": {
+        "name": "Wi-Fi 訊號"
+      },
+      "ssid": {
+        "name": "Wi-Fi 網路"
+      },
+      "last_boot": {
+        "name": "上次啟動"
+      },
+      "games_installed": {
+        "name": "已安裝的遊戲"
+      },
+      "play_time_total": {
+        "name": "遊玩時間（累計）"
+      },
+      "accounts": {
+        "name": "使用者帳號"
+      },
+      "last_seen": {
+        "name": "最後上線"
+      }
+    },
+    "switch": {
+      "bedtime_enabled": {
+        "name": "就寢鬧鐘"
+      },
+      "console_lock": {
+        "name": "封鎖所有遊戲"
+      },
+      "play_timer_alarm": {
+        "name": "「時間到」鬧鐘"
+      },
+      "vr_restricted": {
+        "name": "限制VR模式"
+      },
+      "sns_post_restricted": {
+        "name": "限制在社群網站上發文"
+      },
+      "free_communication_restricted": {
+        "name": "限制交流"
+      }
+    },
+    "time": {
+      "bedtime_alarm": {
+        "name": "就寢時間"
+      },
+      "bedtime_end_time": {
+        "name": "起床時間"
+      }
+    },
+    "update": {
+      "playguard_update": {
+        "name": "PlayGuard"
+      }
+    },
+    "image": {
+      "now_playing_icon": {
+        "name": "正在遊玩的遊戲圖示"
+      }
+    }
+  },
+  "exceptions": {
+    "mqtt_not_ready": {
+      "message": "MQTT 整合暫時無法使用。"
+    },
+    "read_only": {
+      "message": "PlayGuard 在此主機上處於唯讀模式：不會變更任何設定。"
+    },
+    "policy_off": {
+      "message": "主機拒絕指令（遠端存取 › 收到的指令）。"
+    },
+    "timer_writes_disabled": {
+      "message": "指令不能變更遊玩時間：請在主機上開啟 遠端存取 › 允許指令變更遊玩時間。"
+    },
+    "read_only_entity": {
+      "message": "此值無法在這裡變更。"
+    },
+    "no_such_profile": {
+      "message": "PlayGuard 中沒有儲存名為 {profile} 的設定檔。"
+    },
+    "refused": {
+      "message": "{name} 拒絕了此指令：{reason}。"
+    },
+    "refused_title": {
+      "message": "{name} 拒絕了一條指令"
+    },
+    "refused_later": {
+      "message": "{order}：{reason}。"
+    },
+    "reason_unknown_entity": {
+      "message": "未知指令"
+    },
+    "reason_invalid": {
+      "message": "無效的值"
+    },
+    "reason_out_of_range": {
+      "message": "數值超出範圍"
+    },
+    "reason_policy_off": {
+      "message": "指令遭拒絕（遠端存取 › 收到的指令）"
+    },
+    "reason_timer_writes_disabled": {
+      "message": "遠端變更遊玩時間已關閉（遠端存取 › 允許指令變更遊玩時間）"
+    },
+    "reason_read_only": {
+      "message": "PlayGuard 處於唯讀模式"
+    },
+    "reason_not_confirmed": {
+      "message": "未在主機上確認，或未輸入 PIN碼"
+    },
+    "reason_gated": {
+      "message": "遊玩時間正在計時，且無法解除"
+    },
+    "reason_unlock_failed": {
+      "message": "無法解除家長監護"
+    },
+    "reason_not_custom": {
+      "message": "僅適用於自訂限制等級"
+    },
+    "reason_no_such_profile": {
+      "message": "沒有這個名稱的設定檔"
+    },
+    "reason_no_limit_today": {
+      "message": "今天沒有上限"
+    },
+    "reason_console_locked": {
+      "message": "所有遊戲已被封鎖"
+    },
+    "reason_unsupported": {
+      "message": "這台主機不支援"
+    },
+    "reason_bedtime_off": {
+      "message": "就寢鬧鐘已關閉"
+    },
+    "reason_pctl_error": {
+      "message": "主機拒絕了（結果代碼 {rc}）"
+    },
+    "reason_busy": {
+      "message": "PlayGuard 目前無法執行，請再試一次"
+    },
+    "reason_other": {
+      "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name}：今天已玩 {minutes} 分鐘。"
+    },
+    "intent_playing": {
+      "message": "正在玩 {game}。"
+    },
+    "intent_blocked": {
+      "message": "遊戲已被封鎖。"
+    },
+    "intent_no_limit": {
+      "message": "今天沒有上限。"
+    },
+    "intent_left": {
+      "message": "還剩 {minutes} 分鐘。"
+    },
+    "intent_added": {
+      "message": "今天已在 {name} 上增加 {minutes} 分鐘。"
+    },
+    "intent_stopped": {
+      "message": "{name} 已停止今天的遊玩。"
+    },
+    "intent_which": {
+      "message": "哪一台主機：{names}？"
+    },
+    "intent_no_console": {
+      "message": "沒有名為 {name} 的 PlayGuard 主機。"
+    },
+    "logbook_play_started": {
+      "message": "開始了 {game}"
+    },
+    "logbook_play_stopped": {
+      "message": "結束了 {game}"
+    },
+    "logbook_time_warning": {
+      "message": "遊玩時間還剩 {minutes} 分鐘"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "封鎖了遊戲：已達當天的上限"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "封鎖了遊戲：就寢時間"
+    },
+    "logbook_command_applied": {
+      "message": "執行了 {order}"
+    },
+    "logbook_command_rejected": {
+      "message": "拒絕了 {order}：{reason}"
+    },
+    "logbook_command_waiting": {
+      "message": "正在等待 PlayGuard 確認 {order}"
+    }
+  },
+  "issues": {
+    "newer_schema": {
+      "title": "{name} 使用較新的 PlayGuard 協定",
+      "description": "{name} 發布的是結構描述 {schema}；本整合只認得結構描述 {known}。請更新 PlayGuard 整合：在此之前，部分數值可能會缺少。"
+    },
+    "native_discovery": {
+      "title": "{name} 再次發布了自己的 Home Assistant 裝置",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name} 的實體出現了兩次",
+            "description": "主機本身的 MQTT 裝置又出現在本整合的裝置旁邊：它在 PlayGuard 中被重新開啟，或主機上的 PlayGuard 版本太舊，無法接受關閉它的指令。送出後將再次要求主機關閉它。\n\n如果它再次出現，請更新 PlayGuard，或在 PlayGuard › 主機 › 遠端存取 中關閉 *在 Home Assistant 中建立裝置（MQTT 探索）*。若要保留主機本身的裝置，請關閉本整合的選項 *取代主機本身的 Home Assistant 裝置*。"
+          }
+        }
+      }
+    },
+    "agent_version": {
+      "title": "{name} 執行的是舊版 PlayGuard 代理程式",
+      "description": "{name} 上安裝了 PlayGuard {app}，但在 PlayGuard 關閉時運作的代理程式仍是 {agent}：它的更新被延後了。請在 PlayGuard › 主機 › 選用模組 › 連線代理程式 中更新（PlayGuard 啟動時也會提示）。"
+    },
+    "refused_policy_off": {
+      "title": "{name} 拒絕 Home Assistant 的指令",
+      "description": "{name} 被設為拒絕收到的指令，因此在這裡所做的變更不會被執行。請在主機上的 PlayGuard › 主機 › 遠端存取 › 收到的指令 中選擇 立即執行 或 在主機上詢問。主機回報後，此問題就會消失。"
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} 不允許指令變更遊玩時間",
+      "description": "上限、延長時間、設定檔、停止今天的遊玩以及解除家長監護都需要此項。請在主機上開啟 PlayGuard › 主機 › 遠端存取 › 允許指令變更遊玩時間。主機回報後，此問題就會消失。"
+    },
+    "refused_read_only": {
+      "title": "PlayGuard 在 {name} 上處於唯讀模式",
+      "description": "在尚未支援的韌體上，PlayGuard 會以唯讀模式開啟，並拒絕所有指令。請在主機上更新 PlayGuard（檢查更新時會提示）。主機回報後，此問題就會消失。"
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "all": "每天",
+        "today": "僅今天",
+        "sun": "星期日",
+        "mon": "星期一",
+        "tue": "星期二",
+        "wed": "星期三",
+        "thu": "星期四",
+        "fri": "星期五",
+        "sat": "星期六"
+      }
+    },
+    "console": {
+      "options": {
+        "manual": "其他主機（以 ID 新增）"
+      }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "當天的上限",
+        "bedtime": "就寢時間"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "今天",
+        "week": "最近七天"
+      }
+    }
+  },
+  "services": {
+    "set_limits": {
+      "name": "設定上限",
+      "description": "設定某一天、每天、今天或整週的上限（1440 = 無限制）。",
+      "fields": {
+        "device_id": {
+          "name": "主機",
+          "description": "目標主機。"
+        },
+        "minutes": {
+          "name": "分鐘",
+          "description": "0 至 1440；1440 表示無限制。"
+        },
+        "day": {
+          "name": "日期",
+          "description": "哪一天。"
+        },
+        "week": {
+          "name": "週",
+          "description": "七個上限，從星期日開始，取代分鐘和日期。"
+        }
+      }
+    },
+    "add_bonus_time": {
+      "name": "延長時間",
+      "description": "今天額外增加的分鐘數；明天恢復平常的上限。",
+      "fields": {
+        "device_id": {
+          "name": "主機",
+          "description": "目標主機。"
+        },
+        "minutes": {
+          "name": "分鐘",
+          "description": "5 至 180。"
+        }
+      }
+    },
+    "apply_profile": {
+      "name": "套用設定檔",
+      "description": "套用 PlayGuard 中儲存的設定檔的上限。",
+      "fields": {
+        "device_id": {
+          "name": "主機",
+          "description": "目標主機。"
+        },
+        "profile": {
+          "name": "設定檔",
+          "description": "它在 PlayGuard 中的名稱。"
+        }
+      }
+    },
+    "stop_today": {
+      "name": "停止今天的遊玩",
+      "description": "今天設為 0 分鐘；明天恢復平常的上限。",
+      "fields": {
+        "device_id": {
+          "name": "主機",
+          "description": "目標主機。"
+        }
+      }
+    },
+    "lock_now": {
+      "name": "重新啟用家長監護",
+      "description": "暫時解除後重新啟用家長監護。",
+      "fields": {
+        "device_id": {
+          "name": "主機",
+          "description": "目標主機。"
+        }
+      }
+    },
+    "sync_now": {
+      "name": "立即同步",
+      "description": "主機重新發布所有資訊。",
+      "fields": {
+        "device_id": {
+          "name": "主機",
+          "description": "目標主機。"
+        }
+      }
+    },
+    "request_report": {
+      "name": "要求診斷報告",
+      "description": "主機將報告儲存到 SD 卡，並在遠端存取允許時發布（顯示在裝置的診斷資訊中）。",
+      "fields": {
+        "device_id": {
+          "name": "主機",
+          "description": "目標主機。"
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "取得遊玩時間",
+      "description": "傳回今天的遊玩時間（每個遊戲、每個帳號、正在玩的遊戲、上限與剩餘時間、就寢時間），或最近七天的遊玩時間。",
+      "fields": {
+        "device_id": {
+          "name": "主機",
+          "description": "目標主機。"
+        },
+        "period": {
+          "name": "期間",
+          "description": "今天，或最近七天。"
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "遊戲開始",
+      "description": "主機上開始遊戲時觸發。"
+    },
+    "game_stopped": {
+      "name": "遊戲結束",
+      "description": "遊戲結束時觸發：關閉、暫停或開始了另一個遊戲。"
+    },
+    "time_running_out": {
+      "name": "時間快用完",
+      "description": "遊玩期間，今天的上限剩餘 10 分鐘或更少時觸發。"
+    },
+    "games_blocked": {
+      "name": "遊戲遭封鎖",
+      "description": "遊戲遭封鎖時觸發：因當天的上限（或停止今天的遊玩），或因就寢時間。",
+      "fields": {
+        "blocked_by": {
+          "name": "封鎖原因",
+          "description": "封鎖遊戲的原因。"
+        }
+      }
+    },
+    "order_refused": {
+      "name": "指令遭拒絕",
+      "description": "主機拒絕指令時觸發。"
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "正在玩遊戲",
+      "description": "檢查主機上是否正在玩遊戲。",
+      "fields": {
+        "behavior": {
+          "name": "條件成立於"
+        },
+        "for": {
+          "name": "至少持續"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "已達上限",
+      "description": "檢查主機上是否已達今天的上限。",
+      "fields": {
+        "behavior": {
+          "name": "條件成立於"
+        },
+        "for": {
+          "name": "至少持續"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "家長監護已開啟",
+      "description": "檢查主機的家長監護是否開啟（未被暫時解除）。",
+      "fields": {
+        "behavior": {
+          "name": "條件成立於"
+        },
+        "for": {
+          "name": "至少持續"
+        }
+      }
+    }
+  }
+}

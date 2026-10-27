@@ -1,0 +1,750 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": {
+        "title": "PlayGuard-console gevonden",
+        "description": "**{name}** (console-ID `{console_id}`) toevoegen? Het eigen Home Assistant-apparaat van de console (MQTT-discovery) wordt vervangen door dat van deze integratie, met dezelfde entiteiten, de namen van de games, de speeltijd van de week en langetermijnstatistieken."
+      },
+      "user": {
+        "title": "Een PlayGuard-console toevoegen",
+        "description": "De consoles waarvan de status op de broker staat en die nog niet zijn ingesteld. Kies er een, of een andere console om die via zijn ID toe te voegen.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "De naam en ID, en het topicvoorvoegsel als dat niet playguard is."
+        }
+      },
+      "manual": {
+        "title": "Een PlayGuard-console toevoegen via zijn ID",
+        "description": "De ID staat in PlayGuard › Console › Toegang op afstand › Console-ID. De integratie wacht daarna maximaal 10 seconden op de status van de console op de broker.",
+        "data": {
+          "console_id": "Console-ID",
+          "topic_prefix": "Topicvoorvoegsel"
+        },
+        "data_description": {
+          "console_id": "8 tekens, zoals 5a0c3e11.",
+          "topic_prefix": "playguard, tenzij sync.conf iets anders zegt."
+        }
+      },
+      "reconfigure": {
+        "title": "Het topicvoorvoegsel wijzigen",
+        "description": "Het voorvoegsel waaronder {name} publiceert: `topic_prefix` in de sync.conf van PlayGuard.",
+        "data": {
+          "topic_prefix": "Topicvoorvoegsel"
+        },
+        "data_description": {
+          "topic_prefix": "playguard, tenzij sync.conf iets anders zegt."
+        }
+      }
+    },
+    "error": {
+      "invalid_console_id": "Een console-ID heeft 8 tekens, 0 tot 9 en a tot f.",
+      "invalid_prefix": "Dit voorvoegsel kan geen deel zijn van een MQTT-topic.",
+      "no_state": "Deze console heeft onder dit voorvoegsel niets op de broker gepubliceerd. Controleer de console-ID en het voorvoegsel, en of de verbinding van de console één keer actief is geweest (PlayGuard › Console › Toegang op afstand › Status)."
+    },
+    "abort": {
+      "already_configured": "Deze console is al ingesteld.",
+      "invalid_discovery_info": "Dit bericht is geen PlayGuard-status.",
+      "mqtt_not_ready": "De MQTT-integratie is nog niet ingesteld: PlayGuard praat via die integratie met Home Assistant. Stel die eerst in, op dezelfde broker als de console."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "take_over_discovery": "Het eigen Home Assistant-apparaat van de console vervangen",
+          "keep_values_asleep": "De laatste waarden bewaren terwijl de console in de slaapstand staat",
+          "notify_refused": "Een later geweigerde opdracht melden"
+        },
+        "data_description": {
+          "take_over_discovery": "Zet de MQTT-discovery van de console uit, zodat de entiteiten er niet dubbel zijn. Uit: de console publiceert weer zijn eigen apparaat.",
+          "keep_values_asleep": "Zolang de console niet op de broker is (slaapstand, uit, buiten bereik), blijven de entiteiten tonen wat de console het laatst meldde, en een wijziging aan een bediening wacht op de broker op de console. Uit: alle entiteiten behalve Online zijn dan niet beschikbaar.",
+          "notify_refused": "Een opdracht die wordt verstuurd terwijl de console in de slaapstand staat, of die wacht op de bevestiging van PlayGuard, krijgt pas antwoord nadat de actie is afgelopen: een weigering geeft dan een melding, die de volgende uitgevoerde opdracht weghaalt. Een weigering terwijl de actie op het antwoord wacht (maximaal 10 seconden) laat de actie mislukken, met de reden, ongeacht deze optie."
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "parental_controls_enabled": {
+        "name": "Ouderlijk toezicht ingesteld"
+      },
+      "pin_set": {
+        "name": "Pincode ingesteld"
+      },
+      "companion_linked": {
+        "name": "Smartphone-app gekoppeld"
+      },
+      "timer_enabled": {
+        "name": "Speeltijdtimer"
+      },
+      "limit_reached": {
+        "name": "Spelen geblokkeerd",
+        "state_attributes": {
+          "reason": {
+            "name": "Reden",
+            "state": {
+              "limit": "De daglimiet",
+              "bedtime": "Bedtijd"
+            }
+          }
+        }
+      },
+      "clock_accurate": {
+        "name": "Netwerkklok nauwkeurig"
+      },
+      "online": {
+        "name": "Online"
+      },
+      "agent": {
+        "name": "Agent actief"
+      },
+      "prodinfo_blanked": {
+        "name": "PRODINFO gewist"
+      },
+      "charging": {
+        "name": "Laden"
+      },
+      "docked": {
+        "name": "In het dock"
+      }
+    },
+    "button": {
+      "sync_now": {
+        "name": "Nu synchroniseren"
+      },
+      "export_report": {
+        "name": "Een diagnoserapport exporteren"
+      },
+      "add_bonus_time_15": {
+        "name": "Extra tijd +15 min"
+      },
+      "add_bonus_time_30": {
+        "name": "Extra tijd +30 min"
+      },
+      "add_bonus_time_60": {
+        "name": "Extra tijd +1 u"
+      },
+      "stop_today": {
+        "name": "Vandaag niet meer spelen"
+      },
+      "remove_limit": {
+        "name": "De limiet verwijderen"
+      }
+    },
+    "calendar": {
+      "play_sessions": {
+        "name": "Speelsessies"
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Gebeurtenissen",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "command_applied": "Opdracht uitgevoerd",
+              "command_rejected": "Opdracht geweigerd",
+              "command_waiting": "Opdracht wacht op PlayGuard",
+              "play_started": "Game gestart",
+              "play_stopped": "Game gestopt",
+              "time_warning": "Speeltijd bijna om",
+              "play_blocked": "Spelen geblokkeerd"
+            }
+          }
+        }
+      }
+    },
+    "lock": {
+      "parental_controls": {
+        "name": "Ouderlijk toezicht"
+      }
+    },
+    "number": {
+      "limit_sun": {
+        "name": "Limiet zondag"
+      },
+      "limit_mon": {
+        "name": "Limiet maandag"
+      },
+      "limit_tue": {
+        "name": "Limiet dinsdag"
+      },
+      "limit_wed": {
+        "name": "Limiet woensdag"
+      },
+      "limit_thu": {
+        "name": "Limiet donderdag"
+      },
+      "limit_fri": {
+        "name": "Limiet vrijdag"
+      },
+      "limit_sat": {
+        "name": "Limiet zaterdag"
+      },
+      "limit_uniform": {
+        "name": "Limiet elke dag"
+      },
+      "max_screentime_today": {
+        "name": "Max. schermtijd vandaag"
+      }
+    },
+    "select": {
+      "restriction_level": {
+        "name": "Beperkingsniveau",
+        "state": {
+          "unrestricted": "Geen beperkingen",
+          "young_child": "Jong kind",
+          "child": "Kind",
+          "teen": "Tiener",
+          "custom": "Aangepast"
+        }
+      },
+      "profile": {
+        "name": "Profiel"
+      }
+    },
+    "sensor": {
+      "used_screen_time": {
+        "name": "Gebruikte schermtijd"
+      },
+      "used_screen_time_log": {
+        "name": "Speeltijd vandaag"
+      },
+      "screen_time_remaining": {
+        "name": "Resterende schermtijd"
+      },
+      "extended_screen_time": {
+        "name": "Verlengde schermtijd"
+      },
+      "now_playing": {
+        "name": "Speelt nu"
+      },
+      "rating_age": {
+        "name": "Leeftijdsclassificatie"
+      },
+      "firmware": {
+        "name": "Firmware"
+      },
+      "atmosphere": {
+        "name": "Atmosphère"
+      },
+      "spent_raw": {
+        "name": "Bestede tijd (1952)"
+      },
+      "last_order": {
+        "name": "Laatste opdracht"
+      },
+      "week_play_time": {
+        "name": "Speeltijd deze week"
+      },
+      "play_ends": {
+        "name": "Einde speeltijd"
+      },
+      "account_today": {
+        "name": "Speeltijd van {account} vandaag"
+      },
+      "account_week": {
+        "name": "Speeltijd van {account} deze week"
+      },
+      "model": {
+        "name": "Model",
+        "state": {
+          "erista": "Switch (2017)",
+          "mariko": "Switch (2019)",
+          "lite": "Switch Lite",
+          "oled": "Switch OLED",
+          "other": "Ontwikkelaarsunit"
+        }
+      },
+      "nickname": {
+        "name": "Bijnaam van de console"
+      },
+      "region": {
+        "name": "Regio",
+        "state": {
+          "jpn": "Japan",
+          "usa": "Amerika",
+          "eur": "Europa",
+          "aus": "Australië en Nieuw-Zeeland",
+          "htk": "Hongkong, Taiwan, Korea",
+          "chn": "China"
+        }
+      },
+      "hekate": {
+        "name": "hekate"
+      },
+      "system_storage": {
+        "name": "Systeem",
+        "state": {
+          "sysmmc": "sysMMC",
+          "emummc": "emuMMC"
+        }
+      },
+      "serial": {
+        "name": "Serienummer"
+      },
+      "sd_free": {
+        "name": "Vrije ruimte op de SD-kaart"
+      },
+      "sd_total": {
+        "name": "Grootte van de SD-kaart"
+      },
+      "nand_free": {
+        "name": "Vrije ruimte in het interne geheugen"
+      },
+      "nand_total": {
+        "name": "Grootte van het interne geheugen"
+      },
+      "battery": {
+        "name": "Batterij"
+      },
+      "temperature": {
+        "name": "Temperatuur"
+      },
+      "network": {
+        "name": "Verbinding",
+        "state": {
+          "none": "Geen",
+          "wifi": "Wifi",
+          "ethernet": "Ethernet"
+        }
+      },
+      "ip_address": {
+        "name": "IP-adres"
+      },
+      "wifi_signal": {
+        "name": "Wifi-signaal"
+      },
+      "ssid": {
+        "name": "Wifi-netwerk"
+      },
+      "last_boot": {
+        "name": "Laatst opgestart"
+      },
+      "games_installed": {
+        "name": "Geïnstalleerde games"
+      },
+      "play_time_total": {
+        "name": "Speeltijd (totaal)"
+      },
+      "accounts": {
+        "name": "Gebruikersaccounts"
+      },
+      "last_seen": {
+        "name": "Laatst gezien"
+      }
+    },
+    "switch": {
+      "bedtime_enabled": {
+        "name": "Bedtijdalarm"
+      },
+      "console_lock": {
+        "name": "Alle games blokkeren"
+      },
+      "play_timer_alarm": {
+        "name": "Alarm \"Tijd is om\""
+      },
+      "vr_restricted": {
+        "name": "VR-modus beperkt"
+      },
+      "sns_post_restricted": {
+        "name": "Berichten op sociale media beperkt"
+      },
+      "free_communication_restricted": {
+        "name": "Communicatie beperkt"
+      }
+    },
+    "time": {
+      "bedtime_alarm": {
+        "name": "Bedtijd"
+      },
+      "bedtime_end_time": {
+        "name": "Opstaantijd"
+      }
+    },
+    "update": {
+      "playguard_update": {
+        "name": "PlayGuard"
+      }
+    },
+    "image": {
+      "now_playing_icon": {
+        "name": "Pictogram van het huidige spel"
+      }
+    }
+  },
+  "exceptions": {
+    "mqtt_not_ready": {
+      "message": "De MQTT-integratie is nog niet beschikbaar."
+    },
+    "read_only": {
+      "message": "PlayGuard staat op deze console in de alleen-lezenmodus: het wijzigt niets."
+    },
+    "policy_off": {
+      "message": "De console weigert opdrachten (Toegang op afstand › Ontvangen opdrachten)."
+    },
+    "timer_writes_disabled": {
+      "message": "Opdrachten mogen de speeltijdtimer niet wijzigen: zet op de console Toegang op afstand › Opdrachten mogen de speeltijdtimer wijzigen aan."
+    },
+    "read_only_entity": {
+      "message": "Deze waarde kan hier niet worden gewijzigd."
+    },
+    "no_such_profile": {
+      "message": "Er is geen profiel met de naam {profile} opgeslagen in PlayGuard."
+    },
+    "refused": {
+      "message": "{name} heeft deze opdracht geweigerd: {reason}."
+    },
+    "refused_title": {
+      "message": "{name} heeft een opdracht geweigerd"
+    },
+    "refused_later": {
+      "message": "{order}: {reason}."
+    },
+    "reason_unknown_entity": {
+      "message": "onbekende opdracht"
+    },
+    "reason_invalid": {
+      "message": "ongeldige waarde"
+    },
+    "reason_out_of_range": {
+      "message": "waarde buiten bereik"
+    },
+    "reason_policy_off": {
+      "message": "opdrachten worden geweigerd (Toegang op afstand › Ontvangen opdrachten)"
+    },
+    "reason_timer_writes_disabled": {
+      "message": "de speeltijdtimer op afstand wijzigen staat uit (Toegang op afstand › Opdrachten mogen de speeltijdtimer wijzigen)"
+    },
+    "reason_read_only": {
+      "message": "PlayGuard staat in de alleen-lezenmodus"
+    },
+    "reason_not_confirmed": {
+      "message": "niet bevestigd op de console, of de pincode is niet ingevoerd"
+    },
+    "reason_gated": {
+      "message": "de speeltijdtimer telt af en kon niet worden ontgrendeld"
+    },
+    "reason_unlock_failed": {
+      "message": "ouderlijk toezicht kon niet worden ontgrendeld"
+    },
+    "reason_not_custom": {
+      "message": "alleen met het beperkingsniveau \"Aangepast\""
+    },
+    "reason_no_such_profile": {
+      "message": "geen profiel heeft deze naam"
+    },
+    "reason_no_limit_today": {
+      "message": "er is vandaag geen limiet"
+    },
+    "reason_console_locked": {
+      "message": "alle games zijn geblokkeerd"
+    },
+    "reason_unsupported": {
+      "message": "niet ondersteund op deze console"
+    },
+    "reason_bedtime_off": {
+      "message": "het bedtijdalarm staat uit"
+    },
+    "reason_pctl_error": {
+      "message": "de console weigerde (resultaatcode {rc})"
+    },
+    "reason_busy": {
+      "message": "PlayGuard kon het nu niet doen, probeer het opnieuw"
+    },
+    "reason_other": {
+      "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name}: vandaag {minutes} minuten gespeeld."
+    },
+    "intent_playing": {
+      "message": "{game} wordt gespeeld."
+    },
+    "intent_blocked": {
+      "message": "De games zijn geblokkeerd."
+    },
+    "intent_no_limit": {
+      "message": "Er is vandaag geen limiet."
+    },
+    "intent_left": {
+      "message": "Nog {minutes} minuten."
+    },
+    "intent_added": {
+      "message": "{minutes} minuten toegevoegd voor vandaag op {name}."
+    },
+    "intent_stopped": {
+      "message": "Vandaag niet meer spelen op {name}."
+    },
+    "intent_which": {
+      "message": "Welke console: {names}?"
+    },
+    "intent_no_console": {
+      "message": "Geen PlayGuard-console met de naam {name}."
+    },
+    "logbook_play_started": {
+      "message": "heeft {game} gestart"
+    },
+    "logbook_play_stopped": {
+      "message": "heeft {game} gestopt"
+    },
+    "logbook_time_warning": {
+      "message": "heeft nog {minutes} minuten speeltijd"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "heeft de games geblokkeerd: de daglimiet is bereikt"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "heeft de games geblokkeerd: bedtijd"
+    },
+    "logbook_command_applied": {
+      "message": "heeft uitgevoerd: {order}"
+    },
+    "logbook_command_rejected": {
+      "message": "heeft geweigerd: {order} ({reason})"
+    },
+    "logbook_command_waiting": {
+      "message": "wacht op de bevestiging van PlayGuard: {order}"
+    }
+  },
+  "issues": {
+    "newer_schema": {
+      "title": "{name} spreekt een nieuwer PlayGuard-protocol",
+      "description": "{name} publiceert schema {schema}; deze integratie kent schema {known}. Werk de PlayGuard-integratie bij: tot dan kunnen sommige waarden ontbreken."
+    },
+    "native_discovery": {
+      "title": "{name} publiceert weer een eigen Home Assistant-apparaat",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "De entiteiten van {name} staan er dubbel",
+            "description": "Het eigen MQTT-apparaat van de console is terug naast dat van deze integratie: het is in PlayGuard weer aangezet, of de PlayGuard van de console is te oud voor de opdracht die het uitzet. Verstuur om de console opnieuw te vragen het uit te zetten.\n\nAls het terugkomt, werk PlayGuard bij, of zet *Het apparaat aanmaken in Home Assistant (MQTT-discovery)* uit in PlayGuard › Console › Toegang op afstand. Wil je liever het eigen apparaat van de console houden, zet dan de optie *Het eigen Home Assistant-apparaat van de console vervangen* van deze integratie uit."
+          }
+        }
+      }
+    },
+    "agent_version": {
+      "title": "{name} draait een oudere PlayGuard-agent",
+      "description": "PlayGuard {app} is geïnstalleerd op {name}, maar de agent, die werkt terwijl PlayGuard gesloten is, is nog {agent}: de update ervan is uitgesteld. Werk hem bij in PlayGuard › Console › Optionele modules › Verbindingsagent (PlayGuard biedt dat ook aan bij het opstarten)."
+    },
+    "refused_policy_off": {
+      "title": "{name} weigert de opdrachten van Home Assistant",
+      "description": "{name} is ingesteld om ontvangen opdrachten te weigeren, dus wat hier wordt gewijzigd, wordt niet uitgevoerd. Kies op de console, in PlayGuard › Console › Toegang op afstand › Ontvangen opdrachten, Meteen uitvoeren of Vragen op de console. Deze melding verdwijnt zodra de console dat meldt."
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} laat opdrachten de speeltijdtimer niet wijzigen",
+      "description": "Limieten, extra tijd, profielen, Vandaag niet meer spelen en het ontgrendelen van ouderlijk toezicht hebben dat nodig. Zet op de console PlayGuard › Console › Toegang op afstand › Opdrachten mogen de speeltijdtimer wijzigen aan. Deze melding verdwijnt zodra de console dat meldt."
+    },
+    "refused_read_only": {
+      "title": "PlayGuard staat op alleen-lezen op {name}",
+      "description": "PlayGuard opent in alleen-lezen op een firmware die het nog niet ondersteunt, en weigert elke opdracht. Werk PlayGuard bij op de console (het biedt dat aan wanneer het op updates controleert). Deze melding verdwijnt zodra de console dat meldt."
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "all": "Elke dag",
+        "today": "Alleen vandaag",
+        "sun": "Zondag",
+        "mon": "Maandag",
+        "tue": "Dinsdag",
+        "wed": "Woensdag",
+        "thu": "Donderdag",
+        "fri": "Vrijdag",
+        "sat": "Zaterdag"
+      }
+    },
+    "console": {
+      "options": {
+        "manual": "Een andere console, via zijn ID"
+      }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "De daglimiet",
+        "bedtime": "Bedtijd"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "Vandaag",
+        "week": "De afgelopen zeven dagen"
+      }
+    }
+  },
+  "services": {
+    "set_limits": {
+      "name": "De limieten instellen",
+      "description": "Stelt de limiet in van één dag, van elke dag, van vandaag of van de hele week (1440 = geen limiet).",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "De console."
+        },
+        "minutes": {
+          "name": "Minuten",
+          "description": "0 tot 1440; 1440 betekent geen limiet."
+        },
+        "day": {
+          "name": "Dag",
+          "description": "Welke dag."
+        },
+        "week": {
+          "name": "Week",
+          "description": "Zeven limieten, beginnend met zondag, in plaats van minuten en dag."
+        }
+      }
+    },
+    "add_bonus_time": {
+      "name": "Extra tijd toevoegen",
+      "description": "Extra minuten vandaag; morgen geldt weer de gewone limiet.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "De console."
+        },
+        "minutes": {
+          "name": "Minuten",
+          "description": "5 tot 180."
+        }
+      }
+    },
+    "apply_profile": {
+      "name": "Een profiel toepassen",
+      "description": "Past de limieten toe van een profiel dat in PlayGuard is opgeslagen.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "De console."
+        },
+        "profile": {
+          "name": "Profiel",
+          "description": "De naam in PlayGuard."
+        }
+      }
+    },
+    "stop_today": {
+      "name": "Vandaag niet meer spelen",
+      "description": "0 minuten vandaag; morgen geldt weer de gewone limiet.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "De console."
+        }
+      }
+    },
+    "lock_now": {
+      "name": "Ouderlijk toezicht weer inschakelen",
+      "description": "Schakelt ouderlijk toezicht weer in na een tijdelijke ontgrendeling.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "De console."
+        }
+      }
+    },
+    "sync_now": {
+      "name": "Nu synchroniseren",
+      "description": "De console publiceert alles opnieuw.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "De console."
+        }
+      }
+    },
+    "request_report": {
+      "name": "Een diagnoserapport aanvragen",
+      "description": "De console slaat een rapport op zijn SD-kaart op, en publiceert het wanneer Toegang op afstand dat toestaat (dan in de diagnostische gegevens van het apparaat).",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "De console."
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "De speeltijd ophalen",
+      "description": "Geeft de speeltijd van vandaag (per game, per account, de gespeelde game, de limiet en wat daarvan over is, bedtijd) of die van de afgelopen zeven dagen.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "De console."
+        },
+        "period": {
+          "name": "Periode",
+          "description": "Vandaag, of de afgelopen zeven dagen."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "Game gestart",
+      "description": "Activeert wanneer er een game start op de console."
+    },
+    "game_stopped": {
+      "name": "Game gestopt",
+      "description": "Activeert wanneer de game stopt: gesloten, onderbroken, of een andere gestart."
+    },
+    "time_running_out": {
+      "name": "Tijd bijna om",
+      "description": "Activeert wanneer er nog 10 minuten of minder over zijn van de limiet van vandaag terwijl er een game wordt gespeeld."
+    },
+    "games_blocked": {
+      "name": "Games geblokkeerd",
+      "description": "Activeert wanneer de games worden geblokkeerd: door de daglimiet (of Vandaag niet meer spelen), of door bedtijd.",
+      "fields": {
+        "blocked_by": {
+          "name": "Geblokkeerd door",
+          "description": "Wat de games heeft geblokkeerd."
+        }
+      }
+    },
+    "order_refused": {
+      "name": "Opdracht geweigerd",
+      "description": "Activeert wanneer de console een opdracht weigert."
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "Er wordt een game gespeeld",
+      "description": "Test of er een game wordt gespeeld op de console.",
+      "fields": {
+        "behavior": {
+          "name": "Voorwaarde is waar als"
+        },
+        "for": {
+          "name": "Gedurende minstens"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "Limiet bereikt",
+      "description": "Test of de limiet van vandaag is bereikt op de console.",
+      "fields": {
+        "behavior": {
+          "name": "Voorwaarde is waar als"
+        },
+        "for": {
+          "name": "Gedurende minstens"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "Ouderlijk toezicht aan",
+      "description": "Test of het ouderlijk toezicht van de console aan staat (niet tijdelijk ontgrendeld).",
+      "fields": {
+        "behavior": {
+          "name": "Voorwaarde is waar als"
+        },
+        "for": {
+          "name": "Gedurende minstens"
+        }
+      }
+    }
+  }
+}

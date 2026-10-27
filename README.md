@@ -79,6 +79,9 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 - **The console's answer**: an order the console refuses makes its action
   fail, with the console's reason; one refused later (sent while it slept, or
   waiting for PlayGuard) raises a notification.
+- **In 14 languages**: English, French, German, Spanish (Spain and Latin
+  America), Italian, Japanese, Korean, Dutch, Portuguese (Portugal and Brazil),
+  Russian, Chinese (Simplified and Traditional), with the console's own labels.
 - **Repairs** when you need to act (a setting on the console that refuses
   the orders included), **diagnostics** with the console's last state and its
   last diagnostic report, names left out (on the entry and on the device), and
