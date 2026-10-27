@@ -79,8 +79,10 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 - **The console's answer**: an order the console refuses makes its action
   fail, with the console's reason; one refused later (sent while it slept, or
   waiting for PlayGuard) raises a notification.
-- **Repairs** when you need to act, and **diagnostics** with the console's
-  last state and its last diagnostic report, names left out.
+- **Repairs** when you need to act (a setting on the console that refuses
+  the orders included), **diagnostics** with the console's last state and its
+  last diagnostic report, names left out (on the entry and on the device), and
+  the console's events in the **logbook**.
 
 <details>
 <summary><b>📸 Screenshots</b></summary>
@@ -428,6 +430,11 @@ own, `app_id`, `game` (its name), `minutes_left`, `blocked_by`. The console
 builds its state every 30 seconds while a game is played, so these come
 within that. Events are not retained: one sent while
 Home Assistant was away is not seen; *Last order* keeps the last result.
+
+Each event is also fired on Home Assistant's event bus as `playguard_event`
+(`device_id`, `console_id`, `event_type` and the attributes above), which the
+**logbook** shows on the console's device: *Salon started Mario Kart 8
+Deluxe*, *Salon refused Limit Monday: 5000: value out of range*.
 
 ## 🎯 Triggers and conditions
 
@@ -835,6 +842,15 @@ Optional modules › Link agent*. The repair goes once both versions match.
 
 The console's PlayGuard is newer than this integration: update the PlayGuard
 integration (HACS). Until then, some values may be missing.
+</details>
+
+<details>
+<summary>Repair: "… refuses Home Assistant's orders" / "… does not let orders change the play timer" / "PlayGuard is read-only on …"</summary>
+
+An order was refused because of a setting on the console (here, before
+sending it, or by the console). The repair says which setting to change in
+PlayGuard › *Console › Remote access*, or to update PlayGuard; it goes away
+by itself once the console's state shows the change.
 </details>
 
 <details>

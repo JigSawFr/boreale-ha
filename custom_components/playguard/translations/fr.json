@@ -479,6 +479,30 @@
     },
     "intent_no_console": {
       "message": "Aucune console PlayGuard nommée {name}."
+    },
+    "logbook_play_started": {
+      "message": "a lancé {game}"
+    },
+    "logbook_play_stopped": {
+      "message": "a arrêté {game}"
+    },
+    "logbook_time_warning": {
+      "message": "n'a plus que {minutes} minutes de jeu"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "a bloqué les jeux : la limite du jour est atteinte"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "a bloqué les jeux : l'heure du coucher"
+    },
+    "logbook_command_applied": {
+      "message": "a exécuté {order}"
+    },
+    "logbook_command_rejected": {
+      "message": "a refusé {order} : {reason}"
+    },
+    "logbook_command_waiting": {
+      "message": "attend la confirmation de PlayGuard pour {order}"
     }
   },
   "issues": {
@@ -500,6 +524,18 @@
     "agent_version": {
       "title": "{name} fait tourner un ancien agent PlayGuard",
       "description": "PlayGuard {app} est installé sur {name}, mais son agent, qui travaille quand PlayGuard est fermé, est encore en {agent} : sa mise à jour a été remise à plus tard. Mettez-le à jour dans PlayGuard › Console › Modules facultatifs › Agent du lien (PlayGuard le propose aussi à son démarrage)."
+    },
+    "refused_policy_off": {
+      "title": "{name} refuse les ordres de Home Assistant",
+      "description": "{name} est réglée pour refuser les ordres reçus : ce qui est changé ici n'est pas exécuté. Sur la console, dans PlayGuard › Console › Accès à distance › Ordres reçus, choisissez Les exécuter aussitôt ou Demander sur la console. Ceci disparaît dès que la console l'indique."
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} ne laisse pas les ordres changer le temps de jeu",
+      "description": "Les limites, le temps en plus, les profils, Plus de jeu aujourd'hui et le déverrouillage du contrôle parental en ont besoin. Sur la console, activez PlayGuard › Console › Accès à distance › Les ordres peuvent changer le temps de jeu. Ceci disparaît dès que la console l'indique."
+    },
+    "refused_read_only": {
+      "title": "PlayGuard est en lecture seule sur {name}",
+      "description": "PlayGuard s'ouvre en lecture seule sur un firmware qu'il ne prend pas encore en charge, et refuse tous les ordres. Mettez PlayGuard à jour sur la console (il le propose quand il cherche des mises à jour). Ceci disparaît dès que la console l'indique."
     }
   },
   "selector": {

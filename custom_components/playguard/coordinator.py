@@ -38,6 +38,8 @@ from .const import (
     CONF_UNPUBLISHED,
     DEFAULT_PREFIX,
     DOMAIN,
+    EVENT_PLAYGUARD,
+    EVENT_TYPES,
     MANUFACTURER,
     MODEL,
     MODEL_NAMES,
@@ -61,6 +63,13 @@ REPORT_MAX = 128 * 1024
 APPLIED = "command_applied"
 REFUSED = "command_rejected"
 WAITING = "command_waiting"
+# The refusals a setting on the console explains, and whether the state still
+# says it: a repair issue tells which setting, until the state shows it changed.
+SETTINGS_REFUSING: dict[str, Callable[[dict[str, Any]], bool]] = {
+    "read_only": lambda state: bool((state.get("console") or {}).get("read_only")),
+    "policy_off": lambda state: (state.get("link") or {}).get("policy") == "off",
+    "timer_writes_disabled": lambda state: not (state.get("link") or {}).get("remote_timer_writes"),
+}
 
 
 def _json(payload: str | bytes | bytearray) -> dict[str, Any] | None:
@@ -132,6 +141,7 @@ class PlayGuardConsole:
         }
         for sub, handler in topics.items():
             self._unsubscribe.append(await mqtt.async_subscribe(self.hass, f"{self.base}/{sub}", handler, qos=1))
+        await self._async_texts()  # loaded for the logbook, which reads them from the cache
         await self.async_publish_version()
 
     async def async_publish_version(self) -> None:
@@ -166,6 +176,8 @@ class PlayGuardConsole:
             self._statistics_timer = None
         for issue_id in (self._issue_schema, self._issue_native, self._issue_agent):
             ir.async_delete_issue(self.hass, DOMAIN, issue_id)
+        for reason in SETTINGS_REFUSING:
+            ir.async_delete_issue(self.hass, DOMAIN, self._issue_refused(reason))
 
     @callback
     def async_add_listener(self, listener: Callable[[], None]) -> CALLBACK_TYPE:
@@ -199,6 +211,7 @@ class PlayGuardConsole:
         self._seen(msg)
         self._check_schema(doc)
         self.state = doc
+        self._clear_refusals()
         self._update_device()
         self._take_over()
         self._follow_publishes()
@@ -296,6 +309,29 @@ class PlayGuardConsole:
         self._answer(doc)
         for listener in list(self._event_listeners):
             listener(doc)
+        self._fire(doc)
+
+    @callback
+    def _fire(self, doc: dict[str, Any]) -> None:
+        """The event on Home Assistant's bus, with the console's device (the
+        logbook describes it)."""
+        if doc.get("event_type") not in EVENT_TYPES:
+            return
+        device = dr.async_get(self.hass).async_get_device_by_identifier((DOMAIN, self.console_id), self.entry.entry_id)
+        app_id = doc.get("app_id")
+        data = {
+            k: doc.get(k) for k in ("event_type", "entity", "payload", "reason", "rc", "minutes_left", "blocked_by")
+        }
+        self.hass.bus.async_fire(
+            EVENT_PLAYGUARD,
+            {
+                "device_id": device.id if device else None,
+                "console_id": self.console_id,
+                **data,
+                "app_id": app_id,
+                "game": self.game_name(app_id) if isinstance(app_id, str) else None,
+            },
+        )
 
     @callback
     def _on_report(self, msg: ReceiveMessage) -> None:
@@ -478,15 +514,14 @@ class PlayGuardConsole:
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="read_only_entity")
         if self.state is None:
             return  # nothing known yet: the console decides (the order waits on the broker)
-        if (self.state.get("console") or {}).get("read_only"):
-            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="read_only")
-        link = self.state.get("link") or {}
-        if link.get("policy") == "off":
-            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="policy_off")
-        # Unlocking parental controls needs it too; locking them again never does.
+        # Unlocking parental controls needs the timer writes too; locking them again never does.
         unlocking = key == "parental_controls" and payload == "UNLOCK"
-        if (write == WRITE_TIMER or unlocking) and not link.get("remote_timer_writes"):
-            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="timer_writes_disabled")
+        for reason, refusing in SETTINGS_REFUSING.items():
+            if reason == "timer_writes_disabled" and not (write == WRITE_TIMER or unlocking):
+                continue
+            if refusing(self.state):
+                self._refusal_issue(reason)
+                raise ServiceValidationError(translation_domain=DOMAIN, translation_key=reason)
 
     async def async_send(self, key: str, payload: str) -> None:
         """Publishes an order, retained: it waits on the broker if the console sleeps."""
@@ -534,22 +569,57 @@ class PlayGuardConsole:
             if order == key and value == sent and not answer.done():
                 answer.set_result(doc)
                 return
+        if event_type == REFUSED and doc.get("reason") in SETTINGS_REFUSING:
+            self._refusal_issue(str(doc["reason"]))
         if event_type == REFUSED and self.entry.options.get(CONF_NOTIFY_REFUSED, True):
             self.entry.async_create_background_task(
                 self.hass, self._async_notify(doc), f"{DOMAIN} {self.console_id} refusal"
             )
 
+    def _issue_refused(self, reason: str) -> str:
+        return f"refused_{reason}_{self.console_id}"
+
+    @callback
+    def _refusal_issue(self, reason: str) -> None:
+        """An order refused because of a setting on the console: a repair
+        issue says which, until the state shows it changed."""
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            self._issue_refused(reason),
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key=f"refused_{reason}",
+            translation_placeholders={"name": self.name},
+        )
+
+    @callback
+    def _clear_refusals(self) -> None:
+        for reason, refusing in SETTINGS_REFUSING.items():
+            if self.state is not None and not refusing(self.state):
+                ir.async_delete_issue(self.hass, DOMAIN, self._issue_refused(reason))
+
     async def _async_texts(self) -> dict[str, str]:
         """The integration's messages, in Home Assistant's language."""
         return await async_get_translations(self.hass, self.hass.config.language, "exceptions", [DOMAIN])
 
-    async def _async_reason(self, doc: dict[str, Any], texts: dict[str, str] | None = None) -> str:
+    async def _async_reason(self, doc: dict[str, Any]) -> str:
+        return self.reason_text(doc, await self._async_texts())
+
+    def reason_text(self, doc: dict[str, Any], texts: dict[str, str]) -> str:
         """Why the console refused, in words."""
-        texts = texts if texts is not None else await self._async_texts()
         reason, rc = doc.get("reason"), doc.get("rc")
         key = f"reason_{reason}" if reason in REFUSAL_REASONS else "reason_other"
         text = texts.get(f"component.{DOMAIN}.exceptions.{key}.message")
         return text.format(reason=reason, rc=rc or "-") if text else str(reason)
+
+    def order_text(self, doc: dict[str, Any]) -> str:
+        """An event's order, by its entity's name, with its value (but a press)."""
+        payload = doc.get("payload")
+        order = self._order_name(str(doc.get("entity")))
+        if isinstance(payload, str) and payload and payload.upper() != "PRESS":
+            order = f"{order}: {payload}"
+        return order
 
     def _order_name(self, key: str) -> str:
         """An order by its entity's name, else by its key (an action's own order)."""
@@ -566,12 +636,8 @@ class PlayGuardConsole:
     async def _async_notify(self, doc: dict[str, Any]) -> None:
         """A refusal no action waited for, as a notification."""
         texts = await self._async_texts()
-        key, payload = str(doc.get("entity")), doc.get("payload")
-        order = self._order_name(key)
-        if isinstance(payload, str) and payload and payload.upper() != "PRESS":
-            order = f"{order}: {payload}"
         prefix = f"component.{DOMAIN}.exceptions"
-        values = {"name": self.name, "order": order, "reason": await self._async_reason(doc, texts)}
+        values = {"name": self.name, "order": self.order_text(doc), "reason": self.reason_text(doc, texts)}
         title = texts.get(f"{prefix}.refused_title.message", "{name}").format(**values)
         message = texts.get(f"{prefix}.refused_later.message", "{order}: {reason}").format(**values)
         persistent_notification.async_create(self.hass, message, title, self._notification)

@@ -479,6 +479,30 @@
     },
     "intent_no_console": {
       "message": "No PlayGuard console named {name}."
+    },
+    "logbook_play_started": {
+      "message": "started {game}"
+    },
+    "logbook_play_stopped": {
+      "message": "stopped {game}"
+    },
+    "logbook_time_warning": {
+      "message": "has {minutes} minutes of play left"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "blocked the games: the day's limit is reached"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "blocked the games: bedtime"
+    },
+    "logbook_command_applied": {
+      "message": "carried out {order}"
+    },
+    "logbook_command_rejected": {
+      "message": "refused {order}: {reason}"
+    },
+    "logbook_command_waiting": {
+      "message": "waits for PlayGuard's confirmation of {order}"
     }
   },
   "issues": {
@@ -500,6 +524,18 @@
     "agent_version": {
       "title": "{name} runs an older PlayGuard agent",
       "description": "PlayGuard {app} is installed on {name}, but its agent, which works while PlayGuard is closed, is still {agent}: its update was put off. Update it in PlayGuard › Console › Optional modules › Link agent (PlayGuard also offers it when it starts)."
+    },
+    "refused_policy_off": {
+      "title": "{name} refuses Home Assistant's orders",
+      "description": "{name} is set to refuse the orders it receives, so what is changed here is not carried out. On the console, in PlayGuard › Console › Remote access › Orders received, pick Carry them out at once or Ask on the console. This goes away once the console says so."
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} does not let orders change the play timer",
+      "description": "Limits, extra time, profiles, No more play today and unlocking parental controls need it. On the console, turn on PlayGuard › Console › Remote access › Orders may change the play timer. This goes away once the console says so."
+    },
+    "refused_read_only": {
+      "title": "PlayGuard is read-only on {name}",
+      "description": "PlayGuard opens read-only on a firmware it does not support yet, and refuses every order. Update PlayGuard on the console (it offers it when it checks for updates). This goes away once the console says so."
     }
   },
   "selector": {

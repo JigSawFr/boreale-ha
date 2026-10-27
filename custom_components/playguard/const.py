@@ -83,6 +83,10 @@ REFUSAL_REASONS: Final = (
     "busy",
 )
 
+# Each of the console's events, also on Home Assistant's event bus (with the
+# console's device), for the logbook.
+EVENT_PLAYGUARD: Final = "playguard_event"
+
 # Write classes of the entity table (source/sync/sync_entities.c).
 WRITE_NONE: Final = "none"
 WRITE_FREE: Final = "free"  # an order, refused only in read-only mode or under the "off" policy

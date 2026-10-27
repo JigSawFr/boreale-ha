@@ -83,8 +83,10 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 - **La réponse de la console** : un ordre que la console refuse fait échouer
   son action, avec la raison de la console ; un ordre refusé plus tard (envoyé
   pendant sa veille, ou en attente de PlayGuard) crée une notification.
-- Des **réparations** quand vous devez agir, et des **diagnostics** avec le
-  dernier état de la console et son dernier rapport de diagnostic, sans les noms.
+- Des **réparations** quand vous devez agir (un réglage de la console qui
+  refuse les ordres compris), des **diagnostics** avec le dernier état de la
+  console et son dernier rapport de diagnostic, sans les noms (sur l'entrée et
+  sur l'appareil), et les événements de la console dans le **journal**.
 
 <details>
 <summary><b>📸 Captures d'écran</b></summary>
@@ -447,6 +449,12 @@ console construit son état toutes les 30 secondes pendant une partie : ils
 arrivent dans ce délai. Les événements ne sont pas
 retenus : un événement envoyé pendant que Home Assistant était absent n'est pas
 vu ; *Dernier ordre* garde le dernier résultat.
+
+Chaque événement est aussi émis sur le bus d'événements de Home Assistant sous
+le nom `playguard_event` (`device_id`, `console_id`, `event_type` et les
+attributs ci-dessus), que le **journal** affiche sur l'appareil de la console :
+*Salon a lancé Mario Kart 8 Deluxe*, *Salon a refusé Limite lundi : 5000 :
+valeur hors limites*.
 
 ## 🎯 Déclencheurs et conditions
 
@@ -874,6 +882,15 @@ disparaît quand les deux versions sont les mêmes.
 
 Le PlayGuard de la console est plus récent que cette intégration : mettez à jour
 l'intégration PlayGuard (HACS). D'ici là, certaines valeurs peuvent manquer.
+</details>
+
+<details>
+<summary>Réparation : « … refuse les ordres de Home Assistant » / « … ne laisse pas les ordres changer le temps de jeu » / « PlayGuard est en lecture seule sur … »</summary>
+
+Un ordre a été refusé à cause d'un réglage de la console (ici, avant de
+l'envoyer, ou par la console). La réparation dit quel réglage changer dans
+PlayGuard › *Console › Accès à distance*, ou de mettre PlayGuard à jour ; elle
+disparaît d'elle-même dès que l'état de la console montre le changement.
 </details>
 
 <details>
