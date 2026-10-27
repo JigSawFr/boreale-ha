@@ -74,6 +74,9 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   raison, en attente de la confirmation de PlayGuard), pour les automatisations.
 - Un ordre que la console refuserait (mode lecture seule, ordres refusés,
   écriture du minuteur non autorisée) est refusé ici, avec la raison.
+- **La réponse de la console** : un ordre que la console refuse fait échouer
+  son action, avec la raison de la console ; un ordre refusé plus tard (envoyé
+  pendant sa veille, ou en attente de PlayGuard) crée une notification.
 - Des **réparations** quand vous devez agir, et des **diagnostics** avec le
   dernier état de la console et son dernier rapport de diagnostic, sans les noms.
 
@@ -213,6 +216,7 @@ ajoutée deux fois.
 |---|---|---|
 | **Remplacer l'appareil Home Assistant d'origine de la console** | activée | Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivée : la console publie de nouveau son propre appareil (à côté de celui-ci). L'entrée se recharge quand elle change. |
 | **Garder les dernières valeurs pendant la veille** | activée | Tant que la console est hors ligne (en veille, éteinte, hors de portée), ses entités gardent ce qu'elle a dit en dernier, contrôles compris : un changement fait sur l'un d'eux attend sur le broker et est exécuté quand la console sort de veille. Désactivée : toutes les entités sauf *En ligne* sont alors indisponibles. |
+| **Notifier un ordre refusé plus tard** | activée | Un ordre dont la réponse arrive après la fin de son action (envoyé pendant la veille de la console, ou en attente de la confirmation de PlayGuard) et que la console refuse crée une notification, avec la raison ; le prochain ordre appliqué la retire. Un refus qui arrive pendant que l'action attend encore fait échouer l'action, quelle que soit cette option. |
 
 *⋮ › Reconfigurer* change le **Préfixe des topics**, quand `topic_prefix` dans
 le `sync.conf` de la console change. Comme pour l'ajout d'une console à la main,
@@ -368,6 +372,14 @@ exécuté quand elle sort de veille. Un ordre que la console refuserait est refu
 aussitôt, avec la raison (mode lecture seule, ordres refusés, écriture du
 minuteur désactivée, profil inconnu, appareil qui n'est pas une console
 PlayGuard chargée).
+
+Tant que la console est en ligne, l'action (et un changement fait sur une
+entité) attend sa réponse jusqu'à 10 secondes. Refusé, elle échoue avec la
+raison de la console (*Salon a refusé cet ordre : l'alarme du coucher est
+désactivée.*), affichée sous le contrôle, et une automatisation voit l'erreur.
+Exécuté, en attente de la confirmation de PlayGuard, ou sans réponse à temps :
+elle se termine ; un refus qui arrive plus tard crée une notification (option
+*Notifier un ordre refusé plus tard*).
 
 | Action | Champs | Ce qu'elle fait |
 |---|---|---|
@@ -727,7 +739,7 @@ charge : mettez PlayGuard à jour.
 Avec *Demander sur la console*, PlayGuard demande sur la console avant de
 l'exécuter (événement `command_waiting` quand l'agent le garde). Une console en
 veille l'exécute quand elle sort de veille. *Dernier ordre* et l'entité
-*Événements* disent ce qu'il est devenu.
+*Événements* disent ce qu'il est devenu ; un refus crée alors une notification.
 </details>
 
 <details>

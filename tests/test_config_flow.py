@@ -19,6 +19,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, async_
 from custom_components.playguard.const import (
     CONF_CONSOLE_ID,
     CONF_KEEP_VALUES,
+    CONF_NOTIFY_REFUSED,
     CONF_PREFIX,
     CONF_TAKE_OVER,
     DOMAIN,
@@ -350,8 +351,8 @@ async def test_options(hass: HomeAssistant, setup) -> None:
     result = await hass.config_entries.options.async_init(setup.entry_id)
     assert result["step_id"] == "init"
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False}
+        result["flow_id"], {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False, CONF_NOTIFY_REFUSED: False}
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
-    assert setup.options == {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False}
+    assert setup.options == {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False, CONF_NOTIFY_REFUSED: False}

@@ -9,13 +9,14 @@ handled).
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 from datetime import datetime
 import json
 import logging
 from typing import Any
 
-from homeassistant.components import mqtt
+from homeassistant.components import mqtt, persistent_notification
 from homeassistant.components.mqtt import ReceiveMessage
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import __version__ as HA_VERSION
@@ -24,12 +25,14 @@ from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import device_registry as dr, entity_registry as er, issue_registry as ir
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.event import async_call_later
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.loader import async_get_integration
 from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_CONSOLE_ID,
     CONF_KEEP_VALUES,
+    CONF_NOTIFY_REFUSED,
     CONF_PREFIX,
     CONF_TAKE_OVER,
     CONF_UNPUBLISHED,
@@ -39,8 +42,10 @@ from .const import (
     MODEL,
     MODEL_NAMES,
     NATIVE_STATES_MAX,
+    ORDER_TIMEOUT,
     PUBLISH_HARDWARE,
     PUBLISH_SERIAL,
+    REFUSAL_REASONS,
     SCHEMA,
     STATISTICS_DELAY,
     TOPIC_INTEGRATION,
@@ -52,6 +57,10 @@ from .entities import ENTITIES, dig
 _LOGGER = logging.getLogger(__name__)
 
 REPORT_MAX = 128 * 1024
+# The console's answer to an order.
+APPLIED = "command_applied"
+REFUSED = "command_rejected"
+WAITING = "command_waiting"
 
 
 def _json(payload: str | bytes | bytearray) -> dict[str, Any] | None:
@@ -94,6 +103,8 @@ class PlayGuardConsole:
 
         self._listeners: list[Callable[[], None]] = []
         self._event_listeners: list[Callable[[dict[str, Any]], None]] = []
+        # The orders whose action waits for the console's answer: (order, payload, answer).
+        self._waiters: list[tuple[str, str, asyncio.Future[dict[str, Any]]]] = []
         self._unsubscribe: list[CALLBACK_TYPE] = []
         self._statistics_timer: CALLBACK_TYPE | None = None
         self._discovery_sent = False
@@ -101,6 +112,7 @@ class PlayGuardConsole:
         self._issue_schema = f"newer_schema_{self.console_id}"
         self._issue_native = f"native_discovery_{self.console_id}"
         self._issue_agent = f"agent_version_{self.console_id}"
+        self._notification = f"{DOMAIN}_{self.console_id}_refused"
 
     # ---- topics ----
 
@@ -281,6 +293,7 @@ class PlayGuardConsole:
             return
         self._seen(msg)
         self.last_event = doc
+        self._answer(doc)
         for listener in list(self._event_listeners):
             listener(doc)
 
@@ -480,9 +493,88 @@ class PlayGuardConsole:
         await mqtt.async_publish(self.hass, f"{self.base}/{key}/set", payload, qos=1, retain=True)
 
     async def async_order(self, key: str, write: str, payload: str) -> None:
-        """Checks, then sends an order."""
+        """Checks, then sends an order. While the console is on the broker, waits
+        for its answer: refused, the action fails, saying why. Applied, waiting
+        for PlayGuard, or no answer in time: the action returns (the order
+        waits on the broker; a later refusal raises a notification)."""
         self.check_order(key, write, payload)
-        await self.async_send(key, payload)
+        if self.online is not True:
+            await self.async_send(key, payload)
+            return
+        waiter = (key, payload.casefold(), self.hass.loop.create_future())
+        self._waiters.append(waiter)
+        try:
+            await self.async_send(key, payload)
+            async with asyncio.timeout(ORDER_TIMEOUT):
+                doc = await waiter[2]
+        except TimeoutError:
+            _LOGGER.debug("%s: no answer to %s yet, it waits on the broker", self.base, key)
+            return
+        finally:
+            self._waiters.remove(waiter)
+        if doc.get("event_type") == REFUSED:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="refused",
+                translation_placeholders={"name": self.name, "reason": await self._async_reason(doc)},
+            )
+
+    @callback
+    def _answer(self, doc: dict[str, Any]) -> None:
+        """The console's answer to an order: to the action waiting for it, else
+        a refusal in a notification (one per console, which an order applied
+        takes away). Not for the integration's own order (its discovery)."""
+        event_type, key, payload = doc.get("event_type"), doc.get("entity"), doc.get("payload")
+        if event_type not in (APPLIED, REFUSED, WAITING) or key == "discovery":
+            return
+        if event_type == APPLIED:
+            persistent_notification.async_dismiss(self.hass, self._notification)
+        sent = payload.casefold() if isinstance(payload, str) else None
+        for order, value, answer in self._waiters:
+            if order == key and value == sent and not answer.done():
+                answer.set_result(doc)
+                return
+        if event_type == REFUSED and self.entry.options.get(CONF_NOTIFY_REFUSED, True):
+            self.entry.async_create_background_task(
+                self.hass, self._async_notify(doc), f"{DOMAIN} {self.console_id} refusal"
+            )
+
+    async def _async_texts(self) -> dict[str, str]:
+        """The integration's messages, in Home Assistant's language."""
+        return await async_get_translations(self.hass, self.hass.config.language, "exceptions", [DOMAIN])
+
+    async def _async_reason(self, doc: dict[str, Any], texts: dict[str, str] | None = None) -> str:
+        """Why the console refused, in words."""
+        texts = texts if texts is not None else await self._async_texts()
+        reason, rc = doc.get("reason"), doc.get("rc")
+        key = f"reason_{reason}" if reason in REFUSAL_REASONS else "reason_other"
+        text = texts.get(f"component.{DOMAIN}.exceptions.{key}.message")
+        return text.format(reason=reason, rc=rc or "-") if text else str(reason)
+
+    def _order_name(self, key: str) -> str:
+        """An order by its entity's name, else by its key (an action's own order)."""
+        registry = er.async_get(self.hass)
+        for definition in ENTITIES:
+            if definition.key != key:
+                continue
+            entity_id = registry.async_get_entity_id(definition.platform, DOMAIN, f"{self.console_id}_{key}")
+            state = self.hass.states.get(entity_id) if entity_id else None
+            if state is not None:
+                return state.name
+        return key
+
+    async def _async_notify(self, doc: dict[str, Any]) -> None:
+        """A refusal no action waited for, as a notification."""
+        texts = await self._async_texts()
+        key, payload = str(doc.get("entity")), doc.get("payload")
+        order = self._order_name(key)
+        if isinstance(payload, str) and payload and payload.upper() != "PRESS":
+            order = f"{order}: {payload}"
+        prefix = f"component.{DOMAIN}.exceptions"
+        values = {"name": self.name, "order": order, "reason": await self._async_reason(doc, texts)}
+        title = texts.get(f"{prefix}.refused_title.message", "{name}").format(**values)
+        message = texts.get(f"{prefix}.refused_later.message", "{order}: {reason}").format(**values)
+        persistent_notification.async_create(self.hass, message, title, self._notification)
 
     # ---- statistics ----
 

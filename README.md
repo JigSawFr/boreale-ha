@@ -70,6 +70,9 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   reason, waiting for PlayGuard's confirmation), for automations.
 - An order the console would refuse (read-only mode, orders off, timer writes
   not allowed) is refused here, with the reason.
+- **The console's answer**: an order the console refuses makes its action
+  fail, with the console's reason; one refused later (sent while it slept, or
+  waiting for PlayGuard) raises a notification.
 - **Repairs** when you need to act, and **diagnostics** with the console's
   last state and its last diagnostic report, names left out.
 
@@ -206,6 +209,7 @@ twice.
 |---|---|---|
 | **Replace the console's own Home Assistant device** | on | Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again (next to this one). The entry reloads when it changes. |
 | **Keep the last values while the console sleeps** | on | While the console is offline (asleep, off, out of reach), its entities keep showing what it last said, controls included: a change made to one waits on the broker and is carried out when the console wakes up. Off: every entity but *Online* is unavailable then. |
+| **Notify an order refused later** | on | An order whose answer comes after its action returned (sent while the console slept, or waiting for PlayGuard's confirmation) and that the console refuses raises a notification, with the reason; the next order applied takes it away. A refusal that comes while the action still waits makes the action fail, whatever this option. |
 
 *⋮ › Reconfigure* changes the **Topic prefix**, when `topic_prefix` in the
 console's `sync.conf` changes. As when adding a console by hand, the console
@@ -351,6 +355,13 @@ order: when the console is asleep, it waits on the broker and is carried out
 when the console wakes up. An order the console would refuse is refused at
 once, with the reason (read-only mode, orders refused, timer writes off, an
 unknown profile, a device that is not a loaded PlayGuard console).
+
+While the console is online, the action (and a change made to an entity)
+waits up to 10 seconds for its answer. Refused, it fails with the console's
+reason (*Salon refused this order: the bedtime alarm is off.*), shown under the
+control, and an automation sees the error. Applied, waiting for PlayGuard's
+confirmation, or no answer in time: it returns; a refusal that comes later
+raises a notification (option *Notify an order refused later*).
 
 | Action | Fields | What it does |
 |---|---|---|
@@ -693,7 +704,7 @@ PlayGuard.
 Under *Ask on the console*, PlayGuard asks on the console before carrying it
 out (event `command_waiting` when the agent keeps it). A sleeping console
 carries it out when it wakes up. *Last order* and the *Events* entity say
-what became of it.
+what became of it; a refusal then raises a notification.
 </details>
 
 <details>

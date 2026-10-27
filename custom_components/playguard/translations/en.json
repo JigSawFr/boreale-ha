@@ -55,11 +55,13 @@
       "init": {
         "data": {
           "take_over_discovery": "Replace the console's own Home Assistant device",
-          "keep_values_asleep": "Keep the last values while the console sleeps"
+          "keep_values_asleep": "Keep the last values while the console sleeps",
+          "notify_refused": "Notify an order refused later"
         },
         "data_description": {
           "take_over_discovery": "Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again.",
-          "keep_values_asleep": "While the console is off the broker (asleep, off, out of reach), its entities keep showing what it last said, and a change made to a control waits for it on the broker. Off: every entity but Online is unavailable then."
+          "keep_values_asleep": "While the console is off the broker (asleep, off, out of reach), its entities keep showing what it last said, and a change made to a control waits for it on the broker. Off: every entity but Online is unavailable then.",
+          "notify_refused": "An order sent while the console sleeps, or one waiting for PlayGuard's confirmation, gets its answer after its action returned: a refusal then raises a notification, which the next order applied takes away. A refusal while the action waits for the answer (up to 10 seconds) makes the action fail, saying why, whatever this option."
         }
       }
     }
@@ -382,6 +384,69 @@
     },
     "no_such_profile": {
       "message": "No profile named {profile} is saved in PlayGuard."
+    },
+    "refused": {
+      "message": "{name} refused this order: {reason}."
+    },
+    "refused_title": {
+      "message": "{name} refused an order"
+    },
+    "refused_later": {
+      "message": "{order}: {reason}."
+    },
+    "reason_unknown_entity": {
+      "message": "unknown order"
+    },
+    "reason_invalid": {
+      "message": "invalid value"
+    },
+    "reason_out_of_range": {
+      "message": "value out of range"
+    },
+    "reason_policy_off": {
+      "message": "orders are refused (Remote access › Orders received)"
+    },
+    "reason_timer_writes_disabled": {
+      "message": "changing the play timer remotely is off (Remote access › Orders may change the play timer)"
+    },
+    "reason_read_only": {
+      "message": "PlayGuard is in read-only mode"
+    },
+    "reason_not_confirmed": {
+      "message": "not confirmed on the console, or the PIN was not entered"
+    },
+    "reason_gated": {
+      "message": "the play timer is counting down and could not be unlocked"
+    },
+    "reason_unlock_failed": {
+      "message": "parental controls could not be unlocked"
+    },
+    "reason_not_custom": {
+      "message": "only with the custom restriction level"
+    },
+    "reason_no_such_profile": {
+      "message": "no profile has this name"
+    },
+    "reason_no_limit_today": {
+      "message": "there is no limit today"
+    },
+    "reason_console_locked": {
+      "message": "all games are blocked"
+    },
+    "reason_unsupported": {
+      "message": "not supported on this console"
+    },
+    "reason_bedtime_off": {
+      "message": "the bedtime alarm is off"
+    },
+    "reason_pctl_error": {
+      "message": "the console refused (result code {rc})"
+    },
+    "reason_busy": {
+      "message": "PlayGuard could not do it now, try again"
+    },
+    "reason_other": {
+      "message": "{reason}"
     }
   },
   "issues": {
