@@ -1,12 +1,14 @@
-"""Services: the same scalar orders as the entities, with the same bounds."""
+"""Services: the same scalar orders as the entities, with the same bounds;
+and the play time, as a response."""
 
 from __future__ import annotations
 
-from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv, service
 import probatio
 
+from . import play
 from .const import DAYS, DOMAIN, WRITE_FREE, WRITE_TIMER
 from .coordinator import PlayGuardConsole
 
@@ -15,6 +17,7 @@ ATTR_MINUTES = "minutes"
 ATTR_DAY = "day"
 ATTR_WEEK = "week"
 ATTR_PROFILE = "profile"
+ATTR_PERIOD = "period"
 
 _LIMIT = probatio.All(probatio.Coerce(int), probatio.Range(min=0, max=1440))
 
@@ -42,6 +45,12 @@ PROFILE_SCHEMA = probatio.Schema(
     }
 )
 DEVICE_SCHEMA = probatio.Schema({probatio.Required(ATTR_DEVICE_ID): cv.string})
+PLAY_TIME_SCHEMA = probatio.Schema(
+    {
+        probatio.Required(ATTR_DEVICE_ID): cv.string,
+        probatio.Optional(ATTR_PERIOD, default="today"): probatio.In(("today", "week")),
+    }
+)
 
 # Service -> (order, write class) for the ones that take no value.
 PRESS = {
@@ -94,8 +103,16 @@ def async_setup_services(hass: HomeAssistant) -> None:
         key, write = PRESS[call.service]
         await console.async_order(key, write, "PRESS")
 
+    async def get_play_time(call: ServiceCall) -> ServiceResponse:
+        console = _console(hass, call.data[ATTR_DEVICE_ID])
+        summary = play.week(console) if call.data[ATTR_PERIOD] == "week" else play.today(console)
+        return {"console": console.name, **summary}
+
     hass.services.async_register(DOMAIN, "set_limits", set_limits, schema=SET_LIMITS_SCHEMA)
     hass.services.async_register(DOMAIN, "add_bonus_time", add_bonus_time, schema=BONUS_SCHEMA)
     hass.services.async_register(DOMAIN, "apply_profile", apply_profile, schema=PROFILE_SCHEMA)
+    hass.services.async_register(
+        DOMAIN, "get_play_time", get_play_time, schema=PLAY_TIME_SCHEMA, supports_response=SupportsResponse.ONLY
+    )
     for name in PRESS:
         hass.services.async_register(DOMAIN, name, press, schema=DEVICE_SCHEMA)

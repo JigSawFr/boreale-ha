@@ -69,12 +69,15 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   changement fait sur un contrôle ou par une action attend sur le broker et
   est exécuté quand la console sort de veille.
 - **Des actions** : `set_limits`, `add_bonus_time`, `apply_profile`,
-  `stop_today`, `lock_now`, `sync_now`, `request_report`.
+  `stop_today`, `lock_now`, `sync_now`, `request_report`, `get_play_time`.
 - Une **entité d'événement** pour chaque ordre traité (exécuté, refusé avec la
   raison, en attente de la confirmation de PlayGuard), pour les automatisations.
 - Des **déclencheurs et conditions** propres dans l'éditeur d'automatisations :
   jeu lancé ou arrêté, temps bientôt écoulé, jeux bloqués, ordre refusé ; jeu
   en cours, limite atteinte, contrôle parental activé.
+- **Assist et assistants IA** : le temps de jeu du jour, du temps en plus,
+  plus de jeu aujourd'hui, à la voix ou par écrit ; `get_play_time` renvoie le
+  temps de jeu du jour ou de la semaine à un script.
 - Un ordre que la console refuserait (mode lecture seule, ordres refusés,
   écriture du minuteur non autorisée) est refusé ici, avec la raison.
 - **La réponse de la console** : un ordre que la console refuse fait échouer
@@ -107,6 +110,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 [configuration](#-configuration) · [options et reconfiguration](#-options-et-reconfiguration) ·
 [entités](#-entités) · [actions](#-actions) · [événements](#-événements) ·
 [déclencheurs et conditions](#-déclencheurs-et-conditions) ·
+[Assist et assistants IA](#-assist-et-assistants-ia) ·
 [mise à jour des données](#-mise-à-jour-des-données) · [exemples](#-exemples) ·
 [cas d'usage](#-cas-dusage) · [limites connues](#-limites-connues) ·
 [dépannage](#-dépannage) · [désinstallation](#-désinstallation) ·
@@ -394,6 +398,19 @@ elle se termine ; un refus qui arrive plus tard crée une notification (option
 | `playguard.lock_now` | | Réactive le contrôle parental après un déverrouillage temporaire. |
 | `playguard.sync_now` | | La console republie tout. |
 | `playguard.request_report` | | La console enregistre un rapport de diagnostic sur sa carte SD, et le publie quand *Accès à distance* le permet (il est alors dans les diagnostics de l'appareil). |
+| `playguard.get_play_time` | `period` (`today`, par défaut, ou `week`) | Renvoie le temps de jeu comme réponse de l'action (*Variable de réponse* dans un script) : celui du jour (`minutes`, `games` avec pour chacun `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`), ou celui des sept derniers jours (`days`, `minutes`, `games` avec pour chacun `per_day`, `accounts`). N'envoie rien à la console. |
+
+```yaml
+actions:
+  - action: playguard.get_play_time
+    data:
+      device_id: 0123456789abcdef0123456789abcdef
+      period: week
+    response_variable: week
+  - action: notify.notify
+    data:
+      message: "{{ week.minutes }} minutes cette semaine, {{ week.games[0].name }} en tête."
+```
 
 `set_limits`, `add_bonus_time`, `apply_profile` et `stop_today` demandent
 *Les ordres peuvent changer le temps de jeu*.
@@ -458,6 +475,46 @@ conditions:
       device_id: 0123456789abcdef0123456789abcdef
     options:
       behavior: any
+```
+
+## 💬 Assist et assistants IA
+
+Trois intents : `PlayGuardPlayTime` (le temps de jeu du jour, le jeu en cours,
+ce qu'il reste de la limite), `PlayGuardAddTime` (`minutes`, 5 à 180 : du
+temps en plus aujourd'hui) et `PlayGuardStopToday` (plus de jeu aujourd'hui) ;
+chacun prend le `name` de la console quand il y en a plusieurs. Un assistant
+qui utilise l'API LLM de Home Assistant (*Assist* dans ses réglages) les
+reçoit comme outils dès qu'une entité de la console lui est exposée
+(*Paramètres › Assistants vocaux › Exposer*) : « combien de temps ont-ils joué
+aujourd'hui ? », « donne-leur 30 minutes de plus ». Ils répondent dans la
+langue de Home Assistant. Les ordres passent par les mêmes vérifications que
+les actions, et un refus est dit.
+
+L'Assist de Home Assistant (sans LLM) a besoin des phrases, dans
+`custom_sentences/fr/playguard.yaml` du dossier de configuration :
+
+```yaml
+language: fr
+intents:
+  PlayGuardPlayTime:
+    data:
+      - sentences:
+          - "combien de temps [ont-ils|a-t-il|a-t-elle] joué [à la Switch] [aujourd'hui]"
+          - "combien de temps reste-t-il [sur la Switch]"
+  PlayGuardAddTime:
+    data:
+      - sentences:
+          - "(donne|ajoute) {minutes} minutes [de plus] [sur la Switch]"
+  PlayGuardStopToday:
+    data:
+      - sentences:
+          - "plus de [jeux|Switch] aujourd'hui"
+lists:
+  minutes:
+    range:
+      from: 5
+      to: 180
+      step: 5
 ```
 
 ## 🔄 Mise à jour des données

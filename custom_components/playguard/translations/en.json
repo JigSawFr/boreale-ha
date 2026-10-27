@@ -447,6 +447,33 @@
     },
     "reason_other": {
       "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name}: {minutes} minutes played today."
+    },
+    "intent_playing": {
+      "message": "{game} is being played."
+    },
+    "intent_blocked": {
+      "message": "Games are blocked."
+    },
+    "intent_no_limit": {
+      "message": "There is no limit today."
+    },
+    "intent_left": {
+      "message": "{minutes} minutes left."
+    },
+    "intent_added": {
+      "message": "{minutes} minutes added today on {name}."
+    },
+    "intent_stopped": {
+      "message": "No more play today on {name}."
+    },
+    "intent_which": {
+      "message": "Which console: {names}?"
+    },
+    "intent_no_console": {
+      "message": "No PlayGuard console named {name}."
     }
   },
   "issues": {
@@ -493,6 +520,12 @@
       "options": {
         "limit": "The day's limit",
         "bedtime": "Bedtime"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "Today",
+        "week": "The last seven days"
       }
     }
   },
@@ -584,6 +617,20 @@
         "device_id": {
           "name": "Console",
           "description": "The console."
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "Get the play time",
+      "description": "Returns today's play time (each game's, each account's, the game played, the limit and what is left of it, bedtime) or the last seven days'.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        },
+        "period": {
+          "name": "Period",
+          "description": "Today, or the last seven days."
         }
       }
     }

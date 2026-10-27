@@ -162,6 +162,9 @@
     },
     "request_report": {
       "service": "mdi:file-document-outline"
+    },
+    "get_play_time": {
+      "service": "mdi:chart-timeline-variant"
     }
   },
   "triggers": {

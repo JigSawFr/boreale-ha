@@ -91,3 +91,19 @@ request_report:
       selector:
         device:
           integration: playguard
+
+get_play_time:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: playguard
+    period:
+      default: today
+      selector:
+        select:
+          translation_key: period
+          options:
+            - today
+            - week

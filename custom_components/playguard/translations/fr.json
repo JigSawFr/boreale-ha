@@ -447,6 +447,33 @@
     },
     "reason_other": {
       "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name} : {minutes} minutes de jeu aujourd'hui."
+    },
+    "intent_playing": {
+      "message": "{game} est en cours."
+    },
+    "intent_blocked": {
+      "message": "Les jeux sont bloqués."
+    },
+    "intent_no_limit": {
+      "message": "Il n'y a pas de limite aujourd'hui."
+    },
+    "intent_left": {
+      "message": "Il reste {minutes} minutes."
+    },
+    "intent_added": {
+      "message": "{minutes} minutes ajoutées aujourd'hui sur {name}."
+    },
+    "intent_stopped": {
+      "message": "Plus de jeu aujourd'hui sur {name}."
+    },
+    "intent_which": {
+      "message": "Quelle console : {names} ?"
+    },
+    "intent_no_console": {
+      "message": "Aucune console PlayGuard nommée {name}."
     }
   },
   "issues": {
@@ -493,6 +520,12 @@
       "options": {
         "limit": "La limite du jour",
         "bedtime": "L'heure du coucher"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "Aujourd'hui",
+        "week": "Les sept derniers jours"
       }
     }
   },
@@ -584,6 +617,20 @@
         "device_id": {
           "name": "Console",
           "description": "La console."
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "Obtenir le temps de jeu",
+      "description": "Renvoie le temps de jeu du jour (par jeu, par compte, le jeu en cours, la limite et ce qu'il en reste, le coucher) ou celui des sept derniers jours.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        },
+        "period": {
+          "name": "Période",
+          "description": "Aujourd'hui, ou les sept derniers jours."
         }
       }
     }

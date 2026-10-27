@@ -65,12 +65,15 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   (*Online* says it is gone), and a change made to a control or an action
   waits on the broker and is carried out when the console wakes up.
 - **Actions**: `set_limits`, `add_bonus_time`, `apply_profile`, `stop_today`,
-  `lock_now`, `sync_now`, `request_report`.
+  `lock_now`, `sync_now`, `request_report`, `get_play_time`.
 - An **event entity** for every order handled (applied, refused with the
   reason, waiting for PlayGuard's confirmation), for automations.
 - **Triggers and conditions** of its own in the automation editor: a game
   started or stopped, time running out, games blocked, an order refused; a
   game played, the limit reached, parental controls on.
+- **Assist and AI assistants**: today's play time, extra time, no more play
+  today, by voice or chat; `get_play_time` returns the day's or the week's
+  play time to a script.
 - An order the console would refuse (read-only mode, orders off, timer writes
   not allowed) is refused here, with the reason.
 - **The console's answer**: an order the console refuses makes its action
@@ -103,6 +106,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 [set-up](#-set-up) · [options and reconfiguration](#-options-and-reconfiguration) ·
 [entities](#-entities) · [actions](#-actions) · [events](#-events) ·
 [triggers and conditions](#-triggers-and-conditions) ·
+[Assist and AI assistants](#-assist-and-ai-assistants) ·
 [data updates](#-data-updates) · [examples](#-examples) ·
 [use cases](#-use-cases) · [known limitations](#-known-limitations) ·
 [troubleshooting](#-troubleshooting) · [removal](#-removal) ·
@@ -376,6 +380,19 @@ raises a notification (option *Notify an order refused later*).
 | `playguard.lock_now` | | Turns parental controls back on after a temporary unlock. |
 | `playguard.sync_now` | | The console publishes everything again. |
 | `playguard.request_report` | | The console saves a diagnostic report on its SD card, and publishes it when *Remote access* allows it (then in the device's diagnostics). |
+| `playguard.get_play_time` | `period` (`today`, the default, or `week`) | Returns the play time as the action's response (*Response variable* in a script): today's (`minutes`, `games` with each one's `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`), or the last seven days' (`days`, `minutes`, `games` with each one's `per_day`, `accounts`). Sends nothing to the console. |
+
+```yaml
+actions:
+  - action: playguard.get_play_time
+    data:
+      device_id: 0123456789abcdef0123456789abcdef
+      period: week
+    response_variable: week
+  - action: notify.notify
+    data:
+      message: "{{ week.minutes }} minutes this week, {{ week.games[0].name }} first."
+```
 
 `set_limits`, `add_bonus_time`, `apply_profile` and `stop_today` need
 *Orders may change the play timer*.
@@ -438,6 +455,45 @@ conditions:
       device_id: 0123456789abcdef0123456789abcdef
     options:
       behavior: any
+```
+
+## 💬 Assist and AI assistants
+
+Three intents: `PlayGuardPlayTime` (today's play time, the game played, what
+is left of the limit), `PlayGuardAddTime` (`minutes`, 5 to 180: extra time
+today) and `PlayGuardStopToday` (no more play today); each takes the
+console's `name` when there are several. An assistant that uses Home
+Assistant's LLM API (*Assist* in its settings) gets them as tools as soon as
+one of the console's entities is exposed to it (*Settings › Voice assistants
+› Expose*): "how long did they play today?", "give them 30 more minutes".
+They answer in Home Assistant's language. Orders go through the same checks
+as the actions, and a refusal is said.
+
+Home Assistant's own Assist (without an LLM) needs the sentences, in
+`custom_sentences/en/playguard.yaml` of the configuration folder:
+
+```yaml
+language: en
+intents:
+  PlayGuardPlayTime:
+    data:
+      - sentences:
+          - "how long [did they play|have they played] [on the Switch] [today]"
+          - "[how much] time left on the Switch"
+  PlayGuardAddTime:
+    data:
+      - sentences:
+          - "(give|add) {minutes} [more] minutes [on the Switch]"
+  PlayGuardStopToday:
+    data:
+      - sentences:
+          - "no more [Switch] games today"
+lists:
+  minutes:
+    range:
+      from: 5
+      to: 180
+      step: 5
 ```
 
 ## 🔄 Data updates
