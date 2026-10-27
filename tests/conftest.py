@@ -40,6 +40,14 @@ def no_answer_wait():
         yield
 
 
+@pytest.fixture(autouse=True)
+def latest_release():
+    """PlayGuard's latest release, as GitHub's API gives it (no network in the tests)."""
+    release = {"tag_name": "v1.4.0", "name": "PlayGuard 1.4.0", "html_url": "https://github.com/JigSawFr/PlayGuard/releases/tag/v1.4.0", "body": "## What changed"}  # fmt: skip
+    with patch("custom_components.playguard.update.async_latest_release", return_value=release) as mock:
+        yield mock
+
+
 @pytest.fixture
 async def mqtt_mock(mqtt_mock, mqtt_client_mock):
     """Home Assistant's MQTT mock, its socket closed at the end: the mocked

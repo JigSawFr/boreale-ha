@@ -302,6 +302,14 @@ again), *Export a diagnostic report* (disabled by default).
 
 **Event**: *Events*, see [events](#-events).
 
+**Update**: *PlayGuard*, config: the version installed on the console against
+the latest release on GitHub, with its release notes, in *Settings ›
+Updates* too. PlayGuard installs it on the console (it offers it when it
+checks for updates); nothing is installed from Home Assistant. The release
+is read when the entity is added, then again with the console's documents
+once six hours have passed (`api.github.com`, the only request the
+integration makes outside the broker).
+
 **The console itself** (`playguard/<id>/system`, kept fresh by the agent
 while PlayGuard is closed):
 
@@ -867,7 +875,8 @@ It reads `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` and `report`, and publishes the
 same retained scalar orders as the native entities on
 `playguard/<id>/<entity>/set` (the console clears each one once handled), and
-its version, retained, on `playguard/<id>/integration`. Adding a console by
+its version, retained, on `playguard/<id>/integration`. Outside the broker, it reads PlayGuard's latest
+release on `api.github.com` (the *PlayGuard* update entity). Adding a console by
 hand listens to `+/+/state` and `+/+/+/state` for a few seconds, to list the
 consoles there. The contract is PlayGuard's
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md).

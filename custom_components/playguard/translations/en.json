@@ -364,6 +364,11 @@
       "bedtime_end_time": {
         "name": "Wake-up time"
       }
+    },
+    "update": {
+      "playguard_update": {
+        "name": "PlayGuard"
+      }
     }
   },
   "exceptions": {

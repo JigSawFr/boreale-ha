@@ -315,6 +315,14 @@ défaut).
 
 **Événement** : *Événements*, voir [événements](#-événements).
 
+**Mise à jour** : *PlayGuard*, configuration : la version installée sur la
+console face à la dernière release sur GitHub, avec ses notes de version,
+aussi dans *Paramètres › Mises à jour*. PlayGuard l'installe sur la console
+(il la propose quand il cherche des mises à jour) ; rien ne s'installe depuis
+Home Assistant. La release est lue à l'ajout de l'entité, puis de nouveau avec
+les documents de la console une fois six heures passées (`api.github.com`, la
+seule requête de l'intégration hors du broker).
+
 **La console elle-même** (`playguard/<id>/system`, tenu à jour par l'agent
 quand PlayGuard est fermé) :
 
@@ -906,7 +914,9 @@ Elle lit `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event` et `report`, et publie les mêmes
 ordres scalaires retenus que les entités natives sur
 `playguard/<id>/<entity>/set` (la console efface chacun une fois traité), et
-sa version, retenue, sur `playguard/<id>/integration`. L'ajout d'une console à
+sa version, retenue, sur `playguard/<id>/integration`. Hors du broker, elle
+lit la dernière release de PlayGuard sur `api.github.com` (l'entité de mise à
+jour *PlayGuard*). L'ajout d'une console à
 la main écoute `+/+/state` et `+/+/+/state` quelques secondes, pour lister les
 consoles qui y sont. Le contrat est le
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md)
