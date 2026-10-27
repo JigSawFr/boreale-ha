@@ -317,6 +317,12 @@ défaut).
 
 **Événement** : *Événements*, voir [événements](#-événements).
 
+**Image** : *Icône du jeu en cours*, l'icône du jeu lancé, depuis un
+PlayGuard qui publie les icônes des jeux (*Accès à distance › Publier les
+icônes des jeux*, ceux joués récemment) : pour une carte image ou l'image
+d'une notification. Inconnue tant qu'aucun jeu n'est lancé, ou avant que son
+icône n'arrive.
+
 **Mise à jour** : *PlayGuard*, configuration : la version installée sur la
 console face à la dernière release sur GitHub, avec ses notes de version,
 aussi dans *Paramètres › Mises à jour*. PlayGuard l'installe sur la console
@@ -928,7 +934,7 @@ distance* dans PlayGuard.
 ## 📡 Ce qu'elle fait sur le broker
 
 Elle lit `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
-`activity/<date>`, `names`, `week`, `event` et `report`, et publie les mêmes
+`activity/<date>`, `names`, `week`, `event`, `report` et `icon/+`, et publie les mêmes
 ordres scalaires retenus que les entités natives sur
 `playguard/<id>/<entity>/set` (la console efface chacun une fois traité), et
 sa version, retenue, sur `playguard/<id>/integration`. Hors du broker, elle

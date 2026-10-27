@@ -369,6 +369,11 @@
       "playguard_update": {
         "name": "PlayGuard"
       }
+    },
+    "image": {
+      "now_playing_icon": {
+        "name": "Now playing icon"
+      }
     }
   },
   "exceptions": {

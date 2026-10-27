@@ -30,6 +30,7 @@ PLATFORMS: list[Platform] = [
     Platform.BUTTON,
     Platform.CALENDAR,
     Platform.EVENT,
+    Platform.IMAGE,
     Platform.LOCK,
     Platform.NUMBER,
     Platform.SELECT,

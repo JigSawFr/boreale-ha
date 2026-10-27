@@ -103,6 +103,7 @@ class PlayGuardConsole:
         self.week: dict[str, Any] | None = None
         self.finals: dict[str, dict[str, Any]] = {}  # "YYYY-MM-DD" -> a finished day's activity
         self.report: str | None = None
+        self.icons: dict[str, bytes] = {}  # application id (upper case) -> its icon, a JPEG
         self.last_event: dict[str, Any] | None = None
         self.last_seen: datetime | None = None  # the last document it published while we listened
         # What PlayGuard does not publish (the state's link.publishes), as the
@@ -141,6 +142,10 @@ class PlayGuardConsole:
         }
         for sub, handler in topics.items():
             self._unsubscribe.append(await mqtt.async_subscribe(self.hass, f"{self.base}/{sub}", handler, qos=1))
+        # The games' icons: raw JPEG, not text.
+        self._unsubscribe.append(
+            await mqtt.async_subscribe(self.hass, f"{self.base}/icon/+", self._on_icon, qos=1, encoding=None)
+        )
         await self._async_texts()  # loaded for the logbook, which reads them from the cache
         await self.async_publish_version()
 
@@ -332,6 +337,17 @@ class PlayGuardConsole:
                 "game": self.game_name(app_id) if isinstance(app_id, str) else None,
             },
         )
+
+    @callback
+    def _on_icon(self, msg: ReceiveMessage) -> None:
+        """A game's icon, or its clearing (an empty retained message)."""
+        app_id = msg.topic.rsplit("/", 1)[-1].upper()
+        payload = msg.payload if isinstance(msg.payload, (bytes, bytearray)) else msg.payload.encode()
+        if payload:
+            self.icons[app_id] = bytes(payload)
+        else:
+            self.icons.pop(app_id, None)
+        self._changed()
 
     @callback
     def _on_report(self, msg: ReceiveMessage) -> None:

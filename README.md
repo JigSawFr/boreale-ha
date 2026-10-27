@@ -304,6 +304,12 @@ again), *Export a diagnostic report* (disabled by default).
 
 **Event**: *Events*, see [events](#-events).
 
+**Image**: *Now playing icon*, the icon of the game being played, from a
+PlayGuard that publishes the games' icons (*Remote access › Publish the
+games' icons*, the games played lately): for a picture card or a
+notification's image. Unknown while no game is played, or before its icon
+arrived.
+
 **Update**: *PlayGuard*, config: the version installed on the console against
 the latest release on GitHub, with its release notes, in *Settings ›
 Updates* too. PlayGuard installs it on the console (it offers it when it
@@ -888,7 +894,7 @@ PlayGuard.
 ## 📡 What it does on the broker
 
 It reads `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
-`activity/<date>`, `names`, `week`, `event` and `report`, and publishes the
+`activity/<date>`, `names`, `week`, `event`, `report` and `icon/+`, and publishes the
 same retained scalar orders as the native entities on
 `playguard/<id>/<entity>/set` (the console clears each one once handled), and
 its version, retained, on `playguard/<id>/integration`. Outside the broker, it reads PlayGuard's latest

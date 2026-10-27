@@ -23,6 +23,7 @@ from .const import (
     PUBLISH_CONTROLS,
     PUBLISH_GAMES,
     PUBLISH_HARDWARE,
+    PUBLISH_ICONS,
     PUBLISH_NETWORK,
     PUBLISH_SERIAL,
     RESTRICTION_OPTIONS,
@@ -375,6 +376,8 @@ ENTITIES: tuple[EntityDef, ...] = (
     # When play has to stop: the end of today's limit or bedtime, whichever
     # comes first, while a game is played.
     EntityDef(key="play_ends", platform=Platform.SENSOR, device_class="timestamp", extra=True),
+    # The icon of the game being played (PlayGuard's icon/<APP_ID>).
+    EntityDef(key="now_playing_icon", platform=Platform.IMAGE, publish=PUBLISH_ICONS, extra=True),
     # PlayGuard's version against its latest release (update.py).
     EntityDef(key="playguard_update", platform=Platform.UPDATE, category="config", extra=True),
     # When the console last said something (any of its documents): it

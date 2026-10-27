@@ -97,6 +97,7 @@ WRITE_TIMER: Final = "timer"  # also needs "Orders may change the play timer" on
 PUBLISH_CONTROLS: Final = "controls"
 PUBLISH_ACTIVITY: Final = "activity"
 PUBLISH_GAMES: Final = "games"
+PUBLISH_ICONS: Final = "icons"
 PUBLISH_CONSOLE: Final = "console"
 PUBLISH_NETWORK: Final = "network"
 PUBLISH_HARDWARE: Final = "hardware"
