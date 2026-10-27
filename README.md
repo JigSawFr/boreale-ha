@@ -309,9 +309,10 @@ again), *Export a diagnostic report* (disabled by default).
 
 **Image**: *Now playing icon*, the icon of the game being played, from a
 PlayGuard that publishes the games' icons (*Remote access › Publish the
-games' icons*, the games played lately): for a picture card or a
+games' icons*: every installed or played game's, and the agent the game
+being played's when PlayGuard is closed): for a picture card or a
 notification's image. Unknown while no game is played, or before its icon
-arrived.
+arrived (a game installed since PlayGuard last ran: once PlayGuard opens).
 
 **Update**: *PlayGuard*, config: the version installed on the console against
 the latest release on GitHub, with its release notes, in *Settings ›

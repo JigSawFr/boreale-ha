@@ -1,5 +1,5 @@
-"""The icon of the game being played, as PlayGuard publishes it (the games
-played lately, on icon/<APP_ID>)."""
+"""The icon of the game being played, as PlayGuard publishes it (every
+installed or played game's, on icon/<APP_ID>)."""
 
 from __future__ import annotations
 

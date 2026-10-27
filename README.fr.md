@@ -323,9 +323,11 @@ défaut).
 
 **Image** : *Icône du jeu en cours*, l'icône du jeu lancé, depuis un
 PlayGuard qui publie les icônes des jeux (*Accès à distance › Publier les
-icônes des jeux*, ceux joués récemment) : pour une carte image ou l'image
-d'une notification. Inconnue tant qu'aucun jeu n'est lancé, ou avant que son
-icône n'arrive.
+icônes des jeux* : celles de tous les jeux installés ou joués, et l'agent
+celle du jeu lancé quand PlayGuard est fermé) : pour une carte image ou
+l'image d'une notification. Inconnue tant qu'aucun jeu n'est lancé, ou avant
+que son icône n'arrive (un jeu installé depuis la dernière ouverture de
+PlayGuard : dès que PlayGuard s'ouvre).
 
 **Mise à jour** : *PlayGuard*, configuration : la version installée sur la
 console face à la dernière release sur GitHub, avec ses notes de version,
