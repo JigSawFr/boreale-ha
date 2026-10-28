@@ -335,6 +335,31 @@
       },
       "last_seen": {
         "name": "Visto pela última vez"
+      },
+      "console_activity": {
+        "name": "Atividade",
+        "state": {
+          "game": "A jogar um jogo",
+          "homebrew": "Num homebrew",
+          "playguard": "No PlayGuard",
+          "home": "Menu HOME",
+          "suspended": "Jogo suspenso",
+          "offline": "Em suspensão ou desligada"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "Título"
+          },
+          "app_id": {
+            "name": "ID da aplicação"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrews"
+      },
+      "forwarders": {
+        "name": "Forwarders"
       }
     },
     "switch": {

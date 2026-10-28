@@ -335,6 +335,31 @@
       },
       "last_seen": {
         "name": "Last seen"
+      },
+      "console_activity": {
+        "name": "Activity",
+        "state": {
+          "game": "Playing a game",
+          "homebrew": "In a homebrew",
+          "playguard": "In PlayGuard",
+          "home": "HOME menu",
+          "suspended": "Game suspended",
+          "offline": "Asleep or off"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "Title"
+          },
+          "app_id": {
+            "name": "Application ID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrews"
+      },
+      "forwarders": {
+        "name": "Forwarders"
       }
     },
     "switch": {

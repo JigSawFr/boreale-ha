@@ -290,7 +290,8 @@ en heures)
 | Temps de jeu aujourd'hui de *Compte*, Temps de jeu cette semaine de *Compte* | Une paire par compte utilisateur, créée dès que la console en parle (son nom, ou son temps de jeu). En minutes, celui de la semaine affiché en heures. | propres à cette intégration ; inconnus tant que le temps des comptes n'a pas été lu (l'app lit les comptes à la demande, l'agent d'après le journal de jeu) |
 | Parties (calendrier) | Chaque jeu joué et quand : un événement par période où le jeu était au premier plan pendant que la console était en ligne, au nom du jeu ; celui en cours se lit *activé*. Tiré de l'historique de *Jeu en cours* et *En ligne* dans l'enregistreur, il remonte donc aussi loin que l'enregistreur les garde (10 jours par défaut). | propre à cette intégration ; vide sans l'enregistreur ou avec *Jeu en cours* désactivé |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
-| Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
+| Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`) ; un homebrew aussi, par son nom. | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
+| Activité | Ce que fait la console : *Joue à un jeu*, *Dans un homebrew*, *Sur PlayGuard*, *Menu HOME* (ou une applet système par-dessus), *Jeu suspendu* (HOME appuyé dans un jeu, sans le fermer), *En veille ou éteinte* (absente du broker) ; attributs `title` et `app_id` du jeu ou du homebrew. Depuis le `activity_today.now` de PlayGuard 1.5, sous 30 s ; un PlayGuard plus ancien ne donne que jeu, PlayGuard et menu HOME. | propre à cette intégration ; affichée aussi pendant la veille |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
 | Firmware, Atmosphère | Les versions de la console (les infos de l'appareil les montrent aussi). | diagnostic, désactivé par défaut |
 | Dernier ordre | Le dernier ordre traité, et comment. | diagnostic, désactivé par défaut |
@@ -357,7 +358,11 @@ du journal de jeu) : *Jeux installés*, avec chaque jeu que la console liste
 dans `games` (le dernier joué en premier : `app_id`, `name`, `minutes`,
 `installed`, `last_played` ; non enregistré), *Temps de jeu (depuis toujours)*
 (tous les jeux, tous les comptes), *Comptes utilisateurs* (diagnostic,
-désactivé par défaut).
+désactivé par défaut), et depuis PlayGuard 1.5 *Homebrews* (les fichiers
+`.nro` de la carte SD) et *Forwarders* (installés) : PlayGuard ne liste que
+les jeux, les homebrews en nombre ; leur temps de jeu est dans l'attribut
+`homebrew` de *Temps de jeu aujourd'hui* et de *Temps de jeu cette semaine*,
+et dans les jours de la semaine (le minuteur de la console le compte).
 
 Il n'y a **pas de capteur par jeu** : le temps d'un jeu aujourd'hui est dans
 l'attribut `games` du journal de jeu, celui de la semaine dans celui de *Temps
@@ -420,7 +425,7 @@ elle se termine ; un refus qui arrive plus tard crée une notification (option
 | `playguard.lock_now` | | Réactive le contrôle parental après un déverrouillage temporaire. |
 | `playguard.sync_now` | | La console republie tout. |
 | `playguard.request_report` | | La console enregistre un rapport de diagnostic sur sa carte SD, et le publie quand *Accès à distance* le permet (il est alors dans les diagnostics de l'appareil). |
-| `playguard.get_play_time` | `period` (`today`, par défaut, ou `week`) | Renvoie le temps de jeu comme réponse de l'action (*Variable de réponse* dans un script) : celui du jour (`minutes`, `games` avec pour chacun `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`), ou celui des sept derniers jours (`days`, `minutes`, `games` avec pour chacun `per_day`, `accounts`). N'envoie rien à la console. |
+| `playguard.get_play_time` | `period` (`today`, par défaut, ou `week`) | Renvoie le temps de jeu comme réponse de l'action (*Variable de réponse* dans un script) : celui du jour (`minutes`, `games` avec pour chacun `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`, `homebrew_minutes`, `activity`), ou celui des sept derniers jours (`days`, `minutes`, `homebrew_minutes`, `games` avec pour chacun `per_day`, `accounts`). N'envoie rien à la console. |
 
 ```yaml
 actions:

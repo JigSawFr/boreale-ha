@@ -335,6 +335,31 @@
       },
       "last_seen": {
         "name": "最終確認"
+      },
+      "console_activity": {
+        "name": "アクティビティ",
+        "state": {
+          "game": "ソフトをプレイ中",
+          "homebrew": "Homebrewを使用中",
+          "playguard": "PlayGuardを使用中",
+          "home": "HOMEメニュー",
+          "suspended": "ソフトを中断中",
+          "offline": "スリープ中または電源オフ"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "タイトル"
+          },
+          "app_id": {
+            "name": "アプリケーションID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrew"
+      },
+      "forwarders": {
+        "name": "フォワーダー"
       }
     },
     "switch": {

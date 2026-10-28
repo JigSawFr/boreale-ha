@@ -335,6 +335,31 @@
       },
       "last_seen": {
         "name": "마지막 확인"
+      },
+      "console_activity": {
+        "name": "활동",
+        "state": {
+          "game": "게임 플레이 중",
+          "homebrew": "홈브루 사용 중",
+          "playguard": "PlayGuard 사용 중",
+          "home": "HOME 메뉴",
+          "suspended": "게임 일시 중단",
+          "offline": "절전 모드 또는 꺼짐"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "타이틀"
+          },
+          "app_id": {
+            "name": "애플리케이션 ID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "홈브루"
+      },
+      "forwarders": {
+        "name": "포워더"
       }
     },
     "switch": {

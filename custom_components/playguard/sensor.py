@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import PlayGuardConfigEntry, play
-from .const import PUBLISH_ACTIVITY
+from .const import ACTIVITY_OPTIONS, PUBLISH_ACTIVITY
 from .coordinator import PlayGuardConsole
 from .entities import ACCOUNT_ENTITIES, EntityDef, for_platform
 from .entity import PlayGuardEntity
@@ -32,6 +32,7 @@ async def async_setup_entry(
         "games_installed": GamesInstalledSensor,
         "last_seen": LastSeenSensor,
         "play_ends": PlayEndsSensor,
+        "console_activity": ActivitySensor,
     }
     async_add_entities(
         classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR, console.unpublished)
@@ -115,6 +116,41 @@ class NowPlayingSensor(PlayGuardSensor):
         return {"app_id": playing.get("app_id"), "since": playing.get("since")}
 
 
+class ActivitySensor(PlayGuardSensor):
+    """What the console is doing: the state's activity_today.now (PlayGuard
+    1.5), else what the state says (a game played, PlayGuard publishing),
+    and offline while it is off the broker. Shown then too: that is when it
+    is wanted."""
+
+    @property
+    def available(self) -> bool:
+        return self.console.state is not None
+
+    @property
+    def native_value(self) -> str | None:
+        if self.console.online is False:
+            return "offline"
+        state = self.console.state or {}
+        today = state.get("activity_today") or {}
+        now = today.get("now")
+        if now in ACTIVITY_OPTIONS:
+            return str(now)
+        if "now" in today:  # said, and unknown (play time not published)
+            return None
+        # An older PlayGuard: a game played, PlayGuard publishing, else the HOME menu.
+        if (today.get("now_playing") or {}).get("app_id"):
+            return "game"
+        return "playguard" if state.get("source") == "app" else "home"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        playing = ((self.console.state or {}).get("activity_today") or {}).get("now_playing") or {}
+        app_id = playing.get("app_id")
+        name = playing.get("name") or self.console.game_name(app_id) or app_id
+        shown = self.native_value in ("game", "homebrew")
+        return {"title": name if shown else None, "app_id": app_id if shown else None}
+
+
 class PlayLogSensor(PlayGuardSensor):
     """Today's play time from the play log, with each game's."""
 
@@ -126,6 +162,7 @@ class PlayLogSensor(PlayGuardSensor):
         activity = self.console.activity or {}
         return {
             "games": play.games(self.console, activity.get("per_app")),
+            "homebrew": play.as_minutes(activity.get("homebrew_min")),
             "accounts": play.accounts(self.console, activity.get("per_account")),
         }
 
@@ -154,6 +191,7 @@ class WeekSensor(PlayGuardSensor):
         return {
             "days": play.week_days(self.console),
             "games": dict(sorted(games.items(), key=lambda kv: -kv[1])),
+            "homebrew": sum(play.week_homebrew(self.console).values()),
             "accounts": play.week_accounts(self.console),
         }
 

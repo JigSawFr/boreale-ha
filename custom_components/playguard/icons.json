@@ -102,6 +102,23 @@
       },
       "accounts": {
         "default": "mdi:account-multiple"
+      },
+      "console_activity": {
+        "default": "mdi:nintendo-switch",
+        "state": {
+          "game": "mdi:gamepad-variant",
+          "homebrew": "mdi:puzzle",
+          "playguard": "mdi:shield-account",
+          "home": "mdi:home",
+          "suspended": "mdi:pause-circle-outline",
+          "offline": "mdi:power-sleep"
+        }
+      },
+      "homebrews": {
+        "default": "mdi:puzzle"
+      },
+      "forwarders": {
+        "default": "mdi:application-import"
       }
     },
     "switch": {

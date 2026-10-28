@@ -335,6 +335,31 @@
       },
       "last_seen": {
         "name": "最後上線"
+      },
+      "console_activity": {
+        "name": "活動",
+        "state": {
+          "game": "正在玩遊戲",
+          "homebrew": "正在使用自製軟體",
+          "playguard": "正在使用 PlayGuard",
+          "home": "HOME 選單",
+          "suspended": "遊戲已暫停",
+          "offline": "睡眠或關機"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "名稱"
+          },
+          "app_id": {
+            "name": "應用程式 ID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "自製軟體"
+      },
+      "forwarders": {
+        "name": "轉送程式"
       }
     },
     "switch": {

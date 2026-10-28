@@ -87,6 +87,10 @@ REFUSAL_REASONS: Final = (
 # console's device), for the logbook.
 EVENT_PLAYGUARD: Final = "playguard_event"
 
+# What the console is doing (the state's activity_today.now, PlayGuard 1.5),
+# and "offline" while it is off the broker (asleep, off, out of reach).
+ACTIVITY_OPTIONS: Final = ("game", "homebrew", "playguard", "home", "suspended", "offline")
+
 # Write classes of the entity table (source/sync/sync_entities.c).
 WRITE_NONE: Final = "none"
 WRITE_FREE: Final = "free"  # an order, refused only in read-only mode or under the "off" policy

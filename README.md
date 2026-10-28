@@ -278,7 +278,8 @@ the play timer*); lock it to turn them back on, always allowed.
 | *Account*'s play time today, *Account*'s play time this week | One pair per user account, created as the console speaks of it (its name, or its play time). Minutes, the week's shown in hours. | this integration's; unknown when nobody's time was read (the app reads the accounts when asked, the agent from the play log) |
 | Play sessions (calendar) | Each game played and when: one event per stretch the game was in front while the console was online, named after the game; the one going on reads *on*. Built from the recorder's history of *Now playing* and *Online*, so it goes back as far as the recorder keeps them (10 days by default). | this integration's; empty without the recorder or with *Now playing* off |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
-| Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
+| Now playing | The game being played, by name (attributes `app_id`, `since`); a homebrew too, by its name. | unknown while PlayGuard is open (nobody plays then) |
+| Activity | What the console is doing: *Playing a game*, *In a homebrew*, *In PlayGuard*, *HOME menu* (or a system applet over it), *Game suspended* (HOME pressed in a game, not closed), *Asleep or off* (off the broker); attributes `title` and `app_id` of the game or homebrew. From PlayGuard 1.5's `activity_today.now`, within 30 s; an older PlayGuard gives only game, PlayGuard and HOME menu. | this integration's; shown while the console sleeps too |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
 | Firmware, Atmosphère | The console's versions (the device's info shows them too). | diagnostic, disabled by default |
 | Last order | The last order handled, and how. | diagnostic, disabled by default |
@@ -341,7 +342,11 @@ while PlayGuard is closed):
 of the play log): *Games installed*, with every game the console lists in
 `games` (the last played first: `app_id`, `name`, `minutes`, `installed`,
 `last_played`; not recorded), *Play time (all time)* (every game, every
-account), *User accounts* (diagnostic, disabled by default).
+account), *User accounts* (diagnostic, disabled by default), and from
+PlayGuard 1.5 *Homebrews* (the `.nro` files on the SD card) and *Forwarders*
+(installed): PlayGuard lists games only, the homebrews as counts; their play
+time is in *Play time today*'s and *Play time this week*'s `homebrew`
+attribute and in the week's days (the console's timer counts it).
 
 There is **no sensor per game**: a game's time today is in the play log's
 `games` attribute, this week's in *Play time this week*'s, since it was first
@@ -400,7 +405,7 @@ raises a notification (option *Notify an order refused later*).
 | `playguard.lock_now` | | Turns parental controls back on after a temporary unlock. |
 | `playguard.sync_now` | | The console publishes everything again. |
 | `playguard.request_report` | | The console saves a diagnostic report on its SD card, and publishes it when *Remote access* allows it (then in the device's diagnostics). |
-| `playguard.get_play_time` | `period` (`today`, the default, or `week`) | Returns the play time as the action's response (*Response variable* in a script): today's (`minutes`, `games` with each one's `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`), or the last seven days' (`days`, `minutes`, `games` with each one's `per_day`, `accounts`). Sends nothing to the console. |
+| `playguard.get_play_time` | `period` (`today`, the default, or `week`) | Returns the play time as the action's response (*Response variable* in a script): today's (`minutes`, `games` with each one's `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`, `homebrew_minutes`, `activity`), or the last seven days' (`days`, `minutes`, `homebrew_minutes`, `games` with each one's `per_day`, `accounts`). Sends nothing to the console. |
 
 ```yaml
 actions:

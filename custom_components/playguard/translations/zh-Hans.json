@@ -335,6 +335,31 @@
       },
       "last_seen": {
         "name": "最后在线"
+      },
+      "console_activity": {
+        "name": "活动",
+        "state": {
+          "game": "正在玩游戏",
+          "homebrew": "正在使用自制软件",
+          "playguard": "正在使用 PlayGuard",
+          "home": "HOME 菜单",
+          "suspended": "游戏已暂停",
+          "offline": "睡眠或关机"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "名称"
+          },
+          "app_id": {
+            "name": "应用程序 ID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "自制软件"
+      },
+      "forwarders": {
+        "name": "转发程序"
       }
     },
     "switch": {

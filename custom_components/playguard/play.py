@@ -99,11 +99,36 @@ def week_games(console: PlayGuardConsole) -> dict[str, list[int]]:
     return table(console, "games", "app_id", "per_app") or {}
 
 
+def week_homebrew(console: PlayGuardConsole) -> dict[str, int]:
+    """The homebrews' minutes each day of the week, together (PlayGuard lists
+    games only): the week table's, then the finished days' and today's play
+    log, each day the larger count. 0 from a PlayGuard that lists them as games."""
+    days = window(console)
+    out = dict.fromkeys(days, 0)
+
+    def count(day: Any, value: Any) -> None:
+        if day in out and (m := as_minutes(value)) is not None:
+            out[day] = max(out[day], m)
+
+    week = console.week or {}
+    for day, value in zip(week.get("days") or [], week.get("homebrew_min") or [], strict=False):
+        count(day, value)
+    activity = console.activity or {}
+    for day, doc in [
+        *((d.get("local_date") or k, d) for k, d in console.finals.items()),
+        (activity.get("local_date"), activity),
+    ]:
+        count(day, doc.get("homebrew_min"))
+    return out
+
+
 def week_days(console: PlayGuardConsole) -> dict[str, int]:
-    """Each day's minutes of the week."""
+    """Each day's minutes of the week, the homebrews' included (the console's
+    timer counts them)."""
     days = window(console)
     totals = [sum(day) for day in zip(*week_games(console).values(), strict=True)] or [0] * len(days)
-    return dict(zip(days, totals, strict=False))
+    homebrew = week_homebrew(console)
+    return {day: total + homebrew.get(day, 0) for day, total in zip(days, totals, strict=False)}
 
 
 def week_accounts(console: PlayGuardConsole) -> dict[str, int] | None:
@@ -133,6 +158,8 @@ def today(console: PlayGuardConsole) -> dict[str, Any]:
     return {
         "date": activity.get("local_date") or state.get("local_date"),
         "minutes": as_minutes(activity.get("total_min")),
+        "homebrew_minutes": as_minutes(activity.get("homebrew_min")) or 0,
+        "activity": (state.get("activity_today") or {}).get("now"),
         "games": [{**_named(console, a["app_id"]), "minutes": as_minutes(a.get("min")) or 0} for a in rows],
         "accounts": accounts(console, activity.get("per_account")),
         "now_playing": _named(console, playing["app_id"]) if isinstance(playing.get("app_id"), str) else None,
@@ -158,6 +185,7 @@ def week(console: PlayGuardConsole) -> dict[str, Any]:
     return {
         "days": [{"date": day, "minutes": m} for day, m in days.items()],
         "minutes": sum(days.values()),
+        "homebrew_minutes": sum(week_homebrew(console).values()),
         "games": [{**_named(console, app_id), "minutes": sum(m), "per_day": m} for app_id, m in rows],
         "accounts": week_accounts(console),
     }

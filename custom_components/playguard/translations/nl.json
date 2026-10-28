@@ -335,6 +335,31 @@
       },
       "last_seen": {
         "name": "Laatst gezien"
+      },
+      "console_activity": {
+        "name": "Activiteit",
+        "state": {
+          "game": "Speelt een spel",
+          "homebrew": "In een homebrew",
+          "playguard": "In PlayGuard",
+          "home": "HOME-menu",
+          "suspended": "Spel onderbroken",
+          "offline": "Slaapstand of uit"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "Titel"
+          },
+          "app_id": {
+            "name": "Applicatie-ID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrews"
+      },
+      "forwarders": {
+        "name": "Forwarders"
       }
     },
     "switch": {

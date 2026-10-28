@@ -335,6 +335,31 @@
       },
       "last_seen": {
         "name": "Последняя активность"
+      },
+      "console_activity": {
+        "name": "Активность",
+        "state": {
+          "game": "Играет в игру",
+          "homebrew": "В homebrew",
+          "playguard": "В PlayGuard",
+          "home": "Меню HOME",
+          "suspended": "Игра приостановлена",
+          "offline": "В режиме сна или выключена"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "Название"
+          },
+          "app_id": {
+            "name": "ID приложения"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrew"
+      },
+      "forwarders": {
+        "name": "Форвардеры"
       }
     },
     "switch": {
