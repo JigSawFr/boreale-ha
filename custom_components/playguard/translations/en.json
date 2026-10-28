@@ -55,11 +55,13 @@
       "init": {
         "data": {
           "take_over_discovery": "Replace the console's own Home Assistant device",
-          "keep_values_asleep": "Keep the last values while the console sleeps"
+          "keep_values_asleep": "Keep the last values while the console sleeps",
+          "notify_refused": "Notify an order refused later"
         },
         "data_description": {
           "take_over_discovery": "Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again.",
-          "keep_values_asleep": "While the console is off the broker (asleep, off, out of reach), its entities keep showing what it last said, and a change made to a control waits for it on the broker. Off: every entity but Online is unavailable then."
+          "keep_values_asleep": "While the console is off the broker (asleep, off, out of reach), its entities keep showing what it last said, and a change made to a control waits for it on the broker. Off: every entity but Online is unavailable then.",
+          "notify_refused": "An order sent while the console sleeps, or one waiting for PlayGuard's confirmation, gets its answer after its action returned: a refusal then raises a notification, which the next order applied takes away. A refusal while the action waits for the answer (up to 10 seconds) makes the action fail, saying why, whatever this option."
         }
       }
     }
@@ -333,6 +335,31 @@
       },
       "last_seen": {
         "name": "Last seen"
+      },
+      "console_activity": {
+        "name": "Activity",
+        "state": {
+          "game": "Playing a game",
+          "homebrew": "In a homebrew",
+          "playguard": "In PlayGuard",
+          "home": "HOME menu",
+          "suspended": "Game suspended",
+          "offline": "Asleep or off"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "Title"
+          },
+          "app_id": {
+            "name": "Application ID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrews"
+      },
+      "forwarders": {
+        "name": "Forwarders"
       }
     },
     "switch": {
@@ -362,6 +389,16 @@
       "bedtime_end_time": {
         "name": "Wake-up time"
       }
+    },
+    "update": {
+      "playguard_update": {
+        "name": "PlayGuard"
+      }
+    },
+    "image": {
+      "now_playing_icon": {
+        "name": "Now playing icon"
+      }
     }
   },
   "exceptions": {
@@ -382,6 +419,120 @@
     },
     "no_such_profile": {
       "message": "No profile named {profile} is saved in PlayGuard."
+    },
+    "refused": {
+      "message": "{name} refused this order: {reason}."
+    },
+    "refused_title": {
+      "message": "{name} refused an order"
+    },
+    "refused_later": {
+      "message": "{order}: {reason}."
+    },
+    "reason_unknown_entity": {
+      "message": "unknown order"
+    },
+    "reason_invalid": {
+      "message": "invalid value"
+    },
+    "reason_out_of_range": {
+      "message": "value out of range"
+    },
+    "reason_policy_off": {
+      "message": "orders are refused (Remote access › Orders received)"
+    },
+    "reason_timer_writes_disabled": {
+      "message": "changing the play timer remotely is off (Remote access › Orders may change the play timer)"
+    },
+    "reason_read_only": {
+      "message": "PlayGuard is in read-only mode"
+    },
+    "reason_not_confirmed": {
+      "message": "not confirmed on the console, or the PIN was not entered"
+    },
+    "reason_gated": {
+      "message": "the play timer is counting down and could not be unlocked"
+    },
+    "reason_unlock_failed": {
+      "message": "parental controls could not be unlocked"
+    },
+    "reason_not_custom": {
+      "message": "only with the custom restriction level"
+    },
+    "reason_no_such_profile": {
+      "message": "no profile has this name"
+    },
+    "reason_no_limit_today": {
+      "message": "there is no limit today"
+    },
+    "reason_console_locked": {
+      "message": "all games are blocked"
+    },
+    "reason_unsupported": {
+      "message": "not supported on this console"
+    },
+    "reason_bedtime_off": {
+      "message": "the bedtime alarm is off"
+    },
+    "reason_pctl_error": {
+      "message": "the console refused (result code {rc})"
+    },
+    "reason_busy": {
+      "message": "PlayGuard could not do it now, try again"
+    },
+    "reason_other": {
+      "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name}: {minutes} minutes played today."
+    },
+    "intent_playing": {
+      "message": "{game} is being played."
+    },
+    "intent_blocked": {
+      "message": "Games are blocked."
+    },
+    "intent_no_limit": {
+      "message": "There is no limit today."
+    },
+    "intent_left": {
+      "message": "{minutes} minutes left."
+    },
+    "intent_added": {
+      "message": "{minutes} minutes added today on {name}."
+    },
+    "intent_stopped": {
+      "message": "No more play today on {name}."
+    },
+    "intent_which": {
+      "message": "Which console: {names}?"
+    },
+    "intent_no_console": {
+      "message": "No PlayGuard console named {name}."
+    },
+    "logbook_play_started": {
+      "message": "started {game}"
+    },
+    "logbook_play_stopped": {
+      "message": "stopped {game}"
+    },
+    "logbook_time_warning": {
+      "message": "has {minutes} minutes of play left"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "blocked the games: the day's limit is reached"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "blocked the games: bedtime"
+    },
+    "logbook_command_applied": {
+      "message": "carried out {order}"
+    },
+    "logbook_command_rejected": {
+      "message": "refused {order}: {reason}"
+    },
+    "logbook_command_waiting": {
+      "message": "waits for PlayGuard's confirmation of {order}"
     }
   },
   "issues": {
@@ -403,6 +554,18 @@
     "agent_version": {
       "title": "{name} runs an older PlayGuard agent",
       "description": "PlayGuard {app} is installed on {name}, but its agent, which works while PlayGuard is closed, is still {agent}: its update was put off. Update it in PlayGuard › Console › Optional modules › Link agent (PlayGuard also offers it when it starts)."
+    },
+    "refused_policy_off": {
+      "title": "{name} refuses Home Assistant's orders",
+      "description": "{name} is set to refuse the orders it receives, so what is changed here is not carried out. On the console, in PlayGuard › Console › Remote access › Orders received, pick Carry them out at once or Ask on the console. This goes away once the console says so."
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} does not let orders change the play timer",
+      "description": "Limits, extra time, profiles, No more play today and unlocking parental controls need it. On the console, turn on PlayGuard › Console › Remote access › Orders may change the play timer. This goes away once the console says so."
+    },
+    "refused_read_only": {
+      "title": "PlayGuard is read-only on {name}",
+      "description": "PlayGuard opens read-only on a firmware it does not support yet, and refuses every order. Update PlayGuard on the console (it offers it when it checks for updates). This goes away once the console says so."
     }
   },
   "selector": {
@@ -422,6 +585,18 @@
     "console": {
       "options": {
         "manual": "Another console, by its id"
+      }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "The day's limit",
+        "bedtime": "Bedtime"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "Today",
+        "week": "The last seven days"
       }
     }
   },
@@ -513,6 +688,86 @@
         "device_id": {
           "name": "Console",
           "description": "The console."
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "Get the play time",
+      "description": "Returns today's play time (each game's, each account's, the game played, the limit and what is left of it, bedtime) or the last seven days'.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "The console."
+        },
+        "period": {
+          "name": "Period",
+          "description": "Today, or the last seven days."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "Game started",
+      "description": "Triggers when a game starts on the console."
+    },
+    "game_stopped": {
+      "name": "Game stopped",
+      "description": "Triggers when the game stops: closed, suspended, or another one started."
+    },
+    "time_running_out": {
+      "name": "Time running out",
+      "description": "Triggers when 10 minutes or fewer are left of today's limit while a game is played."
+    },
+    "games_blocked": {
+      "name": "Games blocked",
+      "description": "Triggers when games are blocked: by the day's limit (or No more play today), or by bedtime.",
+      "fields": {
+        "blocked_by": {
+          "name": "Blocked by",
+          "description": "What blocked the games."
+        }
+      }
+    },
+    "order_refused": {
+      "name": "Order refused",
+      "description": "Triggers when the console refuses an order."
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "A game is played",
+      "description": "Tests if a game is played on the console.",
+      "fields": {
+        "behavior": {
+          "name": "Condition passes if"
+        },
+        "for": {
+          "name": "For at least"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "Limit reached",
+      "description": "Tests if today's limit is reached on the console.",
+      "fields": {
+        "behavior": {
+          "name": "Condition passes if"
+        },
+        "for": {
+          "name": "For at least"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "Parental controls on",
+      "description": "Tests if the console's parental controls are on (not unlocked for now).",
+      "fields": {
+        "behavior": {
+          "name": "Condition passes if"
+        },
+        "for": {
+          "name": "For at least"
         }
       }
     }

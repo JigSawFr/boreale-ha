@@ -25,6 +25,9 @@ CONF_TAKE_OVER: Final = "take_over_discovery"
 # said keeps showing: its sensors keep their last values, its controls are
 # unavailable.
 CONF_KEEP_VALUES: Final = "keep_values_asleep"
+# A refusal that comes after the order's action returned (the console was
+# asleep, or the order waited for PlayGuard) raises a notification.
+CONF_NOTIFY_REFUSED: Final = "notify_refused"
 # What PlayGuard last said it does not publish (in the entry's data, kept
 # across restarts): those entities are not created.
 CONF_UNPUBLISHED: Final = "unpublished"
@@ -54,6 +57,40 @@ EVENT_TYPES: Final = (
     "play_blocked",
 )
 
+# How long an order's action waits for the console's answer while it is on
+# the broker: refused, the action fails, saying why; no answer by then (or
+# waiting for PlayGuard), the order stays on the broker and the action returns.
+ORDER_TIMEOUT: Final = 10.0
+# Why the console refuses an order (sync_apply.c's sync_reason_name()), each
+# with its translation (exceptions.reason_<reason>); any other is shown as is.
+REFUSAL_REASONS: Final = (
+    "unknown_entity",
+    "invalid",
+    "out_of_range",
+    "policy_off",
+    "timer_writes_disabled",
+    "read_only",
+    "not_confirmed",
+    "gated",
+    "unlock_failed",
+    "not_custom",
+    "no_such_profile",
+    "no_limit_today",
+    "console_locked",
+    "unsupported",
+    "bedtime_off",
+    "pctl_error",
+    "busy",
+)
+
+# Each of the console's events, also on Home Assistant's event bus (with the
+# console's device), for the logbook.
+EVENT_PLAYGUARD: Final = "playguard_event"
+
+# What the console is doing (the state's activity_today.now, PlayGuard 1.5),
+# and "offline" while it is off the broker (asleep, off, out of reach).
+ACTIVITY_OPTIONS: Final = ("game", "homebrew", "playguard", "home", "suspended", "offline")
+
 # Write classes of the entity table (source/sync/sync_entities.c).
 WRITE_NONE: Final = "none"
 WRITE_FREE: Final = "free"  # an order, refused only in read-only mode or under the "off" policy
@@ -64,6 +101,7 @@ WRITE_TIMER: Final = "timer"  # also needs "Orders may change the play timer" on
 PUBLISH_CONTROLS: Final = "controls"
 PUBLISH_ACTIVITY: Final = "activity"
 PUBLISH_GAMES: Final = "games"
+PUBLISH_ICONS: Final = "icons"
 PUBLISH_CONSOLE: Final = "console"
 PUBLISH_NETWORK: Final = "network"
 PUBLISH_HARDWARE: Final = "hardware"

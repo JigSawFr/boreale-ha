@@ -53,7 +53,10 @@ the coverage gate is per module, not the total.
   (label `playguard` here).
 - **Translations.** `translations/en.json` is the source (there is no `strings.json`), and
   `translations/fr.json` follows it in the same pull request: entity names, options,
-  errors, repairs, actions.
+  errors, repairs, actions. The other languages (those of PlayGuard's catalogs that Home
+  Assistant has: de, es, es-419, it, ja, ko, nl, pt, pt-BR, ru, zh-Hans, zh-Hant) follow
+  too, their console labels as PlayGuard's catalogs word them; `tests/test_translations.py`
+  checks that each has every key, no other, and the same placeholders.
 - **Icons** live in `icons.json`, never in the Python.
 
 ## Code layout

@@ -17,12 +17,14 @@ from homeassistant.components.sensor import SensorStateClass
 from homeassistant.const import PERCENTAGE, Platform, UnitOfInformation, UnitOfTemperature, UnitOfTime
 
 from .const import (
+    ACTIVITY_OPTIONS,
     DAYS,
     PUBLISH_ACTIVITY,
     PUBLISH_CONSOLE,
     PUBLISH_CONTROLS,
     PUBLISH_GAMES,
     PUBLISH_HARDWARE,
+    PUBLISH_ICONS,
     PUBLISH_NETWORK,
     PUBLISH_SERIAL,
     RESTRICTION_OPTIONS,
@@ -375,6 +377,35 @@ ENTITIES: tuple[EntityDef, ...] = (
     # When play has to stop: the end of today's limit or bedtime, whichever
     # comes first, while a game is played.
     EntityDef(key="play_ends", platform=Platform.SENSOR, device_class="timestamp", extra=True),
+    # What the console is doing: a game, a homebrew, PlayGuard, the HOME menu,
+    # a game suspended, or offline (sensor.py).
+    EntityDef(
+        key="console_activity", platform=Platform.SENSOR, device_class="enum", options=ACTIVITY_OPTIONS, extra=True
+    ),
+    # The homebrews on the SD card and the forwarders installed (counts only:
+    # PlayGuard lists games only).
+    EntityDef(
+        key="homebrews",
+        platform=Platform.SENSOR,
+        topic="games",
+        path=("homebrews",),
+        state_class=SensorStateClass.MEASUREMENT,
+        publish=PUBLISH_GAMES,
+        extra=True,
+    ),
+    EntityDef(
+        key="forwarders",
+        platform=Platform.SENSOR,
+        topic="games",
+        path=("forwarders",),
+        state_class=SensorStateClass.MEASUREMENT,
+        publish=PUBLISH_GAMES,
+        extra=True,
+    ),
+    # The icon of the game being played (PlayGuard's icon/<APP_ID>).
+    EntityDef(key="now_playing_icon", platform=Platform.IMAGE, publish=PUBLISH_ICONS, extra=True),
+    # PlayGuard's version against its latest release (update.py).
+    EntityDef(key="playguard_update", platform=Platform.UPDATE, category="config", extra=True),
     # When the console last said something (any of its documents): it
     # publishes its state every poll_s seconds while awake.
     EntityDef(

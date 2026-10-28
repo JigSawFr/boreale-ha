@@ -102,6 +102,23 @@
       },
       "accounts": {
         "default": "mdi:account-multiple"
+      },
+      "console_activity": {
+        "default": "mdi:nintendo-switch",
+        "state": {
+          "game": "mdi:gamepad-variant",
+          "homebrew": "mdi:puzzle",
+          "playguard": "mdi:shield-account",
+          "home": "mdi:home",
+          "suspended": "mdi:pause-circle-outline",
+          "offline": "mdi:power-sleep"
+        }
+      },
+      "homebrews": {
+        "default": "mdi:puzzle"
+      },
+      "forwarders": {
+        "default": "mdi:application-import"
       }
     },
     "switch": {
@@ -162,6 +179,37 @@
     },
     "request_report": {
       "service": "mdi:file-document-outline"
+    },
+    "get_play_time": {
+      "service": "mdi:chart-timeline-variant"
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "trigger": "mdi:gamepad-variant"
+    },
+    "game_stopped": {
+      "trigger": "mdi:gamepad-variant-outline"
+    },
+    "time_running_out": {
+      "trigger": "mdi:timer-alert-outline"
+    },
+    "games_blocked": {
+      "trigger": "mdi:block-helper"
+    },
+    "order_refused": {
+      "trigger": "mdi:close-octagon-outline"
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "condition": "mdi:gamepad-variant"
+    },
+    "limit_reached": {
+      "condition": "mdi:block-helper"
+    },
+    "parental_controls_on": {
+      "condition": "mdi:shield-lock"
     }
   }
 }

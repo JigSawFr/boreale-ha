@@ -30,12 +30,14 @@ PLATFORMS: list[Platform] = [
     Platform.BUTTON,
     Platform.CALENDAR,
     Platform.EVENT,
+    Platform.IMAGE,
     Platform.LOCK,
     Platform.NUMBER,
     Platform.SELECT,
     Platform.SENSOR,
     Platform.SWITCH,
     Platform.TIME,
+    Platform.UPDATE,
 ]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)

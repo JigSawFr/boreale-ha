@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
@@ -30,6 +30,22 @@ def fixture(name: str) -> Any:
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
     """Loads custom_components/."""
+
+
+@pytest.fixture(autouse=True)
+def no_answer_wait():
+    """An order's action does not wait for the console's answer, but in the
+    tests of that wait (tests/test_orders.py)."""
+    with patch("custom_components.playguard.coordinator.ORDER_TIMEOUT", 0):
+        yield
+
+
+@pytest.fixture(autouse=True)
+def latest_release():
+    """PlayGuard's latest release, as GitHub's API gives it (no network in the tests)."""
+    release = {"tag_name": "v1.4.0", "name": "PlayGuard 1.4.0", "html_url": "https://github.com/JigSawFr/PlayGuard/releases/tag/v1.4.0", "body": "## What changed"}  # fmt: skip
+    with patch("custom_components.playguard.update.async_latest_release", return_value=release) as mock:
+        yield mock
 
 
 @pytest.fixture

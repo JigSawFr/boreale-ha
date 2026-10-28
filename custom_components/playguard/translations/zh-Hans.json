@@ -1,0 +1,775 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": {
+        "title": "发现 PlayGuard 主机",
+        "description": "添加 **{name}**（主机 ID `{console_id}`）？主机自身的 Home Assistant 设备（MQTT 发现）将由本集成的设备取代，实体、游戏名称、本周游戏时间和长期统计数据都会保留。"
+      },
+      "user": {
+        "title": "添加 PlayGuard 主机",
+        "description": "以下主机的状态已在代理服务器上，但尚未设置。选择一台，或选择其他主机并通过 ID 添加。",
+        "data": {
+          "console": "主机"
+        },
+        "data_description": {
+          "console": "名称和 ID；主题前缀不是 playguard 时也会显示。"
+        }
+      },
+      "manual": {
+        "title": "通过 ID 添加 PlayGuard 主机",
+        "description": "ID 位于 PlayGuard › 主机 › 远程访问 › 主机 ID。之后集成会在代理服务器上等待主机状态，最多 10 秒。",
+        "data": {
+          "console_id": "主机 ID",
+          "topic_prefix": "主题前缀"
+        },
+        "data_description": {
+          "console_id": "8 个字符，例如 5a0c3e11。",
+          "topic_prefix": "除非 sync.conf 另有设置，否则为 playguard。"
+        }
+      },
+      "reconfigure": {
+        "title": "更改主题前缀",
+        "description": "{name} 发布时使用的前缀：PlayGuard 的 sync.conf 中的 `topic_prefix`。",
+        "data": {
+          "topic_prefix": "主题前缀"
+        },
+        "data_description": {
+          "topic_prefix": "除非 sync.conf 另有设置，否则为 playguard。"
+        }
+      }
+    },
+    "error": {
+      "invalid_console_id": "主机 ID 为 8 个字符，由 0 至 9 和 a 至 f 组成。",
+      "invalid_prefix": "此前缀不能用于 MQTT 主题。",
+      "no_state": "此主机未在代理服务器上以此前缀发布任何内容。请检查主机 ID 和前缀，并确认主机的连接至少建立过一次（PlayGuard › 主机 › 远程访问 › 状态）。"
+    },
+    "abort": {
+      "already_configured": "此主机已设置。",
+      "invalid_discovery_info": "此消息不是 PlayGuard 状态。",
+      "mqtt_not_ready": "MQTT 集成尚未设置：PlayGuard 通过它与 Home Assistant 通信。请先设置它，并使用与主机相同的代理服务器。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "take_over_discovery": "取代主机自身的 Home Assistant 设备",
+          "keep_values_asleep": "主机休眠时保留最后的值",
+          "notify_refused": "通知稍后被拒绝的指令"
+        },
+        "data_description": {
+          "take_over_discovery": "关闭主机的 MQTT 发现，避免实体出现两次。关闭时：主机会重新发布自己的设备。",
+          "keep_values_asleep": "主机不在代理服务器上时（休眠、关机、不在范围内），其实体仍显示主机最后报告的值，对控件所做的更改会在代理服务器上等待主机。关闭时：此期间除“在线”外的所有实体均不可用。",
+          "notify_refused": "主机休眠时发送的指令，或正在等待 PlayGuard 确认的指令，会在其动作结束后才收到答复：此时若被拒绝，会发出一条通知，下一条被执行的指令会将其清除。若在动作等待答复期间（最多 10 秒）被拒绝，无论此选项如何，动作都会失败并说明原因。"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "parental_controls_enabled": {
+        "name": "已设置家长控制"
+      },
+      "pin_set": {
+        "name": "已设置 PIN"
+      },
+      "companion_linked": {
+        "name": "已关联手机应用"
+      },
+      "timer_enabled": {
+        "name": "游戏时间"
+      },
+      "limit_reached": {
+        "name": "禁止游玩",
+        "state_attributes": {
+          "reason": {
+            "name": "原因",
+            "state": {
+              "limit": "当天的限制",
+              "bedtime": "就寝时间"
+            }
+          }
+        }
+      },
+      "clock_accurate": {
+        "name": "网络时钟准确"
+      },
+      "online": {
+        "name": "在线"
+      },
+      "agent": {
+        "name": "代理程序运行中"
+      },
+      "prodinfo_blanked": {
+        "name": "PRODINFO 已清空"
+      },
+      "charging": {
+        "name": "充电中"
+      },
+      "docked": {
+        "name": "已插入底座"
+      }
+    },
+    "button": {
+      "sync_now": {
+        "name": "立即同步"
+      },
+      "export_report": {
+        "name": "导出诊断报告"
+      },
+      "add_bonus_time_15": {
+        "name": "加时 +15 分钟"
+      },
+      "add_bonus_time_30": {
+        "name": "加时 +30 分钟"
+      },
+      "add_bonus_time_60": {
+        "name": "加时 +1 小时"
+      },
+      "stop_today": {
+        "name": "今天停止游玩"
+      },
+      "remove_limit": {
+        "name": "取消限制"
+      }
+    },
+    "calendar": {
+      "play_sessions": {
+        "name": "游玩记录"
+      }
+    },
+    "event": {
+      "events": {
+        "name": "事件",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "command_applied": "指令已执行",
+              "command_rejected": "指令被拒绝",
+              "command_waiting": "指令等待 PlayGuard 确认",
+              "play_started": "游戏开始",
+              "play_stopped": "游戏结束",
+              "time_warning": "游戏时间即将结束",
+              "play_blocked": "禁止游玩"
+            }
+          }
+        }
+      }
+    },
+    "lock": {
+      "parental_controls": {
+        "name": "家长控制"
+      }
+    },
+    "number": {
+      "limit_sun": {
+        "name": "限制 星期日"
+      },
+      "limit_mon": {
+        "name": "限制 星期一"
+      },
+      "limit_tue": {
+        "name": "限制 星期二"
+      },
+      "limit_wed": {
+        "name": "限制 星期三"
+      },
+      "limit_thu": {
+        "name": "限制 星期四"
+      },
+      "limit_fri": {
+        "name": "限制 星期五"
+      },
+      "limit_sat": {
+        "name": "限制 星期六"
+      },
+      "limit_uniform": {
+        "name": "限制 每天"
+      },
+      "max_screentime_today": {
+        "name": "今天最长屏幕时间"
+      }
+    },
+    "select": {
+      "restriction_level": {
+        "name": "限制等级",
+        "state": {
+          "unrestricted": "无限制",
+          "young_child": "幼儿",
+          "child": "儿童",
+          "teen": "青少年",
+          "custom": "自定义"
+        }
+      },
+      "profile": {
+        "name": "配置"
+      }
+    },
+    "sensor": {
+      "used_screen_time": {
+        "name": "已用屏幕时间"
+      },
+      "used_screen_time_log": {
+        "name": "今天的游戏时间"
+      },
+      "screen_time_remaining": {
+        "name": "剩余屏幕时间"
+      },
+      "extended_screen_time": {
+        "name": "延长的屏幕时间"
+      },
+      "now_playing": {
+        "name": "正在游玩"
+      },
+      "rating_age": {
+        "name": "年龄分级"
+      },
+      "firmware": {
+        "name": "系统版本"
+      },
+      "atmosphere": {
+        "name": "Atmosphère"
+      },
+      "spent_raw": {
+        "name": "已用时间 (1952)"
+      },
+      "last_order": {
+        "name": "最后一条指令"
+      },
+      "week_play_time": {
+        "name": "本周游戏时间"
+      },
+      "play_ends": {
+        "name": "游玩结束时间"
+      },
+      "account_today": {
+        "name": "{account} 今天的游戏时间"
+      },
+      "account_week": {
+        "name": "{account} 本周的游戏时间"
+      },
+      "model": {
+        "name": "型号",
+        "state": {
+          "erista": "Switch (2017)",
+          "mariko": "Switch (2019)",
+          "lite": "Switch Lite",
+          "oled": "Switch OLED 版",
+          "other": "开发机"
+        }
+      },
+      "nickname": {
+        "name": "主机昵称"
+      },
+      "region": {
+        "name": "地区",
+        "state": {
+          "jpn": "日本",
+          "usa": "美洲",
+          "eur": "欧洲",
+          "aus": "澳大利亚和新西兰",
+          "htk": "香港、台湾、韩国",
+          "chn": "中国"
+        }
+      },
+      "hekate": {
+        "name": "hekate"
+      },
+      "system_storage": {
+        "name": "系统",
+        "state": {
+          "sysmmc": "sysMMC",
+          "emummc": "emuMMC"
+        }
+      },
+      "serial": {
+        "name": "序列号"
+      },
+      "sd_free": {
+        "name": "SD 卡可用空间"
+      },
+      "sd_total": {
+        "name": "SD 卡容量"
+      },
+      "nand_free": {
+        "name": "主机存储空间可用空间"
+      },
+      "nand_total": {
+        "name": "主机存储空间容量"
+      },
+      "battery": {
+        "name": "电池"
+      },
+      "temperature": {
+        "name": "温度"
+      },
+      "network": {
+        "name": "连接",
+        "state": {
+          "none": "无",
+          "wifi": "Wi-Fi",
+          "ethernet": "有线网络"
+        }
+      },
+      "ip_address": {
+        "name": "IP 地址"
+      },
+      "wifi_signal": {
+        "name": "Wi-Fi 信号"
+      },
+      "ssid": {
+        "name": "Wi-Fi 网络"
+      },
+      "last_boot": {
+        "name": "上次启动"
+      },
+      "games_installed": {
+        "name": "已安装的游戏"
+      },
+      "play_time_total": {
+        "name": "游戏时间（累计）"
+      },
+      "accounts": {
+        "name": "用户账户"
+      },
+      "last_seen": {
+        "name": "最后在线"
+      },
+      "console_activity": {
+        "name": "活动",
+        "state": {
+          "game": "正在玩游戏",
+          "homebrew": "正在使用自制软件",
+          "playguard": "正在使用 PlayGuard",
+          "home": "HOME 菜单",
+          "suspended": "游戏已暂停",
+          "offline": "睡眠或关机"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "名称"
+          },
+          "app_id": {
+            "name": "应用程序 ID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "自制软件"
+      },
+      "forwarders": {
+        "name": "转发程序"
+      }
+    },
+    "switch": {
+      "bedtime_enabled": {
+        "name": "就寝提醒"
+      },
+      "console_lock": {
+        "name": "阻止所有游戏"
+      },
+      "play_timer_alarm": {
+        "name": "“时间到”提醒"
+      },
+      "vr_restricted": {
+        "name": "限制VR模式"
+      },
+      "sns_post_restricted": {
+        "name": "限制发布到社交媒体"
+      },
+      "free_communication_restricted": {
+        "name": "限制交流"
+      }
+    },
+    "time": {
+      "bedtime_alarm": {
+        "name": "就寝时间"
+      },
+      "bedtime_end_time": {
+        "name": "起床时间"
+      }
+    },
+    "update": {
+      "playguard_update": {
+        "name": "PlayGuard"
+      }
+    },
+    "image": {
+      "now_playing_icon": {
+        "name": "正在游玩的游戏图标"
+      }
+    }
+  },
+  "exceptions": {
+    "mqtt_not_ready": {
+      "message": "MQTT 集成暂不可用。"
+    },
+    "read_only": {
+      "message": "PlayGuard 在此主机上处于只读模式：不会更改任何内容。"
+    },
+    "policy_off": {
+      "message": "主机拒绝指令（远程访问 › 收到的指令）。"
+    },
+    "timer_writes_disabled": {
+      "message": "指令不能更改游戏时间：请在主机上开启 远程访问 › 允许指令更改游戏时间。"
+    },
+    "read_only_entity": {
+      "message": "此值无法在此处更改。"
+    },
+    "no_such_profile": {
+      "message": "PlayGuard 中没有保存名为 {profile} 的配置。"
+    },
+    "refused": {
+      "message": "{name} 拒绝了此指令：{reason}。"
+    },
+    "refused_title": {
+      "message": "{name} 拒绝了一条指令"
+    },
+    "refused_later": {
+      "message": "{order}：{reason}。"
+    },
+    "reason_unknown_entity": {
+      "message": "未知指令"
+    },
+    "reason_invalid": {
+      "message": "无效的值"
+    },
+    "reason_out_of_range": {
+      "message": "数值超出范围"
+    },
+    "reason_policy_off": {
+      "message": "指令被拒绝（远程访问 › 收到的指令）"
+    },
+    "reason_timer_writes_disabled": {
+      "message": "远程更改游戏时间已关闭（远程访问 › 允许指令更改游戏时间）"
+    },
+    "reason_read_only": {
+      "message": "PlayGuard 处于只读模式"
+    },
+    "reason_not_confirmed": {
+      "message": "未在主机上确认，或未输入 PIN"
+    },
+    "reason_gated": {
+      "message": "游戏时间正在计时，且无法解除"
+    },
+    "reason_unlock_failed": {
+      "message": "无法解除家长控制"
+    },
+    "reason_not_custom": {
+      "message": "仅适用于自定义限制等级"
+    },
+    "reason_no_such_profile": {
+      "message": "没有这个名称的配置"
+    },
+    "reason_no_limit_today": {
+      "message": "今天没有限制"
+    },
+    "reason_console_locked": {
+      "message": "所有游戏已被阻止"
+    },
+    "reason_unsupported": {
+      "message": "这台主机不支持"
+    },
+    "reason_bedtime_off": {
+      "message": "就寝提醒已关闭"
+    },
+    "reason_pctl_error": {
+      "message": "主机拒绝了（结果代码 {rc}）"
+    },
+    "reason_busy": {
+      "message": "PlayGuard 现在无法执行，请重试"
+    },
+    "reason_other": {
+      "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name}：今天已玩 {minutes} 分钟。"
+    },
+    "intent_playing": {
+      "message": "正在玩 {game}。"
+    },
+    "intent_blocked": {
+      "message": "游戏已被阻止。"
+    },
+    "intent_no_limit": {
+      "message": "今天没有限制。"
+    },
+    "intent_left": {
+      "message": "还剩 {minutes} 分钟。"
+    },
+    "intent_added": {
+      "message": "今天已在 {name} 上增加 {minutes} 分钟。"
+    },
+    "intent_stopped": {
+      "message": "{name} 今天停止游玩。"
+    },
+    "intent_which": {
+      "message": "哪台主机：{names}？"
+    },
+    "intent_no_console": {
+      "message": "没有名为 {name} 的 PlayGuard 主机。"
+    },
+    "logbook_play_started": {
+      "message": "开始了 {game}"
+    },
+    "logbook_play_stopped": {
+      "message": "结束了 {game}"
+    },
+    "logbook_time_warning": {
+      "message": "游戏时间还剩 {minutes} 分钟"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "阻止了游戏：已达到当天的限制"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "阻止了游戏：就寝时间"
+    },
+    "logbook_command_applied": {
+      "message": "执行了 {order}"
+    },
+    "logbook_command_rejected": {
+      "message": "拒绝了 {order}：{reason}"
+    },
+    "logbook_command_waiting": {
+      "message": "正在等待 PlayGuard 确认 {order}"
+    }
+  },
+  "issues": {
+    "newer_schema": {
+      "title": "{name} 使用了更新的 PlayGuard 协议",
+      "description": "{name} 发布的是架构 {schema}；本集成只认识架构 {known}。请更新 PlayGuard 集成：在此之前，部分值可能会缺失。"
+    },
+    "native_discovery": {
+      "title": "{name} 再次发布了自己的 Home Assistant 设备",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name} 的实体出现了两次",
+            "description": "主机自身的 MQTT 设备又出现在本集成的设备旁边：它在 PlayGuard 中被重新开启，或主机上的 PlayGuard 版本太旧，无法接受关闭它的指令。提交后将再次请求主机关闭它。\n\n如果它再次出现，请更新 PlayGuard，或在 PlayGuard › 主机 › 远程访问 中关闭 *在 Home Assistant 中创建设备（MQTT 发现）*。若要保留主机自身的设备，请关闭本集成的选项 *取代主机自身的 Home Assistant 设备*。"
+          }
+        }
+      }
+    },
+    "agent_version": {
+      "title": "{name} 运行的是旧版 PlayGuard 代理程序",
+      "description": "{name} 上安装了 PlayGuard {app}，但在 PlayGuard 关闭时工作的代理程序仍是 {agent}：它的更新被推迟了。请在 PlayGuard › 主机 › 可选模块 › 连接代理程序 中更新（PlayGuard 启动时也会提示）。"
+    },
+    "refused_policy_off": {
+      "title": "{name} 拒绝 Home Assistant 的指令",
+      "description": "{name} 被设为拒绝收到的指令，因此在此处所做的更改不会被执行。请在主机上的 PlayGuard › 主机 › 远程访问 › 收到的指令 中选择 立即执行 或 在主机上询问。主机报告后，此问题会消失。"
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} 不允许指令更改游戏时间",
+      "description": "限制、加时、配置、今天停止游玩以及解除家长控制都需要此项。请在主机上开启 PlayGuard › 主机 › 远程访问 › 允许指令更改游戏时间。主机报告后，此问题会消失。"
+    },
+    "refused_read_only": {
+      "title": "PlayGuard 在 {name} 上处于只读模式",
+      "description": "在尚不支持的系统版本上，PlayGuard 会以只读模式打开，并拒绝所有指令。请在主机上更新 PlayGuard（检查更新时会提示）。主机报告后，此问题会消失。"
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "all": "每天",
+        "today": "仅今天",
+        "sun": "星期日",
+        "mon": "星期一",
+        "tue": "星期二",
+        "wed": "星期三",
+        "thu": "星期四",
+        "fri": "星期五",
+        "sat": "星期六"
+      }
+    },
+    "console": {
+      "options": {
+        "manual": "其他主机（通过 ID）"
+      }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "当天的限制",
+        "bedtime": "就寝时间"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "今天",
+        "week": "最近七天"
+      }
+    }
+  },
+  "services": {
+    "set_limits": {
+      "name": "设置限制",
+      "description": "设置某一天、每天、今天或整周的限制（1440 = 无限制）。",
+      "fields": {
+        "device_id": {
+          "name": "主机",
+          "description": "目标主机。"
+        },
+        "minutes": {
+          "name": "分钟",
+          "description": "0 至 1440；1440 表示无限制。"
+        },
+        "day": {
+          "name": "日期",
+          "description": "哪一天。"
+        },
+        "week": {
+          "name": "周",
+          "description": "七个限制，从星期日开始，代替分钟和日期。"
+        }
+      }
+    },
+    "add_bonus_time": {
+      "name": "加时",
+      "description": "今天增加的分钟数；明天恢复平常的限制。",
+      "fields": {
+        "device_id": {
+          "name": "主机",
+          "description": "目标主机。"
+        },
+        "minutes": {
+          "name": "分钟",
+          "description": "5 至 180。"
+        }
+      }
+    },
+    "apply_profile": {
+      "name": "应用配置",
+      "description": "应用 PlayGuard 中保存的配置的限制。",
+      "fields": {
+        "device_id": {
+          "name": "主机",
+          "description": "目标主机。"
+        },
+        "profile": {
+          "name": "配置",
+          "description": "它在 PlayGuard 中的名称。"
+        }
+      }
+    },
+    "stop_today": {
+      "name": "今天停止游玩",
+      "description": "今天设为 0 分钟；明天恢复平常的限制。",
+      "fields": {
+        "device_id": {
+          "name": "主机",
+          "description": "目标主机。"
+        }
+      }
+    },
+    "lock_now": {
+      "name": "重新启用家长控制",
+      "description": "暂时解除后重新启用家长控制。",
+      "fields": {
+        "device_id": {
+          "name": "主机",
+          "description": "目标主机。"
+        }
+      }
+    },
+    "sync_now": {
+      "name": "立即同步",
+      "description": "主机重新发布所有信息。",
+      "fields": {
+        "device_id": {
+          "name": "主机",
+          "description": "目标主机。"
+        }
+      }
+    },
+    "request_report": {
+      "name": "请求诊断报告",
+      "description": "主机将报告保存到 SD 卡，并在远程访问允许时发布（显示在设备的诊断信息中）。",
+      "fields": {
+        "device_id": {
+          "name": "主机",
+          "description": "目标主机。"
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "获取游戏时间",
+      "description": "返回今天的游戏时间（每个游戏、每个账户、正在玩的游戏、限制及剩余时间、就寝时间），或最近七天的游戏时间。",
+      "fields": {
+        "device_id": {
+          "name": "主机",
+          "description": "目标主机。"
+        },
+        "period": {
+          "name": "时段",
+          "description": "今天，或最近七天。"
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "游戏开始",
+      "description": "主机上开始游戏时触发。"
+    },
+    "game_stopped": {
+      "name": "游戏结束",
+      "description": "游戏结束时触发：关闭、暂停或开始了另一个游戏。"
+    },
+    "time_running_out": {
+      "name": "时间快用完",
+      "description": "游玩期间，今天的限制剩余 10 分钟或更少时触发。"
+    },
+    "games_blocked": {
+      "name": "游戏被阻止",
+      "description": "游戏被阻止时触发：因当天的限制（或今天停止游玩），或因就寝时间。",
+      "fields": {
+        "blocked_by": {
+          "name": "阻止原因",
+          "description": "阻止游戏的原因。"
+        }
+      }
+    },
+    "order_refused": {
+      "name": "指令被拒绝",
+      "description": "主机拒绝指令时触发。"
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "正在玩游戏",
+      "description": "检测主机上是否正在玩游戏。",
+      "fields": {
+        "behavior": {
+          "name": "条件满足于"
+        },
+        "for": {
+          "name": "至少持续"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "已达到限制",
+      "description": "检测主机上是否已达到今天的限制。",
+      "fields": {
+        "behavior": {
+          "name": "条件满足于"
+        },
+        "for": {
+          "name": "至少持续"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "家长控制已开启",
+      "description": "检测主机的家长控制是否开启（未被暂时解除）。",
+      "fields": {
+        "behavior": {
+          "name": "条件满足于"
+        },
+        "for": {
+          "name": "至少持续"
+        }
+      }
+    }
+  }
+}

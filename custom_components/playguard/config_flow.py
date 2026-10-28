@@ -29,6 +29,7 @@ import probatio
 from .const import (
     CONF_CONSOLE_ID,
     CONF_KEEP_VALUES,
+    CONF_NOTIFY_REFUSED,
     CONF_PREFIX,
     CONF_TAKE_OVER,
     CONSOLE_ID_RE,
@@ -51,6 +52,7 @@ OPTIONS_SCHEMA = probatio.Schema(
     {
         probatio.Required(CONF_TAKE_OVER, default=True): bool,
         probatio.Required(CONF_KEEP_VALUES, default=True): bool,
+        probatio.Required(CONF_NOTIFY_REFUSED, default=True): bool,
     }
 )
 
@@ -274,8 +276,9 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
 
 class PlayGuardOptionsFlow(OptionsFlowWithReload):
     """Whether the console's own discovery stays off, whether the sensors
-    keep their last values while the console sleeps, which games get a
-    sensor (the entry reloads when one changes)."""
+    keep their last values while the console sleeps, whether a late
+    refusal raises a notification, which games get a sensor (the entry
+    reloads when one changes)."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:

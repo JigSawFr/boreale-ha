@@ -10,17 +10,11 @@ rules:
   config-flow-test-coverage: done
   dependency-transparency: done
   docs-actions: done
-  docs-conditions:
-    status: exempt
-    comment: The integration provides no conditions of its own.
+  docs-conditions: done
   docs-high-level-description: done
   docs-installation-instructions: done
   docs-removal-instructions: done
-  docs-triggers:
-    status: exempt
-    comment: >-
-      The integration provides no triggers of its own; its Events entity is an
-      event entity, used with Home Assistant's state trigger.
+  docs-triggers: done
   entity-event-setup: done
   entity-unique-id: done
   has-entity-name: done

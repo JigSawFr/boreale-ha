@@ -55,11 +55,13 @@
       "init": {
         "data": {
           "take_over_discovery": "Remplacer l'appareil Home Assistant d'origine de la console",
-          "keep_values_asleep": "Garder les dernières valeurs pendant la veille"
+          "keep_values_asleep": "Garder les dernières valeurs pendant la veille",
+          "notify_refused": "Notifier un ordre refusé plus tard"
         },
         "data_description": {
           "take_over_discovery": "Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivé : la console publie de nouveau son propre appareil.",
-          "keep_values_asleep": "Tant que la console n'est pas sur le broker (en veille, éteinte, hors de portée), ses entités gardent ce qu'elle a dit en dernier, et un changement fait sur un contrôle l'attend sur le broker. Désactivé : toutes les entités sauf En ligne sont alors indisponibles."
+          "keep_values_asleep": "Tant que la console n'est pas sur le broker (en veille, éteinte, hors de portée), ses entités gardent ce qu'elle a dit en dernier, et un changement fait sur un contrôle l'attend sur le broker. Désactivé : toutes les entités sauf En ligne sont alors indisponibles.",
+          "notify_refused": "Un ordre envoyé pendant la veille de la console, ou qui attend la confirmation de PlayGuard, reçoit sa réponse après la fin de son action : un refus crée alors une notification, que le prochain ordre appliqué retire. Un refus pendant que l'action attend la réponse (jusqu'à 10 secondes) fait échouer l'action, en disant pourquoi, quelle que soit cette option."
         }
       }
     }
@@ -333,6 +335,31 @@
       },
       "last_seen": {
         "name": "Vu pour la dernière fois"
+      },
+      "console_activity": {
+        "name": "Activité",
+        "state": {
+          "game": "Joue à un jeu",
+          "homebrew": "Dans un homebrew",
+          "playguard": "Sur PlayGuard",
+          "home": "Menu HOME",
+          "suspended": "Jeu suspendu",
+          "offline": "En veille ou éteinte"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "Titre"
+          },
+          "app_id": {
+            "name": "ID de l’application"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrews"
+      },
+      "forwarders": {
+        "name": "Forwarders"
       }
     },
     "switch": {
@@ -362,6 +389,16 @@
       "bedtime_end_time": {
         "name": "Lever"
       }
+    },
+    "update": {
+      "playguard_update": {
+        "name": "PlayGuard"
+      }
+    },
+    "image": {
+      "now_playing_icon": {
+        "name": "Icône du jeu en cours"
+      }
     }
   },
   "exceptions": {
@@ -382,6 +419,120 @@
     },
     "no_such_profile": {
       "message": "Aucun profil nommé {profile} n'est enregistré dans PlayGuard."
+    },
+    "refused": {
+      "message": "{name} a refusé cet ordre : {reason}."
+    },
+    "refused_title": {
+      "message": "{name} a refusé un ordre"
+    },
+    "refused_later": {
+      "message": "{order} : {reason}."
+    },
+    "reason_unknown_entity": {
+      "message": "ordre inconnu"
+    },
+    "reason_invalid": {
+      "message": "valeur invalide"
+    },
+    "reason_out_of_range": {
+      "message": "valeur hors limites"
+    },
+    "reason_policy_off": {
+      "message": "les ordres sont refusés (Accès à distance › Ordres reçus)"
+    },
+    "reason_timer_writes_disabled": {
+      "message": "le changement du temps de jeu à distance est désactivé (Accès à distance › Les ordres peuvent changer le temps de jeu)"
+    },
+    "reason_read_only": {
+      "message": "PlayGuard est en mode lecture seule"
+    },
+    "reason_not_confirmed": {
+      "message": "non confirmé sur la console, ou le code PIN n'a pas été saisi"
+    },
+    "reason_gated": {
+      "message": "le minuteur décompte et n'a pas pu être déverrouillé"
+    },
+    "reason_unlock_failed": {
+      "message": "le contrôle parental n'a pas pu être déverrouillé"
+    },
+    "reason_not_custom": {
+      "message": "seulement avec le niveau de restriction personnalisé"
+    },
+    "reason_no_such_profile": {
+      "message": "aucun profil ne porte ce nom"
+    },
+    "reason_no_limit_today": {
+      "message": "il n'y a pas de limite aujourd'hui"
+    },
+    "reason_console_locked": {
+      "message": "tous les jeux sont bloqués"
+    },
+    "reason_unsupported": {
+      "message": "non pris en charge sur cette console"
+    },
+    "reason_bedtime_off": {
+      "message": "l'alarme du coucher est désactivée"
+    },
+    "reason_pctl_error": {
+      "message": "la console a refusé (code {rc})"
+    },
+    "reason_busy": {
+      "message": "PlayGuard n'a pas pu le faire maintenant, réessayez"
+    },
+    "reason_other": {
+      "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name} : {minutes} minutes de jeu aujourd'hui."
+    },
+    "intent_playing": {
+      "message": "{game} est en cours."
+    },
+    "intent_blocked": {
+      "message": "Les jeux sont bloqués."
+    },
+    "intent_no_limit": {
+      "message": "Il n'y a pas de limite aujourd'hui."
+    },
+    "intent_left": {
+      "message": "Il reste {minutes} minutes."
+    },
+    "intent_added": {
+      "message": "{minutes} minutes ajoutées aujourd'hui sur {name}."
+    },
+    "intent_stopped": {
+      "message": "Plus de jeu aujourd'hui sur {name}."
+    },
+    "intent_which": {
+      "message": "Quelle console : {names} ?"
+    },
+    "intent_no_console": {
+      "message": "Aucune console PlayGuard nommée {name}."
+    },
+    "logbook_play_started": {
+      "message": "a lancé {game}"
+    },
+    "logbook_play_stopped": {
+      "message": "a arrêté {game}"
+    },
+    "logbook_time_warning": {
+      "message": "n'a plus que {minutes} minutes de jeu"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "a bloqué les jeux : la limite du jour est atteinte"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "a bloqué les jeux : l'heure du coucher"
+    },
+    "logbook_command_applied": {
+      "message": "a exécuté {order}"
+    },
+    "logbook_command_rejected": {
+      "message": "a refusé {order} : {reason}"
+    },
+    "logbook_command_waiting": {
+      "message": "attend la confirmation de PlayGuard pour {order}"
     }
   },
   "issues": {
@@ -403,6 +554,18 @@
     "agent_version": {
       "title": "{name} fait tourner un ancien agent PlayGuard",
       "description": "PlayGuard {app} est installé sur {name}, mais son agent, qui travaille quand PlayGuard est fermé, est encore en {agent} : sa mise à jour a été remise à plus tard. Mettez-le à jour dans PlayGuard › Console › Modules facultatifs › Agent du lien (PlayGuard le propose aussi à son démarrage)."
+    },
+    "refused_policy_off": {
+      "title": "{name} refuse les ordres de Home Assistant",
+      "description": "{name} est réglée pour refuser les ordres reçus : ce qui est changé ici n'est pas exécuté. Sur la console, dans PlayGuard › Console › Accès à distance › Ordres reçus, choisissez Les exécuter aussitôt ou Demander sur la console. Ceci disparaît dès que la console l'indique."
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} ne laisse pas les ordres changer le temps de jeu",
+      "description": "Les limites, le temps en plus, les profils, Plus de jeu aujourd'hui et le déverrouillage du contrôle parental en ont besoin. Sur la console, activez PlayGuard › Console › Accès à distance › Les ordres peuvent changer le temps de jeu. Ceci disparaît dès que la console l'indique."
+    },
+    "refused_read_only": {
+      "title": "PlayGuard est en lecture seule sur {name}",
+      "description": "PlayGuard s'ouvre en lecture seule sur un firmware qu'il ne prend pas encore en charge, et refuse tous les ordres. Mettez PlayGuard à jour sur la console (il le propose quand il cherche des mises à jour). Ceci disparaît dès que la console l'indique."
     }
   },
   "selector": {
@@ -422,6 +585,18 @@
     "console": {
       "options": {
         "manual": "Une autre console, par son identifiant"
+      }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "La limite du jour",
+        "bedtime": "L'heure du coucher"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "Aujourd'hui",
+        "week": "Les sept derniers jours"
       }
     }
   },
@@ -513,6 +688,86 @@
         "device_id": {
           "name": "Console",
           "description": "La console."
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "Obtenir le temps de jeu",
+      "description": "Renvoie le temps de jeu du jour (par jeu, par compte, le jeu en cours, la limite et ce qu'il en reste, le coucher) ou celui des sept derniers jours.",
+      "fields": {
+        "device_id": {
+          "name": "Console",
+          "description": "La console."
+        },
+        "period": {
+          "name": "Période",
+          "description": "Aujourd'hui, ou les sept derniers jours."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "Jeu lancé",
+      "description": "Se déclenche quand un jeu démarre sur la console."
+    },
+    "game_stopped": {
+      "name": "Jeu arrêté",
+      "description": "Se déclenche quand le jeu s'arrête : fermé, mis en veille, ou un autre lancé."
+    },
+    "time_running_out": {
+      "name": "Temps bientôt écoulé",
+      "description": "Se déclenche quand il reste 10 minutes ou moins de la limite du jour pendant qu'un jeu est lancé."
+    },
+    "games_blocked": {
+      "name": "Jeux bloqués",
+      "description": "Se déclenche quand les jeux sont bloqués : par la limite du jour (ou Plus de jeu aujourd'hui), ou par l'heure du coucher.",
+      "fields": {
+        "blocked_by": {
+          "name": "Bloqués par",
+          "description": "Ce qui a bloqué les jeux."
+        }
+      }
+    },
+    "order_refused": {
+      "name": "Ordre refusé",
+      "description": "Se déclenche quand la console refuse un ordre."
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "Un jeu est lancé",
+      "description": "Teste si un jeu est lancé sur la console.",
+      "fields": {
+        "behavior": {
+          "name": "La condition est remplie si"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "Limite atteinte",
+      "description": "Teste si la limite du jour est atteinte sur la console.",
+      "fields": {
+        "behavior": {
+          "name": "La condition est remplie si"
+        },
+        "for": {
+          "name": "Pendant au moins"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "Contrôle parental activé",
+      "description": "Teste si le contrôle parental de la console est activé (pas déverrouillé pour le moment).",
+      "fields": {
+        "behavior": {
+          "name": "La condition est remplie si"
+        },
+        "for": {
+          "name": "Pendant au moins"
         }
       }
     }

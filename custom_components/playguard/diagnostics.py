@@ -6,6 +6,7 @@ from typing import Any
 
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntry
 
 from . import PlayGuardConfigEntry
 
@@ -43,3 +44,10 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: PlayGua
         },
         TO_REDACT,
     )
+
+
+async def async_get_device_diagnostics(
+    hass: HomeAssistant, entry: PlayGuardConfigEntry, device: DeviceEntry
+) -> dict[str, Any]:
+    """The console's device: the same as its entry (one console per entry)."""
+    return await async_get_config_entry_diagnostics(hass, entry)

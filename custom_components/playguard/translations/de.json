@@ -1,0 +1,775 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": {
+        "title": "PlayGuard-Konsole gefunden",
+        "description": "**{name}** (Konsolen-ID `{console_id}`) hinzufügen? Ihr eigenes Home-Assistant-Gerät (MQTT-Discovery) wird durch das dieser Integration ersetzt, mit denselben Entitäten, den Spielnamen, der Spielzeit der Woche und den Langzeitstatistiken."
+      },
+      "user": {
+        "title": "PlayGuard-Konsole hinzufügen",
+        "description": "Die Konsolen, deren Status auf dem Broker liegt und die noch nicht eingerichtet sind. Wählen Sie eine aus, oder eine andere Konsole, um sie über ihre ID hinzuzufügen.",
+        "data": {
+          "console": "Konsole"
+        },
+        "data_description": {
+          "console": "Ihr Name und ihre ID, dazu ihr Topic-Präfix, wenn es nicht playguard ist."
+        }
+      },
+      "manual": {
+        "title": "PlayGuard-Konsole über ihre ID hinzufügen",
+        "description": "Die ID steht unter PlayGuard › Konsole › Fernzugriff › Konsolen-ID. Die Integration wartet dann bis zu 10 Sekunden auf den Status der Konsole auf dem Broker.",
+        "data": {
+          "console_id": "Konsolen-ID",
+          "topic_prefix": "Topic-Präfix"
+        },
+        "data_description": {
+          "console_id": "8 Zeichen, zum Beispiel 5a0c3e11.",
+          "topic_prefix": "playguard, sofern sync.conf nichts anderes angibt."
+        }
+      },
+      "reconfigure": {
+        "title": "Topic-Präfix ändern",
+        "description": "Das Präfix, unter dem {name} veröffentlicht: `topic_prefix` in der sync.conf von PlayGuard.",
+        "data": {
+          "topic_prefix": "Topic-Präfix"
+        },
+        "data_description": {
+          "topic_prefix": "playguard, sofern sync.conf nichts anderes angibt."
+        }
+      }
+    },
+    "error": {
+      "invalid_console_id": "Eine Konsolen-ID hat 8 Zeichen, 0 bis 9 und a bis f.",
+      "invalid_prefix": "Dieses Präfix kann nicht Teil eines MQTT-Topics sein.",
+      "no_state": "Diese Konsole hat unter diesem Präfix nichts auf dem Broker veröffentlicht. Prüfen Sie die Konsolen-ID und das Präfix und ob die Verbindung der Konsole einmal aktiv war (PlayGuard › Konsole › Fernzugriff › Status)."
+    },
+    "abort": {
+      "already_configured": "Diese Konsole ist bereits eingerichtet.",
+      "invalid_discovery_info": "Diese Nachricht ist kein PlayGuard-Status.",
+      "mqtt_not_ready": "Die MQTT-Integration ist noch nicht eingerichtet: Über sie kommuniziert PlayGuard mit Home Assistant. Richten Sie sie zuerst ein, auf demselben Broker wie die Konsole."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "take_over_discovery": "Das eigene Home-Assistant-Gerät der Konsole ersetzen",
+          "keep_values_asleep": "Letzte Werte im Standby-Modus der Konsole behalten",
+          "notify_refused": "Einen später abgelehnten Befehl melden"
+        },
+        "data_description": {
+          "take_over_discovery": "Schaltet die MQTT-Discovery der Konsole aus, damit ihre Entitäten nicht doppelt vorhanden sind. Aus: Die Konsole veröffentlicht wieder ihr eigenes Gerät.",
+          "keep_values_asleep": "Solange die Konsole nicht mit dem Broker verbunden ist (Standby-Modus, ausgeschaltet, außer Reichweite), zeigen ihre Entitäten weiter ihre letzten Angaben, und eine Änderung an einem Steuerelement wartet auf dem Broker auf sie. Aus: Alle Entitäten außer Online sind dann nicht verfügbar.",
+          "notify_refused": "Ein Befehl, der im Standby-Modus der Konsole gesendet wird oder auf die Bestätigung von PlayGuard wartet, erhält seine Antwort erst nach dem Ende seiner Aktion: Eine Ablehnung erzeugt dann eine Benachrichtigung, die der nächste ausgeführte Befehl entfernt. Eine Ablehnung, während die Aktion auf die Antwort wartet (bis zu 10 Sekunden), lässt die Aktion mit Angabe des Grunds fehlschlagen, unabhängig von dieser Option."
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "parental_controls_enabled": {
+        "name": "Altersbeschränkungen eingerichtet"
+      },
+      "pin_set": {
+        "name": "Geheimzahl festgelegt"
+      },
+      "companion_linked": {
+        "name": "Smart-Geräte-App verbunden"
+      },
+      "timer_enabled": {
+        "name": "Spielzeit-Timer"
+      },
+      "limit_reached": {
+        "name": "Spielen gesperrt",
+        "state_attributes": {
+          "reason": {
+            "name": "Grund",
+            "state": {
+              "limit": "Das Tageslimit",
+              "bedtime": "Schlafenszeit"
+            }
+          }
+        }
+      },
+      "clock_accurate": {
+        "name": "Netzwerkuhr genau"
+      },
+      "online": {
+        "name": "Online"
+      },
+      "agent": {
+        "name": "Agent aktiv"
+      },
+      "prodinfo_blanked": {
+        "name": "PRODINFO geleert"
+      },
+      "charging": {
+        "name": "Wird geladen"
+      },
+      "docked": {
+        "name": "In der Station"
+      }
+    },
+    "button": {
+      "sync_now": {
+        "name": "Jetzt synchronisieren"
+      },
+      "export_report": {
+        "name": "Diagnosebericht exportieren"
+      },
+      "add_bonus_time_15": {
+        "name": "Zusatzzeit +15 Min."
+      },
+      "add_bonus_time_30": {
+        "name": "Zusatzzeit +30 Min."
+      },
+      "add_bonus_time_60": {
+        "name": "Zusatzzeit +1 Std."
+      },
+      "stop_today": {
+        "name": "Heute nicht mehr spielen"
+      },
+      "remove_limit": {
+        "name": "Limit entfernen"
+      }
+    },
+    "calendar": {
+      "play_sessions": {
+        "name": "Spielsitzungen"
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Ereignisse",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "command_applied": "Befehl ausgeführt",
+              "command_rejected": "Befehl abgelehnt",
+              "command_waiting": "Befehl wartet auf PlayGuard",
+              "play_started": "Spiel gestartet",
+              "play_stopped": "Spiel beendet",
+              "time_warning": "Spielzeit fast vorbei",
+              "play_blocked": "Spielen gesperrt"
+            }
+          }
+        }
+      }
+    },
+    "lock": {
+      "parental_controls": {
+        "name": "Altersbeschränkungen"
+      }
+    },
+    "number": {
+      "limit_sun": {
+        "name": "Limit Sonntag"
+      },
+      "limit_mon": {
+        "name": "Limit Montag"
+      },
+      "limit_tue": {
+        "name": "Limit Dienstag"
+      },
+      "limit_wed": {
+        "name": "Limit Mittwoch"
+      },
+      "limit_thu": {
+        "name": "Limit Donnerstag"
+      },
+      "limit_fri": {
+        "name": "Limit Freitag"
+      },
+      "limit_sat": {
+        "name": "Limit Samstag"
+      },
+      "limit_uniform": {
+        "name": "Limit jeden Tag"
+      },
+      "max_screentime_today": {
+        "name": "Max. Bildschirmzeit heute"
+      }
+    },
+    "select": {
+      "restriction_level": {
+        "name": "Einschränkungskategorie",
+        "state": {
+          "unrestricted": "Keine Einschränkungen",
+          "young_child": "Kleinkinder",
+          "child": "Kinder",
+          "teen": "Jugendliche",
+          "custom": "Nutzerdefiniert"
+        }
+      },
+      "profile": {
+        "name": "Profil"
+      }
+    },
+    "sensor": {
+      "used_screen_time": {
+        "name": "Genutzte Bildschirmzeit"
+      },
+      "used_screen_time_log": {
+        "name": "Spielzeit heute"
+      },
+      "screen_time_remaining": {
+        "name": "Verbleibende Bildschirmzeit"
+      },
+      "extended_screen_time": {
+        "name": "Verlängerte Bildschirmzeit"
+      },
+      "now_playing": {
+        "name": "Aktuelles Spiel"
+      },
+      "rating_age": {
+        "name": "Alterseinstufung"
+      },
+      "firmware": {
+        "name": "Firmware"
+      },
+      "atmosphere": {
+        "name": "Atmosphère"
+      },
+      "spent_raw": {
+        "name": "Verbrauchte Zeit (1952)"
+      },
+      "last_order": {
+        "name": "Letzter Befehl"
+      },
+      "week_play_time": {
+        "name": "Spielzeit diese Woche"
+      },
+      "play_ends": {
+        "name": "Spielende"
+      },
+      "account_today": {
+        "name": "Spielzeit heute von {account}"
+      },
+      "account_week": {
+        "name": "Spielzeit diese Woche von {account}"
+      },
+      "model": {
+        "name": "Modell",
+        "state": {
+          "erista": "Switch (2017)",
+          "mariko": "Switch (2019)",
+          "lite": "Switch Lite",
+          "oled": "Switch OLED",
+          "other": "Entwicklungsgerät"
+        }
+      },
+      "nickname": {
+        "name": "Name der Konsole"
+      },
+      "region": {
+        "name": "Region",
+        "state": {
+          "jpn": "Japan",
+          "usa": "Amerika",
+          "eur": "Europa",
+          "aus": "Australien und Neuseeland",
+          "htk": "Hongkong, Taiwan, Korea",
+          "chn": "China"
+        }
+      },
+      "hekate": {
+        "name": "hekate"
+      },
+      "system_storage": {
+        "name": "System",
+        "state": {
+          "sysmmc": "sysMMC",
+          "emummc": "emuMMC"
+        }
+      },
+      "serial": {
+        "name": "Seriennummer"
+      },
+      "sd_free": {
+        "name": "Freier Speicher der SD-Karte"
+      },
+      "sd_total": {
+        "name": "Größe der SD-Karte"
+      },
+      "nand_free": {
+        "name": "Freier interner Speicher"
+      },
+      "nand_total": {
+        "name": "Größe des internen Speichers"
+      },
+      "battery": {
+        "name": "Akku"
+      },
+      "temperature": {
+        "name": "Temperatur"
+      },
+      "network": {
+        "name": "Verbindung",
+        "state": {
+          "none": "Keine",
+          "wifi": "WLAN",
+          "ethernet": "Ethernet"
+        }
+      },
+      "ip_address": {
+        "name": "IP-Adresse"
+      },
+      "wifi_signal": {
+        "name": "WLAN-Signal"
+      },
+      "ssid": {
+        "name": "WLAN-Netzwerk"
+      },
+      "last_boot": {
+        "name": "Letzter Start"
+      },
+      "games_installed": {
+        "name": "Installierte Spiele"
+      },
+      "play_time_total": {
+        "name": "Spielzeit (insgesamt)"
+      },
+      "accounts": {
+        "name": "Nutzer"
+      },
+      "last_seen": {
+        "name": "Zuletzt gesehen"
+      },
+      "console_activity": {
+        "name": "Aktivität",
+        "state": {
+          "game": "Spielt ein Spiel",
+          "homebrew": "In einem Homebrew",
+          "playguard": "In PlayGuard",
+          "home": "HOME-Menü",
+          "suspended": "Spiel pausiert",
+          "offline": "Standby oder aus"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "Titel"
+          },
+          "app_id": {
+            "name": "Anwendungs-ID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrews"
+      },
+      "forwarders": {
+        "name": "Forwarder"
+      }
+    },
+    "switch": {
+      "bedtime_enabled": {
+        "name": "Gute-Nacht-Alarm"
+      },
+      "console_lock": {
+        "name": "Alle Spiele sperren"
+      },
+      "play_timer_alarm": {
+        "name": "Alarm „Zeit ist um“"
+      },
+      "vr_restricted": {
+        "name": "VR-Modus gesperrt"
+      },
+      "sns_post_restricted": {
+        "name": "Posten in sozialen Netzwerken gesperrt"
+      },
+      "free_communication_restricted": {
+        "name": "Kommunikation gesperrt"
+      }
+    },
+    "time": {
+      "bedtime_alarm": {
+        "name": "Schlafenszeit"
+      },
+      "bedtime_end_time": {
+        "name": "Weckzeit"
+      }
+    },
+    "update": {
+      "playguard_update": {
+        "name": "PlayGuard"
+      }
+    },
+    "image": {
+      "now_playing_icon": {
+        "name": "Symbol des laufenden Spiels"
+      }
+    }
+  },
+  "exceptions": {
+    "mqtt_not_ready": {
+      "message": "Die MQTT-Integration ist noch nicht verfügbar."
+    },
+    "read_only": {
+      "message": "PlayGuard ist auf dieser Konsole im Schreibschutzmodus: Es ändert nichts."
+    },
+    "policy_off": {
+      "message": "Die Konsole lehnt Befehle ab (Fernzugriff › Empfangene Befehle)."
+    },
+    "timer_writes_disabled": {
+      "message": "Befehle dürfen die Spielzeit nicht ändern: Schalten Sie auf der Konsole Fernzugriff › Befehle dürfen die Spielzeit ändern ein."
+    },
+    "read_only_entity": {
+      "message": "Dieser Wert kann hier nicht geändert werden."
+    },
+    "no_such_profile": {
+      "message": "In PlayGuard ist kein Profil namens {profile} gespeichert."
+    },
+    "refused": {
+      "message": "{name} hat diesen Befehl abgelehnt: {reason}."
+    },
+    "refused_title": {
+      "message": "{name} hat einen Befehl abgelehnt"
+    },
+    "refused_later": {
+      "message": "{order}: {reason}."
+    },
+    "reason_unknown_entity": {
+      "message": "unbekannter Befehl"
+    },
+    "reason_invalid": {
+      "message": "ungültiger Wert"
+    },
+    "reason_out_of_range": {
+      "message": "Wert außerhalb des Bereichs"
+    },
+    "reason_policy_off": {
+      "message": "Befehle werden abgelehnt (Fernzugriff › Empfangene Befehle)"
+    },
+    "reason_timer_writes_disabled": {
+      "message": "Ändern der Spielzeit aus der Ferne ist aus (Fernzugriff › Befehle dürfen die Spielzeit ändern)"
+    },
+    "reason_read_only": {
+      "message": "PlayGuard ist im Schreibschutzmodus"
+    },
+    "reason_not_confirmed": {
+      "message": "nicht auf der Konsole bestätigt, oder die Geheimzahl wurde nicht eingegeben"
+    },
+    "reason_gated": {
+      "message": "die Spielzeit wird gezählt, und die Sperre ließ sich nicht aufheben"
+    },
+    "reason_unlock_failed": {
+      "message": "die Altersbeschränkungen konnten nicht aufgehoben werden"
+    },
+    "reason_not_custom": {
+      "message": "nur mit der Einschränkungskategorie „Nutzerdefiniert“"
+    },
+    "reason_no_such_profile": {
+      "message": "kein Profil hat diesen Namen"
+    },
+    "reason_no_limit_today": {
+      "message": "heute gibt es kein Limit"
+    },
+    "reason_console_locked": {
+      "message": "alle Spiele sind gesperrt"
+    },
+    "reason_unsupported": {
+      "message": "auf dieser Konsole nicht unterstützt"
+    },
+    "reason_bedtime_off": {
+      "message": "der Gute-Nacht-Alarm ist aus"
+    },
+    "reason_pctl_error": {
+      "message": "die Konsole hat abgelehnt (Ergebniscode {rc})"
+    },
+    "reason_busy": {
+      "message": "PlayGuard konnte es gerade nicht tun, versuchen Sie es erneut"
+    },
+    "reason_other": {
+      "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name}: heute {minutes} Minuten gespielt."
+    },
+    "intent_playing": {
+      "message": "{game} wird gespielt."
+    },
+    "intent_blocked": {
+      "message": "Die Spiele sind gesperrt."
+    },
+    "intent_no_limit": {
+      "message": "Heute gibt es kein Limit."
+    },
+    "intent_left": {
+      "message": "Noch {minutes} Minuten."
+    },
+    "intent_added": {
+      "message": "{minutes} Minuten heute auf {name} hinzugefügt."
+    },
+    "intent_stopped": {
+      "message": "Heute wird auf {name} nicht mehr gespielt."
+    },
+    "intent_which": {
+      "message": "Welche Konsole: {names}?"
+    },
+    "intent_no_console": {
+      "message": "Keine PlayGuard-Konsole namens {name}."
+    },
+    "logbook_play_started": {
+      "message": "hat {game} gestartet"
+    },
+    "logbook_play_stopped": {
+      "message": "hat {game} beendet"
+    },
+    "logbook_time_warning": {
+      "message": "hat noch {minutes} Minuten Spielzeit"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "hat die Spiele gesperrt: Das Tageslimit ist erreicht"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "hat die Spiele gesperrt: Schlafenszeit"
+    },
+    "logbook_command_applied": {
+      "message": "hat ausgeführt: {order}"
+    },
+    "logbook_command_rejected": {
+      "message": "hat abgelehnt: {order} ({reason})"
+    },
+    "logbook_command_waiting": {
+      "message": "wartet auf die Bestätigung von PlayGuard: {order}"
+    }
+  },
+  "issues": {
+    "newer_schema": {
+      "title": "{name} spricht ein neueres PlayGuard-Protokoll",
+      "description": "{name} veröffentlicht Schema {schema}; diese Integration kennt Schema {known}. Aktualisieren Sie die PlayGuard-Integration: Bis dahin fehlen möglicherweise einige Werte."
+    },
+    "native_discovery": {
+      "title": "{name} veröffentlicht wieder ein eigenes Home-Assistant-Gerät",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Die Entitäten von {name} sind doppelt vorhanden",
+            "description": "Das eigene MQTT-Gerät der Konsole ist neben dem dieser Integration zurück: Es wurde in PlayGuard wieder eingeschaltet, oder das PlayGuard der Konsole ist zu alt für den Befehl, der es ausschaltet. Senden Sie ab, um die Konsole erneut zu bitten, es auszuschalten.\n\nWenn es wiederkommt, aktualisieren Sie PlayGuard, oder schalten Sie *Das Gerät in Home Assistant anlegen (MQTT-Discovery)* unter PlayGuard › Konsole › Fernzugriff aus. Um stattdessen das eigene Gerät der Konsole zu behalten, schalten Sie die Option *Das eigene Home-Assistant-Gerät der Konsole ersetzen* dieser Integration aus."
+          }
+        }
+      }
+    },
+    "agent_version": {
+      "title": "Auf {name} läuft ein älterer PlayGuard-Agent",
+      "description": "PlayGuard {app} ist auf {name} installiert, aber sein Agent, der arbeitet, während PlayGuard geschlossen ist, ist noch {agent}: Sein Update wurde verschoben. Aktualisieren Sie ihn unter PlayGuard › Konsole › Optionale Module › Verbindungsagent (PlayGuard bietet es auch beim Start an)."
+    },
+    "refused_policy_off": {
+      "title": "{name} lehnt die Befehle von Home Assistant ab",
+      "description": "{name} ist so eingestellt, dass empfangene Befehle abgelehnt werden, daher wird hier Geändertes nicht ausgeführt. Wählen Sie auf der Konsole unter PlayGuard › Konsole › Fernzugriff › Empfangene Befehle Sofort ausführen oder Auf der Konsole fragen. Dieser Hinweis verschwindet, sobald die Konsole es meldet."
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} lässt Befehle die Spielzeit nicht ändern",
+      "description": "Limits, Zusatzzeit, Profile, Heute nicht mehr spielen und das Aufheben der Altersbeschränkungen brauchen das. Schalten Sie auf der Konsole PlayGuard › Konsole › Fernzugriff › Befehle dürfen die Spielzeit ändern ein. Dieser Hinweis verschwindet, sobald die Konsole es meldet."
+    },
+    "refused_read_only": {
+      "title": "PlayGuard ist auf {name} schreibgeschützt",
+      "description": "PlayGuard öffnet sich auf einer Firmware, die es noch nicht unterstützt, schreibgeschützt und lehnt jeden Befehl ab. Aktualisieren Sie PlayGuard auf der Konsole (es bietet das an, wenn es nach Updates sucht). Dieser Hinweis verschwindet, sobald die Konsole es meldet."
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "all": "Jeden Tag",
+        "today": "Nur heute",
+        "sun": "Sonntag",
+        "mon": "Montag",
+        "tue": "Dienstag",
+        "wed": "Mittwoch",
+        "thu": "Donnerstag",
+        "fri": "Freitag",
+        "sat": "Samstag"
+      }
+    },
+    "console": {
+      "options": {
+        "manual": "Eine andere Konsole, über ihre ID"
+      }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "Das Tageslimit",
+        "bedtime": "Schlafenszeit"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "Heute",
+        "week": "Die letzten sieben Tage"
+      }
+    }
+  },
+  "services": {
+    "set_limits": {
+      "name": "Limits setzen",
+      "description": "Setzt das Limit eines Tages, aller Tage, von heute oder der ganzen Woche (1440 = kein Limit).",
+      "fields": {
+        "device_id": {
+          "name": "Konsole",
+          "description": "Die Konsole."
+        },
+        "minutes": {
+          "name": "Minuten",
+          "description": "0 bis 1440; 1440 bedeutet kein Limit."
+        },
+        "day": {
+          "name": "Tag",
+          "description": "Welcher Tag."
+        },
+        "week": {
+          "name": "Woche",
+          "description": "Sieben Limits, mit Sonntag beginnend, anstelle von Minuten und Tag."
+        }
+      }
+    },
+    "add_bonus_time": {
+      "name": "Zusatzzeit hinzufügen",
+      "description": "Zusätzliche Minuten heute; morgen gilt wieder das übliche Limit.",
+      "fields": {
+        "device_id": {
+          "name": "Konsole",
+          "description": "Die Konsole."
+        },
+        "minutes": {
+          "name": "Minuten",
+          "description": "5 bis 180."
+        }
+      }
+    },
+    "apply_profile": {
+      "name": "Profil anwenden",
+      "description": "Wendet die Limits eines in PlayGuard gespeicherten Profils an.",
+      "fields": {
+        "device_id": {
+          "name": "Konsole",
+          "description": "Die Konsole."
+        },
+        "profile": {
+          "name": "Profil",
+          "description": "Sein Name in PlayGuard."
+        }
+      }
+    },
+    "stop_today": {
+      "name": "Heute nicht mehr spielen",
+      "description": "0 Minuten heute; morgen gilt wieder das übliche Limit.",
+      "fields": {
+        "device_id": {
+          "name": "Konsole",
+          "description": "Die Konsole."
+        }
+      }
+    },
+    "lock_now": {
+      "name": "Altersbeschränkungen wieder aktivieren",
+      "description": "Aktiviert die Altersbeschränkungen nach einer vorübergehenden Aufhebung wieder.",
+      "fields": {
+        "device_id": {
+          "name": "Konsole",
+          "description": "Die Konsole."
+        }
+      }
+    },
+    "sync_now": {
+      "name": "Jetzt synchronisieren",
+      "description": "Die Konsole veröffentlicht alles erneut.",
+      "fields": {
+        "device_id": {
+          "name": "Konsole",
+          "description": "Die Konsole."
+        }
+      }
+    },
+    "request_report": {
+      "name": "Diagnosebericht anfordern",
+      "description": "Die Konsole speichert einen Bericht auf ihrer SD-Karte und veröffentlicht ihn, wenn Fernzugriff es erlaubt (dann in der Diagnose des Geräts).",
+      "fields": {
+        "device_id": {
+          "name": "Konsole",
+          "description": "Die Konsole."
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "Spielzeit abrufen",
+      "description": "Gibt die heutige Spielzeit zurück (pro Spiel, pro Nutzer, das gespielte Spiel, das Limit und was davon übrig ist, Schlafenszeit) oder die der letzten sieben Tage.",
+      "fields": {
+        "device_id": {
+          "name": "Konsole",
+          "description": "Die Konsole."
+        },
+        "period": {
+          "name": "Zeitraum",
+          "description": "Heute oder die letzten sieben Tage."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "Spiel gestartet",
+      "description": "Wird ausgelöst, wenn ein Spiel auf der Konsole startet."
+    },
+    "game_stopped": {
+      "name": "Spiel beendet",
+      "description": "Wird ausgelöst, wenn das Spiel endet: geschlossen, unterbrochen oder ein anderes gestartet."
+    },
+    "time_running_out": {
+      "name": "Zeit läuft ab",
+      "description": "Wird ausgelöst, wenn während eines Spiels noch 10 Minuten oder weniger vom heutigen Limit übrig sind."
+    },
+    "games_blocked": {
+      "name": "Spiele gesperrt",
+      "description": "Wird ausgelöst, wenn die Spiele gesperrt werden: durch das Tageslimit (oder Heute nicht mehr spielen) oder durch die Schlafenszeit.",
+      "fields": {
+        "blocked_by": {
+          "name": "Gesperrt durch",
+          "description": "Was die Spiele gesperrt hat."
+        }
+      }
+    },
+    "order_refused": {
+      "name": "Befehl abgelehnt",
+      "description": "Wird ausgelöst, wenn die Konsole einen Befehl ablehnt."
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "Ein Spiel läuft",
+      "description": "Prüft, ob auf der Konsole ein Spiel läuft.",
+      "fields": {
+        "behavior": {
+          "name": "Bedingung erfüllt, wenn"
+        },
+        "for": {
+          "name": "Für mindestens"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "Limit erreicht",
+      "description": "Prüft, ob das heutige Limit auf der Konsole erreicht ist.",
+      "fields": {
+        "behavior": {
+          "name": "Bedingung erfüllt, wenn"
+        },
+        "for": {
+          "name": "Für mindestens"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "Altersbeschränkungen aktiv",
+      "description": "Prüft, ob die Altersbeschränkungen der Konsole aktiv sind (nicht vorübergehend aufgehoben).",
+      "fields": {
+        "behavior": {
+          "name": "Bedingung erfüllt, wenn"
+        },
+        "for": {
+          "name": "Für mindestens"
+        }
+      }
+    }
+  }
+}

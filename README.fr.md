@@ -69,13 +69,28 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   changement fait sur un contrôle ou par une action attend sur le broker et
   est exécuté quand la console sort de veille.
 - **Des actions** : `set_limits`, `add_bonus_time`, `apply_profile`,
-  `stop_today`, `lock_now`, `sync_now`, `request_report`.
+  `stop_today`, `lock_now`, `sync_now`, `request_report`, `get_play_time`.
 - Une **entité d'événement** pour chaque ordre traité (exécuté, refusé avec la
   raison, en attente de la confirmation de PlayGuard), pour les automatisations.
+- Des **déclencheurs et conditions** propres dans l'éditeur d'automatisations :
+  jeu lancé ou arrêté, temps bientôt écoulé, jeux bloqués, ordre refusé ; jeu
+  en cours, limite atteinte, contrôle parental activé.
+- **Assist et assistants IA** : le temps de jeu du jour, du temps en plus,
+  plus de jeu aujourd'hui, à la voix ou par écrit ; `get_play_time` renvoie le
+  temps de jeu du jour ou de la semaine à un script.
 - Un ordre que la console refuserait (mode lecture seule, ordres refusés,
   écriture du minuteur non autorisée) est refusé ici, avec la raison.
-- Des **réparations** quand vous devez agir, et des **diagnostics** avec le
-  dernier état de la console et son dernier rapport de diagnostic, sans les noms.
+- **La réponse de la console** : un ordre que la console refuse fait échouer
+  son action, avec la raison de la console ; un ordre refusé plus tard (envoyé
+  pendant sa veille, ou en attente de PlayGuard) crée une notification.
+- **En 14 langues** : français, anglais, allemand, espagnol (Espagne et
+  Amérique latine), italien, japonais, coréen, néerlandais, portugais (Portugal
+  et Brésil), russe, chinois (simplifié et traditionnel), avec les libellés de
+  la console.
+- Des **réparations** quand vous devez agir (un réglage de la console qui
+  refuse les ordres compris), des **diagnostics** avec le dernier état de la
+  console et son dernier rapport de diagnostic, sans les noms (sur l'entrée et
+  sur l'appareil), et les événements de la console dans le **journal**.
 
 <details>
 <summary><b>📸 Captures d'écran</b></summary>
@@ -100,6 +115,8 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 [prérequis](#-prérequis) · [installation](#-installation) ·
 [configuration](#-configuration) · [options et reconfiguration](#-options-et-reconfiguration) ·
 [entités](#-entités) · [actions](#-actions) · [événements](#-événements) ·
+[déclencheurs et conditions](#-déclencheurs-et-conditions) ·
+[Assist et assistants IA](#-assist-et-assistants-ia) ·
 [mise à jour des données](#-mise-à-jour-des-données) · [exemples](#-exemples) ·
 [cas d'usage](#-cas-dusage) · [limites connues](#-limites-connues) ·
 [dépannage](#-dépannage) · [désinstallation](#-désinstallation) ·
@@ -213,6 +230,7 @@ ajoutée deux fois.
 |---|---|---|
 | **Remplacer l'appareil Home Assistant d'origine de la console** | activée | Désactive la découverte MQTT de la console, pour que ses entités n'apparaissent pas deux fois. Désactivée : la console publie de nouveau son propre appareil (à côté de celui-ci). L'entrée se recharge quand elle change. |
 | **Garder les dernières valeurs pendant la veille** | activée | Tant que la console est hors ligne (en veille, éteinte, hors de portée), ses entités gardent ce qu'elle a dit en dernier, contrôles compris : un changement fait sur l'un d'eux attend sur le broker et est exécuté quand la console sort de veille. Désactivée : toutes les entités sauf *En ligne* sont alors indisponibles. |
+| **Notifier un ordre refusé plus tard** | activée | Un ordre dont la réponse arrive après la fin de son action (envoyé pendant la veille de la console, ou en attente de la confirmation de PlayGuard) et que la console refuse crée une notification, avec la raison ; le prochain ordre appliqué la retire. Un refus qui arrive pendant que l'action attend encore fait échouer l'action, quelle que soit cette option. |
 
 *⋮ › Reconfigurer* change le **Préfixe des topics**, quand `topic_prefix` dans
 le `sync.conf` de la console change. Comme pour l'ajout d'une console à la main,
@@ -272,7 +290,8 @@ en heures)
 | Temps de jeu aujourd'hui de *Compte*, Temps de jeu cette semaine de *Compte* | Une paire par compte utilisateur, créée dès que la console en parle (son nom, ou son temps de jeu). En minutes, celui de la semaine affiché en heures. | propres à cette intégration ; inconnus tant que le temps des comptes n'a pas été lu (l'app lit les comptes à la demande, l'agent d'après le journal de jeu) |
 | Parties (calendrier) | Chaque jeu joué et quand : un événement par période où le jeu était au premier plan pendant que la console était en ligne, au nom du jeu ; celui en cours se lit *activé*. Tiré de l'historique de *Jeu en cours* et *En ligne* dans l'enregistreur, il remonte donc aussi loin que l'enregistreur les garde (10 jours par défaut). | propre à cette intégration ; vide sans l'enregistreur ou avec *Jeu en cours* désactivé |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
-| Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
+| Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`) ; un homebrew aussi, par son nom. | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
+| Activité | Ce que fait la console : *Joue à un jeu*, *Dans un homebrew*, *Sur PlayGuard*, *Menu HOME* (ou une applet système par-dessus), *Jeu suspendu* (HOME appuyé dans un jeu, sans le fermer), *En veille ou éteinte* (absente du broker) ; attributs `title` et `app_id` du jeu ou du homebrew. Depuis le `activity_today.now` de PlayGuard 1.5, sous 30 s ; un PlayGuard plus ancien ne donne que jeu, PlayGuard et menu HOME. | propre à cette intégration ; affichée aussi pendant la veille |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
 | Firmware, Atmosphère | Les versions de la console (les infos de l'appareil les montrent aussi). | diagnostic, désactivé par défaut |
 | Dernier ordre | Le dernier ordre traité, et comment. | diagnostic, désactivé par défaut |
@@ -303,6 +322,22 @@ défaut).
 
 **Événement** : *Événements*, voir [événements](#-événements).
 
+**Image** : *Icône du jeu en cours*, l'icône du jeu lancé, depuis un
+PlayGuard qui publie les icônes des jeux (*Accès à distance › Publier les
+icônes des jeux* : celles de tous les jeux installés ou joués, et l'agent
+celle du jeu lancé quand PlayGuard est fermé) : pour une carte image ou
+l'image d'une notification. Inconnue tant qu'aucun jeu n'est lancé, ou avant
+que son icône n'arrive (un jeu installé depuis la dernière ouverture de
+PlayGuard : dès que PlayGuard s'ouvre).
+
+**Mise à jour** : *PlayGuard*, configuration : la version installée sur la
+console face à la dernière release sur GitHub, avec ses notes de version,
+aussi dans *Paramètres › Mises à jour*. PlayGuard l'installe sur la console
+(il la propose quand il cherche des mises à jour) ; rien ne s'installe depuis
+Home Assistant. La release est lue à l'ajout de l'entité, puis de nouveau avec
+les documents de la console une fois six heures passées (`api.github.com`, la
+seule requête de l'intégration hors du broker).
+
 **La console elle-même** (`playguard/<id>/system`, tenu à jour par l'agent
 quand PlayGuard est fermé) :
 
@@ -323,7 +358,11 @@ du journal de jeu) : *Jeux installés*, avec chaque jeu que la console liste
 dans `games` (le dernier joué en premier : `app_id`, `name`, `minutes`,
 `installed`, `last_played` ; non enregistré), *Temps de jeu (depuis toujours)*
 (tous les jeux, tous les comptes), *Comptes utilisateurs* (diagnostic,
-désactivé par défaut).
+désactivé par défaut), et depuis PlayGuard 1.5 *Homebrews* (les fichiers
+`.nro` de la carte SD) et *Forwarders* (installés) : PlayGuard ne liste que
+les jeux, les homebrews en nombre ; leur temps de jeu est dans l'attribut
+`homebrew` de *Temps de jeu aujourd'hui* et de *Temps de jeu cette semaine*,
+et dans les jours de la semaine (le minuteur de la console le compte).
 
 Il n'y a **pas de capteur par jeu** : le temps d'un jeu aujourd'hui est dans
 l'attribut `games` du journal de jeu, celui de la semaine dans celui de *Temps
@@ -369,6 +408,14 @@ aussitôt, avec la raison (mode lecture seule, ordres refusés, écriture du
 minuteur désactivée, profil inconnu, appareil qui n'est pas une console
 PlayGuard chargée).
 
+Tant que la console est en ligne, l'action (et un changement fait sur une
+entité) attend sa réponse jusqu'à 10 secondes. Refusé, elle échoue avec la
+raison de la console (*Salon a refusé cet ordre : l'alarme du coucher est
+désactivée.*), affichée sous le contrôle, et une automatisation voit l'erreur.
+Exécuté, en attente de la confirmation de PlayGuard, ou sans réponse à temps :
+elle se termine ; un refus qui arrive plus tard crée une notification (option
+*Notifier un ordre refusé plus tard*).
+
 | Action | Champs | Ce qu'elle fait |
 |---|---|---|
 | `playguard.set_limits` | `minutes` (0 à 1440 ; 1440 = pas de limite), `day` (`all`, par défaut, `today`, ou `sun` … `sat`), ou `week` (sept limites, dimanche d'abord, à la place de `minutes` et `day`) | Règle la limite d'un jour, de tous les jours, d'aujourd'hui seulement, ou de toute la semaine. |
@@ -378,6 +425,19 @@ PlayGuard chargée).
 | `playguard.lock_now` | | Réactive le contrôle parental après un déverrouillage temporaire. |
 | `playguard.sync_now` | | La console republie tout. |
 | `playguard.request_report` | | La console enregistre un rapport de diagnostic sur sa carte SD, et le publie quand *Accès à distance* le permet (il est alors dans les diagnostics de l'appareil). |
+| `playguard.get_play_time` | `period` (`today`, par défaut, ou `week`) | Renvoie le temps de jeu comme réponse de l'action (*Variable de réponse* dans un script) : celui du jour (`minutes`, `games` avec pour chacun `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`, `homebrew_minutes`, `activity`), ou celui des sept derniers jours (`days`, `minutes`, `homebrew_minutes`, `games` avec pour chacun `per_day`, `accounts`). N'envoie rien à la console. |
+
+```yaml
+actions:
+  - action: playguard.get_play_time
+    data:
+      device_id: 0123456789abcdef0123456789abcdef
+      period: week
+    response_variable: week
+  - action: notify.notify
+    data:
+      message: "{{ week.minutes }} minutes cette semaine, {{ week.games[0].name }} en tête."
+```
 
 `set_limits`, `add_bonus_time`, `apply_profile` et `stop_today` demandent
 *Les ordres peuvent changer le temps de jeu*.
@@ -406,6 +466,89 @@ console construit son état toutes les 30 secondes pendant une partie : ils
 arrivent dans ce délai. Les événements ne sont pas
 retenus : un événement envoyé pendant que Home Assistant était absent n'est pas
 vu ; *Dernier ordre* garde le dernier résultat.
+
+Chaque événement est aussi émis sur le bus d'événements de Home Assistant sous
+le nom `playguard_event` (`device_id`, `console_id`, `event_type` et les
+attributs ci-dessus), que le **journal** affiche sur l'appareil de la console :
+*Salon a lancé Mario Kart 8 Deluxe*, *Salon a refusé Limite lundi : 5000 :
+valeur hors limites*.
+
+## 🎯 Déclencheurs et conditions
+
+Dans l'éditeur d'automatisations, *Ajouter un déclencheur* et *Ajouter une
+condition* proposent ceux de la console, sous PlayGuard ; leur cible est
+l'appareil de la console (ou sa pièce, ou l'entité elle-même).
+
+| Déclencheur | Quand |
+|---|---|
+| `playguard.game_started` | Un jeu démarre. |
+| `playguard.game_stopped` | Le jeu s'arrête : fermé, mis en veille, ou un autre lancé. |
+| `playguard.time_running_out` | Il reste 10 minutes ou moins de la limite du jour pendant qu'un jeu est lancé. |
+| `playguard.games_blocked` | Les jeux sont bloqués ; `blocked_by` : `limit` (la limite du jour, ou *Plus de jeu aujourd'hui*), `bedtime`, ou les deux (par défaut). |
+| `playguard.order_refused` | La console refuse un ordre. |
+
+Le `trigger.to_state` du déclencheur est l'état de l'entité *Événements*, avec
+les attributs de l'événement (`game`, `minutes_left`, `reason`…, voir
+[événements](#-événements)).
+
+| Condition | Remplie quand |
+|---|---|
+| `playguard.is_playing` | Un jeu est lancé (*En cours* en nomme un). |
+| `playguard.limit_reached` | La limite du jour est atteinte. |
+| `playguard.parental_controls_on` | Le contrôle parental est activé, pas déverrouillé pour le moment. |
+
+```yaml
+triggers:
+  - trigger: playguard.time_running_out
+    target:
+      device_id: 0123456789abcdef0123456789abcdef
+conditions:
+  - condition: playguard.is_playing
+    target:
+      device_id: 0123456789abcdef0123456789abcdef
+    options:
+      behavior: any
+```
+
+## 💬 Assist et assistants IA
+
+Trois intents : `PlayGuardPlayTime` (le temps de jeu du jour, le jeu en cours,
+ce qu'il reste de la limite), `PlayGuardAddTime` (`minutes`, 5 à 180 : du
+temps en plus aujourd'hui) et `PlayGuardStopToday` (plus de jeu aujourd'hui) ;
+chacun prend le `name` de la console quand il y en a plusieurs. Un assistant
+qui utilise l'API LLM de Home Assistant (*Assist* dans ses réglages) les
+reçoit comme outils dès qu'une entité de la console lui est exposée
+(*Paramètres › Assistants vocaux › Exposer*) : « combien de temps ont-ils joué
+aujourd'hui ? », « donne-leur 30 minutes de plus ». Ils répondent dans la
+langue de Home Assistant. Les ordres passent par les mêmes vérifications que
+les actions, et un refus est dit.
+
+L'Assist de Home Assistant (sans LLM) a besoin des phrases, dans
+`custom_sentences/fr/playguard.yaml` du dossier de configuration :
+
+```yaml
+language: fr
+intents:
+  PlayGuardPlayTime:
+    data:
+      - sentences:
+          - "combien de temps [ont-ils|a-t-il|a-t-elle] joué [à la Switch] [aujourd'hui]"
+          - "combien de temps reste-t-il [sur la Switch]"
+  PlayGuardAddTime:
+    data:
+      - sentences:
+          - "(donne|ajoute) {minutes} minutes [de plus] [sur la Switch]"
+  PlayGuardStopToday:
+    data:
+      - sentences:
+          - "plus de [jeux|Switch] aujourd'hui"
+lists:
+  minutes:
+    range:
+      from: 5
+      to: 180
+      step: 5
+```
 
 ## 🔄 Mise à jour des données
 
@@ -727,7 +870,7 @@ charge : mettez PlayGuard à jour.
 Avec *Demander sur la console*, PlayGuard demande sur la console avant de
 l'exécuter (événement `command_waiting` quand l'agent le garde). Une console en
 veille l'exécute quand elle sort de veille. *Dernier ordre* et l'entité
-*Événements* disent ce qu'il est devenu.
+*Événements* disent ce qu'il est devenu ; un refus crée alors une notification.
 </details>
 
 <details>
@@ -756,6 +899,15 @@ disparaît quand les deux versions sont les mêmes.
 
 Le PlayGuard de la console est plus récent que cette intégration : mettez à jour
 l'intégration PlayGuard (HACS). D'ici là, certaines valeurs peuvent manquer.
+</details>
+
+<details>
+<summary>Réparation : « … refuse les ordres de Home Assistant » / « … ne laisse pas les ordres changer le temps de jeu » / « PlayGuard est en lecture seule sur … »</summary>
+
+Un ordre a été refusé à cause d'un réglage de la console (ici, avant de
+l'envoyer, ou par la console). La réparation dit quel réglage changer dans
+PlayGuard › *Console › Accès à distance*, ou de mettre PlayGuard à jour ; elle
+disparaît d'elle-même dès que l'état de la console montre le changement.
 </details>
 
 <details>
@@ -793,10 +945,12 @@ distance* dans PlayGuard.
 ## 📡 Ce qu'elle fait sur le broker
 
 Elle lit `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
-`activity/<date>`, `names`, `week`, `event` et `report`, et publie les mêmes
+`activity/<date>`, `names`, `week`, `event`, `report` et `icon/+`, et publie les mêmes
 ordres scalaires retenus que les entités natives sur
 `playguard/<id>/<entity>/set` (la console efface chacun une fois traité), et
-sa version, retenue, sur `playguard/<id>/integration`. L'ajout d'une console à
+sa version, retenue, sur `playguard/<id>/integration`. Hors du broker, elle
+lit la dernière release de PlayGuard sur `api.github.com` (l'entité de mise à
+jour *PlayGuard*). L'ajout d'une console à
 la main écoute `+/+/state` et `+/+/+/state` quelques secondes, pour lister les
 consoles qui y sont. Le contrat est le
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md)

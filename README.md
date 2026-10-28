@@ -65,13 +65,27 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   (*Online* says it is gone), and a change made to a control or an action
   waits on the broker and is carried out when the console wakes up.
 - **Actions**: `set_limits`, `add_bonus_time`, `apply_profile`, `stop_today`,
-  `lock_now`, `sync_now`, `request_report`.
+  `lock_now`, `sync_now`, `request_report`, `get_play_time`.
 - An **event entity** for every order handled (applied, refused with the
   reason, waiting for PlayGuard's confirmation), for automations.
+- **Triggers and conditions** of its own in the automation editor: a game
+  started or stopped, time running out, games blocked, an order refused; a
+  game played, the limit reached, parental controls on.
+- **Assist and AI assistants**: today's play time, extra time, no more play
+  today, by voice or chat; `get_play_time` returns the day's or the week's
+  play time to a script.
 - An order the console would refuse (read-only mode, orders off, timer writes
   not allowed) is refused here, with the reason.
-- **Repairs** when you need to act, and **diagnostics** with the console's
-  last state and its last diagnostic report, names left out.
+- **The console's answer**: an order the console refuses makes its action
+  fail, with the console's reason; one refused later (sent while it slept, or
+  waiting for PlayGuard) raises a notification.
+- **In 14 languages**: English, French, German, Spanish (Spain and Latin
+  America), Italian, Japanese, Korean, Dutch, Portuguese (Portugal and Brazil),
+  Russian, Chinese (Simplified and Traditional), with the console's own labels.
+- **Repairs** when you need to act (a setting on the console that refuses
+  the orders included), **diagnostics** with the console's last state and its
+  last diagnostic report, names left out (on the entry and on the device), and
+  the console's events in the **logbook**.
 
 <details>
 <summary><b>📸 Screenshots</b></summary>
@@ -96,6 +110,8 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 [prerequisites](#-prerequisites) · [installation](#-installation) ·
 [set-up](#-set-up) · [options and reconfiguration](#-options-and-reconfiguration) ·
 [entities](#-entities) · [actions](#-actions) · [events](#-events) ·
+[triggers and conditions](#-triggers-and-conditions) ·
+[Assist and AI assistants](#-assist-and-ai-assistants) ·
 [data updates](#-data-updates) · [examples](#-examples) ·
 [use cases](#-use-cases) · [known limitations](#-known-limitations) ·
 [troubleshooting](#-troubleshooting) · [removal](#-removal) ·
@@ -206,6 +222,7 @@ twice.
 |---|---|---|
 | **Replace the console's own Home Assistant device** | on | Turns the console's MQTT discovery off, so its entities are not there twice. Off: the console publishes its own device again (next to this one). The entry reloads when it changes. |
 | **Keep the last values while the console sleeps** | on | While the console is offline (asleep, off, out of reach), its entities keep showing what it last said, controls included: a change made to one waits on the broker and is carried out when the console wakes up. Off: every entity but *Online* is unavailable then. |
+| **Notify an order refused later** | on | An order whose answer comes after its action returned (sent while the console slept, or waiting for PlayGuard's confirmation) and that the console refuses raises a notification, with the reason; the next order applied takes it away. A refusal that comes while the action still waits makes the action fail, whatever this option. |
 
 *⋮ › Reconfigure* changes the **Topic prefix**, when `topic_prefix` in the
 console's `sync.conf` changes. As when adding a console by hand, the console
@@ -261,7 +278,8 @@ the play timer*); lock it to turn them back on, always allowed.
 | *Account*'s play time today, *Account*'s play time this week | One pair per user account, created as the console speaks of it (its name, or its play time). Minutes, the week's shown in hours. | this integration's; unknown when nobody's time was read (the app reads the accounts when asked, the agent from the play log) |
 | Play sessions (calendar) | Each game played and when: one event per stretch the game was in front while the console was online, named after the game; the one going on reads *on*. Built from the recorder's history of *Now playing* and *Online*, so it goes back as far as the recorder keeps them (10 days by default). | this integration's; empty without the recorder or with *Now playing* off |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
-| Now playing | The game being played, by name (attributes `app_id`, `since`). | unknown while PlayGuard is open (nobody plays then) |
+| Now playing | The game being played, by name (attributes `app_id`, `since`); a homebrew too, by its name. | unknown while PlayGuard is open (nobody plays then) |
+| Activity | What the console is doing: *Playing a game*, *In a homebrew*, *In PlayGuard*, *HOME menu* (or a system applet over it), *Game suspended* (HOME pressed in a game, not closed), *Asleep or off* (off the broker); attributes `title` and `app_id` of the game or homebrew. From PlayGuard 1.5's `activity_today.now`, within 30 s; an older PlayGuard gives only game, PlayGuard and HOME menu. | this integration's; shown while the console sleeps too |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
 | Firmware, Atmosphère | The console's versions (the device's info shows them too). | diagnostic, disabled by default |
 | Last order | The last order handled, and how. | diagnostic, disabled by default |
@@ -290,6 +308,21 @@ again), *Export a diagnostic report* (disabled by default).
 
 **Event**: *Events*, see [events](#-events).
 
+**Image**: *Now playing icon*, the icon of the game being played, from a
+PlayGuard that publishes the games' icons (*Remote access › Publish the
+games' icons*: every installed or played game's, and the agent the game
+being played's when PlayGuard is closed): for a picture card or a
+notification's image. Unknown while no game is played, or before its icon
+arrived (a game installed since PlayGuard last ran: once PlayGuard opens).
+
+**Update**: *PlayGuard*, config: the version installed on the console against
+the latest release on GitHub, with its release notes, in *Settings ›
+Updates* too. PlayGuard installs it on the console (it offers it when it
+checks for updates); nothing is installed from Home Assistant. The release
+is read when the entity is added, then again with the console's documents
+once six hours have passed (`api.github.com`, the only request the
+integration makes outside the broker).
+
 **The console itself** (`playguard/<id>/system`, kept fresh by the agent
 while PlayGuard is closed):
 
@@ -309,7 +342,11 @@ while PlayGuard is closed):
 of the play log): *Games installed*, with every game the console lists in
 `games` (the last played first: `app_id`, `name`, `minutes`, `installed`,
 `last_played`; not recorded), *Play time (all time)* (every game, every
-account), *User accounts* (diagnostic, disabled by default).
+account), *User accounts* (diagnostic, disabled by default), and from
+PlayGuard 1.5 *Homebrews* (the `.nro` files on the SD card) and *Forwarders*
+(installed): PlayGuard lists games only, the homebrews as counts; their play
+time is in *Play time today*'s and *Play time this week*'s `homebrew`
+attribute and in the week's days (the console's timer counts it).
 
 There is **no sensor per game**: a game's time today is in the play log's
 `games` attribute, this week's in *Play time this week*'s, since it was first
@@ -352,6 +389,13 @@ when the console wakes up. An order the console would refuse is refused at
 once, with the reason (read-only mode, orders refused, timer writes off, an
 unknown profile, a device that is not a loaded PlayGuard console).
 
+While the console is online, the action (and a change made to an entity)
+waits up to 10 seconds for its answer. Refused, it fails with the console's
+reason (*Salon refused this order: the bedtime alarm is off.*), shown under the
+control, and an automation sees the error. Applied, waiting for PlayGuard's
+confirmation, or no answer in time: it returns; a refusal that comes later
+raises a notification (option *Notify an order refused later*).
+
 | Action | Fields | What it does |
 |---|---|---|
 | `playguard.set_limits` | `minutes` (0 to 1440; 1440 = no limit), `day` (`all`, the default, `today`, or `sun` … `sat`), or `week` (seven limits, Sunday first, in place of `minutes` and `day`) | Sets a day's limit, every day's, today's only, or the whole week's. |
@@ -361,6 +405,19 @@ unknown profile, a device that is not a loaded PlayGuard console).
 | `playguard.lock_now` | | Turns parental controls back on after a temporary unlock. |
 | `playguard.sync_now` | | The console publishes everything again. |
 | `playguard.request_report` | | The console saves a diagnostic report on its SD card, and publishes it when *Remote access* allows it (then in the device's diagnostics). |
+| `playguard.get_play_time` | `period` (`today`, the default, or `week`) | Returns the play time as the action's response (*Response variable* in a script): today's (`minutes`, `games` with each one's `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`, `homebrew_minutes`, `activity`), or the last seven days' (`days`, `minutes`, `homebrew_minutes`, `games` with each one's `per_day`, `accounts`). Sends nothing to the console. |
+
+```yaml
+actions:
+  - action: playguard.get_play_time
+    data:
+      device_id: 0123456789abcdef0123456789abcdef
+      period: week
+    response_variable: week
+  - action: notify.notify
+    data:
+      message: "{{ week.minutes }} minutes this week, {{ week.games[0].name }} first."
+```
 
 `set_limits`, `add_bonus_time`, `apply_profile` and `stop_today` need
 *Orders may change the play timer*.
@@ -388,6 +445,86 @@ own, `app_id`, `game` (its name), `minutes_left`, `blocked_by`. The console
 builds its state every 30 seconds while a game is played, so these come
 within that. Events are not retained: one sent while
 Home Assistant was away is not seen; *Last order* keeps the last result.
+
+Each event is also fired on Home Assistant's event bus as `playguard_event`
+(`device_id`, `console_id`, `event_type` and the attributes above), which the
+**logbook** shows on the console's device: *Salon started Mario Kart 8
+Deluxe*, *Salon refused Limit Monday: 5000: value out of range*.
+
+## 🎯 Triggers and conditions
+
+In the automation editor, *Add trigger* and *Add condition* offer the
+console's own, under PlayGuard; their target is the console's device (or its
+area, or the entity itself).
+
+| Trigger | When |
+|---|---|
+| `playguard.game_started` | A game starts. |
+| `playguard.game_stopped` | The game stops: closed, suspended, or another one started. |
+| `playguard.time_running_out` | 10 minutes or fewer are left of today's limit while a game is played. |
+| `playguard.games_blocked` | Games are blocked; `blocked_by`: `limit` (the day's limit, or *No more play today*), `bedtime`, or both (the default). |
+| `playguard.order_refused` | The console refuses an order. |
+
+The trigger's `trigger.to_state` is the *Events* entity's state, with the
+event's attributes (`game`, `minutes_left`, `reason` …, see [events](#-events)).
+
+| Condition | Passes when |
+|---|---|
+| `playguard.is_playing` | A game is played (*Now playing* names one). |
+| `playguard.limit_reached` | Today's limit is reached. |
+| `playguard.parental_controls_on` | Parental controls are on, not unlocked for now. |
+
+```yaml
+triggers:
+  - trigger: playguard.time_running_out
+    target:
+      device_id: 0123456789abcdef0123456789abcdef
+conditions:
+  - condition: playguard.is_playing
+    target:
+      device_id: 0123456789abcdef0123456789abcdef
+    options:
+      behavior: any
+```
+
+## 💬 Assist and AI assistants
+
+Three intents: `PlayGuardPlayTime` (today's play time, the game played, what
+is left of the limit), `PlayGuardAddTime` (`minutes`, 5 to 180: extra time
+today) and `PlayGuardStopToday` (no more play today); each takes the
+console's `name` when there are several. An assistant that uses Home
+Assistant's LLM API (*Assist* in its settings) gets them as tools as soon as
+one of the console's entities is exposed to it (*Settings › Voice assistants
+› Expose*): "how long did they play today?", "give them 30 more minutes".
+They answer in Home Assistant's language. Orders go through the same checks
+as the actions, and a refusal is said.
+
+Home Assistant's own Assist (without an LLM) needs the sentences, in
+`custom_sentences/en/playguard.yaml` of the configuration folder:
+
+```yaml
+language: en
+intents:
+  PlayGuardPlayTime:
+    data:
+      - sentences:
+          - "how long [did they play|have they played] [on the Switch] [today]"
+          - "[how much] time left on the Switch"
+  PlayGuardAddTime:
+    data:
+      - sentences:
+          - "(give|add) {minutes} [more] minutes [on the Switch]"
+  PlayGuardStopToday:
+    data:
+      - sentences:
+          - "no more [Switch] games today"
+lists:
+  minutes:
+    range:
+      from: 5
+      to: 180
+      step: 5
+```
 
 ## 🔄 Data updates
 
@@ -693,7 +830,7 @@ PlayGuard.
 Under *Ask on the console*, PlayGuard asks on the console before carrying it
 out (event `command_waiting` when the agent keeps it). A sleeping console
 carries it out when it wakes up. *Last order* and the *Events* entity say
-what became of it.
+what became of it; a refusal then raises a notification.
 </details>
 
 <details>
@@ -720,6 +857,15 @@ Optional modules › Link agent*. The repair goes once both versions match.
 
 The console's PlayGuard is newer than this integration: update the PlayGuard
 integration (HACS). Until then, some values may be missing.
+</details>
+
+<details>
+<summary>Repair: "… refuses Home Assistant's orders" / "… does not let orders change the play timer" / "PlayGuard is read-only on …"</summary>
+
+An order was refused because of a setting on the console (here, before
+sending it, or by the console). The repair says which setting to change in
+PlayGuard › *Console › Remote access*, or to update PlayGuard; it goes away
+by itself once the console's state shows the change.
 </details>
 
 <details>
@@ -757,10 +903,11 @@ PlayGuard.
 ## 📡 What it does on the broker
 
 It reads `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
-`activity/<date>`, `names`, `week`, `event` and `report`, and publishes the
+`activity/<date>`, `names`, `week`, `event`, `report` and `icon/+`, and publishes the
 same retained scalar orders as the native entities on
 `playguard/<id>/<entity>/set` (the console clears each one once handled), and
-its version, retained, on `playguard/<id>/integration`. Adding a console by
+its version, retained, on `playguard/<id>/integration`. Outside the broker, it reads PlayGuard's latest
+release on `api.github.com` (the *PlayGuard* update entity). Adding a console by
 hand listens to `+/+/state` and `+/+/+/state` for a few seconds, to list the
 consoles there. The contract is PlayGuard's
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md).
