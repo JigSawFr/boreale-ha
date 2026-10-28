@@ -184,6 +184,16 @@ interroge GitHub à intervalles réguliers) ; pour la voir tout de suite,
 *HACS › PlayGuard › ⋮ › Mettre à jour les informations*. Puis *Mettre à jour*,
 et redémarrez Home Assistant.
 
+**Pré-versions** : ce que contient la prochaine version à ce stade, publié en
+`X.Y.Z-dev.N` à chaque changement (le journal des modifications de la version
+à venir dans ses notes). Pour les recevoir, activez l'interrupteur
+*Pré-version* de l'appareil du dépôt PlayGuard dans *Paramètres › Appareils et
+services › HACS* (désactivé par défaut : activez-le d'abord sur la page de
+l'appareil) ; la mise à jour propose alors aussi les pré-versions, et la
+version une fois publiée. Désactivez-le pour rester sur les versions : la
+prochaine remplace la pré-version (*HACS › PlayGuard › ⋮ › Retélécharger*
+choisit une version tout de suite).
+
 À la main : téléchargez `playguard.zip` depuis la
 [dernière version](https://github.com/JigSawFr/playguard-ha/releases/latest),
 extrayez-le dans un dossier `custom_components/playguard` de votre
