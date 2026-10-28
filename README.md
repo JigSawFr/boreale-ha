@@ -177,6 +177,15 @@ A new release shows up in HACS by itself, within a few hours (HACS checks
 GitHub on a schedule); to see it at once, *HACS › PlayGuard › ⋮ › Update
 information*. Then *Update*, and restart Home Assistant.
 
+**Pre-releases**: what the next version holds so far, published as
+`X.Y.Z-dev.N` each time it changes (the changelog of the coming release in
+its notes). To get them, turn on the *Pre-release* switch of the PlayGuard
+repository's device in *Settings › Devices & services › HACS* (disabled by
+default: enable it on the device's page first); the update then offers the
+pre-releases too, and the release once it is out. Turn it back off to stay
+on releases: the next release replaces the pre-release (*HACS › PlayGuard ›
+⋮ › Redownload* picks a release at once).
+
 By hand: download `playguard.zip` from the
 [latest release](https://github.com/JigSawFr/playguard-ha/releases/latest),
 extract it into a `custom_components/playguard` folder of your configuration,

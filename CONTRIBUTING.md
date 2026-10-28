@@ -99,6 +99,14 @@ which reads [conventional commits](https://www.conventionalcommits.org/), as Pla
   built by this repository's CI. `scripts/package.py` gives the zip fixed dates (the tag's
   commit), order and modes, so the same tag gives the same bytes, and refuses a tag that is
   not `manifest.json`'s version.
+- **Pre-releases**: each update of the release PR is also published, by `release-please.yml`'s
+  `prerelease` job, as a GitHub pre-release `vX.Y.Z-dev.N` of the PR's head: the next
+  version, `manifest.json` stamped with it (`scripts/prerelease.py stamp`), the PR's
+  changelog section as its notes, the same zip, checksum and attestation. HACS offers it to
+  whoever turns the repository's *Pre-release* switch on. A head already published is not
+  published again; the 5 newest of a version are kept, and all of them are deleted once
+  `vX.Y.Z` is released. Nothing to merge for a pre-release: merging the release PR stays the
+  only way to a release.
 - release-please runs with a token of the *PlayGuard Release* GitHub App when the
   repository has it (variable `RELEASE_APP_CLIENT_ID`, secret `RELEASE_APP_PRIVATE_KEY`;
   permissions Contents, Pull requests and Issues: write): its pushes to the release PR run
