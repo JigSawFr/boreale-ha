@@ -16,6 +16,6 @@ release-please writes the changelog from.
 
 - [ ] `ruff check`, `ruff format --check` and `pytest` pass; `scripts/coverage_per_module.py` keeps every module above 95%
 - [ ] `quality_scale.yaml` is still true (no rule left behind)
-- [ ] New strings are in `translations/en.json` and `translations/fr.json`; icons in `icons.json`
+- [ ] New strings are in `translations/en.json`, `translations/fr.json` and the other 12 languages; icons in `icons.json`
 - [ ] An entity change follows PlayGuard's `entities.json` (or the console's change comes first)
 - [ ] A change users can see is in both README.md and README.fr.md

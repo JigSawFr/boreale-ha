@@ -39,7 +39,7 @@ the coverage gate is per module, not the total.
 - **The quality scale.** [`quality_scale.yaml`](custom_components/playguard/quality_scale.yaml)
   says where the integration stands on Home Assistant's
   [Integration Quality Scale](https://contributors.home-assistant.io/core/quality-scale/rules/)
-  (Gold): each rule *done*, or *exempt* with the reason. hassfest skips that file for a
+  (Platinum): each rule *done*, or *exempt* with the reason. hassfest skips that file for a
   custom integration, so `tests/test_quality_scale.py` checks it. A change that breaks a
   rule (an untranslated error, an entity without a category it needs, a module under 95%)
   is fixed, not marked *todo*.
@@ -66,14 +66,19 @@ the coverage gate is per module, not the total.
 | `custom_components/playguard/__init__.py` | Set-up and unload of a console's entry, the actions registered once |
 | `coordinator.py` | The console's push coordinator: MQTT subscriptions, its documents, orders, the take-over of the console's own discovery, repair issues |
 | `entities.py`, `const.py` | The entity table, mirrored from PlayGuard's; the topics, schema and option names |
-| `entity.py` and one module per platform | The entities (`binary_sensor`, `button`, `event`, `number`, `select`, `sensor`, `switch`, `time`) |
+| `entity.py` and one module per platform | The entities (`binary_sensor`, `button`, `calendar`, `event`, `image`, `lock`, `number`, `select`, `sensor`, `switch`, `time`, `update`) |
+| `play.py` | Today's and the week's play time, per game and per account, as the sensors, `get_play_time` and Assist read them |
+| `trigger.py`, `condition.py`, `automation.py`, `triggers.yaml`, `conditions.yaml` | The console's own triggers and conditions in the automation editor |
+| `intent.py`, `llm.py` | The intents for Assist, and the same as tools of Home Assistant's LLM API |
+| `logbook.py` | The console's events (`playguard_event`) in the logbook |
 | `config_flow.py` | MQTT discovery, adding by hand, options, reconfigure |
-| `services.py`, `services.yaml` | The actions |
+| `services.py`, `services.yaml` | The actions (`get_play_time` with a response) |
 | `statistics.py` | Finished days into the recorder's long-term statistics |
 | `repairs.py`, `diagnostics.py` | The fixable repair, the redacted diagnostics |
 | `brand/` | The integration's icon and logos (Home Assistant 2026.3+), rendered from `branding/` by `scripts/render_branding.mjs` |
-| `tests/` | One test module per part, PlayGuard's fixtures, the parity and quality-scale checks |
-| `scripts/` | The per-module coverage gate, the release zip, the README's branding |
+| `blueprints/automation/playguard/` | The blueprints the README offers to import (`tests/test_blueprints.py` sets each one up) |
+| `tests/` | One test module per part, PlayGuard's fixtures, the parity, translation and quality-scale checks |
+| `scripts/` | The per-module coverage gate, the release zip, the pre-release's version (`prerelease.py`), the README's branding |
 | `branding/` | The icon (a house around Aurore's night and PlayGuard's play sign), the logos, the README's banner and the social preview, as SVG, in Aurore's aurora (its sky, its colours, Sora): `node scripts/render_branding.mjs` (Node and Playwright) renders them to `brand/` and `.github/readme/` |
 | `.github/readme/` | The README's images: the banner, the social preview (uploaded by hand in *Settings › General*), the screenshots (a demo console in a real Home Assistant) |
 
@@ -87,8 +92,9 @@ which reads [conventional commits](https://www.conventionalcommits.org/), as Pla
   `feat(entities)!: …` for a breaking change); CI checks it (`pr-title.yml`).
   release-please sorts each section of the changelog by scope, so a title without one
   lands apart from the rest. Scopes in use: `integration`, `config-flow`, `coordinator`,
-  `entities`, `services`, `statistics`, `repairs`, `diagnostics`, `translations`,
-  `readme`, `release`, `repo`, `deps`.
+  `entities`, `sensors`, `events`, `accounts`, `week`, `availability`, `device`,
+  `calendar`, `blueprints`, `native`, `services`, `statistics`, `repairs`,
+  `diagnostics`, `translations`, `brand`, `readme`, `release`, `repo`, `deps`.
 - **Squash-merge** pull requests, so each one lands as a single commit carrying that title.
 - release-please keeps a `chore(main): release X.Y.Z` PR open
   ([`CHANGELOG.md`](CHANGELOG.md), `version` in `manifest.json`); merging it tags
