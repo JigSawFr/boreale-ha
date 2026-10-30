@@ -119,6 +119,9 @@
       },
       "forwarders": {
         "default": "mdi:application-import"
+      },
+      "homebrew_notices": {
+        "default": "mdi:bell-badge"
       }
     },
     "switch": {

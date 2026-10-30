@@ -103,6 +103,8 @@ class PlayGuardConsole:
         self.games: dict[str, Any] | None = None  # the games installed and played, with their totals
         # What the device is and which homebrews publish on it (tree 2 only).
         self.capabilities: dict[str, Any] | None = None
+        # Every Boréale homebrew's shared bell (Boréale's tree only).
+        self.notices: dict[str, Any] | None = None
         self.online: bool | None = None
         self.activity: dict[str, Any] | None = None
         self.names: dict[str, Any] = {}
@@ -161,6 +163,7 @@ class PlayGuardConsole:
         }
         if tree >= 2:
             topics["capabilities"] = self._on_capabilities
+            topics["notices"] = self._on_notices
         for sub, handler in topics.items():
             self._unsubscribe.append(
                 await mqtt.async_subscribe(
@@ -309,6 +312,14 @@ class PlayGuardConsole:
         if not self._readable("capabilities", doc):
             return
         self.capabilities = doc
+        self._changed()
+
+    @callback
+    def _on_notices(self, msg: ReceiveMessage) -> None:
+        doc = _json(msg.payload)
+        if not self._readable("notices", doc):
+            return
+        self.notices = doc
         self._changed()
 
     @property
