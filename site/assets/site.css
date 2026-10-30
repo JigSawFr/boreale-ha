@@ -455,3 +455,6 @@ footer.site > .wrap { position: relative; }
 /* The repository's address in the install's first step: broken anywhere on
    a narrow phone rather than wider than it. */
 .ground code { overflow-wrap: anywhere; }
+/* Japanese breaks between phrases (word-break: auto-phrase): a phrase wider
+   than a narrow phone may then break anywhere, rather than overflow. */
+:lang(ja) :is(.section-head h2, .section-head p, .ground h3, .ground p, .promise h2, .promise p) { overflow-wrap: anywhere; }
