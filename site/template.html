@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="{{lang}}"{{first_visit}}{{lost}}>
+<head>
+<meta charset="utf-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://gateway.umami.is; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<meta name="theme-color" content="#0b1424">
+{{indexing}}
+<link rel="icon" href="{{root}}assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{{root}}assets/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="{{root}}assets/apple-touch-icon.png">
+<link rel="manifest" href="{{root}}manifest.webmanifest">
+<link rel="preload" href="{{root}}assets/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{root}}assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{root}}assets/site.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Boréale">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{description}}">
+<meta property="og:url" content="{{url}}">
+<meta property="og:image" content="{{site}}assets/social-preview.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:locale" content="{{og_locale}}">
+{{og_alternates}}
+<meta name="twitter:card" content="summary_large_image">
+{{jsonld}}
+<script src="{{root}}assets/lang.js"></script>
+<script src="{{root}}assets/site.js" defer></script>
+<script src="{{root}}assets/umami.js" defer data-website-id="6410ffdd-ae2e-4ddb-8e18-0a77e9fa374e" data-domains="ha.boreale.dev"></script>
+</head>
+<body{{page_class}}>
+<a class="skip" href="#main">{{skip}}</a>
+<div class="sky">
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <header class="wrap top">
+    {{switcher}}
+    <nav aria-label="{{nav_label}}">
+      <ul>
+        <li><a href="{{root}}{{home}}#features">{{nav_features}}</a></li>
+        <li><a href="{{root}}{{home}}#install">{{nav_install}}</a></li>
+        <li><a href="{{docs}}" referrerpolicy="strict-origin">{{nav_docs}}</a></li>
+      </ul>
+    </nav>
+    {{languages}}
+  </header>
+  {{hero}}
+</div>
+{{body}}
+<footer class="site">
+  <div class="wrap">
+    <nav class="links" aria-label="{{footer_label}}">
+      <ul>
+        <li><a href="{{boreale_url}}">Boréale</a></li>
+        <li><a href="{{playguard_url}}">PlayGuard</a></li>
+        <li><a href="https://github.com/JigSawFr/boreale-ha" referrerpolicy="strict-origin">GitHub</a></li>
+        <li><a href="https://github.com/JigSawFr/boreale-ha/issues" referrerpolicy="strict-origin">{{footer_issues}}</a></li>
+        <li><a href="{{root}}{{home}}legal/">{{footer_legal}}</a></li>
+      </ul>
+    </nav>
+    <div class="row">
+      <p>{{footer_made}}</p>
+      <p>{{footer_ha}}</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

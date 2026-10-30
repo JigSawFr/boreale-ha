@@ -21,6 +21,7 @@
 [**Configurer**](#-configuration) ·
 [**Entités**](#-entités) ·
 [**Exemples**](#-exemples) ·
+[**ha.boreale.dev**](https://ha.boreale.dev/fr/?utm_source=github&utm_medium=readme) ·
 [**PlayGuard**](https://github.com/JigSawFr/PlayGuard)
 
 <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/dashboard.png" alt="Un tableau de bord familial : le temps de jeu du jour et ce qui reste, le jeu en cours, du temps en plus en un geste, les deux dernières semaines par enfant, les règles" width="100%">

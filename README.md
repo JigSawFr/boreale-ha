@@ -21,6 +21,7 @@
 [**Set&nbsp;up**](#-set-up) ·
 [**Entities**](#-entities) ·
 [**Examples**](#-examples) ·
+[**ha.boreale.dev**](https://ha.boreale.dev/?utm_source=github&utm_medium=readme) ·
 [**PlayGuard**](https://github.com/JigSawFr/PlayGuard)
 
 <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/dashboard.png" alt="A family dashboard: today's play time and what is left, the game being played, extra time in one tap, the last two weeks per child, the rules" width="100%">
