@@ -428,14 +428,91 @@ async def test_agent_asleep(hass: HomeAssistant, setup, state) -> None:
 
 
 async def test_newer_schema(hass: HomeAssistant, setup, state) -> None:
-    state["schema"] = 2
-    publish(hass, "state", state)
+    """A state of a newer schema is not read: the last one stays, a repair issue says why."""
+    console = setup.runtime_data
+    known = console.state
+    remaining = _id("sensor", "screen_time_remaining", hass)
+    assert hass.states.get(remaining).state == "45"
+    newer = {**state, "schema": 2, "console": {**state["console"], "name": "Grenier"}, "timer": "junk"}
+    publish(hass, "state", newer)
     await hass.async_block_till_done()
-    assert ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+    assert issue and issue.translation_placeholders == {"name": "Salon", "schema": "2", "known": "1"}
+    assert console.state is known and hass.states.get(remaining).state == "45"
     state["schema"] = 1
     publish(hass, "state", state)
     await hass.async_block_till_done()
     assert not ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+    assert console.state is not known
+
+
+async def test_newer_schema_first(hass: HomeAssistant, mqtt_mock, entry, state) -> None:
+    """The first state of a newer schema: none known, the console's entities wait."""
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    publish(hass, "state", {**state, "schema": 2}, retain=True)
+    await hass.async_block_till_done()
+    assert entry.runtime_data.state is None
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+
+
+@pytest.mark.parametrize(
+    ("topic", "attribute", "doc"),
+    [
+        ("system", "system", fixture("system.json")),
+        ("games", "games", fixture("games.json")),
+        ("activity", "activity", fixture("activity.json")),
+        ("names", "names", {"schema": 1, "ts": 2, "games": {"0100000000010000": "Lantern Tides"}}),
+        ("week", "week", {"schema": 1, "ts": 2, "days": ["2026-10-04"], "games": []}),
+    ],
+)
+async def test_newer_schema_every_topic(hass: HomeAssistant, setup, topic: str, attribute: str, doc: dict) -> None:
+    """Every topic checks its schema the same way: a newer document is not read."""
+    console = setup.runtime_data
+    publish(hass, topic, doc)
+    await hass.async_block_till_done()
+    known = getattr(console, attribute)
+    assert known == doc
+    publish(hass, topic, {**doc, "schema": 3, "ts": 9})
+    await hass.async_block_till_done()
+    assert getattr(console, attribute) is known
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+    assert issue and issue.translation_placeholders["schema"] == "3"
+    # The state, still of a schema it knows, does not take the issue away: that topic's next document does.
+    publish(hass, "state", fixture("state.json"))
+    await hass.async_block_till_done()
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+    publish(hass, topic, doc)
+    await hass.async_block_till_done()
+    assert not ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+
+
+async def test_newer_schema_event(hass: HomeAssistant, setup) -> None:
+    """An event of a newer schema is not fired."""
+    fired = []
+    hass.bus.async_listen("playguard_event", fired.append)
+    event = {"schema": 2, "source": "agent", "ts": 2, "event_type": "time_warning", "app_id": "0100000000010000"}
+    publish(hass, "event", event)
+    await hass.async_block_till_done()
+    assert not fired and setup.runtime_data.last_event is None
+    publish(hass, "event", {**event, "schema": 1})
+    await hass.async_block_till_done()
+    assert len(fired) == 1
+
+
+async def test_schema_absent_and_unknown_fields(hass: HomeAssistant, setup, state) -> None:
+    """A document without `schema` is schema 1; a field it does not know is skipped."""
+    console = setup.runtime_data
+    del state["schema"]
+    state["console"]["name"] = "Grenier"
+    state["something_new"] = {"rings": 3}
+    publish(hass, "state", state)
+    publish(hass, "names", {"ts": 2, "games": {"0100000000010000": "Lantern Tides"}, "colours": ["teal"]})
+    await hass.async_block_till_done()
+    assert console.name == "Grenier" and console.game_name("0100000000010000") == "Lantern Tides"
+    assert not ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
+    assert hass.states.get(_id("sensor", "screen_time_remaining", hass)).state == "45"
 
 
 async def test_native_discovery_repair(hass: HomeAssistant, setup, mqtt_mock, state) -> None:

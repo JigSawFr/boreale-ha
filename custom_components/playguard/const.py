@@ -11,8 +11,9 @@ from typing import Final
 
 DOMAIN: Final = "playguard"
 
-# The documents' schema this integration understands. A newer one raises a
-# repair issue; the integration still reads what it knows.
+# The documents' schema this integration understands, on every topic. A
+# document of a newer one is not read (the last one known stays) and raises a
+# repair issue; one without `schema` is schema 1.
 SCHEMA: Final = 1
 
 DEFAULT_PREFIX: Final = "playguard"

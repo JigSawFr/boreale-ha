@@ -142,3 +142,31 @@ async def test_week_alone(hass: HomeAssistant, mqtt_mock, entry) -> None:
     await hass.async_block_till_done()
     await async_wait_recording_done(hass)
     assert not await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=DOMAIN))
+
+
+async def test_newer_schema(hass: HomeAssistant, mqtt_mock, entry) -> None:
+    """A finished day or a week of a newer schema imports nothing; the day known before stays."""
+    lea = "00112233445566778899AABBCCDDEEFF"
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    publish(hass, "activity/2026-10-03", _day("2026-10-03", 45, {"0100000000010000": 45}), True)
+    publish(hass, "activity/2026-10-03", {**_day("2026-10-03", 99, {"0100000000020000": 99}), "schema": 2})
+    publish(hass, "activity/2026-10-04", {**_day("2026-10-04", 90, {"0100000000020000": 90}), "schema": 2}, True)
+    week = {"schema": 2, "ts": 1, "days": ["2026-10-02", "2026-10-03"], "accounts": [{"uid": lea, "min": [30, 0]}]}
+    publish(hass, "week", week, True)
+    await hass.async_block_till_done()
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
+    await hass.async_block_till_done()
+    await async_wait_recording_done(hass)
+
+    console = entry.runtime_data
+    assert set(console.finals) == {"2026-10-03"} and console.finals["2026-10-03"]["total_min"] == 45
+    assert console.week is None
+    metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=DOMAIN))
+    assert set(metadata) == {total_id(CONSOLE_ID), game_id(CONSOLE_ID, "0100000000010000")}
+    start = day_start("2026-10-03", dt_util.get_time_zone(hass.config.time_zone))
+    stats = await hass.async_add_executor_job(
+        statistics_during_period, hass, start, None, {total_id(CONSOLE_ID)}, "hour", None, {"mean"}
+    )
+    assert [r["mean"] for r in stats[total_id(CONSOLE_ID)]] == [45.0]
