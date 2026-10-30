@@ -19,6 +19,17 @@ SCHEMA: Final = 1
 DEFAULT_PREFIX: Final = "playguard"
 CONF_CONSOLE_ID: Final = "console_id"
 CONF_PREFIX: Final = "topic_prefix"
+# Which topic tree the console publishes on. 1: everything under
+# <prefix>/<id>/ (PlayGuard before Boréale, default prefix "playguard").
+# 2: Boréale's, shared by its homebrews: the device's topics under
+# <prefix>/<id>/, PlayGuard's under <prefix>/<id>/playguard/ (default prefix
+# "boreale"). An entry on tree 1 listens to both and follows the console to
+# tree 2 at its first message there.
+CONF_TREE: Final = "tree"
+BOREALE_PREFIX: Final = "boreale"
+MODULE: Final = "playguard"
+# The device's topics on tree 2 (and "icon/<APP_ID>"); the rest is the module's.
+DEVICE_TOPICS: Final = frozenset({"availability", "capabilities", "system", "integration", "icon"})
 # Turn the console's own Home Assistant discovery off (the integration's
 # entities replace it).
 CONF_TAKE_OVER: Final = "take_over_discovery"
@@ -136,3 +147,16 @@ RETIRED: Final = (("binary_sensor", "temp_unlocked"), ("switch", "unlocked"), ("
 # every set-up; cleared when the entry is removed): PlayGuard warns of a
 # newer release of the integration.
 TOPIC_INTEGRATION: Final = "integration"
+
+
+def tree_prefix(prefix: str) -> str:
+    """Where a console on tree 1 under `prefix` publishes once on tree 2: the
+    old default moves to Boréale's, a prefix of one's own stays."""
+    return BOREALE_PREFIX if prefix == DEFAULT_PREFIX else prefix
+
+
+def tree_topic(prefix: str, console_id: str, tree: int, sub: str) -> str:
+    """A console's topic: `sub` ("state", "icon/+", "limit_mon/set") on its tree."""
+    if tree >= 2 and sub.split("/", 1)[0] not in DEVICE_TOPICS:
+        return f"{prefix}/{console_id}/{MODULE}/{sub}"
+    return f"{prefix}/{console_id}/{sub}"

@@ -28,6 +28,7 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: PlayGua
             "online": console.online,
             "state": console.state,
             "system": console.system,
+            "capabilities": console.capabilities,
             "games": {
                 "installed": (console.games or {}).get("installed"),
                 "listed": len((console.games or {}).get("games") or {}),

@@ -249,6 +249,14 @@ and its entry follows it (and reloads) once the console publishes a state
 newer than the last one the entry read; a state left on the broker under the
 former prefix does not move it back.
 
+**Boréale's topic tree.** From the PlayGuard release that moves to it, the
+console publishes under `boreale/<id>/` (its availability, `capabilities`,
+system, icons) and `boreale/<id>/playguard/` (the rest), and clears its old
+topics. An entry on the old tree listens to both, and follows the console at
+its first message on the new one: nothing to do, the entities, their history
+and the statistics stay. A prefix of one's own stays the same; only the tree
+under it changes.
+
 ## 🧩 Entities
 
 One device per console, named after the console (*Name in Home Assistant*
@@ -790,8 +798,8 @@ copy in `blueprints/automation/playguard/`.
 - Without *Orders may change the play timer*, the limits, bedtime, extra time,
   blocking all games and the profiles are refused (the console's own device
   hides these entities instead).
-- Only the prefix `playguard` is discovered; a console under another prefix
-  is added by hand.
+- Only the default prefixes are discovered (`playguard`, and `boreale` on
+  Boréale's tree); a console under another prefix is added by hand.
 - *Now playing* is unknown while PlayGuard is open (and filled by the agent
   otherwise); the week and the game names need PlayGuard itself to have run.
 - The statistics only have the finished days the console still held (the
@@ -808,9 +816,9 @@ copy in `blueprints/automation/playguard/`.
 The console publishes nothing on the broker Home Assistant uses, or under
 another prefix. On the console, *Console › Remote access › Status* must
 read *Online* (PlayGuard open, or its agent running), with the same broker as
-Home Assistant's MQTT integration. A prefix other than `playguard` is never
-discovered: add the console by hand, where it is listed (a prefix of one or
-two levels) or added by its id.
+Home Assistant's MQTT integration. A prefix other than `playguard` (or
+`boreale`, on Boréale's tree) is never discovered: add the console by hand,
+where it is listed (a prefix of one or two levels) or added by its id.
 </details>
 
 <details>
@@ -931,10 +939,13 @@ It reads `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event`, `report` and `icon/+`, and publishes the
 same retained scalar orders as the native entities on
 `playguard/<id>/<entity>/set` (the console clears each one once handled), and
-its version, retained, on `playguard/<id>/integration`. Outside the broker, it reads PlayGuard's latest
+its version, retained, on `playguard/<id>/integration`. On Boréale's tree, the
+console's own topics (`availability`, `capabilities`, `system`, `icon/+`,
+`integration`) are under `boreale/<id>/`, the rest under
+`boreale/<id>/playguard/`. Outside the broker, it reads PlayGuard's latest
 release on `api.github.com` (the *PlayGuard* update entity). Adding a console by
-hand listens to `+/+/state` and `+/+/+/state` for a few seconds, to list the
-consoles there. Every document carries a `schema` (none is 1): one newer than
+hand listens to `+/+/state`, `+/+/+/state` and `+/+/+/+/state` for a few
+seconds, to list the consoles there. Every document carries a `schema` (none is 1): one newer than
 the integration's is not read (a repair says so), a field it does not know is
 skipped. The contract is PlayGuard's
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md).

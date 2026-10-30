@@ -35,6 +35,7 @@ from .const import (
     CONF_NOTIFY_REFUSED,
     CONF_PREFIX,
     CONF_TAKE_OVER,
+    CONF_TREE,
     CONF_UNPUBLISHED,
     DEFAULT_PREFIX,
     DOMAIN,
@@ -53,6 +54,8 @@ from .const import (
     TOPIC_INTEGRATION,
     WRITE_NONE,
     WRITE_TIMER,
+    tree_prefix,
+    tree_topic,
 )
 from .entities import ENTITIES, dig
 
@@ -91,12 +94,15 @@ class PlayGuardConsole:
         self.hass = hass
         self.entry = entry
         self.console_id: str = entry.data[CONF_CONSOLE_ID]
+        self.tree: int = entry.data.get(CONF_TREE, 1)
         self.prefix: str = entry.data.get(CONF_PREFIX, DEFAULT_PREFIX)
-        self.base = f"{self.prefix}/{self.console_id}"
+        self.base = f"{self.prefix}/{self.console_id}"  # the device's topics
 
         self.state: dict[str, Any] | None = None
         self.system: dict[str, Any] | None = None  # the console itself (versions, storage, power, network)
         self.games: dict[str, Any] | None = None  # the games installed and played, with their totals
+        # What the device is and which homebrews publish on it (tree 2 only).
+        self.capabilities: dict[str, Any] | None = None
         self.online: bool | None = None
         self.activity: dict[str, Any] | None = None
         self.names: dict[str, Any] = {}
@@ -127,8 +133,20 @@ class PlayGuardConsole:
 
     # ---- topics ----
 
+    def topic(self, sub: str) -> str:
+        """`sub` on the console's tree: "state", "limit_mon/set"."""
+        return tree_topic(self.prefix, self.console_id, self.tree, sub)
+
     async def async_start(self) -> None:
-        """Subscribes to the console's topics."""
+        """Subscribes to the console's topics. On tree 1, to tree 2's too: the
+        console moves there with its update to a PlayGuard on Boréale's tree."""
+        await self._async_subscribe(self.tree, self.prefix)
+        if self.tree == 1:
+            await self._async_subscribe(2, tree_prefix(self.prefix))
+        await self._async_texts()  # loaded for the logbook, which reads them from the cache
+        await self.async_publish_version()
+
+    async def _async_subscribe(self, tree: int, prefix: str) -> None:
         topics: dict[str, Callable[[ReceiveMessage], None]] = {
             "state": self._on_state,
             "system": self._on_system,
@@ -141,14 +159,55 @@ class PlayGuardConsole:
             "event": self._on_event,
             "report": self._on_report,
         }
+        if tree >= 2:
+            topics["capabilities"] = self._on_capabilities
         for sub, handler in topics.items():
-            self._unsubscribe.append(await mqtt.async_subscribe(self.hass, f"{self.base}/{sub}", handler, qos=1))
+            self._unsubscribe.append(
+                await mqtt.async_subscribe(
+                    self.hass, tree_topic(prefix, self.console_id, tree, sub), self._via(tree, handler), qos=1
+                )
+            )
         # The games' icons: raw JPEG, not text.
         self._unsubscribe.append(
-            await mqtt.async_subscribe(self.hass, f"{self.base}/icon/+", self._on_icon, qos=1, encoding=None)
+            await mqtt.async_subscribe(
+                self.hass,
+                tree_topic(prefix, self.console_id, tree, "icon/+"),
+                self._via(tree, self._on_icon),
+                qos=1,
+                encoding=None,
+            )
         )
-        await self._async_texts()  # loaded for the logbook, which reads them from the cache
-        await self.async_publish_version()
+
+    def _via(self, tree: int, handler: Callable[[ReceiveMessage], None]) -> Callable[[ReceiveMessage], None]:
+        """`handler` for the messages of `tree`. The first one of a newer tree
+        moves the entry there; the older tree is then left behind (what the
+        console clears there is not read)."""
+
+        @callback
+        def _on(msg: ReceiveMessage) -> None:
+            if tree < self.tree:
+                return
+            if tree > self.tree:
+                self._move_to(tree)
+            handler(msg)
+
+        return _on
+
+    @callback
+    def _move_to(self, tree: int) -> None:
+        """The console publishes on a newer tree: orders and the integration's
+        version go there, and the entry keeps it (only that tree from the
+        next start)."""
+        prefix = tree_prefix(self.prefix)
+        _LOGGER.info("%s moved to Boréale's topic tree (%s/%s/)", self.name, prefix, self.console_id)
+        self.tree, self.prefix = tree, prefix
+        self.base = f"{prefix}/{self.console_id}"
+        self.hass.config_entries.async_update_entry(
+            self.entry, data={**self.entry.data, CONF_PREFIX: prefix, CONF_TREE: tree}
+        )
+        self.entry.async_create_background_task(
+            self.hass, self.async_publish_version(), f"{DOMAIN} {self.console_id} version"
+        )
 
     async def async_publish_version(self) -> None:
         """Tells the console which version of the integration (and of Home
@@ -159,7 +218,7 @@ class PlayGuardConsole:
         try:
             await mqtt.async_publish(
                 self.hass,
-                f"{self.base}/{TOPIC_INTEGRATION}",
+                self.topic(TOPIC_INTEGRATION),
                 json.dumps(doc, separators=(",", ":")),
                 qos=1,
                 retain=True,
@@ -169,7 +228,7 @@ class PlayGuardConsole:
 
     async def async_clear_version(self) -> None:
         """The integration is gone: the console no longer warns of its releases."""
-        await mqtt.async_publish(self.hass, f"{self.base}/{TOPIC_INTEGRATION}", "", qos=1, retain=True)
+        await mqtt.async_publish(self.hass, self.topic(TOPIC_INTEGRATION), "", qos=1, retain=True)
 
     @callback
     def async_stop(self) -> None:
@@ -243,6 +302,23 @@ class PlayGuardConsole:
             return
         self.games = doc
         self._changed()
+
+    @callback
+    def _on_capabilities(self, msg: ReceiveMessage) -> None:
+        doc = _json(msg.payload)
+        if not self._readable("capabilities", doc):
+            return
+        self.capabilities = doc
+        self._changed()
+
+    @property
+    def platform(self) -> str:
+        """The device's platform, as it says it (capabilities, else its system
+        document); a console from before Boréale's tree is a Switch."""
+        for doc in (self.capabilities, self.system):
+            if isinstance(platform := (doc or {}).get("platform"), str) and platform:
+                return platform
+        return "switch"
 
     def document(self, topic: str) -> dict[str, Any] | None:
         """The last document of `topic`: "state", "system" or "games"."""
@@ -578,7 +654,7 @@ class PlayGuardConsole:
 
     async def async_send(self, key: str, payload: str) -> None:
         """Publishes an order, retained: it waits on the broker if the console sleeps."""
-        await mqtt.async_publish(self.hass, f"{self.base}/{key}/set", payload, qos=1, retain=True)
+        await mqtt.async_publish(self.hass, self.topic(f"{key}/set"), payload, qos=1, retain=True)
 
     async def async_order(self, key: str, write: str, payload: str) -> None:
         """Checks, then sends an order. While the console is on the broker, waits
