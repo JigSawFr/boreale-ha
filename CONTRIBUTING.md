@@ -95,7 +95,7 @@ which reads [conventional commits](https://www.conventionalcommits.org/), as Pla
   `vX.Y.Z` and publishes the release. `release-please.yml` then attaches **`playguard.zip`**
   (what HACS installs, `hacs.json`'s `zip_release`), `SHA256SUMS.txt` and a
   [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations):
-  `gh attestation verify playguard.zip -R JigSawFr/playguard-ha` checks that a download was
+  `gh attestation verify playguard.zip -R JigSawFr/boreale-ha` checks that a download was
   built by this repository's CI. `scripts/package.py` gives the zip fixed dates (the tag's
   commit), order and modes, so the same tag gives the same bytes, and refuses a tag that is
   not `manifest.json`'s version.

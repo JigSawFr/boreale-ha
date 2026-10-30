@@ -8,7 +8,7 @@ blueprint:
   author: JigSawFr
   homeassistant:
     min_version: 2026.10.0
-  source_url: https://github.com/JigSawFr/playguard-ha/blob/main/blueprints/automation/playguard/extra_time.yaml
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/playguard/extra_time.yaml
   input:
     console:
       name: Console

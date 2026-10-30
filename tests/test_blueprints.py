@@ -124,7 +124,7 @@ def _local(freezer: FrozenDateTimeFactory, hass: HomeAssistant, when: str) -> da
 def test_blueprint_file(path: Path) -> None:
     """Its source is its own file on main, and both READMEs link to it."""
     data = load_yaml_dict(path)
-    url = f"https://github.com/JigSawFr/playguard-ha/blob/main/blueprints/automation/playguard/{path.name}"
+    url = f"https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/playguard/{path.name}"
     assert data["blueprint"]["source_url"] == url
     assert data["blueprint"]["domain"] == "automation"
     for readme in READMES:

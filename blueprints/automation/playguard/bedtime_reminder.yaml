@@ -7,7 +7,7 @@ blueprint:
   author: JigSawFr
   homeassistant:
     min_version: 2026.10.0
-  source_url: https://github.com/JigSawFr/playguard-ha/blob/main/blueprints/automation/playguard/bedtime_reminder.yaml
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/playguard/bedtime_reminder.yaml
   input:
     bedtime:
       name: Bedtime

@@ -11,10 +11,10 @@
   "dependencies": [
     "mqtt"
   ],
-  "documentation": "https://github.com/JigSawFr/playguard-ha",
+  "documentation": "https://github.com/JigSawFr/boreale-ha",
   "integration_type": "device",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/JigSawFr/playguard-ha/issues",
+  "issue_tracker": "https://github.com/JigSawFr/boreale-ha/issues",
   "mqtt": [
     "playguard/+/state"
   ],

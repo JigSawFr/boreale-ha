@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Report privately through GitHub, from the repository's **Security** tab:
-[Report a vulnerability](https://github.com/JigSawFr/playguard-ha/security/advisories/new).
+[Report a vulnerability](https://github.com/JigSawFr/boreale-ha/security/advisories/new).
 That opens a private advisory visible only to you and the maintainer. Please do not open a
 public issue: the integration sends orders to a console that guards a child's play time,
 and a way around what PlayGuard allows is useful to exactly the people it is meant to hold

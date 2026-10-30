@@ -70,7 +70,7 @@ jobs:
           python scripts/package.py --out dist/playguard.zip --version-must-be "$TAG"
           cd dist && sha256sum playguard.zip > SHA256SUMS.txt
       # Anyone can then check that a download came from this repository's CI, unchanged:
-      #   gh attestation verify playguard.zip -R JigSawFr/playguard-ha
+      #   gh attestation verify playguard.zip -R JigSawFr/boreale-ha
       - name: Build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:

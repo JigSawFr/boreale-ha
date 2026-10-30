@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Report a security vulnerability
-    url: https://github.com/JigSawFr/playguard-ha/security/advisories/new
+    url: https://github.com/JigSawFr/boreale-ha/security/advisories/new
     about: Privately, never as a public issue — a way around what PlayGuard allows must not be readable by everyone before it is fixed.
   - name: Something the console does (PlayGuard itself)
     url: https://github.com/JigSawFr/PlayGuard/issues/new/choose

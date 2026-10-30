@@ -10,7 +10,7 @@ blueprint:
   author: JigSawFr
   homeassistant:
     min_version: 2026.10.0
-  source_url: https://github.com/JigSawFr/playguard-ha/blob/main/blueprints/automation/playguard/time_warning.yaml
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/playguard/time_warning.yaml
   input:
     events:
       name: Events

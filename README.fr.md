@@ -1,20 +1,20 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/banner.png" alt="PlayGuard for Home Assistant" width="100%">
+<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/banner.png" alt="PlayGuard for Home Assistant" width="100%">
 
 ### Le contrôle parental de la Nintendo Switch, dans Home Assistant
 
 **Temps&nbsp;de&nbsp;jeu · Limites · Temps&nbsp;en&nbsp;plus · Coucher · Statistiques · MQTT&nbsp;local**
 
-[![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
-[![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
+[![validate](https://github.com/JigSawFr/boreale-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/boreale-ha/actions/workflows/validate.yml)
+[![latest release](https://img.shields.io/github/v/release/JigSawFr/boreale-ha)](https://github.com/JigSawFr/boreale-ha/releases/latest)
 [![HACS: custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](https://github.com/JigSawFr/playguard-ha/blob/main/custom_components/playguard/quality_scale.yaml)
-[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)
+[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](https://github.com/JigSawFr/boreale-ha/blob/main/custom_components/playguard/quality_scale.yaml)
+[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/JigSawFr/boreale-ha/blob/main/LICENSE)
 
-[English](https://github.com/JigSawFr/playguard-ha/blob/main/README.md) · **Français**
+[English](https://github.com/JigSawFr/boreale-ha/blob/main/README.md) · **Français**
 
-[![Ouvrez votre instance Home Assistant et ouvrez un dépôt dans le Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
+[![Ouvrez votre instance Home Assistant et ouvrez un dépôt dans le Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=boreale-ha&category=integration)
 [![Ouvrez votre instance Home Assistant et commencez à configurer une nouvelle intégration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
 
 [**Installer**](#-installation) ·
@@ -23,7 +23,7 @@
 [**Exemples**](#-exemples) ·
 [**PlayGuard**](https://github.com/JigSawFr/PlayGuard)
 
-<img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/dashboard.png" alt="Un tableau de bord familial : le temps de jeu du jour et ce qui reste, le jeu en cours, du temps en plus en un geste, les deux dernières semaines par enfant, les règles" width="100%">
+<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/dashboard.png" alt="Un tableau de bord familial : le temps de jeu du jour et ce qui reste, le jeu en cours, du temps en plus en un geste, les deux dernières semaines par enfant, les règles" width="100%">
 
 </div>
 
@@ -97,13 +97,13 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 <br>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/device.png" alt="La page de l'appareil de la console : ses contrôles, ses capteurs et son activité" width="72%">
-  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/phone.png" alt="Le tableau de bord familial sur un téléphone" width="24%">
+  <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/device.png" alt="La page de l'appareil de la console : ses contrôles, ses capteurs et son activité" width="72%">
+  <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/phone.png" alt="Le tableau de bord familial sur un téléphone" width="24%">
   <br><sub><b>L'appareil de la console</b> · <b>Sur un téléphone</b></sub>
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/discovered.png" alt="Une console trouvée sur le broker, proposée sous Découvertes" width="72%">
+  <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/discovered.png" alt="Une console trouvée sur le broker, proposée sous Découvertes" width="72%">
   <br><sub><b>Trouvée sur le broker</b></sub>
 </p>
 
@@ -170,7 +170,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 Avec [HACS](https://hacs.xyz/) :
 
 1. *HACS › ⋮ › Dépôts personnalisés* : ajoutez
-   `https://github.com/JigSawFr/playguard-ha`, type *Intégration* ; ou le
+   `https://github.com/JigSawFr/boreale-ha`, type *Intégration* ; ou le
    premier bouton en haut de cette page (My Home Assistant ouvre le dépôt dans
    votre HACS). Dans PlayGuard, *Accès à distance › Home Assistant ›
    Installer l'intégration Home Assistant* affiche les deux mêmes boutons en
@@ -195,10 +195,10 @@ prochaine remplace la pré-version (*HACS › PlayGuard › ⋮ › Retéléchar
 choisit une version tout de suite).
 
 À la main : téléchargez `playguard.zip` depuis la
-[dernière version](https://github.com/JigSawFr/playguard-ha/releases/latest),
+[dernière version](https://github.com/JigSawFr/boreale-ha/releases/latest),
 extrayez-le dans un dossier `custom_components/playguard` de votre
 configuration, et redémarrez Home Assistant. Le zip de chaque version porte une
-attestation de provenance de build : `gh attestation verify playguard.zip -R JigSawFr/playguard-ha`
+attestation de provenance de build : `gh attestation verify playguard.zip -R JigSawFr/boreale-ha`
 vérifie qu'il a été construit par la CI de ce dépôt (`SHA256SUMS.txt`, à côté,
 donne sa somme de contrôle).
 
@@ -768,13 +768,13 @@ téléphone (l'application Home Assistant).
 
 | Blueprint | Ce qu'il fait | Importer |
 |---|---|---|
-| **Time is up, extra time from the notification** | Quand la limite du jour est atteinte (pas à l'heure du coucher), une notification sur le téléphone avec un bouton qui donne du temps en plus (*+15 min*, ou ce que vous choisissez). | [![Importer le blueprint de fin de temps](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
-| **A few minutes left, extra time from the notification** | Quand il reste 10 minutes de jeu avant la limite du jour (l'événement *Temps de jeu bientôt écoulé*), une notification sur le téléphone avec le jeu, les minutes restantes et un bouton qui donne du temps en plus. | [![Importer le blueprint des dernières minutes](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
-| **Extra time when…** | Du temps en plus quand quelque chose arrive : un assistant activé (les corvées faites), un bouton ou une télécommande pressés, un tag scanné ; puis ce que vous voulez (désactiver l'assistant). | [![Importer le blueprint de temps en plus](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
-| **Bedtime reminder** | Une notification quelques minutes avant *Alarme du coucher*, pendant qu'un jeu est joué (ou chaque jour). | [![Importer le blueprint de rappel du coucher](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
-| **Still playing after bedtime** | Quand un jeu est joué entre *Coucher* et *Lever* : le coucher est arrivé avec un jeu en cours, ou un jeu a été lancé dans la nuit. Pour quand le minuteur de jeu est désactivé, ou que l'alarme ne fait que prévenir. | [![Importer le blueprint still playing after bedtime](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fafter_bedtime.yaml) |
-| **Evening summary** | Le temps de jeu du jour à une heure fixe : le total, celui de chaque enfant (quand la console a lu les comptes) et les jeux les plus joués ; rien un jour sans jeu. | [![Importer le blueprint evening summary](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fevening_summary.yaml) |
-| **Weekly summary** | Une fois par semaine, le temps de jeu des sept derniers jours et les jeux les plus joués. | [![Importer le blueprint de résumé de la semaine](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
+| **Time is up, extra time from the notification** | Quand la limite du jour est atteinte (pas à l'heure du coucher), une notification sur le téléphone avec un bouton qui donne du temps en plus (*+15 min*, ou ce que vous choisissez). | [![Importer le blueprint de fin de temps](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
+| **A few minutes left, extra time from the notification** | Quand il reste 10 minutes de jeu avant la limite du jour (l'événement *Temps de jeu bientôt écoulé*), une notification sur le téléphone avec le jeu, les minutes restantes et un bouton qui donne du temps en plus. | [![Importer le blueprint des dernières minutes](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
+| **Extra time when…** | Du temps en plus quand quelque chose arrive : un assistant activé (les corvées faites), un bouton ou une télécommande pressés, un tag scanné ; puis ce que vous voulez (désactiver l'assistant). | [![Importer le blueprint de temps en plus](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
+| **Bedtime reminder** | Une notification quelques minutes avant *Alarme du coucher*, pendant qu'un jeu est joué (ou chaque jour). | [![Importer le blueprint de rappel du coucher](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
+| **Still playing after bedtime** | Quand un jeu est joué entre *Coucher* et *Lever* : le coucher est arrivé avec un jeu en cours, ou un jeu a été lancé dans la nuit. Pour quand le minuteur de jeu est désactivé, ou que l'alarme ne fait que prévenir. | [![Importer le blueprint still playing after bedtime](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fafter_bedtime.yaml) |
+| **Evening summary** | Le temps de jeu du jour à une heure fixe : le total, celui de chaque enfant (quand la console a lu les comptes) et les jeux les plus joués ; rien un jour sans jeu. | [![Importer le blueprint evening summary](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fevening_summary.yaml) |
+| **Weekly summary** | Une fois par semaine, le temps de jeu des sept derniers jours et les jeux les plus joués. | [![Importer le blueprint de résumé de la semaine](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
 
 Ceux qui donnent du temps en plus demandent *Les ordres peuvent changer le
 temps de jeu* activé sur la console. Leurs notifications sont en anglais :
@@ -932,7 +932,7 @@ console passé minuit. Choisissez la statistique `playguard:<console id>_play_ti
 Pour tout le reste, téléchargez les diagnostics (*Paramètres › Appareils et
 services › PlayGuard › ⋮ › Télécharger les diagnostics* : les derniers documents
 et le dernier rapport de la console, sans les noms) et ouvrez un
-[ticket](https://github.com/JigSawFr/playguard-ha/issues).
+[ticket](https://github.com/JigSawFr/boreale-ha/issues).
 
 ## 🧹 Désinstallation
 
@@ -968,21 +968,21 @@ de PlayGuard (en anglais).
 
 ## 🤝 Aide, sécurité et contribution
 
-- Un problème avec l'intégration : [Obtenir de l'aide](https://github.com/JigSawFr/playguard-ha/blob/main/.github/SUPPORT.md) (en
+- Un problème avec l'intégration : [Obtenir de l'aide](https://github.com/JigSawFr/boreale-ha/blob/main/.github/SUPPORT.md) (en
   anglais) dit où demander ; un rapport de bug demande les diagnostics de la
   console (la page de l'appareil, *⋮ › Télécharger les diagnostics* : sans les
   noms ni les identifiants de compte).
-- Un problème de sécurité : en privé, comme le dit [SECURITY.md](https://github.com/JigSawFr/playguard-ha/blob/main/SECURITY.md)
+- Un problème de sécurité : en privé, comme le dit [SECURITY.md](https://github.com/JigSawFr/boreale-ha/blob/main/SECURITY.md)
   (en anglais), jamais dans un ticket public.
 - Travailler sur l'intégration (tests, couverture, échelle de qualité, parité
   avec la table des entités de PlayGuard, traductions, versions) :
-  [CONTRIBUTING.md](https://github.com/JigSawFr/playguard-ha/blob/main/CONTRIBUTING.md) (en anglais). Les changements sont listés
-  dans [CHANGELOG.md](https://github.com/JigSawFr/playguard-ha/blob/main/CHANGELOG.md).
+  [CONTRIBUTING.md](https://github.com/JigSawFr/boreale-ha/blob/main/CONTRIBUTING.md) (en anglais). Les changements sont listés
+  dans [CHANGELOG.md](https://github.com/JigSawFr/boreale-ha/blob/main/CHANGELOG.md).
 - Soutenir PlayGuard : [GitHub Sponsors](https://github.com/sponsors/JigSawFr)
   ou [Ko-fi](https://ko-fi.com/jigsawfr).
 
 ## 📜 Licence
 
-**GPLv3** (voir [`LICENSE`](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)), comme PlayGuard. Maintenu par [JigSawFr](https://github.com/JigSawFr).
+**GPLv3** (voir [`LICENSE`](https://github.com/JigSawFr/boreale-ha/blob/main/LICENSE)), comme PlayGuard. Maintenu par [JigSawFr](https://github.com/JigSawFr).
 
 <sub>Ni affilié à Nintendo ni au projet Home Assistant, ni approuvé par eux. Nintendo Switch est une marque de Nintendo.</sub>
