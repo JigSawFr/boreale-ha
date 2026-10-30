@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.9.0](https://github.com/JigSawFr/boreale-ha/compare/v0.8.0...v0.9.0) (2026-10-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **init:** the domain is boreale; automations using the triggers and conditions playguard.* must use boreale.*.
+
+### 🚀 Features
+
+* **activity:** what the console is doing, and the homebrews counted ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+* **assist:** the play time as an action's response, and intents for Assist and AI assistants ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+* **automation:** the console's own triggers and conditions in the automation editor ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+* **coordinator:** follow the console to Boréale's topic tree ([#40](https://github.com/JigSawFr/boreale-ha/issues/40)) ([3392446](https://github.com/JigSawFr/boreale-ha/commit/3392446ceb93fc00eb22236968dd456f5ebb563c))
+* **i18n:** German, Spanish, Italian, Japanese, Korean, Dutch, Portuguese, Russian and Chinese ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+* **image:** the icon of the game being played ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+* **init:** Boréale for Nintendo Switch, domain boreale, taking over playguard ([#41](https://github.com/JigSawFr/boreale-ha/issues/41)) ([0035a13](https://github.com/JigSawFr/boreale-ha/commit/0035a13044e754df1e0e432786ea2d0613de3b70))
+* **native:** the console's answers, triggers and conditions, Assist, update, game icon, activity, 14 languages ([#33](https://github.com/JigSawFr/boreale-ha/issues/33)) ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+* **orders:** a refused order fails with the console's reason, and a refusal that comes later raises a notification ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+* **repairs:** the settings that refuse orders as repairs, the console's events in the logbook, the device's diagnostics ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+* **site:** ha.boreale.dev, the integration's site in fifteen languages ([#43](https://github.com/JigSawFr/boreale-ha/issues/43)) ([a7e5c2b](https://github.com/JigSawFr/boreale-ha/commit/a7e5c2b4832de0f6ffcafadf2dfc5f08e4b71c57))
+* **update:** PlayGuard's version against its latest release ([387c4c0](https://github.com/JigSawFr/boreale-ha/commit/387c4c02740aa20e74670fc22be4f549e008a775))
+
+
+### 🐞 Bug Fixes
+
+* **coordinator:** a document of a newer schema is no longer read ([#38](https://github.com/JigSawFr/boreale-ha/issues/38)) ([cfd748e](https://github.com/JigSawFr/boreale-ha/commit/cfd748e053a25f90348f16ecb3ca9383301edab3))
+* **release:** the pre-release found from the release PR's branch ([#36](https://github.com/JigSawFr/boreale-ha/issues/36)) ([9fea093](https://github.com/JigSawFr/boreale-ha/commit/9fea09349e0ffc902dc5fc017c79b788db1f81d4))
+* **services:** the playguard.* actions no longer answer, nothing of the old integration kept ([#44](https://github.com/JigSawFr/boreale-ha/issues/44)) ([9231826](https://github.com/JigSawFr/boreale-ha/commit/92318268635762443f11f3fb1d6c217515edaab0))
+
+
+### 📚 Documentation
+
+* **readme:** the READMEs and CONTRIBUTING caught up with what the integration does ([#37](https://github.com/JigSawFr/boreale-ha/issues/37)) ([ce9c956](https://github.com/JigSawFr/boreale-ha/commit/ce9c9562ce418d1118432728397b5cb67bf5cb55))
+
 ## [0.8.0](https://github.com/JigSawFr/playguard-ha/compare/v0.7.0...v0.8.0) (2026-10-26)
 
 
