@@ -260,6 +260,14 @@ découverte, et son entrée la suit (et se recharge) dès que la console publie 
 état plus récent que le dernier lu par l'entrée ; un état resté sur le broker
 sous l'ancien préfixe ne la fait pas revenir en arrière.
 
+**L'arbre de topics de Boréale.** À partir de la release de PlayGuard qui y
+passe, la console publie sous `boreale/<id>/` (sa disponibilité,
+`capabilities`, le système, les icônes) et `boreale/<id>/playguard/` (le
+reste), et efface ses anciens topics. Une entrée sur l'ancien arbre écoute
+les deux et suit la console à son premier message sur le nouveau : rien à
+faire, les entités, leur historique et les statistiques restent. Un préfixe
+choisi reste le même ; seul l'arbre en dessous change.
+
 ## 🧩 Entités
 
 Un appareil par console, au nom de la console (*Nom dans Home Assistant* dans
@@ -828,8 +836,9 @@ de ses entrées), ou dans la copie du blueprint dans
 - Sans *Les ordres peuvent changer le temps de jeu*, les limites, l'heure du
   coucher, le temps en plus, le blocage de tous les jeux et les profils sont
   refusés (l'appareil d'origine de la console masque plutôt ces entités).
-- Seul le préfixe `playguard` est découvert ; une console sous un autre préfixe
-  s'ajoute à la main.
+- Seuls les préfixes par défaut sont découverts (`playguard`, et `boreale`
+  sur l'arbre de Boréale) ; une console sous un autre préfixe s'ajoute à la
+  main.
 - *Jeu en cours* est inconnu tant que PlayGuard est ouvert (et renseigné par
   l'agent sinon) ; la semaine et les noms des jeux demandent que PlayGuard
   lui-même ait tourné.
@@ -850,7 +859,7 @@ La console ne publie rien sur le broker qu'utilise Home Assistant, ou publie
 sous un autre préfixe. Sur la console, *Console › Accès à distance › État*
 doit afficher *En ligne* (PlayGuard ouvert, ou son agent actif), avec le même
 broker que l'intégration MQTT de Home Assistant. Un préfixe autre que
-`playguard` n'est jamais découvert : ajoutez la console à la main, où elle est
+`playguard` (ou `boreale`, sur l'arbre de Boréale) n'est jamais découvert : ajoutez la console à la main, où elle est
 listée (un préfixe d'un ou deux niveaux) ou ajoutée par son identifiant.
 </details>
 
@@ -977,10 +986,14 @@ Elle lit `playguard/<id>/state`, `system`, `games`, `availability`, `activity`,
 `activity/<date>`, `names`, `week`, `event`, `report` et `icon/+`, et publie les mêmes
 ordres scalaires retenus que les entités natives sur
 `playguard/<id>/<entity>/set` (la console efface chacun une fois traité), et
-sa version, retenue, sur `playguard/<id>/integration`. Hors du broker, elle
+sa version, retenue, sur `playguard/<id>/integration`. Sur l'arbre de
+Boréale, les topics de la console elle-même (`availability`, `capabilities`,
+`system`, `icon/+`, `integration`) sont sous `boreale/<id>/`, le reste sous
+`boreale/<id>/playguard/`. Hors du broker, elle
 lit la dernière release de PlayGuard sur `api.github.com` (l'entité de mise à
 jour *PlayGuard*). L'ajout d'une console à
-la main écoute `+/+/state` et `+/+/+/state` quelques secondes, pour lister les
+la main écoute `+/+/state`, `+/+/+/state` et `+/+/+/+/state` quelques
+secondes, pour lister les
 consoles qui y sont. Chaque document porte un `schema` (absent : 1) : un
 schéma plus récent que celui de l'intégration n'est pas lu (une réparation le
 signale), un champ inconnu est ignoré. Le contrat est le

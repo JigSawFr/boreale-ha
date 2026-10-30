@@ -22,6 +22,7 @@ from custom_components.playguard.const import (
     CONF_NOTIFY_REFUSED,
     CONF_PREFIX,
     CONF_TAKE_OVER,
+    CONF_TREE,
     DOMAIN,
 )
 
@@ -105,7 +106,7 @@ async def test_discovered(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Salon"
-    assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"}
+    assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard", CONF_TREE: 1}
     assert result["options"] == {CONF_TAKE_OVER: True}
     assert result["result"].unique_id == CONSOLE_ID
     assert (result["result"].version, result["result"].minor_version) == (1, 3)  # nothing to migrate
@@ -227,7 +228,7 @@ async def test_found_on_the_broker(hass: HomeAssistant, mqtt_mock) -> None:
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"console": "0badc0de"})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Chambre"
-    assert result["data"] == {CONF_CONSOLE_ID: "0badc0de", CONF_PREFIX: "home/playguard"}
+    assert result["data"] == {CONF_CONSOLE_ID: "0badc0de", CONF_PREFIX: "home/playguard", CONF_TREE: 1}
     assert result["result"].unique_id == "0badc0de"
 
 
@@ -279,7 +280,7 @@ async def test_by_hand(hass: HomeAssistant, mqtt_mock, no_wait) -> None:
         result = await _answered(hass, mqtt_mock, step, topic, json.dumps(fixture("state.json")))
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Salon"  # the console's name
-    assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "home/playguard"}
+    assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "home/playguard", CONF_TREE: 1}
     assert result["result"].unique_id == CONSOLE_ID
 
 
@@ -329,7 +330,7 @@ async def test_reconfigure(hass: HomeAssistant, setup, mqtt_mock, no_wait) -> No
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
     await hass.async_block_till_done()
-    assert setup.data == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "home/playguard"}
+    assert setup.data == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "home/playguard", CONF_TREE: 1}
     assert setup.options == {CONF_TAKE_OVER: True}
 
     # Reloaded: the console is heard under the new prefix only.
