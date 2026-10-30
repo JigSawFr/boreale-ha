@@ -49,8 +49,11 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   proposée à la configuration, sans identifiant à saisir.
 - **Les mêmes entités** que l'appareil MQTT d'origine de la console (noms,
   unités, options), à sa place (pas de doublons ; réactivez-le dans les
-  options), plus **En ligne**, **Agent actif**, **Temps de jeu cette semaine**,
-  **Fin de partie prévue** et le calendrier **Parties**.
+  options), plus **En ligne**, **Agent actif**, **Vu pour la dernière fois**,
+  **Temps de jeu cette semaine**, **Fin de partie prévue**, **Activité**,
+  **Homebrews** et **Forwarders**, le calendrier **Parties**, l'**Icône du jeu
+  en cours** et une entité de mise à jour **PlayGuard** (la version de la
+  console face à la dernière release de PlayGuard).
 - **Les noms des jeux** sur *Jeu en cours*, et le temps de chaque jeu
   aujourd'hui et cette semaine en attributs ; tous les jeux sur *Jeux
   installés* (`games`), avec leur temps de jeu : une entité pour les jeux,
@@ -91,6 +94,10 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   refuse les ordres compris), des **diagnostics** avec le dernier état de la
   console et son dernier rapport de diagnostic, sans les noms (sur l'entrée et
   sur l'appareil), et les événements de la console dans le **journal**.
+- Des **blueprints**, des automatisations toutes prêtes : temps écoulé ou
+  bientôt écoulé avec du temps en plus depuis la notification, du temps en plus
+  quand une entrée s'active, un rappel du coucher, une partie encore en cours
+  après le coucher, un résumé du soir et un de la semaine.
 
 <details>
 <summary><b>📸 Captures d'écran</b></summary>
@@ -118,8 +125,10 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 [déclencheurs et conditions](#-déclencheurs-et-conditions) ·
 [Assist et assistants IA](#-assist-et-assistants-ia) ·
 [mise à jour des données](#-mise-à-jour-des-données) · [exemples](#-exemples) ·
-[cas d'usage](#-cas-dusage) · [limites connues](#-limites-connues) ·
+[blueprints](#-blueprints) · [cas d'usage](#-cas-dusage) ·
+[limites connues](#-limites-connues) ·
 [dépannage](#-dépannage) · [désinstallation](#-désinstallation) ·
+[ce qu'elle fait sur le broker](#-ce-quelle-fait-sur-le-broker) ·
 [aide, sécurité et contribution](#-aide-sécurité-et-contribution)
 
 ## 🎮 Appareils pris en charge
@@ -128,7 +137,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   Lite) sous Atmosphère, avec un PlayGuard qui a *Console › Accès à
   distance*. Ce que PlayGuard lui-même prend en charge est sur sa page
   [compatibilité](https://github.com/JigSawFr/PlayGuard/blob/main/docs/fr/compatibility.md) :
-  testé sur les firmwares 22.0.0 à 22.5.0 (Atmosphère 1.11.x) ; sur un firmware
+  testé sur les firmwares 22.0.0 à 23.0.1 (Atmosphère 1.11.x à 1.12.1) ; sur un firmware
   plus récent, il s'ouvre en lecture seule, et chaque ordre est refusé jusqu'à
   ce qu'une version de PlayGuard le prenne en charge ; avant le firmware 21.0.0,
   il n'a pas de minuteur (limites, heure du coucher, temps en plus, verrou de
@@ -256,7 +265,7 @@ sous l'ancien préfixe ne la fait pas revenir en arrière.
 Un appareil par console, au nom de la console (*Nom dans Home Assistant* dans
 PlayGuard) : la console telle que Nintendo la nomme, son modèle et son numéro
 de modèle (*Nintendo Switch – OLED Model*, HEG-001) et le système qu'elle fait
-tourner comme logiciel (*23.0.1 · Atmosphère 1.10.1*). Les entités de
+tourner comme logiciel (*23.0.1 · Atmosphère 1.12.1*). Les entités de
 *configuration* et de *diagnostic* sont dans leurs propres sections de la page
 de l'appareil et hors des tableaux de bord par défaut. Tant que la console est
 hors ligne, ses entités gardent leurs dernières valeurs (*En ligne* dit
@@ -279,7 +288,7 @@ recharge avec lui.
 | Code PIN défini | Un code PIN est défini. | diagnostic |
 | Horloge réseau exacte | L'horloge de la console est réglée depuis le réseau. | diagnostic, désactivé par défaut |
 | En ligne | La console est sur le broker en ce moment (sinon : en veille, éteinte, hors de portée). | diagnostic, propre à cette intégration |
-| Agent actif | L'agent de PlayGuard garde le lien (désactivé tant que la console est hors ligne : il dort avec elle). | diagnostic, désactivé par défaut, propre à cette intégration |
+| Agent actif | L'agent de PlayGuard garde le lien (éteint tant que la console est hors ligne : il dort avec elle). | diagnostic, désactivé par défaut, propre à cette intégration |
 
 **Verrou** : *Contrôle parental*, verrouillé tant qu'il s'applique.
 Déverrouillez-le pour le suspendre avec le code PIN que PlayGuard garde (il
@@ -298,7 +307,6 @@ en heures)
 | Temps de jeu cette semaine | Les 7 derniers jours, avec les minutes de chaque jour (`days`), de chaque jeu (`games`) et de chaque compte (`accounts`). | propre à cette intégration ; dès que PlayGuard ou son agent a publié du temps de jeu |
 | Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, avec le minuteur de jeu désactivé, ou sans limite ni coucher |
 | Temps de jeu aujourd'hui de *Compte*, Temps de jeu cette semaine de *Compte* | Une paire par compte utilisateur, créée dès que la console en parle (son nom, ou son temps de jeu). En minutes, celui de la semaine affiché en heures. | propres à cette intégration ; inconnus tant que le temps des comptes n'a pas été lu (l'app lit les comptes à la demande, l'agent d'après le journal de jeu) |
-| Parties (calendrier) | Chaque jeu joué et quand : un événement par période où le jeu était au premier plan pendant que la console était en ligne, au nom du jeu ; celui en cours se lit *activé*. Tiré de l'historique de *Jeu en cours* et *En ligne* dans l'enregistreur, il remonte donc aussi loin que l'enregistreur les garde (10 jours par défaut). | propre à cette intégration ; vide sans l'enregistreur ou avec *Jeu en cours* désactivé |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
 | Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`) ; un homebrew aussi, par son nom. | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
 | Activité | Ce que fait la console : *Joue à un jeu*, *Dans un homebrew*, *Sur PlayGuard*, *Menu HOME* (ou une applet système par-dessus), *Jeu suspendu* (HOME appuyé dans un jeu, sans le fermer), *En veille ou éteinte* (absente du broker) ; attributs `title` et `app_id` du jeu ou du homebrew. Depuis le `activity_today.now` de PlayGuard 1.5, sous 30 s ; un PlayGuard plus ancien ne donne que jeu, PlayGuard et menu HOME. | propre à cette intégration ; affichée aussi pendant la veille |
@@ -332,6 +340,13 @@ défaut).
 
 **Événement** : *Événements*, voir [événements](#-événements).
 
+**Calendrier** : *Parties*, chaque jeu joué et quand : un événement par
+période où le jeu était au premier plan pendant que la console était en ligne,
+au nom du jeu ; celui en cours met le calendrier à *activé*. Tiré de
+l'historique de *Jeu en cours* et *En ligne* dans l'enregistreur, il remonte
+donc aussi loin que l'enregistreur les garde (10 jours par défaut) ; vide sans
+l'enregistreur ou avec *Jeu en cours* désactivé. Propre à cette intégration.
+
 **Image** : *Icône du jeu en cours*, l'icône du jeu lancé, depuis un
 PlayGuard qui publie les icônes des jeux (*Accès à distance › Publier les
 icônes des jeux* : celles de tous les jeux installés ou joués, et l'agent
@@ -355,7 +370,7 @@ quand PlayGuard est fermé) :
 |---|---|---|
 | Batterie, En charge, Sur le dock | Sa charge, si un chargeur l'alimente, si elle est sur le dock. | |
 | Espace libre de la carte SD, Espace libre du stockage interne | L'espace restant sur la carte SD et sur le stockage utilisateur du système (celui de l'emuMMC sur un emuMMC), affiché en Gio. | lus toutes les 5 minutes ; leurs tailles sont de diagnostic, désactivées par défaut |
-| Modèle | Switch (2017), Switch (2019), Switch Lite, Switch OLED. | diagnostic, désactivé par défaut |
+| Modèle | Switch (2017), Switch (2019), Switch Lite, Switch OLED, Unité de développement. | diagnostic, désactivé par défaut |
 | Surnom de la console, Région, Système, hekate | Le surnom des Paramètres de la console, la région, sysMMC ou emuMMC, hekate sur la carte SD. | diagnostic, désactivés par défaut |
 | PRODINFO masqué | Atmosphère cache l'identité de la console. | diagnostic, désactivé par défaut |
 | Température, Connexion, Adresse IP, Signal Wi-Fi | Le capteur interne, Wi-Fi ou ethernet, l'adresse de la console, 0 à 3 barres. | diagnostic, désactivés par défaut |
@@ -384,7 +399,7 @@ lit l'attribut :
 
 ```jinja
 {{ (state_attr('sensor.living_room_play_time_today', 'games') or {})
-   .get('Super Mario Odyssey', 0) > 60 }}
+   .get('Comet Kart Racers', 0) > 60 }}
 ```
 
 Les entités qui changent le minuteur (limites, heure du coucher, temps en plus,
@@ -435,7 +450,7 @@ elle se termine ; un refus qui arrive plus tard crée une notification (option
 | `playguard.lock_now` | | Réactive le contrôle parental après un déverrouillage temporaire. |
 | `playguard.sync_now` | | La console republie tout. |
 | `playguard.request_report` | | La console enregistre un rapport de diagnostic sur sa carte SD, et le publie quand *Accès à distance* le permet (il est alors dans les diagnostics de l'appareil). |
-| `playguard.get_play_time` | `period` (`today`, par défaut, ou `week`) | Renvoie le temps de jeu comme réponse de l'action (*Variable de réponse* dans un script) : celui du jour (`minutes`, `games` avec pour chacun `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`, `homebrew_minutes`, `activity`), ou celui des sept derniers jours (`days`, `minutes`, `homebrew_minutes`, `games` avec pour chacun `per_day`, `accounts`). N'envoie rien à la console. |
+| `playguard.get_play_time` | `period` (`today`, par défaut, ou `week`) | Renvoie le temps de jeu comme réponse de l'action (*Variable de réponse* dans un script) : celui du jour (`date`, `minutes`, `games` avec pour chacun `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`, `homebrew_minutes`, `activity`), ou celui des sept derniers jours (`days`, `minutes`, `homebrew_minutes`, `games` avec pour chacun `per_day`, `accounts`) ; les jeux viennent du plus joué au moins joué. N'envoie rien à la console. |
 
 ```yaml
 actions:
@@ -480,7 +495,7 @@ vu ; *Dernier ordre* garde le dernier résultat.
 Chaque événement est aussi émis sur le bus d'événements de Home Assistant sous
 le nom `playguard_event` (`device_id`, `console_id`, `event_type` et les
 attributs ci-dessus), que le **journal** affiche sur l'appareil de la console :
-*Salon a lancé Mario Kart 8 Deluxe*, *Salon a refusé Limite lundi : 5000 :
+*Salon a lancé Comet Kart Racers*, *Salon a refusé Limite lundi : 5000 :
 valeur hors limites*.
 
 ## 🎯 Déclencheurs et conditions
@@ -492,9 +507,9 @@ l'appareil de la console (ou sa pièce, ou l'entité elle-même).
 | Déclencheur | Quand |
 |---|---|
 | `playguard.game_started` | Un jeu démarre. |
-| `playguard.game_stopped` | Le jeu s'arrête : fermé, mis en veille, ou un autre lancé. |
+| `playguard.game_stopped` | Le jeu s'arrête : fermé, suspendu, ou un autre lancé. |
 | `playguard.time_running_out` | Il reste 10 minutes ou moins de la limite du jour pendant qu'un jeu est lancé. |
-| `playguard.games_blocked` | Les jeux sont bloqués ; `blocked_by` : `limit` (la limite du jour, ou *Plus de jeu aujourd'hui*), `bedtime`, ou les deux (par défaut). |
+| `playguard.games_blocked` | Les jeux sont bloqués ; `blocked_by` : `limit` (la limite du jour, ou *Fin du jeu pour aujourd'hui*), `bedtime`, ou les deux (par défaut). |
 | `playguard.order_refused` | La console refuse un ordre. |
 
 Le `trigger.to_state` du déclencheur est l'état de l'entité *Événements*, avec
@@ -503,8 +518,8 @@ les attributs de l'événement (`game`, `minutes_left`, `reason`…, voir
 
 | Condition | Remplie quand |
 |---|---|
-| `playguard.is_playing` | Un jeu est lancé (*En cours* en nomme un). |
-| `playguard.limit_reached` | La limite du jour est atteinte. |
+| `playguard.is_playing` | Un jeu est lancé (*Jeu en cours* en nomme un). |
+| `playguard.limit_reached` | Les jeux sont bloqués (*Jeu bloqué* est activé) : la limite du jour est atteinte, ou c'est l'heure du coucher. |
 | `playguard.parental_controls_on` | Le contrôle parental est activé, pas déverrouillé pour le moment. |
 
 ```yaml
@@ -770,16 +785,17 @@ téléphone (l'application Home Assistant).
 |---|---|---|
 | **Time is up, extra time from the notification** | Quand la limite du jour est atteinte (pas à l'heure du coucher), une notification sur le téléphone avec un bouton qui donne du temps en plus (*+15 min*, ou ce que vous choisissez). | [![Importer le blueprint de fin de temps](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
 | **A few minutes left, extra time from the notification** | Quand il reste 10 minutes de jeu avant la limite du jour (l'événement *Temps de jeu bientôt écoulé*), une notification sur le téléphone avec le jeu, les minutes restantes et un bouton qui donne du temps en plus. | [![Importer le blueprint des dernières minutes](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
-| **Extra time when…** | Du temps en plus quand quelque chose arrive : un assistant activé (les corvées faites), un bouton ou une télécommande pressés, un tag scanné ; puis ce que vous voulez (désactiver l'assistant). | [![Importer le blueprint de temps en plus](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
-| **Bedtime reminder** | Une notification quelques minutes avant *Alarme du coucher*, pendant qu'un jeu est joué (ou chaque jour). | [![Importer le blueprint de rappel du coucher](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
+| **Extra time when…** | Du temps en plus quand quelque chose arrive : une entrée activée (les tâches faites), un bouton ou une télécommande pressés, un tag scanné ; puis ce que vous voulez (désactiver l'entrée). | [![Importer le blueprint de temps en plus](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
+| **Bedtime reminder** | Une notification quelques minutes avant *Coucher*, pendant qu'un jeu est joué (ou chaque jour). | [![Importer le blueprint de rappel du coucher](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
 | **Still playing after bedtime** | Quand un jeu est joué entre *Coucher* et *Lever* : le coucher est arrivé avec un jeu en cours, ou un jeu a été lancé dans la nuit. Pour quand le minuteur de jeu est désactivé, ou que l'alarme ne fait que prévenir. | [![Importer le blueprint still playing after bedtime](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fafter_bedtime.yaml) |
-| **Evening summary** | Le temps de jeu du jour à une heure fixe : le total, celui de chaque enfant (quand la console a lu les comptes) et les jeux les plus joués ; rien un jour sans jeu. | [![Importer le blueprint evening summary](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fevening_summary.yaml) |
+| **Evening summary** | Le temps de jeu du jour à une heure fixe : le total, celui de chaque enfant (quand la console a lu les comptes) et les jeux les plus joués ; rien un jour sans jeu, sauf si vous le demandez. | [![Importer le blueprint evening summary](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fevening_summary.yaml) |
 | **Weekly summary** | Une fois par semaine, le temps de jeu des sept derniers jours et les jeux les plus joués. | [![Importer le blueprint de résumé de la semaine](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
 
 Ceux qui donnent du temps en plus demandent *Les ordres peuvent changer le
 temps de jeu* activé sur la console. Leurs notifications sont en anglais :
-changez le texte dans l'automatisation (le message de *Time is up* est une
-entrée), ou dans la copie du blueprint.
+changez le texte dans l'automatisation (le message de *Time is up* est l'une
+de ses entrées), ou dans la copie du blueprint dans
+`blueprints/automation/playguard/`.
 
 ## 🏡 Cas d'usage
 
