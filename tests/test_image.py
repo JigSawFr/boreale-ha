@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import async_fire_mqtt_message
 
-from custom_components.playguard.const import DOMAIN
+from custom_components.boreale.const import DOMAIN
 
 from .conftest import BASE, CONSOLE_ID, publish
 

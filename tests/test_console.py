@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.playguard.const import CONF_TAKE_OVER, DOMAIN
+from custom_components.boreale.const import CONF_TAKE_OVER, DOMAIN
 
 from .conftest import CONSOLE_ID, fixture, publish
 

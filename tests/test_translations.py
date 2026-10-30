@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-TRANSLATIONS = Path(__file__).parent.parent / "custom_components" / "playguard" / "translations"
+TRANSLATIONS = Path(__file__).parent.parent / "custom_components" / "boreale" / "translations"
 EN = json.loads((TRANSLATIONS / "en.json").read_text(encoding="utf-8"))
 
 

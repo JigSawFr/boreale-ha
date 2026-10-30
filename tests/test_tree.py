@@ -12,8 +12,8 @@ from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_mqtt_message
 
-from custom_components.playguard.config_flow import _where
-from custom_components.playguard.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, CONF_TREE, DOMAIN
+from custom_components.boreale.config_flow import _where
+from custom_components.boreale.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, CONF_TREE, DOMAIN
 
 from .conftest import BASE, CONSOLE_ID, fixture
 from .test_config_flow import _answered, _choices, _scanned, _state_of
@@ -140,7 +140,7 @@ async def test_by_hand_on_the_tree(hass: HomeAssistant, mqtt_mock) -> None:
     step = hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"}
     )
-    with patch("custom_components.playguard.config_flow.STATE_TIMEOUT", 5):
+    with patch("custom_components.boreale.config_flow.STATE_TIMEOUT", 5):
         result = await _answered(hass, mqtt_mock, step, f"{MODULE}/state", json.dumps(fixture("state.json")))
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "boreale", CONF_TREE: 2}

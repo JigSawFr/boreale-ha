@@ -1,0 +1,105 @@
+blueprint:
+  name: PlayGuard — evening summary
+  description: >-
+    Today's play time on a phone at a set time: the total, each child's
+    (each account's, when the console read them) and the games played the
+    most.
+  domain: automation
+  author: JigSawFr
+  homeassistant:
+    min_version: 2026.10.0
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/boreale/evening_summary.yaml
+  input:
+    today:
+      name: Play time today
+      description: The console's *Play time today* sensor.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: sensor
+    phone:
+      name: Phone
+      description: The phone told (the Home Assistant app).
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+    at:
+      name: At
+      default: "20:30:00"
+      selector:
+        time:
+    days:
+      name: Days
+      default: [mon, tue, wed, thu, fri, sat, sun]
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Monday
+              value: mon
+            - label: Tuesday
+              value: tue
+            - label: Wednesday
+              value: wed
+            - label: Thursday
+              value: thu
+            - label: Friday
+              value: fri
+            - label: Saturday
+              value: sat
+            - label: Sunday
+              value: sun
+    top:
+      name: Games named
+      description: How many of the games played the most.
+      default: 3
+      selector:
+        number:
+          min: 0
+          max: 10
+    skip_idle:
+      name: Not on a day without play
+      default: true
+      selector:
+        boolean:
+
+mode: single
+
+triggers:
+  - trigger: time
+    at: !input at
+
+variables:
+  today: !input today
+  top: !input top
+  skip_idle: !input skip_idle
+  total: "{{ states(today) | int(0) }}"
+
+conditions:
+  - condition: time
+    weekday: !input days
+  - condition: template
+    value_template: "{{ total > 0 or not skip_idle }}"
+
+actions:
+  - domain: mobile_app
+    type: notify
+    device_id: !input phone
+    title: "{{ device_attr(device_id(today), 'name_by_user') or device_attr(device_id(today), 'name') }}"
+    message: >-
+      {%- macro hm(m) -%}
+      {{ (m // 60) ~ ' h ' ~ '%02d' % (m % 60) if m >= 60 else m ~ ' min' }}
+      {%- endmacro -%}
+      {%- set accounts = (state_attr(today, 'accounts') or {}).items() | list -%}
+      {%- set games = (state_attr(today, 'games') or {}).items() | list -%}
+      Play today: {{ hm(total) }}.
+      {%- if accounts %}
+      {%- for name, m in accounts %} {{ name }} {{ hm(m) }}{{ ',' if not loop.last else '.' }}
+      {%- endfor %}
+      {%- endif %}
+      {%- if games and top | int > 0 %} Most played:
+      {%- for name, m in games[:top | int] %} {{ name }} {{ hm(m) }}{{ ',' if not loop.last else '.' }}
+      {%- endfor %}
+      {%- endif %}

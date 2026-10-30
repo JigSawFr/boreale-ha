@@ -9,7 +9,7 @@ from pathlib import Path
 
 from homeassistant.util.yaml import load_yaml_dict
 
-INTEGRATION = Path(__file__).parent.parent / "custom_components" / "playguard"
+INTEGRATION = Path(__file__).parent.parent / "custom_components" / "boreale"
 
 TIERS: dict[str, tuple[str, ...]] = {
     "bronze": (

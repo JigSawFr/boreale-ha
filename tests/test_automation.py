@@ -8,7 +8,7 @@ from homeassistant.helpers import condition, device_registry as dr, entity_regis
 from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import async_mock_service
 
-from custom_components.playguard.const import DOMAIN
+from custom_components.boreale.const import DOMAIN
 
 from .conftest import CONSOLE_ID, publish
 
@@ -44,7 +44,7 @@ def _event(hass: HomeAssistant, event_type: str, ts: int, **data) -> None:
 
 async def test_game_started(hass: HomeAssistant, setup) -> None:
     """The console's device as the target: its Events entity."""
-    calls = await _automation(hass, {"trigger": "playguard.game_started", "target": {"device_id": _device_id(hass)}})
+    calls = await _automation(hass, {"trigger": "boreale.game_started", "target": {"device_id": _device_id(hass)}})
     _event(hass, "play_stopped", 1, app_id="0100000000010000")
     _event(hass, "play_started", 2, app_id="0100000000010000")
     await hass.async_block_till_done()
@@ -53,7 +53,7 @@ async def test_game_started(hass: HomeAssistant, setup) -> None:
 
 async def test_games_blocked(hass: HomeAssistant, setup) -> None:
     trigger = {
-        "trigger": "playguard.games_blocked",
+        "trigger": "boreale.games_blocked",
         "target": {"entity_id": _id(hass, "event", "events")},
         "options": {"blocked_by": ["bedtime"]},
     }
@@ -70,14 +70,14 @@ async def test_conditions(hass: HomeAssistant, setup, state) -> None:
     reached, parental controls are on."""
     device = {"device_id": _device_id(hass)}
     conditions = [
-        {"condition": "playguard.is_playing", "target": device, "options": {"behavior": "any"}},
-        {"condition": "playguard.parental_controls_on", "target": device, "options": {"behavior": "any"}},
+        {"condition": "boreale.is_playing", "target": device, "options": {"behavior": "any"}},
+        {"condition": "boreale.parental_controls_on", "target": device, "options": {"behavior": "any"}},
         {
             "condition": "not",
-            "conditions": [{"condition": "playguard.limit_reached", "target": device, "options": {"behavior": "any"}}],
+            "conditions": [{"condition": "boreale.limit_reached", "target": device, "options": {"behavior": "any"}}],
         },
     ]
-    calls = await _automation(hass, {"trigger": "playguard.order_refused", "target": device}, conditions)
+    calls = await _automation(hass, {"trigger": "boreale.order_refused", "target": device}, conditions)
     _event(hass, "command_rejected", 1, entity="limit_mon", payload="5000", reason="out_of_range")
     await hass.async_block_till_done()
     assert len(calls) == 1

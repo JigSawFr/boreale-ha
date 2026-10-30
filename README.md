@@ -1,21 +1,21 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/banner.png" alt="PlayGuard for Home Assistant" width="100%">
+<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/banner.png" alt="PlayGuard for Home Assistant" width="100%">
 
 ### Nintendo Switch parental controls, in Home Assistant
 
 **Play&nbsp;time · Limits · Extra&nbsp;time · Bedtime · Statistics · Local&nbsp;MQTT**
 
-[![validate](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/playguard-ha/actions/workflows/validate.yml)
-[![latest release](https://img.shields.io/github/v/release/JigSawFr/playguard-ha)](https://github.com/JigSawFr/playguard-ha/releases/latest)
+[![validate](https://github.com/JigSawFr/boreale-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/boreale-ha/actions/workflows/validate.yml)
+[![latest release](https://img.shields.io/github/v/release/JigSawFr/boreale-ha)](https://github.com/JigSawFr/boreale-ha/releases/latest)
 [![HACS: custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](https://github.com/JigSawFr/playguard-ha/blob/main/custom_components/playguard/quality_scale.yaml)
-[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)
+[![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](https://github.com/JigSawFr/boreale-ha/blob/main/custom_components/boreale/quality_scale.yaml)
+[![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/JigSawFr/boreale-ha/blob/main/LICENSE)
 
-**English** · [Français](https://github.com/JigSawFr/playguard-ha/blob/main/README.fr.md)
+**English** · [Français](https://github.com/JigSawFr/boreale-ha/blob/main/README.fr.md)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=playguard-ha&category=integration)
-[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=playguard)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=boreale-ha&category=integration)
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=boreale)
 
 [**Install**](#-installation) ·
 [**Set&nbsp;up**](#-set-up) ·
@@ -23,7 +23,7 @@
 [**Examples**](#-examples) ·
 [**PlayGuard**](https://github.com/JigSawFr/PlayGuard)
 
-<img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/dashboard.png" alt="A family dashboard: today's play time and what is left, the game being played, extra time in one tap, the last two weeks per child, the rules" width="100%">
+<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/dashboard.png" alt="A family dashboard: today's play time and what is left, the game being played, extra time in one tap, the last two weeks per child, the rules" width="100%">
 
 </div>
 
@@ -97,13 +97,13 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 <br>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/device.png" alt="The console's device page: its controls, sensors and activity" width="72%">
-  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/phone.png" alt="The family dashboard on a phone" width="24%">
+  <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/device.png" alt="The console's device page: its controls, sensors and activity" width="72%">
+  <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/phone.png" alt="The family dashboard on a phone" width="24%">
   <br><sub><b>The console's device</b> · <b>On a phone</b></sub>
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/JigSawFr/playguard-ha/main/.github/readme/discovered.png" alt="A console found on the broker, offered under Discovered" width="72%">
+  <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/discovered.png" alt="A console found on the broker, offered under Discovered" width="72%">
   <br><sub><b>Found on the broker</b></sub>
 </p>
 
@@ -171,48 +171,64 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 With [HACS](https://hacs.xyz/):
 
 1. *HACS › ⋮ › Custom repositories*: add
-   `https://github.com/JigSawFr/playguard-ha`, type *Integration*; or the
+   `https://github.com/JigSawFr/boreale-ha`, type *Integration*; or the
    first button at the top of this page (My Home Assistant opens the
    repository in your HACS). In PlayGuard, *Remote access › Home Assistant ›
    Install the Home Assistant integration* shows the same two buttons as QR
    codes, for a phone.
-2. Open **PlayGuard** in HACS and *Download* it: HACS installs the
-   `playguard.zip` of the release you pick.
+2. Open **Boréale for Nintendo Switch** in HACS and *Download* it: HACS installs the
+   `boreale.zip` of the release you pick.
 3. Restart Home Assistant.
 
 A new release shows up in HACS by itself, within a few hours (HACS checks
-GitHub on a schedule); to see it at once, *HACS › PlayGuard › ⋮ › Update
+GitHub on a schedule); to see it at once, *HACS › Boréale for Nintendo Switch › ⋮ › Update
 information*. Then *Update*, and restart Home Assistant.
 
 **Pre-releases**: what the next version holds so far, published as
 `X.Y.Z-dev.N` each time it changes (the changelog of the coming release in
-its notes). To get them, turn on the *Pre-release* switch of the PlayGuard
+its notes). To get them, turn on the *Pre-release* switch of the Boréale for Nintendo Switch
 repository's device in *Settings › Devices & services › HACS* (disabled by
 default: enable it on the device's page first); the update then offers the
 pre-releases too, and the release once it is out. Turn it back off to stay
-on releases: the next release replaces the pre-release (*HACS › PlayGuard ›
+on releases: the next release replaces the pre-release (*HACS › Boréale for Nintendo Switch ›
 ⋮ › Redownload* picks a release at once).
 
-By hand: download `playguard.zip` from the
-[latest release](https://github.com/JigSawFr/playguard-ha/releases/latest),
-extract it into a `custom_components/playguard` folder of your configuration,
+By hand: download `boreale.zip` from the
+[latest release](https://github.com/JigSawFr/boreale-ha/releases/latest),
+extract it into a `custom_components/boreale` folder of your configuration,
 and restart Home Assistant. Each release's zip carries a build provenance
-attestation: `gh attestation verify playguard.zip -R JigSawFr/playguard-ha`
+attestation: `gh attestation verify boreale.zip -R JigSawFr/boreale-ha`
 checks that it was built by this repository's CI (`SHA256SUMS.txt`, next to
 it, has its checksum).
+
+**From the PlayGuard integration.** This integration was called *PlayGuard*
+(domain `playguard`) before it became Boréale's (domain `boreale`). Once
+updated, each console set up with it is taken over at Home Assistant's next
+start, as soon as the console's state is read: its device, its entities with
+their ids, names, areas and history, and its statistics move over, without
+asking. A repair then says what is left to you:
+
+- the actions are `boreale.…` now (`boreale.add_bonus_time`); the old ones
+  (`playguard.add_bonus_time`) still work for now, and each one still called
+  raises a repair naming it;
+- the triggers and conditions (`playguard.game_started`,
+  `playguard.is_playing`) must be changed to `boreale.…` in the automations;
+- the blueprints are in `blueprints/automation/boreale/`: import them again;
+- the old integration, if still there, is removed in HACS (or delete
+  `custom_components/playguard`), then Home Assistant restarted.
 
 ## 🔌 Set-up
 
 **Found on the broker.** Each console that publishes (PlayGuard open, or its
 agent running) shows up in *Settings › Devices & services › Discovered*:
 
-1. Select **PlayGuard** under *Discovered*.
+1. Select **Boréale for Nintendo Switch** under *Discovered*.
 2. Confirm the console (its name and id are shown). Nothing to type.
 
 **By hand** (a console that is not found, or a prefix other than
 `playguard`):
 
-1. *Settings › Devices & services › Add integration › PlayGuard*.
+1. *Settings › Devices & services › Add integration › Boréale for Nintendo Switch*.
 2. The integration listens to the broker for a few seconds, and lists the
    consoles whose state is there and that are not set up yet (their name, id,
    and prefix when it is not `playguard`; under a prefix of one or two
@@ -232,7 +248,7 @@ twice.
 
 ## 🔧 Options and reconfiguration
 
-*Settings › Devices & services › PlayGuard › ⚙ (Configure)*:
+*Settings › Devices & services › Boréale for Nintendo Switch › ⚙ (Configure)*:
 
 | Option | Default | What it does |
 |---|---|---|
@@ -428,18 +444,18 @@ raises a notification (option *Notify an order refused later*).
 
 | Action | Fields | What it does |
 |---|---|---|
-| `playguard.set_limits` | `minutes` (0 to 1440; 1440 = no limit), `day` (`all`, the default, `today`, or `sun` … `sat`), or `week` (seven limits, Sunday first, in place of `minutes` and `day`) | Sets a day's limit, every day's, today's only, or the whole week's. |
-| `playguard.add_bonus_time` | `minutes` (5 to 180, default 30) | Extra minutes today; the usual limit comes back tomorrow. |
-| `playguard.apply_profile` | `profile` (its name in PlayGuard) | Applies the limits of a saved profile. |
-| `playguard.stop_today` | | 0 minutes today; the usual limit comes back tomorrow. |
-| `playguard.lock_now` | | Turns parental controls back on after a temporary unlock. |
-| `playguard.sync_now` | | The console publishes everything again. |
-| `playguard.request_report` | | The console saves a diagnostic report on its SD card, and publishes it when *Remote access* allows it (then in the device's diagnostics). |
-| `playguard.get_play_time` | `period` (`today`, the default, or `week`) | Returns the play time as the action's response (*Response variable* in a script): today's (`date`, `minutes`, `games` with each one's `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`, `homebrew_minutes`, `activity`), or the last seven days' (`days`, `minutes`, `homebrew_minutes`, `games` with each one's `per_day`, `accounts`); the games come most played first. Sends nothing to the console. |
+| `boreale.set_limits` | `minutes` (0 to 1440; 1440 = no limit), `day` (`all`, the default, `today`, or `sun` … `sat`), or `week` (seven limits, Sunday first, in place of `minutes` and `day`) | Sets a day's limit, every day's, today's only, or the whole week's. |
+| `boreale.add_bonus_time` | `minutes` (5 to 180, default 30) | Extra minutes today; the usual limit comes back tomorrow. |
+| `boreale.apply_profile` | `profile` (its name in PlayGuard) | Applies the limits of a saved profile. |
+| `boreale.stop_today` | | 0 minutes today; the usual limit comes back tomorrow. |
+| `boreale.lock_now` | | Turns parental controls back on after a temporary unlock. |
+| `boreale.sync_now` | | The console publishes everything again. |
+| `boreale.request_report` | | The console saves a diagnostic report on its SD card, and publishes it when *Remote access* allows it (then in the device's diagnostics). |
+| `boreale.get_play_time` | `period` (`today`, the default, or `week`) | Returns the play time as the action's response (*Response variable* in a script): today's (`date`, `minutes`, `games` with each one's `app_id`, `name`, `minutes`, `accounts`, `now_playing`, `limit_minutes`, `remaining_minutes`, `extra_minutes`, `blocked`, `blocked_by`, `bedtime`, `parental_controls`, `homebrew_minutes`, `activity`), or the last seven days' (`days`, `minutes`, `homebrew_minutes`, `games` with each one's `per_day`, `accounts`); the games come most played first. Sends nothing to the console. |
 
 ```yaml
 actions:
-  - action: playguard.get_play_time
+  - action: boreale.get_play_time
     data:
       device_id: 0123456789abcdef0123456789abcdef
       period: week
@@ -489,28 +505,28 @@ area, or the entity itself).
 
 | Trigger | When |
 |---|---|
-| `playguard.game_started` | A game starts. |
-| `playguard.game_stopped` | The game stops: closed, suspended, or another one started. |
-| `playguard.time_running_out` | 10 minutes or fewer are left of today's limit while a game is played. |
-| `playguard.games_blocked` | Games are blocked; `blocked_by`: `limit` (the day's limit, or *No more play today*), `bedtime`, or both (the default). |
-| `playguard.order_refused` | The console refuses an order. |
+| `boreale.game_started` | A game starts. |
+| `boreale.game_stopped` | The game stops: closed, suspended, or another one started. |
+| `boreale.time_running_out` | 10 minutes or fewer are left of today's limit while a game is played. |
+| `boreale.games_blocked` | Games are blocked; `blocked_by`: `limit` (the day's limit, or *No more play today*), `bedtime`, or both (the default). |
+| `boreale.order_refused` | The console refuses an order. |
 
 The trigger's `trigger.to_state` is the *Events* entity's state, with the
 event's attributes (`game`, `minutes_left`, `reason` …, see [events](#-events)).
 
 | Condition | Passes when |
 |---|---|
-| `playguard.is_playing` | A game is played (*Now playing* names one). |
-| `playguard.limit_reached` | Games are blocked (*Playing blocked* is on): today's limit is reached, or it is bedtime. |
-| `playguard.parental_controls_on` | Parental controls are on, not unlocked for now. |
+| `boreale.is_playing` | A game is played (*Now playing* names one). |
+| `boreale.limit_reached` | Games are blocked (*Playing blocked* is on): today's limit is reached, or it is bedtime. |
+| `boreale.parental_controls_on` | Parental controls are on, not unlocked for now. |
 
 ```yaml
 triggers:
-  - trigger: playguard.time_running_out
+  - trigger: boreale.time_running_out
     target:
       device_id: 0123456789abcdef0123456789abcdef
 conditions:
-  - condition: playguard.is_playing
+  - condition: boreale.is_playing
     target:
       device_id: 0123456789abcdef0123456789abcdef
     options:
@@ -651,7 +667,7 @@ triggers:
     event: end
     entity_id: calendar.school_holidays
 actions:
-  - action: playguard.apply_profile
+  - action: boreale.apply_profile
     data:
       device_id: 0123456789abcdef0123456789abcdef
       profile: "{{ 'Holidays' if trigger.event == 'start' else 'School week' }}"
@@ -666,7 +682,7 @@ triggers:
     entity_id: input_boolean.chores_done
     to: "on"
 actions:
-  - action: playguard.add_bonus_time
+  - action: boreale.add_bonus_time
     data:
       device_id: 0123456789abcdef0123456789abcdef
       minutes: 30
@@ -756,18 +772,18 @@ the console's entities and the phone (the Home Assistant app).
 
 | Blueprint | What it does | Import |
 |---|---|---|
-| **Time is up, extra time from the notification** | When the day's limit is reached (not at bedtime), a notification on the phone with a button that gives extra time (*+15 min*, or what you set). | [![Import the time is up blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_is_up.yaml) |
-| **A few minutes left, extra time from the notification** | When a game has 10 minutes left before the day's limit (the event *Play time almost over*), a notification on the phone with the game, the minutes left and a button that gives extra time. | [![Import the time warning blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Ftime_warning.yaml) |
-| **Extra time when…** | Extra time when something happens: a helper turned on (the chores done), a button or a remote pressed, a tag scanned; then what you like (turn the helper off again). | [![Import the extra time blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fextra_time.yaml) |
-| **Bedtime reminder** | A notification some minutes before *Bedtime*, while a game is played (or every day). | [![Import the bedtime reminder blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fbedtime_reminder.yaml) |
-| **Still playing after bedtime** | When a game is played between *Bedtime* and *Wake-up time*: bedtime came with a game on, or one started in the night. For when the play timer is off, or the alarm only warns. | [![Import the still playing after bedtime blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fafter_bedtime.yaml) |
-| **Evening summary** | Today's play time at a set time: the total, each child's (when the console read the accounts) and the games played the most; nothing on a day without play, unless you ask for it. | [![Import the evening summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fevening_summary.yaml) |
-| **Weekly summary** | Once a week, the last seven days' play time and the games played the most. | [![Import the weekly summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fplayguard-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fplayguard%2Fweekly_summary.yaml) |
+| **Time is up, extra time from the notification** | When the day's limit is reached (not at bedtime), a notification on the phone with a button that gives extra time (*+15 min*, or what you set). | [![Import the time is up blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fboreale%2Ftime_is_up.yaml) |
+| **A few minutes left, extra time from the notification** | When a game has 10 minutes left before the day's limit (the event *Play time almost over*), a notification on the phone with the game, the minutes left and a button that gives extra time. | [![Import the time warning blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fboreale%2Ftime_warning.yaml) |
+| **Extra time when…** | Extra time when something happens: a helper turned on (the chores done), a button or a remote pressed, a tag scanned; then what you like (turn the helper off again). | [![Import the extra time blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fboreale%2Fextra_time.yaml) |
+| **Bedtime reminder** | A notification some minutes before *Bedtime*, while a game is played (or every day). | [![Import the bedtime reminder blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fboreale%2Fbedtime_reminder.yaml) |
+| **Still playing after bedtime** | When a game is played between *Bedtime* and *Wake-up time*: bedtime came with a game on, or one started in the night. For when the play timer is off, or the alarm only warns. | [![Import the still playing after bedtime blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fboreale%2Fafter_bedtime.yaml) |
+| **Evening summary** | Today's play time at a set time: the total, each child's (when the console read the accounts) and the games played the most; nothing on a day without play, unless you ask for it. | [![Import the evening summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fboreale%2Fevening_summary.yaml) |
+| **Weekly summary** | Once a week, the last seven days' play time and the games played the most. | [![Import the weekly summary blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FJigSawFr%2Fboreale-ha%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fboreale%2Fweekly_summary.yaml) |
 
 The ones that give extra time need *Orders may change the play timer* on the
 console. Their notifications are in English: change the text in the
 automation (*Time is up*'s message is one of its inputs), or the blueprint's
-copy in `blueprints/automation/playguard/`.
+copy in `blueprints/automation/boreale/`.
 
 ## 🏡 Use cases
 
@@ -914,18 +930,18 @@ account's) in a
 For anything else, download the diagnostics (*Settings › Devices & services
 › PlayGuard › ⋮ › Download diagnostics*: the console's last documents and
 report, names left out) and open an
-[issue](https://github.com/JigSawFr/playguard-ha/issues).
+[issue](https://github.com/JigSawFr/boreale-ha/issues).
 
 ## 🧹 Removal
 
-1. *Settings › Devices & services › PlayGuard*, then for each console *⋮ ›
+1. *Settings › Devices & services › Boréale for Nintendo Switch*, then for each console *⋮ ›
    Delete*. Removing a console's entry asks the console to publish its own
    Home Assistant device again (a sleeping console does it when it wakes up),
    and clears the integration's version on the broker (PlayGuard no longer
    warns of its releases); to do without the console's own device, turn off
    *Create the device in Home Assistant* in PlayGuard.
-2. With HACS: *HACS › PlayGuard › ⋮ › Remove*; by hand: delete
-   `custom_components/playguard`. Restart Home Assistant.
+2. With HACS: *HACS › Boréale for Nintendo Switch › ⋮ › Remove*; by hand: delete
+   `custom_components/boreale`. Restart Home Assistant.
 3. The long-term statistics stay in the recorder: delete them in *Settings ›
    Tools › Statistics* if you do not want them any more.
 
@@ -952,20 +968,20 @@ skipped. The contract is PlayGuard's
 
 ## 🤝 Help, security and contributing
 
-- A problem with the integration: [Getting help](https://github.com/JigSawFr/playguard-ha/blob/main/.github/SUPPORT.md) says
+- A problem with the integration: [Getting help](https://github.com/JigSawFr/boreale-ha/blob/main/.github/SUPPORT.md) says
   where to ask; a bug report wants the console's diagnostics (the device's
   page, *⋮ › Download diagnostics*: names and account ids left out).
-- A security problem: privately, as [SECURITY.md](https://github.com/JigSawFr/playguard-ha/blob/main/SECURITY.md) says, never in
+- A security problem: privately, as [SECURITY.md](https://github.com/JigSawFr/boreale-ha/blob/main/SECURITY.md) says, never in
   a public issue.
 - Working on the integration (tests, coverage, the quality scale, the parity
   with PlayGuard's entity table, translations, releases):
-  [CONTRIBUTING.md](https://github.com/JigSawFr/playguard-ha/blob/main/CONTRIBUTING.md). Changes are listed in
-  [CHANGELOG.md](https://github.com/JigSawFr/playguard-ha/blob/main/CHANGELOG.md).
+  [CONTRIBUTING.md](https://github.com/JigSawFr/boreale-ha/blob/main/CONTRIBUTING.md). Changes are listed in
+  [CHANGELOG.md](https://github.com/JigSawFr/boreale-ha/blob/main/CHANGELOG.md).
 - Support PlayGuard: [GitHub Sponsors](https://github.com/sponsors/JigSawFr)
   or [Ko-fi](https://ko-fi.com/jigsawfr).
 
 ## 📜 License
 
-**GPLv3** (see [`LICENSE`](https://github.com/JigSawFr/playguard-ha/blob/main/LICENSE)), as PlayGuard. Maintained by [JigSawFr](https://github.com/JigSawFr).
+**GPLv3** (see [`LICENSE`](https://github.com/JigSawFr/boreale-ha/blob/main/LICENSE)), as PlayGuard. Maintained by [JigSawFr](https://github.com/JigSawFr).
 
 <sub>Not affiliated with or endorsed by Nintendo or the Home Assistant project. Nintendo Switch is a trademark of Nintendo.</sub>

@@ -1,0 +1,787 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": {
+        "title": "PlayGuard の本体が見つかりました",
+        "description": "**{name}**（本体 ID `{console_id}`）を追加しますか？本体自身の Home Assistant デバイス（MQTT 自動検出）は、このインテグレーションのデバイスに置き換わります。エンティティ、ソフト名、今週のプレイ時間、長期統計はそのまま引き継がれます。"
+      },
+      "user": {
+        "title": "PlayGuard の本体を追加",
+        "description": "状態がブローカーにあり、まだ設定されていない本体です。1台選ぶか、「別の本体」を選んで ID で追加してください。",
+        "data": {
+          "console": "本体"
+        },
+        "data_description": {
+          "console": "名前と ID。トピックのプレフィックスが playguard 以外ならそれも表示します。"
+        }
+      },
+      "manual": {
+        "title": "ID で PlayGuard の本体を追加",
+        "description": "ID は PlayGuard › 本体 › リモートアクセス › 本体 ID にあります。追加後、ブローカー上の本体の状態を最大10秒待ちます。",
+        "data": {
+          "console_id": "本体 ID",
+          "topic_prefix": "トピックのプレフィックス"
+        },
+        "data_description": {
+          "console_id": "8文字（例：5a0c3e11）。",
+          "topic_prefix": "sync.conf で別の値にしていなければ playguard。"
+        }
+      },
+      "reconfigure": {
+        "title": "トピックのプレフィックスを変更",
+        "description": "{name} が送信に使うプレフィックス：PlayGuard の sync.conf にある `topic_prefix` です。",
+        "data": {
+          "topic_prefix": "トピックのプレフィックス"
+        },
+        "data_description": {
+          "topic_prefix": "sync.conf で別の値にしていなければ playguard。"
+        }
+      }
+    },
+    "error": {
+      "invalid_console_id": "本体 ID は 0〜9 と a〜f の8文字です。",
+      "invalid_prefix": "このプレフィックスは MQTT トピックに使えません。",
+      "no_state": "この本体は、このプレフィックスでブローカーに何も送信していません。本体 ID とプレフィックスを確認し、本体の接続が一度確立されていることを確認してください（PlayGuard › 本体 › リモートアクセス › 状態）。"
+    },
+    "abort": {
+      "already_configured": "この本体はすでに設定されています。",
+      "invalid_discovery_info": "このメッセージは PlayGuard の状態ではありません。",
+      "mqtt_not_ready": "MQTT インテグレーションがまだ設定されていません。PlayGuard はこれを通じて Home Assistant とやり取りします。先に、本体と同じブローカーで設定してください。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "take_over_discovery": "本体自身の Home Assistant デバイスを置き換える",
+          "keep_values_asleep": "本体のスリープ中も最後の値を保持する",
+          "notify_refused": "後から拒否された指示を通知する"
+        },
+        "data_description": {
+          "take_over_discovery": "本体の MQTT 自動検出をオフにして、エンティティが二重にならないようにします。オフ：本体が再び自身のデバイスを送信します。",
+          "keep_values_asleep": "本体がブローカーにいない間（スリープ中、電源オフ、圏外）も、エンティティは本体が最後に送った値を表示し、コントロールで行った変更はブローカー上で本体を待ちます。オフ：その間、オンライン以外のエンティティはすべて利用不可になります。",
+          "notify_refused": "本体のスリープ中に送った指示や、PlayGuard の確認待ちの指示は、アクションが終わった後に結果が届きます。そのとき拒否されると通知が表示され、次に指示が実行されると消えます。アクションが結果を待っている間（最大10秒）に拒否された場合は、このオプションに関係なく、理由を示してアクションが失敗します。"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "parental_controls_enabled": {
+        "name": "みまもり設定済み"
+      },
+      "pin_set": {
+        "name": "暗証番号設定済み"
+      },
+      "companion_linked": {
+        "name": "スマホアプリと連携中"
+      },
+      "timer_enabled": {
+        "name": "プレイ時間"
+      },
+      "limit_reached": {
+        "name": "プレイ不可",
+        "state_attributes": {
+          "reason": {
+            "name": "理由",
+            "state": {
+              "limit": "1日の上限",
+              "bedtime": "おやすみの時間"
+            }
+          }
+        }
+      },
+      "clock_accurate": {
+        "name": "ネットワーク時計が正確"
+      },
+      "online": {
+        "name": "オンライン"
+      },
+      "agent": {
+        "name": "エージェント実行中"
+      },
+      "prodinfo_blanked": {
+        "name": "PRODINFO 消去済み"
+      },
+      "charging": {
+        "name": "充電中"
+      },
+      "docked": {
+        "name": "ドック接続中"
+      }
+    },
+    "button": {
+      "sync_now": {
+        "name": "今すぐ同期"
+      },
+      "export_report": {
+        "name": "診断レポートをエクスポート"
+      },
+      "add_bonus_time_15": {
+        "name": "時間の延長 +15分"
+      },
+      "add_bonus_time_30": {
+        "name": "時間の延長 +30分"
+      },
+      "add_bonus_time_60": {
+        "name": "時間の延長 +1時間"
+      },
+      "stop_today": {
+        "name": "今日のプレイを終了"
+      },
+      "remove_limit": {
+        "name": "上限を解除"
+      }
+    },
+    "calendar": {
+      "play_sessions": {
+        "name": "プレイ記録"
+      }
+    },
+    "event": {
+      "events": {
+        "name": "イベント",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "command_applied": "指示を実行",
+              "command_rejected": "指示を拒否",
+              "command_waiting": "PlayGuard の確認待ちの指示",
+              "play_started": "ソフトを開始",
+              "play_stopped": "ソフトを終了",
+              "time_warning": "プレイ時間がまもなく終了",
+              "play_blocked": "プレイ不可"
+            }
+          }
+        }
+      }
+    },
+    "lock": {
+      "parental_controls": {
+        "name": "みまもり設定"
+      }
+    },
+    "number": {
+      "limit_sun": {
+        "name": "上限 日曜日"
+      },
+      "limit_mon": {
+        "name": "上限 月曜日"
+      },
+      "limit_tue": {
+        "name": "上限 火曜日"
+      },
+      "limit_wed": {
+        "name": "上限 水曜日"
+      },
+      "limit_thu": {
+        "name": "上限 木曜日"
+      },
+      "limit_fri": {
+        "name": "上限 金曜日"
+      },
+      "limit_sat": {
+        "name": "上限 土曜日"
+      },
+      "limit_uniform": {
+        "name": "上限 毎日"
+      },
+      "max_screentime_today": {
+        "name": "今日の最大スクリーンタイム"
+      }
+    },
+    "select": {
+      "restriction_level": {
+        "name": "制限レベル",
+        "state": {
+          "unrestricted": "制限なし",
+          "young_child": "小学生",
+          "child": "中学生",
+          "teen": "高校生",
+          "custom": "カスタム"
+        }
+      },
+      "profile": {
+        "name": "プリセット"
+      }
+    },
+    "sensor": {
+      "used_screen_time": {
+        "name": "使用したスクリーンタイム"
+      },
+      "used_screen_time_log": {
+        "name": "今日のプレイ時間"
+      },
+      "screen_time_remaining": {
+        "name": "残りのスクリーンタイム"
+      },
+      "extended_screen_time": {
+        "name": "延長したスクリーンタイム"
+      },
+      "now_playing": {
+        "name": "プレイ中のソフト"
+      },
+      "rating_age": {
+        "name": "年齢区分"
+      },
+      "firmware": {
+        "name": "ファームウェア"
+      },
+      "atmosphere": {
+        "name": "Atmosphère"
+      },
+      "spent_raw": {
+        "name": "経過時間 (1952)"
+      },
+      "last_order": {
+        "name": "最後の指示"
+      },
+      "week_play_time": {
+        "name": "今週のプレイ時間"
+      },
+      "play_ends": {
+        "name": "プレイ終了時刻"
+      },
+      "account_today": {
+        "name": "{account} の今日のプレイ時間"
+      },
+      "account_week": {
+        "name": "{account} の今週のプレイ時間"
+      },
+      "model": {
+        "name": "モデル",
+        "state": {
+          "erista": "Switch (2017)",
+          "mariko": "Switch (2019)",
+          "lite": "Switch Lite",
+          "oled": "Switch（有機ELモデル）",
+          "other": "開発機"
+        }
+      },
+      "nickname": {
+        "name": "本体のニックネーム"
+      },
+      "region": {
+        "name": "地域",
+        "state": {
+          "jpn": "日本",
+          "usa": "南北アメリカ",
+          "eur": "ヨーロッパ",
+          "aus": "オーストラリア・ニュージーランド",
+          "htk": "香港・台湾・韓国",
+          "chn": "中国"
+        }
+      },
+      "hekate": {
+        "name": "hekate"
+      },
+      "system_storage": {
+        "name": "システム",
+        "state": {
+          "sysmmc": "sysMMC",
+          "emummc": "emuMMC"
+        }
+      },
+      "serial": {
+        "name": "シリアル番号"
+      },
+      "sd_free": {
+        "name": "SDカードの空き容量"
+      },
+      "sd_total": {
+        "name": "SDカードの容量"
+      },
+      "nand_free": {
+        "name": "本体保存メモリーの空き容量"
+      },
+      "nand_total": {
+        "name": "本体保存メモリーの容量"
+      },
+      "battery": {
+        "name": "バッテリー"
+      },
+      "temperature": {
+        "name": "温度"
+      },
+      "network": {
+        "name": "接続",
+        "state": {
+          "none": "なし",
+          "wifi": "Wi-Fi",
+          "ethernet": "有線LAN"
+        }
+      },
+      "ip_address": {
+        "name": "IPアドレス"
+      },
+      "wifi_signal": {
+        "name": "Wi-Fi の電波強度"
+      },
+      "ssid": {
+        "name": "Wi-Fi ネットワーク"
+      },
+      "last_boot": {
+        "name": "最終起動"
+      },
+      "games_installed": {
+        "name": "インストール済みのソフト"
+      },
+      "play_time_total": {
+        "name": "プレイ時間（累計）"
+      },
+      "accounts": {
+        "name": "ユーザー"
+      },
+      "last_seen": {
+        "name": "最終確認"
+      },
+      "console_activity": {
+        "name": "アクティビティ",
+        "state": {
+          "game": "ソフトをプレイ中",
+          "homebrew": "Homebrewを使用中",
+          "playguard": "PlayGuardを使用中",
+          "home": "HOMEメニュー",
+          "suspended": "ソフトを中断中",
+          "offline": "スリープ中または電源オフ"
+        },
+        "state_attributes": {
+          "title": {
+            "name": "タイトル"
+          },
+          "app_id": {
+            "name": "アプリケーションID"
+          }
+        }
+      },
+      "homebrews": {
+        "name": "Homebrew"
+      },
+      "forwarders": {
+        "name": "フォワーダー"
+      }
+    },
+    "switch": {
+      "bedtime_enabled": {
+        "name": "おやすみアラーム"
+      },
+      "console_lock": {
+        "name": "すべてのソフトをブロック"
+      },
+      "play_timer_alarm": {
+        "name": "「時間です」アラーム"
+      },
+      "vr_restricted": {
+        "name": "VRモードの制限"
+      },
+      "sns_post_restricted": {
+        "name": "SNSへの投稿の制限"
+      },
+      "free_communication_restricted": {
+        "name": "コミュニケーションの制限"
+      }
+    },
+    "time": {
+      "bedtime_alarm": {
+        "name": "おやすみアラーム"
+      },
+      "bedtime_end_time": {
+        "name": "起床時刻"
+      }
+    },
+    "update": {
+      "playguard_update": {
+        "name": "PlayGuard"
+      }
+    },
+    "image": {
+      "now_playing_icon": {
+        "name": "プレイ中のソフトのアイコン"
+      }
+    }
+  },
+  "exceptions": {
+    "mqtt_not_ready": {
+      "message": "MQTT インテグレーションがまだ利用できません。"
+    },
+    "read_only": {
+      "message": "この本体の PlayGuard は閲覧のみモードです。何も変更しません。"
+    },
+    "policy_off": {
+      "message": "本体は指示を拒否します（リモートアクセス › 受け取った指示）。"
+    },
+    "timer_writes_disabled": {
+      "message": "指示でプレイ時間を変更できません。本体で、リモートアクセス › 指示でプレイ時間を変更できる をオンにしてください。"
+    },
+    "read_only_entity": {
+      "message": "この値はここからは変更できません。"
+    },
+    "no_such_profile": {
+      "message": "PlayGuard に {profile} という名前のプリセットは保存されていません。"
+    },
+    "refused": {
+      "message": "{name} がこの指示を拒否しました：{reason}。"
+    },
+    "refused_title": {
+      "message": "{name} が指示を拒否しました"
+    },
+    "refused_later": {
+      "message": "{order}：{reason}。"
+    },
+    "reason_unknown_entity": {
+      "message": "不明な指示"
+    },
+    "reason_invalid": {
+      "message": "無効な値"
+    },
+    "reason_out_of_range": {
+      "message": "値が範囲外"
+    },
+    "reason_policy_off": {
+      "message": "指示を拒否する設定（リモートアクセス › 受け取った指示）"
+    },
+    "reason_timer_writes_disabled": {
+      "message": "リモートでのプレイ時間の変更がオフ（リモートアクセス › 指示でプレイ時間を変更できる）"
+    },
+    "reason_read_only": {
+      "message": "PlayGuard が閲覧のみモード"
+    },
+    "reason_not_confirmed": {
+      "message": "本体で確認されなかったか、暗証番号が入力されなかった"
+    },
+    "reason_gated": {
+      "message": "プレイ時間のカウント中で、一時解除できなかった"
+    },
+    "reason_unlock_failed": {
+      "message": "みまもり設定を解除できなかった"
+    },
+    "reason_not_custom": {
+      "message": "制限レベル「カスタム」のときのみ"
+    },
+    "reason_no_such_profile": {
+      "message": "この名前のプリセットがない"
+    },
+    "reason_no_limit_today": {
+      "message": "今日は上限がない"
+    },
+    "reason_console_locked": {
+      "message": "すべてのソフトがブロック中"
+    },
+    "reason_unsupported": {
+      "message": "この本体では非対応"
+    },
+    "reason_bedtime_off": {
+      "message": "おやすみアラームがオフ"
+    },
+    "reason_pctl_error": {
+      "message": "本体が拒否した（結果コード {rc}）"
+    },
+    "reason_busy": {
+      "message": "PlayGuard が今は実行できなかった。もう一度お試しください"
+    },
+    "reason_other": {
+      "message": "{reason}"
+    },
+    "intent_played": {
+      "message": "{name}：今日は{minutes}分プレイしました。"
+    },
+    "intent_playing": {
+      "message": "{game} をプレイ中です。"
+    },
+    "intent_blocked": {
+      "message": "ソフトはブロックされています。"
+    },
+    "intent_no_limit": {
+      "message": "今日は上限がありません。"
+    },
+    "intent_left": {
+      "message": "残り{minutes}分です。"
+    },
+    "intent_added": {
+      "message": "{name} で今日{minutes}分延長しました。"
+    },
+    "intent_stopped": {
+      "message": "{name} の今日のプレイを終了しました。"
+    },
+    "intent_which": {
+      "message": "どの本体ですか：{names}？"
+    },
+    "intent_no_console": {
+      "message": "{name} という名前の PlayGuard 本体はありません。"
+    },
+    "logbook_play_started": {
+      "message": "{game} を開始しました"
+    },
+    "logbook_play_stopped": {
+      "message": "{game} を終了しました"
+    },
+    "logbook_time_warning": {
+      "message": "プレイ時間は残り{minutes}分です"
+    },
+    "logbook_play_blocked_limit": {
+      "message": "ソフトをブロックしました：1日の上限に達しました"
+    },
+    "logbook_play_blocked_bedtime": {
+      "message": "ソフトをブロックしました：おやすみの時間です"
+    },
+    "logbook_command_applied": {
+      "message": "{order} を実行しました"
+    },
+    "logbook_command_rejected": {
+      "message": "{order} を拒否しました：{reason}"
+    },
+    "logbook_command_waiting": {
+      "message": "{order} について PlayGuard の確認を待っています"
+    }
+  },
+  "issues": {
+    "newer_schema": {
+      "title": "{name} は新しい PlayGuard プロトコルを使っています",
+      "description": "{name} はスキーマ {schema} を送信していますが、このインテグレーションが対応しているのはスキーマ {known} までです。PlayGuard インテグレーションを更新してください。それまでは一部の値が表示されないことがあります。"
+    },
+    "native_discovery": {
+      "title": "{name} が再び自身の Home Assistant デバイスを送信しています",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name} のエンティティが二重になっています",
+            "description": "本体自身の MQTT デバイスが、このインテグレーションのデバイスと並んで再び現れました。PlayGuard で再びオンにされたか、本体の PlayGuard が古く、それをオフにする指示を受け付けられません。送信すると、本体にもう一度オフにするよう求めます。\n\nまた現れる場合は、PlayGuard を更新するか、PlayGuard › 本体 › リモートアクセス で *Home Assistant にデバイスを作成（MQTT 自動検出）* をオフにしてください。本体自身のデバイスを残したい場合は、このインテグレーションのオプション *本体自身の Home Assistant デバイスを置き換える* をオフにしてください。"
+          }
+        }
+      }
+    },
+    "agent_version": {
+      "title": "{name} の PlayGuard エージェントが古いままです",
+      "description": "{name} には PlayGuard {app} がインストールされていますが、PlayGuard を閉じている間に動くエージェントはまだ {agent} です。更新が後回しにされました。PlayGuard › 本体 › 追加モジュール › 接続エージェント で更新してください（PlayGuard の起動時にも案内されます）。"
+    },
+    "refused_policy_off": {
+      "title": "{name} が Home Assistant からの指示を拒否しています",
+      "description": "{name} は受け取った指示を拒否する設定のため、ここで変更しても実行されません。本体の PlayGuard › 本体 › リモートアクセス › 受け取った指示 で、すぐに実行する または 本体で確認する を選んでください。本体がそれを伝えると、この表示は消えます。"
+    },
+    "refused_timer_writes_disabled": {
+      "title": "{name} は指示によるプレイ時間の変更を許可していません",
+      "description": "上限、時間の延長、プリセット、今日のプレイを終了、みまもり設定の解除にはこの許可が必要です。本体で、PlayGuard › 本体 › リモートアクセス › 指示でプレイ時間を変更できる をオンにしてください。本体がそれを伝えると、この表示は消えます。"
+    },
+    "refused_read_only": {
+      "title": "{name} の PlayGuard は閲覧のみモードです",
+      "description": "PlayGuard は未対応のファームウェアでは閲覧のみモードで開き、すべての指示を拒否します。本体の PlayGuard を更新してください（更新の確認時に案内されます）。本体がそれを伝えると、この表示は消えます。"
+    },
+    "taken_over": {
+      "title": "PlayGuard は Boréale for Nintendo Switch になりました",
+      "description": "コンソールは、エンティティ、履歴、統計とともに、インテグレーション {legacy} から Boréale へ移行しました。そのトリガーや条件（{legacy}.game_started、{legacy}.is_playing…）を使うオートメーション、スクリプト、ブループリントは、代わりに boreale.… を使う必要があります。アクション（{legacy}.add_bonus_time…）は当面そのまま動作し、まだ呼び出されているものはここに表示されます。対応が済んだら、これを無視してください。"
+    },
+    "taken_over_installed": {
+      "title": "PlayGuard は Boréale for Nintendo Switch になりました",
+      "description": "コンソールは、エンティティ、履歴、統計とともに、インテグレーション {legacy} から Boréale へ移行しました。そのトリガーや条件（{legacy}.game_started、{legacy}.is_playing…）を使うオートメーション、スクリプト、ブループリントは、代わりに boreale.… を使う必要があります。アクション（{legacy}.add_bonus_time…）は当面そのまま動作し、まだ呼び出されているものはここに表示されます。対応が済んだら、これを無視してください。\n\n古いインテグレーションがまだインストールされています。HACS で PlayGuard を削除するか、フォルダー custom_components/{legacy} を削除してから、Home Assistant を再起動してください。"
+    },
+    "legacy_action": {
+      "title": "{old} は {new} になりました",
+      "description": "オートメーションまたはスクリプトがまだ {old} を呼び出しています。当面は動作しますが、{new} に変更してください。"
+    }
+  },
+  "selector": {
+    "day": {
+      "options": {
+        "all": "毎日",
+        "today": "今日のみ",
+        "sun": "日曜日",
+        "mon": "月曜日",
+        "tue": "火曜日",
+        "wed": "水曜日",
+        "thu": "木曜日",
+        "fri": "金曜日",
+        "sat": "土曜日"
+      }
+    },
+    "console": {
+      "options": {
+        "manual": "別の本体（ID で追加）"
+      }
+    },
+    "blocked_by": {
+      "options": {
+        "limit": "1日の上限",
+        "bedtime": "おやすみの時間"
+      }
+    },
+    "period": {
+      "options": {
+        "today": "今日",
+        "week": "過去7日間"
+      }
+    }
+  },
+  "services": {
+    "set_limits": {
+      "name": "上限を設定",
+      "description": "1日分、毎日、今日、または1週間分の上限を設定します（1440 = 制限なし）。",
+      "fields": {
+        "device_id": {
+          "name": "本体",
+          "description": "対象の本体。"
+        },
+        "minutes": {
+          "name": "分",
+          "description": "0〜1440。1440 は制限なし。"
+        },
+        "day": {
+          "name": "曜日",
+          "description": "対象の曜日。"
+        },
+        "week": {
+          "name": "週",
+          "description": "日曜日から始まる7つの上限。分と曜日の代わりに使います。"
+        }
+      }
+    },
+    "add_bonus_time": {
+      "name": "時間を延長",
+      "description": "今日だけ時間を延長します。明日はいつもの上限に戻ります。",
+      "fields": {
+        "device_id": {
+          "name": "本体",
+          "description": "対象の本体。"
+        },
+        "minutes": {
+          "name": "分",
+          "description": "5〜180。"
+        }
+      }
+    },
+    "apply_profile": {
+      "name": "プリセットを適用",
+      "description": "PlayGuard に保存したプリセットの上限を適用します。",
+      "fields": {
+        "device_id": {
+          "name": "本体",
+          "description": "対象の本体。"
+        },
+        "profile": {
+          "name": "プリセット",
+          "description": "PlayGuard での名前。"
+        }
+      }
+    },
+    "stop_today": {
+      "name": "今日のプレイを終了",
+      "description": "今日は0分にします。明日はいつもの上限に戻ります。",
+      "fields": {
+        "device_id": {
+          "name": "本体",
+          "description": "対象の本体。"
+        }
+      }
+    },
+    "lock_now": {
+      "name": "みまもり設定を再び有効にする",
+      "description": "一時解除の後、みまもり設定を再び有効にします。",
+      "fields": {
+        "device_id": {
+          "name": "本体",
+          "description": "対象の本体。"
+        }
+      }
+    },
+    "sync_now": {
+      "name": "今すぐ同期",
+      "description": "本体がすべての情報を再送信します。",
+      "fields": {
+        "device_id": {
+          "name": "本体",
+          "description": "対象の本体。"
+        }
+      }
+    },
+    "request_report": {
+      "name": "診断レポートを要求",
+      "description": "本体が SDカードにレポートを保存し、リモートアクセスで許可されていれば送信します（デバイスの診断情報に表示されます）。",
+      "fields": {
+        "device_id": {
+          "name": "本体",
+          "description": "対象の本体。"
+        }
+      }
+    },
+    "get_play_time": {
+      "name": "プレイ時間を取得",
+      "description": "今日のプレイ時間（ソフトごと、アカウントごと、プレイ中のソフト、上限と残り時間、おやすみアラーム）または過去7日間のプレイ時間を返します。",
+      "fields": {
+        "device_id": {
+          "name": "本体",
+          "description": "対象の本体。"
+        },
+        "period": {
+          "name": "期間",
+          "description": "今日、または過去7日間。"
+        }
+      }
+    }
+  },
+  "triggers": {
+    "game_started": {
+      "name": "ソフトを開始",
+      "description": "本体でソフトが始まったときにトリガーします。"
+    },
+    "game_stopped": {
+      "name": "ソフトを終了",
+      "description": "ソフトが終わったときにトリガーします：終了、中断、または別のソフトの開始。"
+    },
+    "time_running_out": {
+      "name": "残り時間わずか",
+      "description": "ソフトのプレイ中に、今日の上限の残りが10分以下になったときにトリガーします。"
+    },
+    "games_blocked": {
+      "name": "ソフトがブロックされた",
+      "description": "ソフトがブロックされたときにトリガーします：1日の上限（または今日のプレイを終了）、またはおやすみの時間によるもの。",
+      "fields": {
+        "blocked_by": {
+          "name": "ブロックの理由",
+          "description": "ソフトをブロックしたもの。"
+        }
+      }
+    },
+    "order_refused": {
+      "name": "指示を拒否",
+      "description": "本体が指示を拒否したときにトリガーします。"
+    }
+  },
+  "conditions": {
+    "is_playing": {
+      "name": "ソフトをプレイ中",
+      "description": "本体でソフトがプレイされているかをテストします。",
+      "fields": {
+        "behavior": {
+          "name": "条件を満たすのは"
+        },
+        "for": {
+          "name": "継続時間（以上）"
+        }
+      }
+    },
+    "limit_reached": {
+      "name": "上限に到達",
+      "description": "本体で今日の上限に達しているかをテストします。",
+      "fields": {
+        "behavior": {
+          "name": "条件を満たすのは"
+        },
+        "for": {
+          "name": "継続時間（以上）"
+        }
+      }
+    },
+    "parental_controls_on": {
+      "name": "みまもり設定が有効",
+      "description": "本体のみまもり設定が有効か（一時解除されていないか）をテストします。",
+      "fields": {
+        "behavior": {
+          "name": "条件を満たすのは"
+        },
+        "for": {
+          "name": "継続時間（以上）"
+        }
+      }
+    }
+  }
+}

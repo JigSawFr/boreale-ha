@@ -25,7 +25,7 @@ jobs:
       - uses: home-assistant/actions/hassfest@cd6f3635a740c84d8a14f6121a90068b8ece6bf6 # master
 
   # What HACS checks before it lists a repository (the brand images are the
-  # integration's own: custom_components/playguard/brand/).
+  # integration's own: custom_components/boreale/brand/).
   hacs:
     runs-on: ubuntu-26.04
     steps:
@@ -56,8 +56,8 @@ jobs:
       - run: pip install -r requirements_test.txt mypy==2.4.0
       # Strict typing (the quality scale's platinum rule): pyproject.toml's [tool.mypy].
       - run: mypy
-      - run: python -m pytest -q --cov=custom_components.playguard --cov-branch --cov-report=term --cov-report=json
+      - run: python -m pytest -q --cov=custom_components.boreale --cov-branch --cov-report=term --cov-report=json
       # Home Assistant's quality scale: more than 95% of every module.
       - run: python scripts/coverage_per_module.py coverage.json
       # What a release attaches for HACS (release-please.yml), built the same way.
-      - run: python scripts/package.py --out dist/playguard.zip
+      - run: python scripts/package.py --out dist/boreale.zip

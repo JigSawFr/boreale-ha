@@ -12,9 +12,9 @@ from homeassistant.helpers.llm import LLM_API_ASSIST, LLMContext
 from homeassistant.setup import async_setup_component
 import pytest
 
-from custom_components.playguard import llm
-from custom_components.playguard.const import DOMAIN
-from custom_components.playguard.intent import INTENT_ADD_TIME, INTENT_PLAY_TIME, INTENT_STOP_TODAY
+from custom_components.boreale import llm
+from custom_components.boreale.const import DOMAIN
+from custom_components.boreale.intent import INTENT_ADD_TIME, INTENT_PLAY_TIME, INTENT_STOP_TODAY
 
 from .conftest import BASE, CONSOLE_ID, fixture, publish
 
@@ -99,7 +99,7 @@ async def test_intent_orders(hass: HomeAssistant, setup, mqtt_mock) -> None:
 
     with (
         patch(
-            "custom_components.playguard.coordinator.PlayGuardConsole.async_order",
+            "custom_components.boreale.coordinator.PlayGuardConsole.async_order",
             side_effect=HomeAssistantError("refused"),
         ),
         pytest.raises(intent.IntentHandleError, match="refused"),
@@ -112,12 +112,12 @@ async def test_intent_which_console(hass: HomeAssistant, setup) -> None:
         await _intent(hass, INTENT_PLAY_TIME, {"name": "Bedroom"})
     console = setup.runtime_data
     with (
-        patch("custom_components.playguard.intent._consoles", return_value=[console, console]),
+        patch("custom_components.boreale.intent._consoles", return_value=[console, console]),
         pytest.raises(intent.IntentHandleError, match="Which console: Salon, Salon"),
     ):
         await _intent(hass, INTENT_PLAY_TIME)
     with (
-        patch("custom_components.playguard.intent._consoles", return_value=[]),
+        patch("custom_components.boreale.intent._consoles", return_value=[]),
         pytest.raises(intent.IntentHandleError, match="No PlayGuard console"),
     ):
         await _intent(hass, INTENT_PLAY_TIME)

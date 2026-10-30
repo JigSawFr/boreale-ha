@@ -13,8 +13,8 @@ import pytest
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 from pytest_homeassistant_custom_component.components.recorder.common import async_wait_recording_done
 
-from custom_components.playguard.const import DOMAIN
-from custom_components.playguard.statistics import account_id, day_start, game_id, total_id
+from custom_components.boreale.const import STATISTICS_SOURCE
+from custom_components.boreale.statistics import account_id, day_start, game_id, total_id
 
 from .conftest import CONSOLE_ID, publish
 
@@ -82,7 +82,7 @@ async def test_odd_days(hass: HomeAssistant, mqtt_mock, entry) -> None:
     async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
     await hass.async_block_till_done()
     await async_wait_recording_done(hass)
-    assert not await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=DOMAIN))
+    assert not await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=STATISTICS_SOURCE))
 
     odd = {**_day("2026-10-04", 0, {}), "total_min": None}
     odd["per_app"] = ["junk", {"app_id": "not-hex!", "min": 5}, {"app_id": "0100000000010000", "min": "x"}]
@@ -92,7 +92,7 @@ async def test_odd_days(hass: HomeAssistant, mqtt_mock, entry) -> None:
     async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=20))
     await hass.async_block_till_done()
     await async_wait_recording_done(hass)
-    metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=DOMAIN))
+    metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=STATISTICS_SOURCE))
     assert set(metadata) == {game_id(CONSOLE_ID, "0100000000010000")}  # no total: it had none
 
 
@@ -141,7 +141,7 @@ async def test_week_alone(hass: HomeAssistant, mqtt_mock, entry) -> None:
     async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=10))
     await hass.async_block_till_done()
     await async_wait_recording_done(hass)
-    assert not await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=DOMAIN))
+    assert not await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=STATISTICS_SOURCE))
 
 
 async def test_newer_schema(hass: HomeAssistant, mqtt_mock, entry) -> None:
@@ -163,7 +163,7 @@ async def test_newer_schema(hass: HomeAssistant, mqtt_mock, entry) -> None:
     console = entry.runtime_data
     assert set(console.finals) == {"2026-10-03"} and console.finals["2026-10-03"]["total_min"] == 45
     assert console.week is None
-    metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=DOMAIN))
+    metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_source=STATISTICS_SOURCE))
     assert set(metadata) == {total_id(CONSOLE_ID), game_id(CONSOLE_ID, "0100000000010000")}
     start = day_start("2026-10-03", dt_util.get_time_zone(hass.config.time_zone))
     stats = await hass.async_add_executor_job(

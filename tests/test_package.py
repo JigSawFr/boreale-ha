@@ -10,7 +10,7 @@ import zipfile
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / "custom_components" / "playguard"
+SOURCE = ROOT / "custom_components" / "boreale"
 
 _spec = importlib.util.spec_from_file_location("package", ROOT / "scripts" / "package.py")
 package = importlib.util.module_from_spec(_spec)
@@ -19,7 +19,7 @@ _spec.loader.exec_module(package)
 
 def test_contents(tmp_path: Path) -> None:
     """The integration's files at the root, as HACS extracts them, and nothing else."""
-    out = tmp_path / "playguard.zip"
+    out = tmp_path / "boreale.zip"
     package.build(out, epoch=1_760_000_000)
     with zipfile.ZipFile(out) as zf:
         names = zf.namelist()
@@ -58,7 +58,7 @@ def test_same_bytes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 def test_cli(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """A release's tag must be manifest.json's version."""
     version = json.loads((SOURCE / "manifest.json").read_text())["version"]
-    out = tmp_path / "dist" / "playguard.zip"
+    out = tmp_path / "dist" / "boreale.zip"
     assert package.main(["--out", str(out), "--version-must-be", f"v{version}"]) == 0
     assert out.is_file() and f"version {version}" in capsys.readouterr().out
     assert package.main(["--out", str(out), "--version-must-be", "v99.0.0"]) == 1

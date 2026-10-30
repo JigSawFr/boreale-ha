@@ -1,0 +1,90 @@
+blueprint:
+  name: PlayGuard — weekly summary
+  description: >-
+    The last seven days' play time on a phone once a week, with the games
+    played the most.
+  domain: automation
+  author: JigSawFr
+  homeassistant:
+    min_version: 2026.10.0
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/boreale/weekly_summary.yaml
+  input:
+    week:
+      name: Play time this week
+      description: The console's *Play time this week* sensor.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: sensor
+    phone:
+      name: Phone
+      description: The phone told (the Home Assistant app).
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+    days:
+      name: Days
+      default: [sun]
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Monday
+              value: mon
+            - label: Tuesday
+              value: tue
+            - label: Wednesday
+              value: wed
+            - label: Thursday
+              value: thu
+            - label: Friday
+              value: fri
+            - label: Saturday
+              value: sat
+            - label: Sunday
+              value: sun
+    at:
+      name: At
+      default: "19:00:00"
+      selector:
+        time:
+    top:
+      name: Games named
+      description: How many of the games played the most.
+      default: 3
+      selector:
+        number:
+          min: 0
+          max: 10
+
+mode: single
+
+triggers:
+  - trigger: time
+    at: !input at
+
+conditions:
+  - condition: time
+    weekday: !input days
+
+variables:
+  week: !input week
+  top: !input top
+
+actions:
+  - domain: mobile_app
+    type: notify
+    device_id: !input phone
+    title: "{{ device_attr(device_id(week), 'name_by_user') or device_attr(device_id(week), 'name') }}"
+    message: >-
+      {%- macro hm(m) -%}
+      {{ (m // 60) ~ ' h ' ~ '%02d' % (m % 60) if m >= 60 else m ~ ' min' }}
+      {%- endmacro -%}
+      {%- set games = (state_attr(week, 'games') or {}).items() | list -%}
+      Play this week: {{ hm((state_attr(week, 'days') or {}).values() | sum) }}.
+      {%- if games and top | int > 0 %} Most played:
+      {%- for name, m in games[:top | int] %} {{ name }} {{ hm(m) }}{{ ',' if not loop.last else '.' }}
+      {%- endfor %}
+      {%- endif %}

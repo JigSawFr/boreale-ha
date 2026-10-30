@@ -30,7 +30,7 @@ def test_stale() -> None:
 
 def test_stamp(tmp_path: Path) -> None:
     manifest = tmp_path / "manifest.json"
-    manifest.write_text((ROOT / "custom_components" / "playguard" / "manifest.json").read_text())
+    manifest.write_text((ROOT / "custom_components" / "boreale" / "manifest.json").read_text())
     prerelease.stamp("0.9.0-dev.2", manifest)
     text = manifest.read_text()
     assert json.loads(text)["version"] == "0.9.0-dev.2"

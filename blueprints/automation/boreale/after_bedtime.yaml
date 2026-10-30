@@ -1,0 +1,73 @@
+blueprint:
+  name: PlayGuard — still playing after bedtime
+  description: >-
+    A notification on a phone when a game is played between the console's
+    bedtime and its wake-up time: bedtime came while a game was on, or one
+    was started in the night. Useful when the play timer is off (it does
+    not block then) or the bedtime alarm only warns.
+  domain: automation
+  author: JigSawFr
+  homeassistant:
+    min_version: 2026.10.0
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/boreale/after_bedtime.yaml
+  input:
+    bedtime:
+      name: Bedtime
+      description: The console's *Bedtime* time.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: time
+    wake:
+      name: Wake-up time
+      description: The console's *Wake-up time*. Left empty, the night ends at midnight.
+      default: ""
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: time
+    now_playing:
+      name: Now playing
+      description: The console's *Now playing* sensor.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: sensor
+    phone:
+      name: Phone
+      description: The phone told (the Home Assistant app).
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+
+mode: single
+max_exceeded: silent
+
+trigger_variables:
+  bedtime: !input bedtime
+  wake: !input wake
+  now_playing: !input now_playing
+
+triggers:
+  # True while a game is played in the night: fires when bedtime comes with a
+  # game on, or when one starts in the night; again after it stopped.
+  - trigger: template
+    value_template: >-
+      {%- set b = states(bedtime) -%}
+      {%- set w = states(wake) if wake else '00:00:00' -%}
+      {%- set w = '00:00:00' if w in ['unknown', 'unavailable'] else w -%}
+      {%- set t = now().strftime('%H:%M:%S') -%}
+      {%- set night = (t >= b or t < w) if b > w else (b <= t < w) -%}
+      {{ b not in ['unknown', 'unavailable'] and night
+         and states(now_playing) not in ['unknown', 'unavailable', ''] }}
+
+actions:
+  - domain: mobile_app
+    type: notify
+    device_id: !input phone
+    title: "{{ device_attr(device_id(now_playing), 'name_by_user') or device_attr(device_id(now_playing), 'name') }}"
+    message: "{{ states(now_playing) }} is still being played after bedtime ({{ states(bedtime)[:5] }})."

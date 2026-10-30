@@ -14,7 +14,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 import pytest
 
-from custom_components.playguard.const import CONF_NOTIFY_REFUSED, CONF_TAKE_OVER, DOMAIN
+from custom_components.boreale.const import CONF_NOTIFY_REFUSED, CONF_TAKE_OVER, DOMAIN
 
 from .conftest import CONSOLE_ID, publish
 
@@ -24,7 +24,7 @@ NOTIFICATION = f"{DOMAIN}_{CONSOLE_ID}_refused"
 @pytest.fixture
 def wait():
     """The action waits for the answer (long enough for any test)."""
-    with patch("custom_components.playguard.coordinator.ORDER_TIMEOUT", 30):
+    with patch("custom_components.boreale.coordinator.ORDER_TIMEOUT", 30):
         yield
 
 
@@ -122,7 +122,7 @@ async def test_refused_later(hass: HomeAssistant, setup, wait) -> None:
 
 async def test_no_answer(hass: HomeAssistant, setup, mqtt_mock) -> None:
     """No answer in time: the action returns, the order waits on the broker."""
-    with patch("custom_components.playguard.coordinator.ORDER_TIMEOUT", 0.01):
+    with patch("custom_components.boreale.coordinator.ORDER_TIMEOUT", 0.01):
         await hass.services.async_call(DOMAIN, "sync_now", {"device_id": _device_id(hass)}, blocking=True)
     assert setup.runtime_data._waiters == []
 

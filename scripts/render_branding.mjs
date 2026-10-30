@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BRAND = 'custom_components/playguard/brand/';
+const BRAND = 'custom_components/boreale/brand/';
 const TILE = '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><image href="icon.svg" x="0" y="0" width="256" height="256"/></svg>';
 const jobs = [
   { svg: TILE, out: '.github/readme/icon.png', w: 256, h: 256, scale: 2, transparent: true },

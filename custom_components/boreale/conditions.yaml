@@ -1,0 +1,34 @@
+# The console's conditions (the console's device or the entity itself as the
+# target).
+
+.fields: &fields
+  behavior:
+    required: true
+    default: any
+    selector:
+      automation_behavior:
+        mode: condition
+  for:
+    required: true
+    default: 00:00:00
+    selector:
+      duration:
+
+is_playing:
+  target:
+    entity:
+      - integration: boreale
+        domain: sensor
+  fields: *fields
+limit_reached:
+  target:
+    entity:
+      - integration: boreale
+        domain: binary_sensor
+  fields: *fields
+parental_controls_on:
+  target:
+    entity:
+      - integration: boreale
+        domain: lock
+  fields: *fields
