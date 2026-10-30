@@ -569,15 +569,11 @@
     },
     "taken_over": {
       "title": "PlayGuard ist jetzt Boréale for Nintendo Switch",
-      "description": "Deine Konsolen sind von der Integration {legacy} zu Boréale umgezogen, mit ihren Entitäten, ihrem Verlauf und ihren Statistiken. Automationen, Skripte und Blueprints, die ihre Auslöser und Bedingungen ({legacy}.game_started, {legacy}.is_playing…) verwenden, müssen jetzt stattdessen boreale.… verwenden. Ihre Aktionen ({legacy}.add_bonus_time…) funktionieren vorerst weiter, und jede noch aufgerufene wird hier gemeldet. Ignoriere dies, sobald es erledigt ist."
+      "description": "Deine Konsolen sind von der Integration {legacy} zu Boréale umgezogen, mit ihren Entitäten, ihrem Verlauf und ihren Statistiken. Automationen, Skripte und Blueprints, die ihre Aktionen, Auslöser und Bedingungen ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) verwenden, müssen jetzt stattdessen boreale.… verwenden: die alten Namen antworten nicht mehr. Ignoriere dies, sobald es erledigt ist."
     },
     "taken_over_installed": {
       "title": "PlayGuard ist jetzt Boréale for Nintendo Switch",
-      "description": "Deine Konsolen sind von der Integration {legacy} zu Boréale umgezogen, mit ihren Entitäten, ihrem Verlauf und ihren Statistiken. Automationen, Skripte und Blueprints, die ihre Auslöser und Bedingungen ({legacy}.game_started, {legacy}.is_playing…) verwenden, müssen jetzt stattdessen boreale.… verwenden. Ihre Aktionen ({legacy}.add_bonus_time…) funktionieren vorerst weiter, und jede noch aufgerufene wird hier gemeldet. Ignoriere dies, sobald es erledigt ist.\n\nDie alte Integration ist noch installiert: entferne PlayGuard in HACS oder lösche den Ordner custom_components/{legacy} und starte Home Assistant neu."
-    },
-    "legacy_action": {
-      "title": "{old} heißt jetzt {new}",
-      "description": "Eine Automation oder ein Skript ruft noch {old} auf. Das funktioniert vorerst weiter: ändere es in {new}."
+      "description": "Deine Konsolen sind von der Integration {legacy} zu Boréale umgezogen, mit ihren Entitäten, ihrem Verlauf und ihren Statistiken. Automationen, Skripte und Blueprints, die ihre Aktionen, Auslöser und Bedingungen ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) verwenden, müssen jetzt stattdessen boreale.… verwenden: die alten Namen antworten nicht mehr. Ignoriere dies, sobald es erledigt ist.\n\nDie alte Integration ist noch installiert: entferne PlayGuard in HACS oder lösche den Ordner custom_components/{legacy} und starte Home Assistant neu."
     }
   },
   "selector": {

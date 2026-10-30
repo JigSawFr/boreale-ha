@@ -3,23 +3,14 @@ and the play time, as a response."""
 
 from __future__ import annotations
 
-from collections.abc import Callable, Coroutine
-import logging
-from typing import Any
-
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse, callback
 from homeassistant.exceptions import ServiceValidationError
-from homeassistant.helpers import config_validation as cv, issue_registry as ir, service
+from homeassistant.helpers import config_validation as cv, service
 import probatio
 
 from . import play
-from .const import DAYS, DOMAIN, LEGACY_DOMAIN, WRITE_FREE, WRITE_TIMER
+from .const import DAYS, DOMAIN, WRITE_FREE, WRITE_TIMER
 from .coordinator import PlayGuardConsole
-
-_LOGGER = logging.getLogger(__name__)
-
-# An action's handler.
-type Handler = Callable[[ServiceCall], Coroutine[Any, Any, ServiceResponse | None]]
 
 ATTR_DEVICE_ID = "device_id"
 ATTR_MINUTES = "minutes"
@@ -117,48 +108,11 @@ def async_setup_services(hass: HomeAssistant) -> None:
         summary = play.week(console) if call.data[ATTR_PERIOD] == "week" else play.today(console)
         return {"console": console.name, **summary}
 
-    actions: dict[str, tuple[Handler, Any]] = {
-        "set_limits": (set_limits, SET_LIMITS_SCHEMA),
-        "add_bonus_time": (add_bonus_time, BONUS_SCHEMA),
-        "apply_profile": (apply_profile, PROFILE_SCHEMA),
-        **{name: (press, DEVICE_SCHEMA) for name in PRESS},
-    }
-    for name, (handler, schema) in actions.items():
-        hass.services.async_register(DOMAIN, name, handler, schema=schema)
+    hass.services.async_register(DOMAIN, "set_limits", set_limits, schema=SET_LIMITS_SCHEMA)
+    hass.services.async_register(DOMAIN, "add_bonus_time", add_bonus_time, schema=BONUS_SCHEMA)
+    hass.services.async_register(DOMAIN, "apply_profile", apply_profile, schema=PROFILE_SCHEMA)
     hass.services.async_register(
         DOMAIN, "get_play_time", get_play_time, schema=PLAY_TIME_SCHEMA, supports_response=SupportsResponse.ONLY
     )
-    # The actions of the integration before Boréale ("playguard.add_bonus_time")
-    # answer too, for the automations and scripts written for it, while that
-    # integration is not set up itself; each call says it is to change.
-    if hass.services.has_service(LEGACY_DOMAIN, "set_limits"):
-        return
-    for name, (handler, schema) in actions.items():
-        hass.services.async_register(LEGACY_DOMAIN, name, _legacy(hass, name, handler), schema=schema)
-    hass.services.async_register(
-        LEGACY_DOMAIN,
-        "get_play_time",
-        _legacy(hass, "get_play_time", get_play_time),
-        schema=PLAY_TIME_SCHEMA,
-        supports_response=SupportsResponse.ONLY,
-    )
-
-
-def _legacy(hass: HomeAssistant, name: str, handler: Handler) -> Handler:
-    """`handler` under the old name: it runs, and a repair issue names the
-    action to change."""
-
-    async def _call(call: ServiceCall) -> ServiceResponse | None:
-        _LOGGER.warning("%s.%s is now %s.%s: change it where it is used", LEGACY_DOMAIN, name, DOMAIN, name)
-        ir.async_create_issue(
-            hass,
-            DOMAIN,
-            f"legacy_action_{name}",
-            is_fixable=False,
-            severity=ir.IssueSeverity.WARNING,
-            translation_key="legacy_action",
-            translation_placeholders={"old": f"{LEGACY_DOMAIN}.{name}", "new": f"{DOMAIN}.{name}"},
-        )
-        return await handler(call)
-
-    return _call
+    for name in PRESS:
+        hass.services.async_register(DOMAIN, name, press, schema=DEVICE_SCHEMA)

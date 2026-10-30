@@ -10,8 +10,9 @@ import re
 from typing import Final
 
 DOMAIN: Final = "boreale"
-# The integration before Boréale: its entries are imported (__init__.py),
-# its actions answer for a while (services.py).
+# The integration before Boréale: its entries are taken over once
+# (__init__.py, config_flow.py), nothing of it is kept. The take-over goes
+# with the release after the one that ships it (workbench's suivi).
 LEGACY_DOMAIN: Final = "playguard"
 # The imported statistics' source and id prefix ("playguard:<id>_play_time"):
 # kept from before Boréale, so their history stays (Home Assistant cannot
@@ -34,7 +35,8 @@ CONF_PREFIX: Final = "topic_prefix"
 # 2: Boréale's, shared by its homebrews: the device's topics under
 # <prefix>/<id>/, PlayGuard's under <prefix>/<id>/playguard/ (default prefix
 # "boreale"). An entry on tree 1 listens to both and follows the console to
-# tree 2 at its first message there.
+# tree 2 at its first message there, then listens to tree 2 alone. Tree 1
+# goes with the release after PlayGuard's that moves to tree 2.
 CONF_TREE: Final = "tree"
 BOREALE_PREFIX: Final = "boreale"
 MODULE: Final = "playguard"
