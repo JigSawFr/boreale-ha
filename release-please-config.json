@@ -25,11 +25,11 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "playguard-ha",
+      "package-name": "boreale-ha",
       "initial-version": "0.1.0",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
-        { "type": "json", "path": "custom_components/playguard/manifest.json", "jsonpath": "$.version" }
+        { "type": "json", "path": "custom_components/boreale/manifest.json", "jsonpath": "$.version" }
       ]
     }
   }

@@ -9,9 +9,9 @@ from homeassistant.helpers import device_registry as dr, issue_registry as ir
 import pytest
 from pytest_homeassistant_custom_component.common import async_capture_events
 
-from custom_components.playguard import logbook
-from custom_components.playguard.const import DOMAIN, EVENT_PLAYGUARD
-from custom_components.playguard.diagnostics import async_get_device_diagnostics
+from custom_components.boreale import logbook
+from custom_components.boreale.const import DOMAIN, EVENT_PLAYGUARD
+from custom_components.boreale.diagnostics import async_get_device_diagnostics
 
 from .conftest import CONSOLE_ID, publish
 

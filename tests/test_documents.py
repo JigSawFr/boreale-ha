@@ -18,10 +18,10 @@ from homeassistant.util import dt as dt_util
 import pytest
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
-from custom_components.playguard.const import DOMAIN, WRITE_NONE
-from custom_components.playguard.entities import BY_KEY
-from custom_components.playguard.event import PlayGuardEvent
-from custom_components.playguard.sensor import PlayGuardSensor
+from custom_components.boreale.const import DOMAIN, WRITE_NONE
+from custom_components.boreale.entities import BY_KEY
+from custom_components.boreale.event import PlayGuardEvent
+from custom_components.boreale.sensor import PlayGuardSensor
 
 from .conftest import BASE, CONSOLE_ID, fixture, publish
 

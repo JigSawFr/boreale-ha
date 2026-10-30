@@ -11,8 +11,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.playguard.const import DOMAIN
-from custom_components.playguard.update import RELEASES, async_latest_release
+from custom_components.boreale.const import DOMAIN
+from custom_components.boreale.update import RELEASES, async_latest_release
 
 from .conftest import CONSOLE_ID, publish
 

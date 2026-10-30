@@ -1,0 +1,80 @@
+blueprint:
+  name: PlayGuard — bedtime reminder
+  description: >-
+    A notification on a phone some minutes before the console's bedtime,
+    while a game is played (or every day).
+  domain: automation
+  author: JigSawFr
+  homeassistant:
+    min_version: 2026.10.0
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/boreale/bedtime_reminder.yaml
+  input:
+    bedtime:
+      name: Bedtime
+      description: The console's *Bedtime alarm* time.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: time
+    now_playing:
+      name: Now playing
+      description: The console's *Now playing* sensor.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: sensor
+    phone:
+      name: Phone
+      description: The phone told (the Home Assistant app).
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+    before:
+      name: How long before
+      default: 15
+      selector:
+        number:
+          min: 5
+          max: 120
+          step: 5
+          unit_of_measurement: min
+    only_playing:
+      name: Only while a game is played
+      default: true
+      selector:
+        boolean:
+
+mode: single
+max_exceeded: silent
+
+trigger_variables:
+  bedtime: !input bedtime
+  before: !input before
+
+triggers:
+  # True from `before` minutes before bedtime until bedtime: fires once a day.
+  - trigger: template
+    value_template: >-
+      {%- set at = states(bedtime) -%}
+      {{ at not in ['unknown', 'unavailable'] and
+         today_at(at) - timedelta(minutes=before | int) <= now() < today_at(at) }}
+
+variables:
+  now_playing: !input now_playing
+  only_playing: !input only_playing
+  game: "{{ states(now_playing) if states(now_playing) not in ['unknown', 'unavailable', ''] else '' }}"
+
+conditions:
+  - condition: template
+    value_template: "{{ game != '' or not only_playing }}"
+
+actions:
+  - domain: mobile_app
+    type: notify
+    device_id: !input phone
+    title: "{{ device_attr(device_id(bedtime), 'name_by_user') or device_attr(device_id(bedtime), 'name') }}"
+    message: >-
+      Bedtime in {{ before }} minutes{{ ': ' ~ game ~ ' is still on' if game }}.

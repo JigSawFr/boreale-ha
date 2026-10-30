@@ -17,7 +17,7 @@ pip install -r requirements_test.txt    # Home Assistant 2026.10.1 and its test 
 pip install ruff==0.17.0
 ```
 
-To try it in a real Home Assistant, copy (or link) `custom_components/playguard` into the
+To try it in a real Home Assistant, copy (or link) `custom_components/boreale` into the
 `custom_components` folder of a test configuration, with an MQTT broker and a console
 running PlayGuard with *Remote access* on, or retained documents from
 [`tests/fixtures/`](tests/fixtures/) published on the broker by hand.
@@ -27,23 +27,23 @@ running PlayGuard with *Remote access* on, or retained documents from
 ```sh
 ruff check custom_components tests scripts
 ruff format --check custom_components tests scripts
-python -m pytest --cov=custom_components.playguard --cov-branch --cov-report=term --cov-report=json
+python -m pytest --cov=custom_components.boreale --cov-branch --cov-report=term --cov-report=json
 python scripts/coverage_per_module.py coverage.json   # more than 95% of every module
-python scripts/package.py                             # dist/playguard.zip, as a release builds it
+python scripts/package.py                             # dist/boreale.zip, as a release builds it
 ```
 
 `validate.yml` runs the same on every pull request, plus Home Assistant's hassfest and
 HACS's checks, and `codeql.yml` the static analysis. A new code path comes with its test:
 the coverage gate is per module, not the total.
 
-- **The quality scale.** [`quality_scale.yaml`](custom_components/playguard/quality_scale.yaml)
+- **The quality scale.** [`quality_scale.yaml`](custom_components/boreale/quality_scale.yaml)
   says where the integration stands on Home Assistant's
   [Integration Quality Scale](https://contributors.home-assistant.io/core/quality-scale/rules/)
   (Platinum): each rule *done*, or *exempt* with the reason. hassfest skips that file for a
   custom integration, so `tests/test_quality_scale.py` checks it. A change that breaks a
   rule (an untranslated error, an entity without a category it needs, a module under 95%)
   is fixed, not marked *todo*.
-- **The entities follow PlayGuard's table.** `custom_components/playguard/entities.py`,
+- **The entities follow PlayGuard's table.** `custom_components/boreale/entities.py`,
   with the names in `translations/` and the icons in `icons.json`, mirrors PlayGuard's
   entity table (`source/sync/sync_entities.c`). PlayGuard's host tests export it as
   `build/host-tests/sync/entities.json` (`make test`); copy that file to
@@ -63,7 +63,7 @@ the coverage gate is per module, not the total.
 
 | Path | Content |
 |---|---|
-| `custom_components/playguard/__init__.py` | Set-up and unload of a console's entry, the actions registered once |
+| `custom_components/boreale/__init__.py` | Set-up and unload of a console's entry, the actions registered once |
 | `coordinator.py` | The console's push coordinator: MQTT subscriptions, its documents, orders, the take-over of the console's own discovery, repair issues |
 | `entities.py`, `const.py` | The entity table, mirrored from PlayGuard's; the topics, schema and option names |
 | `entity.py` and one module per platform | The entities (`binary_sensor`, `button`, `calendar`, `event`, `image`, `lock`, `number`, `select`, `sensor`, `switch`, `time`, `update`) |
@@ -76,7 +76,7 @@ the coverage gate is per module, not the total.
 | `statistics.py` | Finished days into the recorder's long-term statistics |
 | `repairs.py`, `diagnostics.py` | The fixable repair, the redacted diagnostics |
 | `brand/` | The integration's icon and logos (Home Assistant 2026.3+), rendered from `branding/` by `scripts/render_branding.mjs` |
-| `blueprints/automation/playguard/` | The blueprints the README offers to import (`tests/test_blueprints.py` sets each one up) |
+| `blueprints/automation/boreale/` | The blueprints the README offers to import (`tests/test_blueprints.py` sets each one up) |
 | `tests/` | One test module per part, PlayGuard's fixtures, the parity, translation and quality-scale checks |
 | `scripts/` | The per-module coverage gate, the release zip, the pre-release's version (`prerelease.py`), the README's branding |
 | `branding/` | The icon (a house around Aurore's night and PlayGuard's play sign), the logos, the README's banner and the social preview, as SVG, in Aurore's aurora (its sky, its colours, Sora): `node scripts/render_branding.mjs` (Node and Playwright) renders them to `brand/` and `.github/readme/` |
@@ -111,10 +111,10 @@ which reads [conventional commits](https://www.conventionalcommits.org/), as Pla
 - **Squash-merge** pull requests, so each one lands as a single commit carrying that title.
 - release-please keeps a `chore(main): release X.Y.Z` PR open
   ([`CHANGELOG.md`](CHANGELOG.md), `version` in `manifest.json`); merging it tags
-  `vX.Y.Z` and publishes the release. `release-please.yml` then attaches **`playguard.zip`**
+  `vX.Y.Z` and publishes the release. `release-please.yml` then attaches **`boreale.zip`**
   (what HACS installs, `hacs.json`'s `zip_release`), `SHA256SUMS.txt` and a
   [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations):
-  `gh attestation verify playguard.zip -R JigSawFr/playguard-ha` checks that a download was
+  `gh attestation verify boreale.zip -R JigSawFr/boreale-ha` checks that a download was
   built by this repository's CI. `scripts/package.py` gives the zip fixed dates (the tag's
   commit), order and modes, so the same tag gives the same bytes, and refuses a tag that is
   not `manifest.json`'s version.

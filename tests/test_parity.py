@@ -13,12 +13,12 @@ from pathlib import Path
 
 from homeassistant.util.yaml import load_yaml
 
-from custom_components.playguard.const import RETIRED
-from custom_components.playguard.entities import ACCOUNT_ENTITIES, BY_KEY, ENTITIES, EntityDef
+from custom_components.boreale.const import RETIRED
+from custom_components.boreale.entities import ACCOUNT_ENTITIES, BY_KEY, ENTITIES, EntityDef
 
 from .conftest import fixture
 
-INTEGRATION = Path(__file__).parent.parent / "custom_components" / "playguard"
+INTEGRATION = Path(__file__).parent.parent / "custom_components" / "boreale"
 STRINGS = INTEGRATION / "translations" / "en.json"
 ICONS = INTEGRATION / "icons.json"
 

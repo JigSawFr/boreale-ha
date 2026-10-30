@@ -12,8 +12,8 @@ from homeassistant.util import dt as dt_util
 import pytest
 from pytest_homeassistant_custom_component.components.recorder.common import async_wait_recording_done
 
-from custom_components.playguard.calendar import sessions
-from custom_components.playguard.const import DOMAIN
+from custom_components.boreale.calendar import sessions
+from custom_components.boreale.const import DOMAIN
 
 from .conftest import CONSOLE_ID, publish
 

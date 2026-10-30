@@ -1,4 +1,4 @@
-"""The blueprints (blueprints/automation/playguard): each one set up as an
+"""The blueprints (blueprints/automation/boreale): each one set up as an
 automation from its file, then run against the console, its notification
 caught on its way to the phone."""
 
@@ -24,13 +24,13 @@ import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed
 import yaml
 
-from custom_components.playguard.const import DOMAIN
+from custom_components.boreale.const import DOMAIN
 
 from .conftest import BASE, CONSOLE_ID, fixture, publish
 
 ROOT = Path(__file__).resolve().parent.parent
 BLUEPRINTS = ROOT / "blueprints"
-FILES = sorted((BLUEPRINTS / "automation" / "playguard").glob("*.yaml"))
+FILES = sorted((BLUEPRINTS / "automation" / "boreale").glob("*.yaml"))
 READMES = [(ROOT / name).read_text(encoding="utf-8") for name in ("README.md", "README.fr.md")]
 
 
@@ -96,7 +96,7 @@ def _orders(mqtt_mock, order: str) -> list[str]:
 
 
 async def _automation(hass: HomeAssistant, blueprint: str, inputs: dict[str, Any], alias: str = "test") -> None:
-    config = {"alias": alias, "use_blueprint": {"path": f"playguard/{blueprint}", "input": inputs}}
+    config = {"alias": alias, "use_blueprint": {"path": f"boreale/{blueprint}", "input": inputs}}
     assert await async_setup_component(hass, "automation", {"automation": [config]})
     await hass.async_block_till_done()
     assert hass.states.get(f"automation.{alias}").state == STATE_ON
@@ -124,7 +124,7 @@ def _local(freezer: FrozenDateTimeFactory, hass: HomeAssistant, when: str) -> da
 def test_blueprint_file(path: Path) -> None:
     """Its source is its own file on main, and both READMEs link to it."""
     data = load_yaml_dict(path)
-    url = f"https://github.com/JigSawFr/playguard-ha/blob/main/blueprints/automation/playguard/{path.name}"
+    url = f"https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/boreale/{path.name}"
     assert data["blueprint"]["source_url"] == url
     assert data["blueprint"]["domain"] == "automation"
     for readme in READMES:
@@ -237,14 +237,14 @@ async def test_extra_time(hass: HomeAssistant, setup, mqtt_mock) -> None:
                 {
                     "alias": "chores",
                     "use_blueprint": {
-                        "path": "playguard/extra_time.yaml",
+                        "path": "boreale/extra_time.yaml",
                         "input": {"console": console, "when": [chores], "then": [off]},
                     },
                 },
                 {
                     "alias": "homework",
                     "use_blueprint": {
-                        "path": "playguard/extra_time.yaml",
+                        "path": "boreale/extra_time.yaml",
                         "input": {"console": console, "when": [homework], "minutes": 15},
                     },
                 },

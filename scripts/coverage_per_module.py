@@ -1,7 +1,7 @@
 """Fails when a module of the integration is not covered by more than 95%
 (Home Assistant's quality scale asks it of every module, not of the total).
 
-    python -m pytest --cov=custom_components.playguard --cov-branch --cov-report=json
+    python -m pytest --cov=custom_components.boreale --cov-branch --cov-report=json
     python scripts/coverage_per_module.py [coverage.json]
 """
 
@@ -12,7 +12,7 @@ from pathlib import Path
 import sys
 
 FLOOR = 95.0
-PACKAGE = Path("custom_components/playguard")
+PACKAGE = Path("custom_components/boreale")
 
 
 def main(report: str = "coverage.json") -> int:

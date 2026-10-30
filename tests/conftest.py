@@ -12,8 +12,8 @@ from homeassistant.helpers import entity_registry as er
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_mqtt_message
 
-from custom_components.playguard.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, DOMAIN
-from custom_components.playguard.entities import ENTITIES
+from custom_components.boreale.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, DOMAIN
+from custom_components.boreale.entities import ENTITIES
 
 pytest_plugins = "pytest_homeassistant_custom_component"
 
@@ -36,7 +36,7 @@ def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
 def no_answer_wait():
     """An order's action does not wait for the console's answer, but in the
     tests of that wait (tests/test_orders.py)."""
-    with patch("custom_components.playguard.coordinator.ORDER_TIMEOUT", 0):
+    with patch("custom_components.boreale.coordinator.ORDER_TIMEOUT", 0):
         yield
 
 
@@ -44,7 +44,7 @@ def no_answer_wait():
 def latest_release():
     """PlayGuard's latest release, as GitHub's API gives it (no network in the tests)."""
     release = {"tag_name": "v1.4.0", "name": "PlayGuard 1.4.0", "html_url": "https://github.com/JigSawFr/PlayGuard/releases/tag/v1.4.0", "body": "## What changed"}  # fmt: skip
-    with patch("custom_components.playguard.update.async_latest_release", return_value=release) as mock:
+    with patch("custom_components.boreale.update.async_latest_release", return_value=release) as mock:
         yield mock
 
 

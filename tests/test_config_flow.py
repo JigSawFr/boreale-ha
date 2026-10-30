@@ -16,7 +16,7 @@ from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_mqtt_message
 
-from custom_components.playguard.const import (
+from custom_components.boreale.const import (
     CONF_CONSOLE_ID,
     CONF_KEEP_VALUES,
     CONF_NOTIFY_REFUSED,
@@ -54,14 +54,14 @@ async def _answered(hass: HomeAssistant, mqtt_mock, step: Awaitable, topic: str,
 @pytest.fixture
 def no_wait():
     """No console answers: the flows give up at once."""
-    with patch("custom_components.playguard.config_flow.STATE_TIMEOUT", 0.01):
+    with patch("custom_components.boreale.config_flow.STATE_TIMEOUT", 0.01):
         yield
 
 
 @pytest.fixture(autouse=True)
 def short_scan():
     """Adding a console by hand listens for the consoles briefly."""
-    with patch("custom_components.playguard.config_flow.SCAN_TIMEOUT", 0.01):
+    with patch("custom_components.boreale.config_flow.SCAN_TIMEOUT", 0.01):
         yield
 
 
@@ -71,7 +71,7 @@ async def _scanned(hass: HomeAssistant, mqtt_mock, retained: list[tuple[str, str
     task = hass.async_create_task(
         hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     )
-    with patch("custom_components.playguard.config_flow.SCAN_TIMEOUT", 0.5):
+    with patch("custom_components.boreale.config_flow.SCAN_TIMEOUT", 0.5):
         for _ in range(100):
             subscribed = {c.args[0] for c in mqtt_mock.async_subscribe.call_args_list}
             if {"+/+/state", "+/+/+/state"} <= subscribed:
@@ -276,7 +276,7 @@ async def test_by_hand(hass: HomeAssistant, mqtt_mock, no_wait) -> None:
         result["flow_id"], {CONF_CONSOLE_ID: " A1B2C3D4 ", CONF_PREFIX: "home/playguard/"}
     )
     topic = f"home/playguard/{CONSOLE_ID}/state"
-    with patch("custom_components.playguard.config_flow.STATE_TIMEOUT", 5):
+    with patch("custom_components.boreale.config_flow.STATE_TIMEOUT", 5):
         result = await _answered(hass, mqtt_mock, step, topic, json.dumps(fixture("state.json")))
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Salon"  # the console's name
@@ -325,7 +325,7 @@ async def test_reconfigure(hass: HomeAssistant, setup, mqtt_mock, no_wait) -> No
     assert result["errors"] == {"base": "no_state"}
     step = hass.config_entries.flow.async_configure(result["flow_id"], {CONF_PREFIX: " home/playguard/ "})
     topic = f"home/playguard/{CONSOLE_ID}/state"
-    with patch("custom_components.playguard.config_flow.STATE_TIMEOUT", 5):
+    with patch("custom_components.boreale.config_flow.STATE_TIMEOUT", 5):
         result = await _answered(hass, mqtt_mock, step, topic, json.dumps(fixture("state.json")))
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"

@@ -21,7 +21,7 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / "custom_components" / "playguard" / "manifest.json"
+MANIFEST = ROOT / "custom_components" / "boreale" / "manifest.json"
 PLEASE = ROOT / ".release-please-manifest.json"
 CHANGELOG = ROOT / "CHANGELOG.md"
 

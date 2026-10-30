@@ -8,7 +8,7 @@ from homeassistant.const import STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 
-from custom_components.playguard.const import DOMAIN
+from custom_components.boreale.const import DOMAIN
 
 from .conftest import CONSOLE_ID, fixture, publish
 

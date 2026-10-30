@@ -26,8 +26,8 @@ import probatio
 import pytest
 from pytest_homeassistant_custom_component.components.diagnostics import get_diagnostics_for_config_entry
 
-from custom_components.playguard.const import CONF_KEEP_VALUES, CONF_TAKE_OVER, DOMAIN
-from custom_components.playguard.entities import ENTITIES
+from custom_components.boreale.const import CONF_KEEP_VALUES, CONF_TAKE_OVER, DOMAIN
+from custom_components.boreale.entities import ENTITIES
 
 from .conftest import BASE, CONSOLE_ID, fixture, publish
 
@@ -185,7 +185,7 @@ async def test_takes_over_the_native_discovery(hass: HomeAssistant, setup, mqtt_
 
 async def test_tells_the_console_its_version(hass: HomeAssistant, setup, mqtt_mock) -> None:
     """Retained, once at set-up: PlayGuard warns of a newer release of the integration."""
-    manifest = json.loads((Path(__file__).parents[1] / "custom_components/playguard/manifest.json").read_text())
+    manifest = json.loads((Path(__file__).parents[1] / "custom_components/boreale/manifest.json").read_text())
     told = [p for p in _published(mqtt_mock) if p[0] == f"{BASE}/integration"]
     assert len(told) == 1
     _topic, payload, qos, retain = told[0]
@@ -197,7 +197,7 @@ async def test_version_not_told(hass: HomeAssistant, mqtt_mock, entry, caplog: p
     """The broker refusing it does not fail the set-up."""
     entry.add_to_hass(hass)
     with patch(
-        "custom_components.playguard.coordinator.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
+        "custom_components.boreale.coordinator.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
     ):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
@@ -596,7 +596,7 @@ async def test_remove_without_mqtt(hass: HomeAssistant, setup, caplog: pytest.Lo
     """MQTT may be gone when the entry is removed: the removal still goes through."""
     assert await hass.config_entries.async_unload(setup.entry_id)
     with patch(
-        "custom_components.playguard.coordinator.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
+        "custom_components.boreale.coordinator.mqtt.async_publish", side_effect=HomeAssistantError("MQTT is gone")
     ):
         await hass.config_entries.async_remove(setup.entry_id)
         await hass.async_block_till_done()

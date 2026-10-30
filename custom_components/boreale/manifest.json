@@ -1,0 +1,25 @@
+{
+  "domain": "boreale",
+  "name": "Boréale for Nintendo Switch",
+  "after_dependencies": [
+    "recorder"
+  ],
+  "codeowners": [
+    "@JigSawFr"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "mqtt"
+  ],
+  "documentation": "https://github.com/JigSawFr/boreale-ha",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/JigSawFr/boreale-ha/issues",
+  "mqtt": [
+    "playguard/+/state",
+    "boreale/+/playguard/state"
+  ],
+  "quality_scale": "platinum",
+  "requirements": [],
+  "version": "0.9.0-dev.1"
+}
