@@ -908,7 +908,10 @@ disparaît quand les deux versions sont les mêmes.
 <summary>Réparation : « … parle un protocole PlayGuard plus récent »</summary>
 
 Le PlayGuard de la console est plus récent que cette intégration : mettez à jour
-l'intégration PlayGuard (HACS). D'ici là, certaines valeurs peuvent manquer.
+l'intégration PlayGuard (HACS). D'ici là, un document de ce schéma plus récent
+n'est pas lu : ses entités gardent ce que disait le dernier document connu (ou
+restent inconnues), aucune entité n'est supprimée et aucune statistique n'en
+est importée.
 </details>
 
 <details>
@@ -962,7 +965,9 @@ sa version, retenue, sur `playguard/<id>/integration`. Hors du broker, elle
 lit la dernière release de PlayGuard sur `api.github.com` (l'entité de mise à
 jour *PlayGuard*). L'ajout d'une console à
 la main écoute `+/+/state` et `+/+/+/state` quelques secondes, pour lister les
-consoles qui y sont. Le contrat est le
+consoles qui y sont. Chaque document porte un `schema` (absent : 1) : un
+schéma plus récent que celui de l'intégration n'est pas lu (une réparation le
+signale), un champ inconnu est ignoré. Le contrat est le
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md)
 de PlayGuard (en anglais).
 
