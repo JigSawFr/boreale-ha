@@ -209,11 +209,10 @@ start, as soon as the console's state is read: its device, its entities with
 their ids, names, areas and history, and its statistics move over, without
 asking. A repair then says what is left to you:
 
-- the actions are `boreale.…` now (`boreale.add_bonus_time`); the old ones
-  (`playguard.add_bonus_time`) still work for now, and each one still called
-  raises a repair naming it;
-- the triggers and conditions (`playguard.game_started`,
-  `playguard.is_playing`) must be changed to `boreale.…` in the automations;
+- the actions, triggers and conditions are `boreale.…` now
+  (`boreale.add_bonus_time`, `boreale.game_started`, `boreale.is_playing`):
+  change the `playguard.…` ones in your automations and scripts, the old
+  names no longer answer;
 - the blueprints are in `blueprints/automation/boreale/`: import them again;
 - the old integration, if still there, is removed in HACS (or delete
   `custom_components/playguard`), then Home Assistant restarted.

@@ -220,12 +220,10 @@ son appareil, ses entités avec leurs identifiants, noms, pièces et
 historique, et ses statistiques passent de l'une à l'autre, sans rien
 demander. Une réparation dit ensuite ce qui vous reste à faire :
 
-- les actions sont désormais `boreale.…` (`boreale.add_bonus_time`) ; les
-  anciennes (`playguard.add_bonus_time`) marchent encore pour l'instant, et
-  chacune encore appelée lève une réparation qui la nomme ;
-- les déclencheurs et conditions (`playguard.game_started`,
-  `playguard.is_playing`) sont à remplacer par `boreale.…` dans les
-  automatisations ;
+- les actions, déclencheurs et conditions sont désormais `boreale.…`
+  (`boreale.add_bonus_time`, `boreale.game_started`, `boreale.is_playing`) :
+  remplacez les `playguard.…` dans vos automatisations et scripts, les
+  anciens noms ne répondent plus ;
 - les blueprints sont dans `blueprints/automation/boreale/` : importez-les
   de nouveau ;
 - l'ancienne intégration, si elle est encore là, se supprime dans HACS (ou

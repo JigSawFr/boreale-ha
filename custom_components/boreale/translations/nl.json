@@ -569,15 +569,11 @@
     },
     "taken_over": {
       "title": "PlayGuard is nu Boréale for Nintendo Switch",
-      "description": "Je consoles zijn verhuisd van de integratie {legacy} naar Boréale, met hun entiteiten, hun geschiedenis en hun statistieken. Automatiseringen, scripts en blueprints die de triggers en voorwaarden ervan gebruiken ({legacy}.game_started, {legacy}.is_playing…) moeten nu boreale.… gebruiken. De acties ervan ({legacy}.add_bonus_time…) werken voorlopig nog, en elke actie die nog wordt aangeroepen staat hier. Negeer dit zodra het klaar is."
+      "description": "Je consoles zijn verhuisd van de integratie {legacy} naar Boréale, met hun entiteiten, hun geschiedenis en hun statistieken. Automatiseringen, scripts en blueprints die de acties, triggers en voorwaarden ervan gebruiken ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) moeten nu boreale.… gebruiken: de oude namen reageren niet meer. Negeer dit zodra het klaar is."
     },
     "taken_over_installed": {
       "title": "PlayGuard is nu Boréale for Nintendo Switch",
-      "description": "Je consoles zijn verhuisd van de integratie {legacy} naar Boréale, met hun entiteiten, hun geschiedenis en hun statistieken. Automatiseringen, scripts en blueprints die de triggers en voorwaarden ervan gebruiken ({legacy}.game_started, {legacy}.is_playing…) moeten nu boreale.… gebruiken. De acties ervan ({legacy}.add_bonus_time…) werken voorlopig nog, en elke actie die nog wordt aangeroepen staat hier. Negeer dit zodra het klaar is.\n\nDe oude integratie is nog geïnstalleerd: verwijder PlayGuard in HACS, of verwijder de map custom_components/{legacy}, en start Home Assistant opnieuw."
-    },
-    "legacy_action": {
-      "title": "{old} is nu {new}",
-      "description": "Een automatisering of script roept nog {old} aan. Dat werkt voorlopig nog: verander het in {new}."
+      "description": "Je consoles zijn verhuisd van de integratie {legacy} naar Boréale, met hun entiteiten, hun geschiedenis en hun statistieken. Automatiseringen, scripts en blueprints die de acties, triggers en voorwaarden ervan gebruiken ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) moeten nu boreale.… gebruiken: de oude namen reageren niet meer. Negeer dit zodra het klaar is.\n\nDe oude integratie is nog geïnstalleerd: verwijder PlayGuard in HACS, of verwijder de map custom_components/{legacy}, en start Home Assistant opnieuw."
     }
   },
   "selector": {

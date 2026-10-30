@@ -569,15 +569,11 @@
     },
     "taken_over": {
       "title": "PlayGuard ora è Boréale for Nintendo Switch",
-      "description": "Le tue console sono passate dall'integrazione {legacy} a Boréale, con le loro entità, la cronologia e le statistiche. Automazioni, script e blueprint che usano i suoi trigger e le sue condizioni ({legacy}.game_started, {legacy}.is_playing…) ora devono usare boreale.… al loro posto. Le sue azioni ({legacy}.add_bonus_time…) funzionano ancora per ora, e ognuna ancora chiamata è segnalata qui. Ignora questo avviso una volta fatto."
+      "description": "Le tue console sono passate dall'integrazione {legacy} a Boréale, con le loro entità, la cronologia e le statistiche. Automazioni, script e blueprint che usano le sue azioni, i suoi trigger e le sue condizioni ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) ora devono usare boreale.… al loro posto: i vecchi nomi non rispondono più. Ignora questo avviso una volta fatto."
     },
     "taken_over_installed": {
       "title": "PlayGuard ora è Boréale for Nintendo Switch",
-      "description": "Le tue console sono passate dall'integrazione {legacy} a Boréale, con le loro entità, la cronologia e le statistiche. Automazioni, script e blueprint che usano i suoi trigger e le sue condizioni ({legacy}.game_started, {legacy}.is_playing…) ora devono usare boreale.… al loro posto. Le sue azioni ({legacy}.add_bonus_time…) funzionano ancora per ora, e ognuna ancora chiamata è segnalata qui. Ignora questo avviso una volta fatto.\n\nLa vecchia integrazione è ancora installata: rimuovi PlayGuard in HACS, o elimina la cartella custom_components/{legacy}, poi riavvia Home Assistant."
-    },
-    "legacy_action": {
-      "title": "{old} ora è {new}",
-      "description": "Un'automazione o uno script chiama ancora {old}. Per ora funziona ancora: cambialo in {new}."
+      "description": "Le tue console sono passate dall'integrazione {legacy} a Boréale, con le loro entità, la cronologia e le statistiche. Automazioni, script e blueprint che usano le sue azioni, i suoi trigger e le sue condizioni ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) ora devono usare boreale.… al loro posto: i vecchi nomi non rispondono più. Ignora questo avviso una volta fatto.\n\nLa vecchia integrazione è ancora installata: rimuovi PlayGuard in HACS, o elimina la cartella custom_components/{legacy}, poi riavvia Home Assistant."
     }
   },
   "selector": {

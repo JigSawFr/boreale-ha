@@ -165,22 +165,3 @@ async def test_taken_over_when_added_by_hand(hass: HomeAssistant, mqtt_mock, leg
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     assert hass.config_entries.async_get_entry(legacy.entry_id) is None
-
-
-async def test_legacy_actions(hass: HomeAssistant, mqtt_mock, setup) -> None:
-    """The old actions still answer, each one used naming the new one."""
-    device = dr.async_get(hass).async_get_device_by_identifier((DOMAIN, CONSOLE_ID), setup.entry_id)
-    mqtt_mock.async_publish.reset_mock()
-    await hass.services.async_call(
-        LEGACY_DOMAIN, "add_bonus_time", {"device_id": device.id, "minutes": 15}, blocking=True
-    )
-    assert [c.args for c in mqtt_mock.async_publish.call_args_list] == [(f"{BASE}/add_bonus_time/set", "15", 1, True)]
-    issue = ir.async_get(hass).async_get_issue(DOMAIN, "legacy_action_add_bonus_time")
-    assert issue is not None and issue.translation_placeholders == {
-        "old": "playguard.add_bonus_time",
-        "new": "boreale.add_bonus_time",
-    }
-    response = await hass.services.async_call(
-        LEGACY_DOMAIN, "get_play_time", {"device_id": device.id}, blocking=True, return_response=True
-    )
-    assert response["console"] == "Salon"

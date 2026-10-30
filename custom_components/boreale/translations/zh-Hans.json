@@ -569,15 +569,11 @@
     },
     "taken_over": {
       "title": "PlayGuard 现已更名为 Boréale for Nintendo Switch",
-      "description": "你的主机已从集成 {legacy} 迁移到 Boréale，实体、历史记录和统计数据都已保留。使用其触发器和条件（{legacy}.game_started、{legacy}.is_playing…）的自动化、脚本和蓝图现在必须改用 boreale.…。其动作（{legacy}.add_bonus_time…）暂时仍可使用，仍被调用的动作会在这里列出。完成后忽略此提示即可。"
+      "description": "你的主机已从集成 {legacy} 迁移到 Boréale，实体、历史记录和统计数据都已保留。使用其动作、触发器和条件（{legacy}.add_bonus_time、{legacy}.game_started、{legacy}.is_playing…）的自动化、脚本和蓝图现在必须改用 boreale.…：旧名称已不再响应。完成后忽略此提示即可。"
     },
     "taken_over_installed": {
       "title": "PlayGuard 现已更名为 Boréale for Nintendo Switch",
-      "description": "你的主机已从集成 {legacy} 迁移到 Boréale，实体、历史记录和统计数据都已保留。使用其触发器和条件（{legacy}.game_started、{legacy}.is_playing…）的自动化、脚本和蓝图现在必须改用 boreale.…。其动作（{legacy}.add_bonus_time…）暂时仍可使用，仍被调用的动作会在这里列出。完成后忽略此提示即可。\n\n旧集成仍已安装：请在 HACS 中删除 PlayGuard，或删除文件夹 custom_components/{legacy}，然后重启 Home Assistant。"
-    },
-    "legacy_action": {
-      "title": "{old} 现已改为 {new}",
-      "description": "某个自动化或脚本仍在调用 {old}。暂时仍可使用：请改为 {new}。"
+      "description": "你的主机已从集成 {legacy} 迁移到 Boréale，实体、历史记录和统计数据都已保留。使用其动作、触发器和条件（{legacy}.add_bonus_time、{legacy}.game_started、{legacy}.is_playing…）的自动化、脚本和蓝图现在必须改用 boreale.…：旧名称已不再响应。完成后忽略此提示即可。\n\n旧集成仍已安装：请在 HACS 中删除 PlayGuard，或删除文件夹 custom_components/{legacy}，然后重启 Home Assistant。"
     }
   },
   "selector": {

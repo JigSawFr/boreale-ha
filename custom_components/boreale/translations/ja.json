@@ -569,15 +569,11 @@
     },
     "taken_over": {
       "title": "PlayGuard は Boréale for Nintendo Switch になりました",
-      "description": "コンソールは、エンティティ、履歴、統計とともに、インテグレーション {legacy} から Boréale へ移行しました。そのトリガーや条件（{legacy}.game_started、{legacy}.is_playing…）を使うオートメーション、スクリプト、ブループリントは、代わりに boreale.… を使う必要があります。アクション（{legacy}.add_bonus_time…）は当面そのまま動作し、まだ呼び出されているものはここに表示されます。対応が済んだら、これを無視してください。"
+      "description": "コンソールは、エンティティ、履歴、統計とともに、インテグレーション {legacy} から Boréale へ移行しました。そのアクション、トリガー、条件（{legacy}.add_bonus_time、{legacy}.game_started、{legacy}.is_playing…）を使うオートメーション、スクリプト、ブループリントは、代わりに boreale.… を使う必要があります。古い名前はもう応答しません。対応が済んだら、これを無視してください。"
     },
     "taken_over_installed": {
       "title": "PlayGuard は Boréale for Nintendo Switch になりました",
-      "description": "コンソールは、エンティティ、履歴、統計とともに、インテグレーション {legacy} から Boréale へ移行しました。そのトリガーや条件（{legacy}.game_started、{legacy}.is_playing…）を使うオートメーション、スクリプト、ブループリントは、代わりに boreale.… を使う必要があります。アクション（{legacy}.add_bonus_time…）は当面そのまま動作し、まだ呼び出されているものはここに表示されます。対応が済んだら、これを無視してください。\n\n古いインテグレーションがまだインストールされています。HACS で PlayGuard を削除するか、フォルダー custom_components/{legacy} を削除してから、Home Assistant を再起動してください。"
-    },
-    "legacy_action": {
-      "title": "{old} は {new} になりました",
-      "description": "オートメーションまたはスクリプトがまだ {old} を呼び出しています。当面は動作しますが、{new} に変更してください。"
+      "description": "コンソールは、エンティティ、履歴、統計とともに、インテグレーション {legacy} から Boréale へ移行しました。そのアクション、トリガー、条件（{legacy}.add_bonus_time、{legacy}.game_started、{legacy}.is_playing…）を使うオートメーション、スクリプト、ブループリントは、代わりに boreale.… を使う必要があります。古い名前はもう応答しません。対応が済んだら、これを無視してください。\n\n古いインテグレーションがまだインストールされています。HACS で PlayGuard を削除するか、フォルダー custom_components/{legacy} を削除してから、Home Assistant を再起動してください。"
     }
   },
   "selector": {

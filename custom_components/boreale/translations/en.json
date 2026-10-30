@@ -569,15 +569,11 @@
     },
     "taken_over": {
       "title": "PlayGuard is now Boréale for Nintendo Switch",
-      "description": "Your consoles moved from the integration {legacy} to Boréale, with their entities, their history and their statistics. Automations, scripts and blueprints that use its triggers and conditions ({legacy}.game_started, {legacy}.is_playing…) must now use boreale.… instead. Its actions ({legacy}.add_bonus_time…) still work for now, and each one still called is listed here. Ignore this once done."
+      "description": "Your consoles moved from the integration {legacy} to Boréale, with their entities, their history and their statistics. Automations, scripts and blueprints that use its actions, triggers and conditions ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) must now use boreale.… instead: the old names no longer answer. Ignore this once done."
     },
     "taken_over_installed": {
       "title": "PlayGuard is now Boréale for Nintendo Switch",
-      "description": "Your consoles moved from the integration {legacy} to Boréale, with their entities, their history and their statistics. Automations, scripts and blueprints that use its triggers and conditions ({legacy}.game_started, {legacy}.is_playing…) must now use boreale.… instead. Its actions ({legacy}.add_bonus_time…) still work for now, and each one still called is listed here. Ignore this once done.\n\nThe old integration is still installed: remove PlayGuard in HACS, or delete the folder custom_components/{legacy}, then restart Home Assistant."
-    },
-    "legacy_action": {
-      "title": "{old} is now {new}",
-      "description": "An automation or a script still calls {old}. It still works for now: change it to {new}."
+      "description": "Your consoles moved from the integration {legacy} to Boréale, with their entities, their history and their statistics. Automations, scripts and blueprints that use its actions, triggers and conditions ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) must now use boreale.… instead: the old names no longer answer. Ignore this once done.\n\nThe old integration is still installed: remove PlayGuard in HACS, or delete the folder custom_components/{legacy}, then restart Home Assistant."
     }
   },
   "selector": {
