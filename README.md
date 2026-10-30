@@ -879,7 +879,9 @@ Optional modules › Link agent*. The repair goes once both versions match.
 <summary>Repair: "… speaks a newer PlayGuard protocol"</summary>
 
 The console's PlayGuard is newer than this integration: update the PlayGuard
-integration (HACS). Until then, some values may be missing.
+integration (HACS). Until then, a document of that newer schema is not read:
+its entities keep what the last document it knew said (or stay unknown), no
+entity is removed, and no statistic is imported from it.
 </details>
 
 <details>
@@ -932,7 +934,9 @@ same retained scalar orders as the native entities on
 its version, retained, on `playguard/<id>/integration`. Outside the broker, it reads PlayGuard's latest
 release on `api.github.com` (the *PlayGuard* update entity). Adding a console by
 hand listens to `+/+/state` and `+/+/+/state` for a few seconds, to list the
-consoles there. The contract is PlayGuard's
+consoles there. Every document carries a `schema` (none is 1): one newer than
+the integration's is not read (a repair says so), a field it does not know is
+skipped. The contract is PlayGuard's
 [`docs/sync-protocol.md`](https://github.com/JigSawFr/PlayGuard/blob/main/docs/sync-protocol.md).
 
 ## 🤝 Help, security and contributing

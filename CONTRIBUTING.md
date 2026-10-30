@@ -82,6 +82,19 @@ the coverage gate is per module, not the total.
 | `branding/` | The icon (a house around Aurore's night and PlayGuard's play sign), the logos, the README's banner and the social preview, as SVG, in Aurore's aurora (its sky, its colours, Sora): `node scripts/render_branding.mjs` (Node and Playwright) renders them to `brand/` and `.github/readme/` |
 | `.github/readme/` | The README's images: the banner, the social preview (uploaded by hand in *Settings › General*), the screenshots (a demo console in a real Home Assistant) |
 
+## Formats
+
+What crosses a version boundary carries a version. A document of a newer `schema` is not
+read (the last one known stays, a repair says so), one without `schema` is schema 1, and
+a field the integration does not know is skipped; `tests/test_init.py`,
+`test_published.py` and `test_statistics.py` cover each case.
+
+| Format | Version | Writer → reader |
+|---|---|---|
+| MQTT `state`, `system`, `games`, `activity`, `activity/<date>`, `names`, `week`, `event` | `schema`, `SCHEMA` 1 in `const.py` | PlayGuard → `coordinator.py` (`_readable`), then the entities and `statistics.py` |
+| MQTT `integration` | `schema`, `SCHEMA` 1 | `coordinator.py` → PlayGuard |
+| The config entry | `VERSION` 1, `MINOR_VERSION` 3 (`config_flow.py`) | migrated by `async_migrate_entry` (`__init__.py`) |
+
 ## Pull requests and releases
 
 Releases are automated with [release-please](https://github.com/googleapis/release-please),

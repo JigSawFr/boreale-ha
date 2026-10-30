@@ -120,6 +120,7 @@ class PlayGuardConsole:
         self._discovery_sent = False
         self._native_states = 0
         self._issue_schema = f"newer_schema_{self.console_id}"
+        self._newer: dict[str, int] = {}  # topic -> the newer schema its last document came in
         self._issue_native = f"native_discovery_{self.console_id}"
         self._issue_agent = f"agent_version_{self.console_id}"
         self._notification = f"{DOMAIN}_{self.console_id}_refused"
@@ -214,7 +215,8 @@ class PlayGuardConsole:
         if doc is None:
             return
         self._seen(msg)
-        self._check_schema(doc)
+        if not self._readable("state", doc):
+            return
         self.state = doc
         self._clear_refusals()
         self._update_device()
@@ -225,7 +227,10 @@ class PlayGuardConsole:
     @callback
     def _on_system(self, msg: ReceiveMessage) -> None:
         self._seen(msg)
-        self.system = _json(msg.payload)
+        doc = _json(msg.payload)
+        if not self._readable("system", doc):
+            return
+        self.system = doc
         self._check_agent()
         self._update_device()
         self._changed()
@@ -233,7 +238,10 @@ class PlayGuardConsole:
     @callback
     def _on_games(self, msg: ReceiveMessage) -> None:
         self._seen(msg)
-        self.games = _json(msg.payload)
+        doc = _json(msg.payload)
+        if not self._readable("games", doc):
+            return
+        self.games = doc
         self._changed()
 
     def document(self, topic: str) -> dict[str, Any] | None:
@@ -275,13 +283,18 @@ class PlayGuardConsole:
     @callback
     def _on_activity(self, msg: ReceiveMessage) -> None:
         self._seen(msg)
-        self.activity = _json(msg.payload)
+        doc = _json(msg.payload)
+        if not self._readable("activity", doc):
+            return
+        self.activity = doc
         self._changed()
 
     @callback
     def _on_final(self, msg: ReceiveMessage) -> None:
         date = msg.topic.rsplit("/", 1)[-1]
         doc = _json(msg.payload)
+        if not self._readable(f"activity/{date}", doc):
+            return  # the day it may have had stays
         if doc is None:
             self.finals.pop(date, None)  # the console keeps 14 days and clears the older ones
             self._changed()
@@ -293,13 +306,19 @@ class PlayGuardConsole:
     @callback
     def _on_names(self, msg: ReceiveMessage) -> None:
         self._seen(msg)
-        self.names = _json(msg.payload) or {}
+        doc = _json(msg.payload)
+        if not self._readable("names", doc):
+            return
+        self.names = doc or {}
         self._changed()
 
     @callback
     def _on_week(self, msg: ReceiveMessage) -> None:
         self._seen(msg)
-        self.week = _json(msg.payload)
+        doc = _json(msg.payload)
+        if not self._readable("week", doc):
+            return
+        self.week = doc
         self._changed()
         if self.week:
             self._schedule_statistics()  # its finished days, per account
@@ -310,6 +329,8 @@ class PlayGuardConsole:
         if doc is None:
             return
         self._seen(msg)
+        if not self._readable("event", doc):
+            return
         self.last_event = doc
         self._answer(doc)
         for listener in list(self._event_listeners):
@@ -451,9 +472,20 @@ class PlayGuardConsole:
                 registry.async_remove(entity_id)
 
     @callback
-    def _check_schema(self, doc: dict[str, Any]) -> None:
-        schema = doc.get("schema")
-        if isinstance(schema, int) and schema > SCHEMA:
+    def _readable(self, topic: str, doc: dict[str, Any] | None) -> bool:
+        """Whether a topic's document is one this integration reads. One of a
+        newer schema is not (its fields may mean something else): the last
+        one it knew stays, and a repair issue says so until every topic is
+        back to a schema it knows. A document without `schema` is schema 1;
+        None (a topic cleared) is read."""
+        schema = (doc or {}).get("schema", 1)
+        newer = isinstance(schema, int) and not isinstance(schema, bool) and schema > SCHEMA
+        if newer:
+            self._newer[topic] = schema
+            _LOGGER.debug("%s/%s: schema %s, newer than %s: not read", self.base, topic, schema, SCHEMA)
+        else:
+            self._newer.pop(topic, None)
+        if self._newer:
             ir.async_create_issue(
                 self.hass,
                 DOMAIN,
@@ -461,10 +493,15 @@ class PlayGuardConsole:
                 is_fixable=False,
                 severity=ir.IssueSeverity.WARNING,
                 translation_key="newer_schema",
-                translation_placeholders={"name": self.name, "schema": str(schema), "known": str(SCHEMA)},
+                translation_placeholders={
+                    "name": self.name,
+                    "schema": str(max(self._newer.values())),
+                    "known": str(SCHEMA),
+                },
             )
         else:
             ir.async_delete_issue(self.hass, DOMAIN, self._issue_schema)
+        return not newer
 
     @callback
     def _check_agent(self) -> None:

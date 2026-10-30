@@ -9,6 +9,9 @@ Importing the same day again replaces it.
 Each account's daily time too: from PlayGuard's week table (`week`, every
 day but its last, which may not be over), and from a finished day that
 carries it (`per_account`, only when PlayGuard had read the accounts).
+
+Only documents of a schema the integration knows get here: the coordinator
+keeps one of a newer schema out (`_readable`), so nothing is imported from it.
 """
 
 from __future__ import annotations

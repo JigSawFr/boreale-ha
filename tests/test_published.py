@@ -181,6 +181,18 @@ async def test_older_playguard_publishes_everything(
     assert CONF_UNPUBLISHED not in setup.data
 
 
+async def test_newer_state_removes_nothing(hass: HomeAssistant, setup: MockConfigEntry, state: dict[str, Any]) -> None:
+    """A state of a newer schema is not read: what it says is off removes nothing."""
+    state["schema"] = 2
+    state["link"]["publishes"]["network"] = False
+    with patch.object(hass.config_entries, "async_schedule_reload") as reload:
+        publish(hass, "state", state)
+        await hass.async_block_till_done()
+    reload.assert_not_called()
+    assert _id(hass, "sensor", "ip_address") and _id(hass, "sensor", "serial")
+    assert CONF_UNPUBLISHED not in setup.data
+
+
 async def test_not_created_when_not_published(hass: HomeAssistant, mqtt_mock: Any, entry: MockConfigEntry) -> None:
     """What the last state said is off is not created at the next start."""
     known = MockConfigEntry(
