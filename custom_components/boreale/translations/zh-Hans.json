@@ -358,6 +358,9 @@
       "homebrews": {
         "name": "自制软件"
       },
+      "homebrew_notices": {
+        "name": "homebrew 通知"
+      },
       "forwarders": {
         "name": "转发程序"
       }

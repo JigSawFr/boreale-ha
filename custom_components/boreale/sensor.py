@@ -33,6 +33,7 @@ async def async_setup_entry(
         "last_seen": LastSeenSensor,
         "play_ends": PlayEndsSensor,
         "console_activity": ActivitySensor,
+        "homebrew_notices": NoticesSensor,
     }
     async_add_entities(
         classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR, console.unpublished)
@@ -346,3 +347,36 @@ class AccountSensor(PlayGuardSensor):
             )
         table = play.table(self.console, "accounts", "uid", "per_account")
         return None if table is None else sum(table.get(self.uid, []))
+
+
+class NoticesSensor(PlayGuardSensor):
+    """What waits on the user or failed in the Boréale homebrews of the
+    console, as their shared bell says (<base>/notices): how many, and each
+    homebrew's notices as attributes. Unknown on the tree before Boréale's."""
+
+    @property
+    def available(self) -> bool:
+        return self.console.notices is not None
+
+    @property
+    def native_value(self) -> int | None:
+        doc = self.console.notices or {}
+        counts = [doc.get(k) for k in ("todo", "error")]
+        if not all(isinstance(n, int) and not isinstance(n, bool) and n >= 0 for n in counts):
+            return None
+        return sum(counts)  # type: ignore[arg-type]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        doc = self.console.notices or {}
+        homebrews: dict[str, list[dict[str, Any]]] = {}
+        for brew in doc.get("homebrews") or []:
+            if not isinstance(brew, dict) or not isinstance(brew.get("notices"), list):
+                continue
+            name = str(brew.get("name") or brew.get("module") or "")
+            homebrews[name] = [
+                {k: n[k] for k in ("title", "detail", "level", "progress") if k in n}
+                for n in brew["notices"]
+                if isinstance(n, dict)
+            ]
+        return {"to_do": doc.get("todo"), "failed": doc.get("error"), "homebrews": homebrews}

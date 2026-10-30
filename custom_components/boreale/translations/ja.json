@@ -358,6 +358,9 @@
       "homebrews": {
         "name": "Homebrew"
       },
+      "homebrew_notices": {
+        "name": "homebrew の通知"
+      },
       "forwarders": {
         "name": "フォワーダー"
       }

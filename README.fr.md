@@ -52,7 +52,8 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   unités, options), à sa place (pas de doublons ; réactivez-le dans les
   options), plus **En ligne**, **Agent actif**, **Vu pour la dernière fois**,
   **Temps de jeu cette semaine**, **Fin de partie prévue**, **Activité**,
-  **Homebrews** et **Forwarders**, le calendrier **Parties**, l'**Icône du jeu
+  **Homebrews**, **Forwarders** et **Notifications des homebrews**, le
+  calendrier **Parties**, l'**Icône du jeu
   en cours** et une entité de mise à jour **PlayGuard** (la version de la
   console face à la dernière release de PlayGuard).
 - **Les noms des jeux** sur *Jeu en cours*, et le temps de chaque jeu
@@ -414,6 +415,11 @@ désactivé par défaut), et depuis PlayGuard 1.5 *Homebrews* (les fichiers
 les jeux, les homebrews en nombre ; leur temps de jeu est dans l'attribut
 `homebrew` de *Temps de jeu aujourd'hui* et de *Temps de jeu cette semaine*,
 et dans les jours de la semaine (le minuteur de la console le compte).
+*Notifications des homebrews* compte ce qui vous attend ou a échoué dans les
+homebrews Boréale de la console (PlayGuard, PlayShelf…), d'après leur cloche
+partagée (`boreale/<id>/notices`) : ses attributs donnent `to_do`, `failed`
+et les notifications de chaque homebrew (`title`, `detail`, `level`,
+`progress`) ; indisponible sur l'arbre des topics d'avant Boréale.
 
 Il n'y a **pas de capteur par jeu** : le temps d'un jeu aujourd'hui est dans
 l'attribut `games` du journal de jeu, celui de la semaine dans celui de *Temps

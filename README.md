@@ -50,8 +50,8 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 - **The same entities** as the console's own MQTT device (names, units,
   options), replacing it (no duplicates; turn it back on in the options),
   plus **Online**, **Agent running**, **Last seen**, **Play time this week**,
-  **Play ends**, **Activity**, **Homebrews** and **Forwarders**, the **Play
-  sessions** calendar, the **Now playing icon** and a **PlayGuard** update
+  **Play ends**, **Activity**, **Homebrews**, **Forwarders** and **Homebrew
+  notifications**, the **Play sessions** calendar, the **Now playing icon** and a **PlayGuard** update
   entity (the console's version against PlayGuard's latest release).
 - **Game names** on *Now playing*, and each game's time today and this week as
   attributes; every game on *Games installed* (`games`), with its play time:
@@ -393,6 +393,11 @@ PlayGuard 1.5 *Homebrews* (the `.nro` files on the SD card) and *Forwarders*
 (installed): PlayGuard lists games only, the homebrews as counts; their play
 time is in *Play time today*'s and *Play time this week*'s `homebrew`
 attribute and in the week's days (the console's timer counts it).
+*Homebrew notifications* counts what waits on you or failed in the console's
+Boréale homebrews (PlayGuard, PlayShelf…), from their shared bell
+(`boreale/<id>/notices`): its attributes give `to_do`, `failed` and each
+homebrew's notices (`title`, `detail`, `level`, `progress`); unavailable on
+the topic tree before Boréale's.
 
 There is **no sensor per game**: a game's time today is in the play log's
 `games` attribute, this week's in *Play time this week*'s, since it was first

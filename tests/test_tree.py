@@ -152,3 +152,43 @@ async def test_found_on_the_tree(hass: HomeAssistant, mqtt_mock) -> None:
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"console": CONSOLE_ID})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "boreale", CONF_TREE: 2}
+
+
+async def test_homebrew_notices(hass: HomeAssistant, mqtt_mock, tree_entry: MockConfigEntry, state: dict) -> None:
+    """Every Boréale homebrew's shared bell, on Boréale's tree: what is to do
+    and what failed, each homebrew's notices as attributes; a document of a
+    newer schema is not read."""
+    tree_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(tree_entry.entry_id)
+    await hass.async_block_till_done()
+    subscribed = {c.args[0] for c in mqtt_mock.async_subscribe.call_args_list}
+    assert f"{TREE}/notices" in subscribed and f"{MODULE}/notices" not in subscribed
+    async_fire_mqtt_message(hass, f"{MODULE}/state", json.dumps(state), retain=True)
+    await hass.async_block_till_done()
+    entity_id = "sensor.salon_homebrew_notifications"
+    assert hass.states.get(entity_id).state == "unavailable"  # nothing said yet
+    doc = {
+        "schema": 1,
+        "homebrews": [
+            {"module": "lantern", "name": "Lantern", "notices": [
+                {"id": "dl", "level": "progress", "title": "Downloading", "detail": "Star Kart", "progress": 40},
+                {"id": "fail", "level": "error", "title": "Install failed", "detail": ""}]},
+            {"module": "playguard", "name": "PlayGuard", "notices": [
+                {"id": "pin_weak", "level": "todo", "title": "The PIN is easy to guess", "detail": ""}]},
+        ],
+        "todo": 1,
+        "error": 1,
+    }  # fmt: skip
+    async_fire_mqtt_message(hass, f"{TREE}/notices", json.dumps(doc), retain=True)
+    await hass.async_block_till_done()
+    sensor = hass.states.get(entity_id)
+    assert sensor.state == "2"
+    assert sensor.attributes["to_do"] == 1 and sensor.attributes["failed"] == 1
+    assert sensor.attributes["homebrews"]["Lantern"][0] == {
+        "title": "Downloading", "detail": "Star Kart", "level": "progress", "progress": 40
+    }  # fmt: skip
+    assert sensor.attributes["homebrews"]["PlayGuard"][0]["level"] == "todo"
+    # A newer schema: the last one read stays.
+    async_fire_mqtt_message(hass, f"{TREE}/notices", json.dumps({"schema": 2, "todo": 9, "error": 9}), retain=True)
+    await hass.async_block_till_done()
+    assert hass.states.get(entity_id).state == "2"

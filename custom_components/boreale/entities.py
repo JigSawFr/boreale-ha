@@ -402,6 +402,9 @@ ENTITIES: tuple[EntityDef, ...] = (
         publish=PUBLISH_GAMES,
         extra=True,
     ),
+    # What waits on the user or failed in the Boréale homebrews of the console
+    # (their shared bell: <base>/notices, sensor.py).
+    EntityDef(key="homebrew_notices", platform=Platform.SENSOR, state_class=SensorStateClass.MEASUREMENT, extra=True),
     # The icon of the game being played (PlayGuard's icon/<APP_ID>).
     EntityDef(key="now_playing_icon", platform=Platform.IMAGE, publish=PUBLISH_ICONS, extra=True),
     # PlayGuard's version against its latest release (update.py).

@@ -358,6 +358,9 @@
       "homebrews": {
         "name": "Homebrews"
       },
+      "homebrew_notices": {
+        "name": "Notificações dos homebrews"
+      },
       "forwarders": {
         "name": "Forwarders"
       }

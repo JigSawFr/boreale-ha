@@ -358,6 +358,9 @@
       "homebrews": {
         "name": "홈브루"
       },
+      "homebrew_notices": {
+        "name": "홈브루 알림"
+      },
       "forwarders": {
         "name": "포워더"
       }
