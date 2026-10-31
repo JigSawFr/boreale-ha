@@ -1,57 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320">
-  <!-- The README's banner (1280x320), Aurore's sky; rendered to .github/readme/banner.png by scripts/render_branding.mjs. -->
+  <!-- The README's banner (1280x320), Boréale's template (branding/README.md of JigSawFr/boreale): the night, the aurora, the mark, the name, what it does. Rendered to .github/readme/banner.png by scripts/render_branding.mjs. Sora. -->
   <defs>
-    <linearGradient id="b-sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0A1020"/>
-      <stop offset="1" stop-color="#141B2E"/>
-    </linearGradient>
-    <linearGradient id="b-word" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#00FFCC"/>
-      <stop offset="0.55" stop-color="#33BBFF"/>
-      <stop offset="1" stop-color="#8A5CFF"/>
-    </linearGradient>
-    <linearGradient id="b-colour" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#00FFCC" stop-opacity="0"/>
-      <stop offset="0.25" stop-color="#00FFCC"/>
-      <stop offset="0.65" stop-color="#33BBFF"/>
-      <stop offset="0.9" stop-color="#8A5CFF"/>
-      <stop offset="1" stop-color="#8A5CFF" stop-opacity="0"/>
-    </linearGradient>
-    <linearGradient id="b-rise" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#fff" stop-opacity="0.9"/>
-      <stop offset="0.3" stop-color="#fff" stop-opacity="0.5"/>
-      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
-    </linearGradient>
-    <pattern id="b-rays" width="12" height="320" patternUnits="userSpaceOnUse">
-      <rect width="12" height="320" fill="#fff" opacity="0.5"/>
-      <rect x="3.0" width="5.4" height="320" fill="#fff"/>
-    </pattern>
-    <filter id="b-soft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3.6 2"/></filter>
-    <filter id="b-line" x="-10%" y="-100%" width="120%" height="300%"><feGaussianBlur stdDeviation="6"/></filter>
-    <mask id="b-rays-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="320">
-      <rect width="1280" height="320" fill="url(#b-rays)" filter="url(#b-soft)"/>
-    </mask>
-    <mask id="b-fade" maskUnits="userSpaceOnUse" x="0" y="0" width="1280" height="320">
-      <path d="M0 300 C 300 305, 700 295, 960 245 S 1180 130, 1280 140 L 1280 0 L 0 0 Z" fill="url(#b-rise)"/>
-    </mask>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#00FFCC"/><stop offset="0.55" stop-color="#33BBFF"/><stop offset="1" stop-color="#8A5CFF"/></linearGradient>
+    <linearGradient id="c1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00FFCC" stop-opacity="0"/><stop offset="1" stop-color="#00FFCC" stop-opacity="0.3"/></linearGradient>
+    <linearGradient id="c2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#33BBFF" stop-opacity="0"/><stop offset="1" stop-color="#33BBFF" stop-opacity="0.22"/></linearGradient>
+    <linearGradient id="c3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A5CFF" stop-opacity="0"/><stop offset="1" stop-color="#8A5CFF" stop-opacity="0.24"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
   </defs>
-  <rect width="1280" height="320" fill="url(#b-sky)"/>
-  <g opacity="0.6">
-    <g mask="url(#b-fade)">
-      <rect width="1280" height="320" fill="url(#b-colour)" mask="url(#b-rays-mask)"/>
-    </g>
-    <path d="M0 300 C 300 305, 700 295, 960 245 S 1180 130, 1280 140" fill="none" stroke="url(#b-colour)" stroke-width="10" filter="url(#b-line)"/>
-    <path d="M0 300 C 300 305, 700 295, 960 245 S 1180 130, 1280 140" fill="none" stroke="url(#b-colour)" stroke-width="2.5" opacity="0.8"/>
+  <rect width="1280" height="320" rx="24" fill="#0B1424"/>
+  <g filter="url(#soft)">
+    <path d="M0 170 C 220 110, 420 190, 640 130 S 1040 80, 1280 120 L 1280 10 C 1040 -10, 860 60, 640 30 S 220 0, 0 60 Z" fill="url(#c1)"/>
+    <path d="M0 130 C 260 90, 480 150, 700 110 S 1080 60, 1280 90 L 1280 0 L 0 0 Z" fill="url(#c2)"/>
+    <path d="M0 100 C 300 60, 520 120, 760 80 S 1100 40, 1280 60 L 1280 0 L 0 0 Z" fill="url(#c3)"/>
   </g>
-  <g fill="#E8EEF7">
-    <circle cx="1130" cy="40" r="1.4" opacity="0.8"/><circle cx="1210" cy="250" r="1.2" opacity="0.6"/>
-    <circle cx="860" cy="270" r="1.1" opacity="0.5"/><circle cx="700" cy="34" r="1.3" opacity="0.7"/>
-    <circle cx="1040" cy="290" r="1" opacity="0.5"/><circle cx="1250" cy="150" r="1.2" opacity="0.6"/>
-    <circle cx="760" cy="300" r="1" opacity="0.4"/><circle cx="980" cy="24" r="1.1" opacity="0.6"/>
-  </g>
-  <image href="icon.svg" x="72" y="56" width="208" height="208"/>
-  <text x="326" y="150" font-family="Sora" font-weight="700" font-size="92" letter-spacing="-2.5" fill="#E8EEF7">PlayGuard</text>
-  <text x="330" y="196" font-family="Sora" font-weight="400" font-size="30" fill="#33BBFF">for Home Assistant</text>
-  <rect x="330" y="214" width="120" height="5" rx="2.5" fill="url(#b-word)"/>
-  <text x="330" y="258" font-family="Sora" font-weight="400" font-size="24" fill="#A9B6CC">The Nintendo Switch's play time, limits and bedtime, in your home</text>
+  <g fill="#E8EEF7"><circle cx="80" cy="40" r="1.4" opacity="0.7"/><circle cx="300" cy="28" r="1.2" opacity="0.5"/><circle cx="520" cy="54" r="1.6" opacity="0.7"/><circle cx="760" cy="22" r="1.1" opacity="0.5"/><circle cx="980" cy="48" r="1.5" opacity="0.7"/><circle cx="1180" cy="30" r="1.2" opacity="0.6"/></g>
+  <image href="icon.svg" x="72" y="76" width="168" height="168"/>
+  <text x="276" y="150" font-family="Sora" font-weight="700" font-size="88" letter-spacing="-2.5" fill="#E8EEF7">Boréale</text>
+  <text x="280" y="196" font-family="Sora" font-weight="400" font-size="32" fill="#33BBFF">for Home Assistant</text>
+  <rect x="280" y="214" width="72" height="5" rx="2.5" fill="url(#word)"/>
+  <text x="278" y="258" font-family="Sora" font-weight="300" font-size="28" fill="#E8EEF7">Your Switch homebrews, at home</text>
 </svg>

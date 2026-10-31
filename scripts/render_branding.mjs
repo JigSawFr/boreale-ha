@@ -1,5 +1,5 @@
-// Renders branding/*.svg, in Aurore's aurora as its .github/branding/render.mjs
-// does, to the README's images (.github/readme/: banner.png 1280x320,
+// Renders branding/*.svg (the banner after Boréale's template, the social
+// preview in Aurore's sky) to the README's images (.github/readme/: banner.png 1280x320,
 // social-preview.png 1280x640, uploaded by hand in Settings › General, and
 // icon.png) and to the integration's brand/ that Home Assistant shows
 // (icon.png 256, logo.png and dark_logo.png 1065x256, each at @2x too).
@@ -22,7 +22,7 @@ const jobs = [
   { svg: 'branding/logo.svg', out: BRAND + 'logo@2x.png', w: 1065, h: 256, scale: 2, transparent: true },
   { svg: 'branding/logo-dark.svg', out: BRAND + 'dark_logo.png', w: 1065, h: 256, scale: 1, transparent: true },
   { svg: 'branding/logo-dark.svg', out: BRAND + 'dark_logo@2x.png', w: 1065, h: 256, scale: 2, transparent: true },
-  { svg: 'branding/banner.svg', out: '.github/readme/banner.png', w: 1280, h: 320, scale: 2 },
+  { svg: 'branding/banner.svg', out: '.github/readme/banner.png', w: 1280, h: 320, scale: 2, transparent: true },
   { svg: 'branding/social-preview.svg', out: '.github/readme/social-preview.png', w: 1280, h: 640, scale: 1 },
 ];
 
@@ -35,11 +35,12 @@ for (const job of jobs) {
   const page = await browser.newPage({ viewport: { width: job.w, height: job.h }, deviceScaleFactor: job.scale });
   const svg = inline(job.svg.startsWith('<svg') ? job.svg : readFileSync(join(root, job.svg), 'utf8'));
   await page.setContent(`<!doctype html><html><head>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;700&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;700&display=block" rel="stylesheet">
 <style>html,body{margin:0;background:transparent}svg{display:block}</style></head><body>${svg}</body></html>`);
   await page.evaluate(async () => {
     await document.fonts.load('700 30px Sora');
     await document.fonts.load('400 20px Sora');
+    await document.fonts.load('300 20px Sora');
     await document.fonts.ready;
   });
   await page.screenshot({ path: join(root, job.out), omitBackground: !!job.transparent });

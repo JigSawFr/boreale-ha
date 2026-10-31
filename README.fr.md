@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/banner.png" alt="PlayGuard for Home Assistant" width="100%">
+<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/banner.png" alt="Boréale for Home Assistant" width="100%">
 
-### Le contrôle parental de la Nintendo Switch, dans Home Assistant
+### Vos homebrews Nintendo Switch, dans Home Assistant
 
 **Temps&nbsp;de&nbsp;jeu · Limites · Temps&nbsp;en&nbsp;plus · Coucher · Statistiques · MQTT&nbsp;local**
 
@@ -30,7 +30,8 @@
 
 ---
 
-Une intégration Home Assistant pour [PlayGuard](https://github.com/JigSawFr/PlayGuard),
+**Boréale for Home Assistant** est l'intégration Home Assistant de [Boréale](https://boreale.dev/fr/?utm_source=github&utm_medium=readme).
+Elle commence par [PlayGuard](https://github.com/JigSawFr/PlayGuard),
 le homebrew Nintendo Switch qui gère le contrôle parental de la console hors
 ligne : limites de temps de jeu, heure du coucher, restrictions, temps en plus,
 verrou de console. PlayGuard publie l'état de la console, son temps de jeu et

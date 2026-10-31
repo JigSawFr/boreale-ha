@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <!-- PlayGuard for Home Assistant's icon: a house around a night sky with Aurore's aurora, and PlayGuard's play sign. Full-bleed: the console, the stores and the phones round its corners; <image href="icon.svg"> elsewhere rounds them itself. -->
+  <!-- Boréale for Home Assistant's icon: a house around a night sky with Aurore's aurora, and PlayGuard's play sign. Full-bleed: the console, the stores and the phones round its corners; <image href="icon.svg"> elsewhere rounds them itself. -->
   <defs>
     <linearGradient id="i-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A1020"/><stop offset="1" stop-color="#16203A"/></linearGradient>
     <linearGradient id="i-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B1430"/><stop offset="1" stop-color="#132A44"/></linearGradient>
