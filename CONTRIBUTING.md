@@ -36,6 +36,17 @@ python scripts/package.py                             # dist/boreale.zip, as a r
 HACS's checks, and `codeql.yml` the static analysis. A new code path comes with its test:
 the coverage gate is per module, not the total.
 
+The website, [ha.boreale.dev](https://ha.boreale.dev/?utm_source=github&utm_medium=docs) (`site/`), is built on
+`library/boreale-site`, a submodule that Boréale's sites share (`git submodule update
+--init` after a clone):
+
+```sh
+python3 tools/build_site.py build && python3 tools/check_site.py build
+```
+
+`site.yml` runs them on every pull request, with every page on phones, a tablet and a
+desktop and axe's accessibility checks ([`site/README.md`](site/README.md)).
+
 - **The quality scale.** [`quality_scale.yaml`](custom_components/boreale/quality_scale.yaml)
   says where the integration stands on Home Assistant's
   [Integration Quality Scale](https://contributors.home-assistant.io/core/quality-scale/rules/)

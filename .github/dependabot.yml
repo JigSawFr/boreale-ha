@@ -21,6 +21,16 @@ updates:
         patterns:
           - github/codeql-action*
 
+  # What Boréale's sites share (library/boreale-site, the site's look, menus
+  # and rules): its PR runs the site's build and checks against the new one.
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: ci
+      include: scope
+
   # The test harness (requirements_test.txt): each release of
   # pytest-homeassistant-custom-component is a Home Assistant release, so its PR
   # runs the tests against the new Home Assistant before users get it. The

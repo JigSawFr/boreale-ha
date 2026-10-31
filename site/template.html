@@ -15,6 +15,7 @@
 <link rel="manifest" href="{{root}}manifest.webmanifest">
 <link rel="preload" href="{{root}}assets/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{root}}assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{root}}assets/boreale.css">
 <link rel="stylesheet" href="{{root}}assets/site.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Boréale">
@@ -29,8 +30,9 @@
 <meta name="twitter:card" content="summary_large_image">
 {{jsonld}}
 <script src="{{root}}assets/lang.js"></script>
+<script src="{{root}}assets/boreale.js" defer></script>
 <script src="{{root}}assets/site.js" defer></script>
-<script src="{{root}}assets/umami.js" defer data-website-id="6410ffdd-ae2e-4ddb-8e18-0a77e9fa374e" data-domains="ha.boreale.dev"></script>
+{{audience}}
 </head>
 <body{{page_class}}>
 <a class="skip" href="#main">{{skip}}</a>
