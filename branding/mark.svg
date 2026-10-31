@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Boréale for Home Assistant's mark (the header, the website): a house's frame in the aurora's colours around the night, a console in snow, its two Joy-Cons at its sides. -->
+  <defs><linearGradient id="m-colour" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00FFCC"/><stop offset="0.65" stop-color="#33BBFF"/><stop offset="1" stop-color="#8A5CFF"/></linearGradient></defs>
+  <path d="M128 42 L 212 110 L 212 198 Q 212 214 196 214 L 60 214 Q 44 214 44 198 L 44 110 Z" fill="#0E1A33" stroke="url(#m-colour)" stroke-width="16" stroke-linejoin="round"/>
+  <rect x="74" y="120" width="108" height="62" rx="14" fill="none" stroke="#E8EEF7" stroke-width="10"/>
+  <path d="M98 122 L 98 180 M158 122 L 158 180" stroke="#E8EEF7" stroke-width="8" stroke-linecap="round"/>
+</svg>
