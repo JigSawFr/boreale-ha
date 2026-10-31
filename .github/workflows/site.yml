@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 env:
-  # Playwright, pinned, for the layout check (tools/site_layout.py).
+  # Playwright, pinned, for the layout check (boreale-site's tools/site_layout.py).
   PLAYWRIGHT_VERSION: 1.64.0
   # axe-core, for the accessibility check: its npm package, checked against
   # the hash it had when pinned (as PlayShelf's web.yml).
@@ -36,6 +36,8 @@ jobs:
       publish: ${{ steps.new.outputs.publish }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true   # library/boreale-site, what Boréale's sites share
       - name: The pages
         env:
           GITHUB_TOKEN: ${{ github.token }}   # the latest release, without the API's anonymous limit
@@ -52,7 +54,7 @@ jobs:
           key: playwright-ubuntu-26.04-${{ env.PLAYWRIGHT_VERSION }}
       # No page wider than the screen on phones, a tablet or a desktop, no
       # target too small to touch, no script that throws, nothing axe finds
-      # against WCAG 2.2 AA (tools/site_layout.py). About a minute.
+      # against WCAG 2.2 AA (boreale-site's tools/site_layout.py). About a minute.
       - name: The pages on phones, a tablet and a desktop
         timeout-minutes: 8
         run: |
@@ -67,7 +69,7 @@ jobs:
           echo "$AXE_SHA256  $RUNNER_TEMP/axe.tgz" | sha256sum -c --quiet
           python3 -c 'import sys, tarfile; open(sys.argv[2], "wb").write(tarfile.open(sys.argv[1]).extractfile("package/axe.min.js").read())' \
             "$RUNNER_TEMP/axe.tgz" "$RUNNER_TEMP/axe.min.js"
-          SITE_AXE="$RUNNER_TEMP/axe.min.js" "$VENV/bin/python" -u tools/site_layout.py build
+          SITE_AXE="$RUNNER_TEMP/axe.min.js" "$VENV/bin/python" -u library/boreale-site/tools/site_layout.py build
       # main's site is published, unless a scheduled or dispatched build made
       # exactly the one served (its build.sha256, tools/build_site.py).
       - name: Anything new to publish

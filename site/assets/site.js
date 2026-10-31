@@ -1,7 +1,8 @@
-// boreale.dev: the aurora behind the header and the hero (canvas#sky). Three
-// soft curtains in the brand's colours under a few stars, drawn once at load;
-// they move only while the page is visible and the visitor has not asked for
-// less motion. Without script, site.css's gradient stands in.
+// ha.boreale.dev: the aurora behind the home page's header and hero
+// (canvas#sky), and the page not found's. Three soft curtains in the
+// brand's colours under a few stars, drawn once at load; they move only
+// while the page is visible and the visitor has not asked for less motion.
+// Without script, site.css's gradient stands in.
 (function () {
   const canvas = document.getElementById("sky");
   if (!canvas || !canvas.getContext) return;
@@ -99,47 +100,22 @@
   }
 })();
 
-// Boréale's site switcher: the menu of the four sites opens under the name
-// beside its button, wherever the header is. The same block in boreale.dev's,
-// PlayGuard's, PlayShelf's and Aurore's site.js; boreale's is the reference.
-// Without popovers (an old browser), the name still leads home.
+// The header's links on a phone, a row to scroll (site.css): its edge fades
+// only while there are more of them to scroll to.
 (function () {
-  const menu = document.getElementById("sites");
-  const anchor = menu && menu.closest(".switcher");
-  if (!anchor || !menu.showPopover) return;
-  menu.addEventListener("beforetoggle", (event) => {
-    if (event.newState !== "open") return;
-    const box = anchor.getBoundingClientRect();
-    const screen = document.documentElement.clientWidth;
-    const width = Math.min(400, screen - 24); // site.css's width
-    menu.style.top = `${box.bottom + window.scrollY + 6}px`;
-    menu.style.left = `${Math.max(12, Math.min(box.left, screen - width - 12)) + window.scrollX}px`;
-  });
+  const nav = document.querySelector(".nav");
+  if (!nav) return;
+  const fade = () => nav.classList.toggle("more", nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+  nav.addEventListener("scroll", fade, { passive: true });
+  window.addEventListener("resize", fade);
+  fade();
 })();
 
-// The header's languages: their menu opens under its button, its right edge
-// on the button's where the screen has room, the language in use in view.
+// The showcase (PlayGuard's site's): the cards' edge lit where the pointer
+// is, and the home page's sections rising into view once (not with less
+// motion asked; those already in view at load shown at once).
 (function () {
-  const menu = document.getElementById("languages");
-  const button = document.querySelector(".lang-button");
-  if (!menu || !button || !menu.showPopover) return;
-  menu.addEventListener("beforetoggle", (event) => {
-    if (event.newState !== "open") return;
-    const box = button.getBoundingClientRect();
-    const screen = document.documentElement.clientWidth;
-    menu.style.top = `${box.bottom + window.scrollY + 6}px`;
-    const width = Math.min(460, screen - 24); // site.css's width
-    menu.style.left = `${Math.max(12, Math.min(box.right - width, screen - width - 12)) + window.scrollX}px`;
-    requestAnimationFrame(() => menu.querySelector("[aria-current]")?.scrollIntoView({ block: "nearest" }));
-  });
-})();
-
-// The showcase (site.css's block of the same name, in boreale.dev's,
-// PlayGuard's, PlayShelf's and Aurore's site.js): the cards' edge lit where
-// the pointer is, and the home page's sections rising into view once (not
-// with less motion asked; those already in view at load shown at once).
-(function () {
-  for (const card of document.querySelectorAll(".project")) {
+  for (const card of document.querySelectorAll(".card")) {
     card.addEventListener("pointermove", (e) => {
       const box = card.getBoundingClientRect();
       card.style.setProperty("--mx", `${e.clientX - box.left}px`);
@@ -156,7 +132,7 @@
   for (const part of document.querySelectorAll(".home main > section")) {
     if (part.getBoundingClientRect().top < window.innerHeight * 0.88) continue;
     part.classList.add("reveal");
-    [...part.querySelectorAll(".project")].forEach((card, i) => card.style.setProperty("--i", i));
+    [...part.querySelectorAll(".card")].forEach((card, i) => card.style.setProperty("--i", i));
     seen.observe(part);
   }
 })();
