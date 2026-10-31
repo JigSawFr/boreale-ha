@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320">
-  <!-- The README's banner (1280x320), Boréale's template (branding/README.md of JigSawFr/boreale): the night, the aurora, the mark, the name, what it does. Rendered to .github/readme/banner.png by scripts/render_branding.mjs. Sora. -->
+  <!-- The README's banner (1280x320), Boréale's template, the mark of branding/mark.svg inlined (branding/README.md of JigSawFr/boreale): the night, the aurora, the mark, the name, what it does. Rendered to .github/readme/banner.png by scripts/render_branding.mjs. Sora. -->
   <defs>
     <linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#00FFCC"/><stop offset="0.55" stop-color="#33BBFF"/><stop offset="1" stop-color="#8A5CFF"/></linearGradient>
     <linearGradient id="c1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00FFCC" stop-opacity="0"/><stop offset="1" stop-color="#00FFCC" stop-opacity="0.3"/></linearGradient>
@@ -14,7 +14,10 @@
     <path d="M0 100 C 300 60, 520 120, 760 80 S 1100 40, 1280 60 L 1280 0 L 0 0 Z" fill="url(#c3)"/>
   </g>
   <g fill="#E8EEF7"><circle cx="80" cy="40" r="1.4" opacity="0.7"/><circle cx="300" cy="28" r="1.2" opacity="0.5"/><circle cx="520" cy="54" r="1.6" opacity="0.7"/><circle cx="760" cy="22" r="1.1" opacity="0.5"/><circle cx="980" cy="48" r="1.5" opacity="0.7"/><circle cx="1180" cy="30" r="1.2" opacity="0.6"/></g>
-  <image href="icon.svg" x="72" y="76" width="168" height="168"/>
+  <svg x="72" y="76" width="168" height="168" viewBox="0 0 256 256"><defs><linearGradient id="m-colour" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00FFCC"/><stop offset="0.65" stop-color="#33BBFF"/><stop offset="1" stop-color="#8A5CFF"/></linearGradient></defs>
+  <path d="M128 42 L 212 110 L 212 198 Q 212 214 196 214 L 60 214 Q 44 214 44 198 L 44 110 Z" fill="#0E1A33" stroke="url(#m-colour)" stroke-width="16" stroke-linejoin="round"/>
+  <rect x="74" y="120" width="108" height="62" rx="14" fill="none" stroke="#E8EEF7" stroke-width="10"/>
+  <path d="M98 122 L 98 180 M158 122 L 158 180" stroke="#E8EEF7" stroke-width="8" stroke-linecap="round"/></svg>
   <text x="276" y="150" font-family="Sora" font-weight="700" font-size="88" letter-spacing="-2.5" fill="#E8EEF7">Boréale</text>
   <text x="280" y="196" font-family="Sora" font-weight="400" font-size="32" fill="#33BBFF">for Home Assistant</text>
   <rect x="280" y="214" width="72" height="5" rx="2.5" fill="url(#word)"/>

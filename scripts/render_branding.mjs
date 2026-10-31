@@ -1,7 +1,9 @@
 // Renders branding/*.svg (the banner after Boréale's template, the social
 // preview in Aurore's sky) to the README's images (.github/readme/: banner.png 1280x320,
 // social-preview.png 1280x640, uploaded by hand in Settings › General, and
-// icon.png) and to the integration's brand/ that Home Assistant shows
+// icon.png), to the site's icons (site/assets/: icon-192, icon-512, apple-touch-icon;
+// favicon.svg is a copy of icon.svg and favicon.ico is made from icon-512.png:
+// Pillow, sizes 16, 32 and 48) and to the integration's brand/ that Home Assistant shows
 // (icon.png 256, logo.png and dark_logo.png 1065x256, each at @2x too).
 // <image href="icon.svg" …> becomes the icon itself, its corners rounded.
 // Needs Node and Playwright (Chromium); loads Sora from Google Fonts.
@@ -22,6 +24,9 @@ const jobs = [
   { svg: 'branding/logo.svg', out: BRAND + 'logo@2x.png', w: 1065, h: 256, scale: 2, transparent: true },
   { svg: 'branding/logo-dark.svg', out: BRAND + 'dark_logo.png', w: 1065, h: 256, scale: 1, transparent: true },
   { svg: 'branding/logo-dark.svg', out: BRAND + 'dark_logo@2x.png', w: 1065, h: 256, scale: 2, transparent: true },
+  { svg: TILE, out: 'site/assets/icon-192.png', w: 256, h: 256, scale: 0.75, transparent: true },
+  { svg: TILE, out: 'site/assets/icon-512.png', w: 256, h: 256, scale: 2, transparent: true },
+  { svg: TILE, out: 'site/assets/apple-touch-icon.png', w: 256, h: 256, scale: 0.703125, transparent: true },
   { svg: 'branding/banner.svg', out: '.github/readme/banner.png', w: 1280, h: 320, scale: 2, transparent: true },
   { svg: 'branding/social-preview.svg', out: '.github/readme/social-preview.png', w: 1280, h: 640, scale: 1 },
 ];
