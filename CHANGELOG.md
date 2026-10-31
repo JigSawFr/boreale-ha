@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/JigSawFr/boreale-ha/compare/v0.9.0...v0.10.0) (2026-10-31)
+
+
+### 🚀 Features
+
+* **sensor:** the Boréale homebrews' notifications, from their shared bell ([#45](https://github.com/JigSawFr/boreale-ha/issues/45)) ([77330be](https://github.com/JigSawFr/boreale-ha/commit/77330be16f4d5c0be174a88befc6ba20977afb55))
+* **site:** build on boreale-site, with Boréale's header and a dashboard hero ([#47](https://github.com/JigSawFr/boreale-ha/issues/47)) ([4ba613d](https://github.com/JigSawFr/boreale-ha/commit/4ba613d4d28d166af9fe93b698ce325e2974887c))
+
 ## [0.9.0](https://github.com/JigSawFr/boreale-ha/compare/v0.8.0...v0.9.0) (2026-10-30)
 
 
