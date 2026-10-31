@@ -126,13 +126,14 @@ def header(language: str, catalog: dict, root: str, path: str, latest: dict) -> 
 
 def footer(language: str, catalog: dict, root: str) -> str:
     """The footer: Boréale's sites and the support are the library's; this
-    site's own column is its repository, its issues and its legal page."""
+    site's own column is its repository and its issues, and its legal page
+    replaces boreale.dev's in Boréale's column."""
     home = root + folder(language)
     github = f"https://github.com/{OWNER}/{REPO}"
     return HA.footer(
         language, catalog, root,
-        columns=[("Boréale for HA", [("GitHub", github), (catalog["footer_issues"], f"{github}/issues"),
-                                     (catalog["footer_legal"], f"{home}legal/")])],
+        columns=[("Boréale for HA", [("GitHub", github), (catalog["footer_issues"], f"{github}/issues")])],
+        legal=(catalog["footer_legal"], f"{home}legal/"),
         brand=f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="20" height="20"> <strong>Boréale for Home Assistant</strong>',
         about=[catalog["footer_made"]], fine=catalog["footer_ha"])
 
