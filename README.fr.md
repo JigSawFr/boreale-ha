@@ -24,7 +24,7 @@
 [**ha.boreale.dev**](https://ha.boreale.dev/fr/?utm_source=github&utm_medium=readme) ·
 [**PlayGuard**](https://github.com/JigSawFr/PlayGuard)
 
-<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/dashboard.png" alt="Un tableau de bord familial : le temps de jeu du jour et ce qui reste, le jeu en cours, du temps en plus en un geste, les deux dernières semaines par enfant, les règles" width="100%">
+<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/dashboard.png" alt="La carte d'une console sur un tableau de bord : le temps restant aujourd'hui, le temps joué face à la limite, le jeu en cours, du temps en plus en un geste, l'heure du coucher et la semaine" width="100%">
 
 </div>
 
@@ -108,8 +108,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/device.png" alt="La page de l'appareil de la console : ses contrôles, ses capteurs et son activité" width="72%">
-  <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/phone.png" alt="Le tableau de bord familial sur un téléphone" width="24%">
-  <br><sub><b>L'appareil de la console</b> · <b>Sur un téléphone</b></sub>
+  <br><sub><b>L'appareil de la console</b></sub>
 </p>
 
 <p align="center">
@@ -117,7 +116,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   <br><sub><b>Trouvée sur le broker</b></sub>
 </p>
 
-<sub>Une console de démonstration dans Home Assistant 2026.10, thème sombre ; le tableau de bord est le tableau de bord familial des exemples plus bas, avec le graphique par enfant.</sub>
+<sub>Une console de démonstration dans Home Assistant 2026.10, thème sombre. La carte du haut est dessinée, avec des noms fictifs, pas capturée.</sub>
 
 </details>
 

@@ -19,7 +19,7 @@
   "footer_legal": "隐私与法律声明",
   "footer_made": "由 <a href=\"https://github.com/JigSawFr\" rel=\"noreferrer\">JigSawFr</a> 制作 · 基于 GPLv3 的自由软件。",
   "hero_eyebrow": "Boréale 项目 · Home Assistant 集成",
-  "hero_lede": "Boréale for Nintendo Switch 把 Boréale 自制软件带进 Home Assistant：今天的游戏时间、限制、一键额外时间、就寝时间和长期统计，来自 PlayGuard，通过你自己的 MQTT 代理。",
+  "hero_lede": "Boréale for Home Assistant 把 Switch 上的 Boréale 自制软件带到你的仪表板：今天的游戏时间、限制、一键额外时间、就寝时间和长期统计，来自 PlayGuard，通过你自己的 MQTT 代理。",
   "hero_title": "你的 Switch，<em>就在家里的</em> Home Assistant",
   "install_eyebrow": "安装",
   "install_guide": "PlayGuard 指南",

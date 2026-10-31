@@ -19,7 +19,7 @@
   "footer_legal": "Datenschutz und Impressum",
   "footer_made": "Gemacht von <a href=\"https://github.com/JigSawFr\" rel=\"noreferrer\">JigSawFr</a> · Freie Software unter der GPLv3.",
   "hero_eyebrow": "Ein Boréale-Projekt · Integration für Home Assistant",
-  "hero_lede": "Boréale for Nintendo Switch bringt die Boréale-Homebrews in Home Assistant: die heutige Spielzeit, die Limits, Extrazeit mit einem Tippen, die Schlafenszeit und Langzeitstatistiken, von PlayGuard, über deinen eigenen MQTT-Broker.",
+  "hero_lede": "Boréale for Home Assistant bringt die Boréale-Homebrews deiner Switch auf dein Dashboard: die heutige Spielzeit, die Limits, Extrazeit mit einem Tippen, die Schlafenszeit und Langzeitstatistiken, von PlayGuard, über deinen eigenen MQTT-Broker.",
   "hero_title": "Deine Switch, <em>zu Hause</em> in Home Assistant",
   "install_eyebrow": "Installieren",
   "install_guide": "Die Anleitung von PlayGuard",

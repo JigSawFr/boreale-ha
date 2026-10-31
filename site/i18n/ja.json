@@ -19,7 +19,7 @@
   "footer_legal": "プライバシーと法的情報",
   "footer_made": "<a href=\"https://github.com/JigSawFr\" rel=\"noreferrer\">JigSawFr</a> 制作 · GPLv3 のフリーソフトウェア。",
   "hero_eyebrow": "Boréale のプロジェクト · Home Assistant 連携",
-  "hero_lede": "Boréale for Nintendo Switch は Boréale の自作ソフトを Home Assistant に届けます。今日のプレイ時間、制限、ワンタップの延長時間、就寝時刻、長期統計を、PlayGuard から、あなた自身の MQTT ブローカー経由で。",
+  "hero_lede": "Boréale for Home Assistant は、Switch の Boréale 自作ソフトをダッシュボードに届けます。今日のプレイ時間、制限、ワンタップの延長時間、就寝時刻、長期統計を、PlayGuard から、あなた自身の MQTT ブローカー経由で。",
   "hero_title": "あなたの Switch を、<em>おうちの</em> Home Assistant に",
   "install_eyebrow": "インストール",
   "install_guide": "PlayGuard のガイド",

@@ -24,7 +24,7 @@
 [**ha.boreale.dev**](https://ha.boreale.dev/?utm_source=github&utm_medium=readme) ·
 [**PlayGuard**](https://github.com/JigSawFr/PlayGuard)
 
-<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/dashboard.png" alt="A family dashboard: today's play time and what is left, the game being played, extra time in one tap, the last two weeks per child, the rules" width="100%">
+<img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/dashboard.png" alt="A console's card on a dashboard: time left today, time played against the limit, the game being played, extra time in one tap, bedtime and the week" width="100%">
 
 </div>
 
@@ -100,8 +100,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/device.png" alt="The console's device page: its controls, sensors and activity" width="72%">
-  <img src="https://raw.githubusercontent.com/JigSawFr/boreale-ha/main/.github/readme/phone.png" alt="The family dashboard on a phone" width="24%">
-  <br><sub><b>The console's device</b> · <b>On a phone</b></sub>
+  <br><sub><b>The console's device</b></sub>
 </p>
 
 <p align="center">
@@ -109,7 +108,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   <br><sub><b>Found on the broker</b></sub>
 </p>
 
-<sub>A demo console in Home Assistant 2026.10, dark theme; the dashboard is the family dashboard of the examples below, per child added.</sub>
+<sub>A demo console in Home Assistant 2026.10, dark theme. The card at the top is drawn, with fictional names, not captured.</sub>
 
 </details>
 
