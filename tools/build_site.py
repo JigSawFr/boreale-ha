@@ -87,18 +87,18 @@ def versions() -> tuple:
 
 
 def release_pill(release: tuple, language: str) -> str:
-    """The latest release and its date over the hero's title (PlayGuard's
-    pill), leading to its notes; nothing without one."""
+    """The latest release and its date over the hero's title (chrome.css's
+    .pill-eyebrow), leading to its notes; nothing without one."""
     if not release:
         return ""
     version, published, url = release
-    return (f'<p class="release-pill"><a href="{attribute(url)}">v{html.escape(version)} · '
+    return (f'<p class="pill-eyebrow"><a href="{attribute(url)}">v{html.escape(version)} · '
             f'<time datetime="{published.isoformat()}">{boreale.day(published, language)}</time></a></p>')
 
 
 def structured(language: str, catalog: dict, latest: dict) -> str:
     """schema.org data for search engines: the integration, by Boréale."""
-    item = {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Boréale for Nintendo Switch",
+    item = {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Boréale for Home Assistant",
             "url": HA.address(language), "description": catalog["description"], "inLanguage": html_lang(language),
             "applicationCategory": "HomeAutomationApplication", "operatingSystem": "Home Assistant",
             "license": "https://www.gnu.org/licenses/gpl-3.0.html",
@@ -110,6 +110,33 @@ def structured(language: str, catalog: dict, latest: dict) -> str:
     return f'<script type="application/ld+json">{text}</script>'
 
 
+def header(language: str, catalog: dict, root: str, path: str, latest: dict) -> str:
+    """The header: the site's own wordmark, Boréale for HA, with its mark
+    (PlayGuard's Play<b>Guard</b>), opening the menu of Boréale's sites; the
+    page's links, the way into HACS as its call to action, GitHub."""
+    home = root + folder(language)
+    french = language.startswith("fr")
+    return HA.header(
+        language, catalog, root, path,
+        links=[("nav_features", f"{home}#features"), ("nav_install", f"{home}#install"),
+               ("nav_docs", DOCS["fr" if french else "en"])],
+        cta=("cta_hacs", HACS), github=f"https://github.com/{OWNER}/{REPO}", label=catalog["nav_label"], latest=latest,
+        brand=f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="34" height="34"><span>Boréale <b>for HA</b></span>')
+
+
+def footer(language: str, catalog: dict, root: str) -> str:
+    """The footer: Boréale's sites and the support are the library's; this
+    site's own column is its repository, its issues and its legal page."""
+    home = root + folder(language)
+    github = f"https://github.com/{OWNER}/{REPO}"
+    return HA.footer(
+        language, catalog, root,
+        columns=[("Boréale for HA", [("GitHub", github), (catalog["footer_issues"], f"{github}/issues"),
+                                     (catalog["footer_legal"], f"{home}legal/")])],
+        brand=f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="20" height="20"> <strong>Boréale for Home Assistant</strong>',
+        about=[catalog["footer_made"]], fine=catalog["footer_ha"])
+
+
 def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str, title: str,
          latest: dict, release: tuple, path: str = "", first_visit: bool = False, lost: bool = False) -> str:
     values = dict(catalog)
@@ -119,8 +146,6 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
     values["docs"] = DOCS["fr" if french else "en"]
     values["guide"] = GUIDE["fr" if french else "en"]
     values["hacs"] = HACS
-    values["boreale_url"] = "https://boreale.dev/" + folder(language)
-    values["playguard_url"] = "https://guard.boreale.dev/" + folder(language)
     values["release"] = release_pill(release, language)
     # The hero's dashboard: its durations as the language writes them.
     def minutes(n: int) -> str:
@@ -136,28 +161,25 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
     values["lang"] = html_lang(language)
     values["home"] = folder(language)
     values["og_locale"] = OG_LOCALES[language]
-    # The header's languages: this page in each (none for 404.html, which
-    # is at any address).
-    values["languages"] = HA.languages(language, catalog, root, path if not lost else "")
     # The root's home page sends a first visit to the browser's language
     # (boreale-site's lang.js), and 404.html at the root a visitor reading
     # another language to that language's.
     values["first_visit"] = " data-first-visit" if first_visit else ""
     values["lost"] = f' data-lost="{root}"' if lost and language == CODES[0] else ""
     values["indexing"] = HA.indexing(language, path, lost)
-    values["page_class"] = ' class="home"' if hero else ""
-    # The aurora's canvas behind the home page's hero and the page not found;
-    # a quieter sky behind the other pages' header (site.css, site.js).
-    aurora = bool(hero) or lost
-    values["sky_class"] = "sky sky-home" if aurora else "sky"
-    values["sky_canvas"] = '<canvas id="sky" aria-hidden="true"></canvas>' if aurora else ""
+    # The page's chrome (boreale-site's chrome.css and chrome.js): the skip
+    # link, the sky (the aurora behind the home page's hero and the page not
+    # found, which has no veils under it; a quieter one elsewhere), the
+    # header and the footer.
+    values["skip"] = HA.skip(catalog)
+    values["sky"] = HA.sky(home=bool(hero) or lost, veils=not lost)
+    # The header's languages: this page in each (none for 404.html, which
+    # is at any address).
+    values["header"] = header(language, catalog, root, path if not lost else "", latest)
+    values["footer"] = footer(language, catalog, root)
     values["og_alternates"] = "\n".join(
         f'<meta property="og:locale:alternate" content="{OG_LOCALES[code]}">' for code in CODES if code != language)
     values.update(root=root, site=SITE_URL, url=url, title=title)
-    # The header's name: the site's own wordmark, Boréale for HA, with its
-    # mark (PlayGuard's Play<b>Guard</b>), opening the menu of Boréale's sites.
-    values["switcher"] = HA.switcher(language, catalog, root, latest, brand=(
-        f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="34" height="34"><span>Boréale <b>for HA</b></span>'))
     values["audience"] = HA.audience(root)
     values["jsonld"] = structured(language, catalog, latest)
     values["hero"] = fill(hero, values)
