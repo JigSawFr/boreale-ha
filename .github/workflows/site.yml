@@ -5,6 +5,10 @@ name: site
 # Source: GitHub Actions). Once a day too, so the versions in the hero and
 # the menu of Boréale's sites follow the releases: a scheduled build
 # publishes only when it differs from the site served.
+#
+# The checkout, the build, the checks and the layout check are boreale-site's
+# reusable workflow (library/boreale-site's README, "Reusable workflow");
+# the deployment is this repository's.
 on:
   push:
     branches: [ main ]
@@ -16,85 +20,39 @@ on:
 permissions:
   contents: read
 
-env:
-  # Playwright, pinned, for the layout check (boreale-site's tools/site_layout.py).
-  PLAYWRIGHT_VERSION: 1.64.0
-  # axe-core, for the accessibility check: its npm package, checked against
-  # the hash it had when pinned (as PlayShelf's web.yml).
-  AXE_VERSION: 4.13.0
-  AXE_SHA256: 096912f6e77b4b695fc9304b7be65091db42d98de054da674ae222a11cb33f70
-
 concurrency:
   group: site-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: ubuntu-26.04
-    timeout-minutes: 15
-    outputs:
-      publish: ${{ steps.new.outputs.publish }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          submodules: true   # library/boreale-site, what Boréale's sites share
-      - name: The pages
-        env:
-          GITHUB_TOKEN: ${{ github.token }}   # the latest release, without the API's anonymous limit
-        run: python3 tools/build_site.py build
-      - name: Their links, catalogs and Content-Security-Policy
-        run: python3 tools/check_site.py build
-      # Playwright for Python and its Chromium, kept from one run to the next
-      # while PLAYWRIGHT_VERSION stays.
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ~/.cache/ms-playwright
-            ~/.cache/playwright-venv
-          key: playwright-ubuntu-26.04-${{ env.PLAYWRIGHT_VERSION }}
-      # No page wider than the screen on phones, a tablet or a desktop, no
-      # target too small to touch, no script that throws, nothing axe finds
-      # against WCAG 2.2 AA (boreale-site's tools/site_layout.py). About a minute.
-      - name: The pages on phones, a tablet and a desktop
-        timeout-minutes: 8
-        run: |
-          VENV="$HOME/.cache/playwright-venv"
-          if [ ! -x "$VENV/bin/python" ]; then
-            python3 -m venv "$VENV"
-            "$VENV/bin/pip" install -q "playwright==$PLAYWRIGHT_VERSION"
-          fi
-          sudo "$VENV/bin/python" -m playwright install-deps chromium
-          "$VENV/bin/python" -m playwright install chromium
-          curl -sfL --retry 3 -o "$RUNNER_TEMP/axe.tgz" "https://registry.npmjs.org/axe-core/-/axe-core-$AXE_VERSION.tgz"
-          echo "$AXE_SHA256  $RUNNER_TEMP/axe.tgz" | sha256sum -c --quiet
-          python3 -c 'import sys, tarfile; open(sys.argv[2], "wb").write(tarfile.open(sys.argv[1]).extractfile("package/axe.min.js").read())' \
-            "$RUNNER_TEMP/axe.tgz" "$RUNNER_TEMP/axe.min.js"
-          SITE_AXE="$RUNNER_TEMP/axe.min.js" "$VENV/bin/python" -u library/boreale-site/tools/site_layout.py build
+    permissions:
+      contents: read
+      pages: read   # asked by the reusable workflow (the site's address)
+    uses: JigSawFr/boreale-site/.github/workflows/site.yml@49844b1a733f738afdabcc1c903bbf8696028d96 # v1.0.0
+    with:
+      timeout_minutes: 15
+      layout_timeout_minutes: 8
+      github_token: true   # the latest release, without the API's anonymous limit
+      build: python3 tools/build_site.py build
+      check: python3 tools/check_site.py build
       # main's site is published, unless a scheduled or dispatched build made
       # exactly the one served (its build.sha256, tools/build_site.py).
-      - name: Anything new to publish
-        id: new
-        if: github.ref == 'refs/heads/main'
-        run: |
-          served=""
-          if [ "$GITHUB_EVENT_NAME" = schedule ]; then
-            served=$(curl -sfL --retry 3 "https://ha.boreale.dev/build.sha256" || true)
-          fi
-          if [ -n "$served" ] && [ "$served" = "$(cat build/build.sha256)" ]; then
-            echo "The site served is the one built: nothing to publish."
-          else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
-        if: steps.new.outputs.publish == 'true'
-        with:
-          path: build
-          # .well-known/security.txt: hidden files are left out by default.
-          include-hidden-files: true
+      pages_artifact: ${{ github.ref == 'refs/heads/main' }}
+      gate: |
+        served=""
+        if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+          served=$(curl -sfL --retry 3 "https://ha.boreale.dev/build.sha256" || true)
+        fi
+        if [ -n "$served" ] && [ "$served" = "$(cat build/build.sha256)" ]; then
+          echo "The site served is the one built: nothing to publish."
+        else
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+        fi
 
   deploy:
     needs: build
-    if: needs.build.outputs.publish == 'true'
+    if: needs.build.outputs.pages_artifact_id != ''
     runs-on: ubuntu-slim
     timeout-minutes: 5
     permissions:
