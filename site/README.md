@@ -1,14 +1,15 @@
 # The website
 
-<https://ha.boreale.dev/>: what Boréale for Nintendo Switch does, how to
+<https://ha.boreale.dev/>: what Boréale for Home Assistant does, how to
 install it and the move from the PlayGuard integration, in the consoles'
 fifteen languages, as Boréale's other sites: English at the root, each other
 one in its folder (`/fr/`, `/fr-ca/`, `/de/` … `/zh-hant/`).
 
 What Boréale's sites share is `library/boreale-site`, a submodule
 (`JigSawFr/boreale-site`, its README): the languages, the brand's colours and
-fonts (`boreale.css`), the menu of Boréale's sites in the header (this site
-under *Integrations*) and the language menu (`boreale.js`, `lang.js`), the
+fonts (`boreale.css`), the page chrome (`chrome.css`, `chrome.js`: the header
+with the menu of Boréale's sites, this site under *Integrations*, and the
+language menu, the sky, buttons, cards, sections' rhythm and footer), the
 marks, the rules for links out (no referrer; `utm_source=ha` on the links to
 our other sites only), the Content-Security-Policy's checks and the audience
 count (Umami Cloud, without cookie, from `ha.boreale.dev` only: `umami.js`).
@@ -19,10 +20,12 @@ here. After a clone: `git submodule update --init`.
 
 `python3 tools/build_site.py <out-dir>` (Python 3, nothing to install):
 
-- `template.html`: the page around the content, its header in PlayGuard's
-  site's way (guard.boreale.dev, the reference for the look): the site's
-  wordmark, *Boréale for HA*, opening the menu of Boréale's sites, the links,
-  *Open in HACS* lit, GitHub and the languages; on two rows on a phone.
+- `template.html`: the page around the content; its skip link, sky, header
+  and footer are written by boreale-site's `Site.skip()`, `sky()`, `header()`
+  and `footer()` (`header()` and `footer()` in `build_site.py` give them this
+  site's links): the site's wordmark, *Boréale for HA*, opening the menu of
+  Boréale's sites, the links, *Open in HACS* lit, GitHub and the languages;
+  on two rows on a phone.
   `hero.html` and `home.html`: the home page, its hero (the text, and a
   console's card on a Home Assistant dashboard drawn beside it, `.panel` in
   `site.css`, its texts `mock_*` and fictional names), then the features,
@@ -37,10 +40,10 @@ here. After a clone: `git submodule update --init`.
   date, leading to its notes) and in the menu, comes from GitHub's API; the other projects' from boreale.dev's
   `versions.json`. `SITE_OFFLINE=1` builds without them; `GITHUB_TOKEN`
   lifts the API's anonymous limit; `SITE_URL` is the site's address.
-- `assets/`: this site's own, `site.css` and `site.js` (the aurora, the
-  sections), the icons (`favicon.svg` is `branding/icon.svg`; the PNGs and
+- `assets/`: this site's own, `site.css` (the hero, the dashboard drawn
+  beside it, the install steps, the other pages), the icons (`favicon.svg` is `branding/icon.svg`; the PNGs and
   `favicon.ico` rendered from it) and the social preview
-  (`.github/readme/social-preview.png`). boreale-site's assets are copied
+  (`.github/readme/social-preview.png`). boreale-site's assets (`chrome.css` and `chrome.js` among them) are copied
   beside them at the build; one of them here too stops it.
 - No contact address: the contact is the repository's issues, a security
   flaw its private advisories (`.well-known/security.txt`).

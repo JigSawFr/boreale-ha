@@ -16,6 +16,7 @@
 <link rel="preload" href="{{root}}assets/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{root}}assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{root}}assets/boreale.css">
+<link rel="stylesheet" href="{{root}}assets/chrome.css">
 <link rel="stylesheet" href="{{root}}assets/site.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Boréale for Home Assistant">
@@ -31,44 +32,16 @@
 {{jsonld}}
 <script src="{{root}}assets/lang.js"></script>
 <script src="{{root}}assets/boreale.js" defer></script>
-<script src="{{root}}assets/site.js" defer></script>
+<script src="{{root}}assets/chrome.js" defer></script>
 {{audience}}
 </head>
-<body{{page_class}}>
-<a class="skip" href="#main">{{skip}}</a>
-<div class="{{sky_class}}">
-  {{sky_canvas}}
-  <header class="top">
-    {{switcher}}
-    <nav class="nav" aria-label="{{nav_label}}">
-      <a href="{{root}}{{home}}#features">{{nav_features}}</a>
-      <a href="{{root}}{{home}}#install">{{nav_install}}</a>
-      <a href="{{docs}}">{{nav_docs}}</a>
-      <a href="{{hacs}}" class="nav-try">{{cta_hacs}}</a>
-      <a href="https://github.com/JigSawFr/boreale-ha" class="nav-gh">GitHub</a>
-    </nav>
-    {{languages}}
-  </header>
+<body>
+{{skip}}
+{{sky}}
+  {{header}}
   {{hero}}
 </div>
 {{body}}
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <p><img src="{{root}}assets/marks/ha.svg" alt="" width="24" height="24"> <strong>Boréale for Home Assistant</strong></p>
-      <p>{{footer_made}}</p>
-    </div>
-    <nav class="links" aria-label="{{footer_label}}">
-      <ul>
-        <li><a href="{{boreale_url}}">Boréale</a></li>
-        <li><a href="{{playguard_url}}">PlayGuard</a></li>
-        <li><a href="https://github.com/JigSawFr/boreale-ha">GitHub</a></li>
-        <li><a href="https://github.com/JigSawFr/boreale-ha/issues">{{footer_issues}}</a></li>
-        <li><a href="{{root}}{{home}}legal/">{{footer_legal}}</a></li>
-      </ul>
-    </nav>
-    <p class="fine">{{footer_ha}}</p>
-  </div>
-</footer>
+{{footer}}
 </body>
 </html>
