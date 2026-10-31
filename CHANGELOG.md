@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.1](https://github.com/JigSawFr/boreale-ha/compare/v0.10.0...v0.10.1) (2026-10-31)
+
+
+### 📚 Documentation
+
+* **branding:** rename the README and brand images to Boréale for Home Assistant ([#50](https://github.com/JigSawFr/boreale-ha/issues/50)) ([c3962ee](https://github.com/JigSawFr/boreale-ha/commit/c3962ee19f077cd8d24a5979b4666ca5a2bc8699))
+* **site:** name Boréale for Home Assistant in the home page's lede and use fictional captures in the README ([#52](https://github.com/JigSawFr/boreale-ha/issues/52)) ([b5ff4a6](https://github.com/JigSawFr/boreale-ha/commit/b5ff4a66488cdb2a9b6919cf0812f615b252ac6d))
+
 ## [0.10.0](https://github.com/JigSawFr/boreale-ha/compare/v0.9.0...v0.10.0) (2026-10-31)
 
 
