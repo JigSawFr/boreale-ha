@@ -1,218 +1,316 @@
-/* ha.boreale.dev (site/README.md): the night, an aurora once at the top.
-   One dark look: the brand stands on the night. The brand's colours and
-   fonts, the language menu and the menu of Boréale's sites are
-   boreale-site's (boreale.css, loaded first). */
-* { box-sizing: border-box; }
-html { background: var(--abyss); }
-body {
-  margin: 0; background: var(--abyss); color: var(--snow);
-  font-family: var(--body); font-size: 1.0625rem; line-height: 1.6;
-  -webkit-font-smoothing: antialiased; text-size-adjust: 100%;
+/* ha.boreale.dev (site/README.md): Boréale's night, an aurora once at the
+   top of the home page (site.js), in PlayGuard's site's look (its header,
+   hero, cards and steps: guard.boreale.dev, the reference). One dark look:
+   the brand stands on the night. The brand's colours and fonts, the
+   language menu and the menu of Boréale's sites are boreale-site's
+   (boreale.css, loaded first). */
+
+:root {
+  /* Beside Boréale's colours (boreale.css): a second night, a lighter
+     dusk and the links' blue, for their contrast on this site's pages. */
+  --night-2: #12213f;
+  --dusk: #8593ae;
+  --link: #6fd0ff;
+  --line: var(--night-line);
+  --shadow: 0 20px 50px -24px rgb(0 0 0 / 0.7);
+  /* The page's sides: 16px, more beside an iPhone's notch in landscape
+     (viewport-fit=cover lets the page under it); 1180px of content between. */
+  --gutter-l: max(16px, env(safe-area-inset-left));
+  --gutter-r: max(16px, env(safe-area-inset-right));
+  --side-l: max(var(--gutter-l), calc((100% - 1180px) / 2));
+  --side-r: max(var(--gutter-r), calc((100% - 1180px) / 2));
 }
+
+* { box-sizing: border-box; }
+/* iOS enlarges the text when the phone turns to landscape, unless told not to. */
+html { background: var(--abyss); scroll-behavior: smooth; scroll-padding-top: 24px; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { margin: 0; background: var(--abyss); color: var(--snow); font: 16.5px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
 /* A long word (German's, Russian's) hyphenated where the browser can, else
    broken rather than wider than a phone. */
-h1, h2, h3, h4 { font-family: var(--display); line-height: 1.12; margin: 0; text-wrap: balance; hyphens: auto; overflow-wrap: break-word; }
-p { margin: 0; }
-a { color: var(--ice); text-underline-offset: 3px; }
-a:hover { color: var(--aurora); }
-:focus-visible { outline: 2px solid var(--aurora); outline-offset: 3px; border-radius: 6px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; text-wrap: balance; hyphens: auto; overflow-wrap: break-word; }
+a { color: var(--link); text-underline-offset: 3px; }
 img { max-width: 100%; }
-.skip { position: absolute; left: -9999px; }
-.skip:focus { left: 16px; top: 16px; z-index: 10; background: var(--night); padding: 8px 12px; border-radius: 8px; }
+code { overflow-wrap: anywhere; font: 0.875em var(--mono); background: rgb(232 238 247 / 0.07); border: 1px solid rgb(232 238 247 / 0.08); padding: 0.1em 0.38em; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--aurora); outline-offset: 3px; }
 
-.wrap {
-  max-width: 1160px; margin: 0 auto;
-  padding-left: max(20px, env(safe-area-inset-left, 0px));
-  padding-right: max(20px, env(safe-area-inset-right, 0px));
-}
+/* Line breaks as each script wants them (PlayGuard's rules): Japanese
+   between phrases, never inside a word (headings and short lines; a phrase
+   wider than a phone may then break anywhere), Korean between words as its
+   spaces say, Chinese without a punctuation mark opening a line, its titles
+   kept whole between their spaces and punctuation. */
+:lang(ja) :is(h1, h2, h3, .eyebrow, .lede, .section-lede, .button, .card p, .steps p, .band p, .promise p, .lost p, .tile-label) { word-break: auto-phrase; overflow-wrap: anywhere; }
+:lang(ko) body { word-break: keep-all; }
+:is(:lang(zh-Hans), :lang(zh-Hant)) body { line-break: strict; }
+:is(:lang(zh-Hans), :lang(zh-Hant)) :is(h1, h2, h3) { word-break: keep-all; overflow-wrap: anywhere; }
 
-/* The sky: the canvas (site.js) behind the header and the hero; at rest, or
-   without script, the same aurora as a gradient. */
+.skip { position: absolute; left: -999px; top: 8px; background: var(--night); color: var(--snow); padding: 8px 12px; border-radius: 8px; z-index: 10; }
+.skip:focus { left: 8px; }
+.wrap { max-width: 1212px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+
+/* The sky: the canvas (site.js) behind the home page's header and hero;
+   without script, or with less motion asked, the same aurora as a gradient.
+   The other pages have a quieter one behind their header. */
 .sky { position: relative; isolation: isolate; overflow: hidden; }
 .sky::before {
   content: ""; position: absolute; inset: 0; z-index: -2;
   background:
-    radial-gradient(120% 60% at 30% -10%, rgba(0, 255, 204, 0.22), transparent 60%),
-    radial-gradient(90% 50% at 75% -5%, rgba(138, 92, 255, 0.22), transparent 60%),
-    radial-gradient(80% 40% at 55% 10%, rgba(51, 187, 255, 0.16), transparent 70%),
+    radial-gradient(70% 140% at 15% -60%, rgb(0 255 204 / 0.16), transparent 70%),
+    radial-gradient(60% 140% at 85% -60%, rgb(138 92 255 / 0.18), transparent 70%),
+    var(--abyss);
+}
+.sky:not(.sky-home) { border-bottom: 1px solid var(--line); }
+.sky-home::before {
+  background:
+    radial-gradient(120% 60% at 30% -10%, rgb(0 255 204 / 0.2), transparent 60%),
+    radial-gradient(90% 50% at 75% -5%, rgb(138 92 255 / 0.22), transparent 60%),
+    radial-gradient(80% 40% at 55% 10%, rgb(51 187 255 / 0.14), transparent 70%),
     var(--abyss);
 }
 .sky canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; }
-.sky::after {
-  content: ""; position: absolute; inset: auto 0 0 0; height: 45%; z-index: -1;
-  background: linear-gradient(to top, var(--abyss), transparent);
-}
+.sky-home::after { content: ""; position: absolute; inset: auto 0 0 0; height: 40%; z-index: -1; background: linear-gradient(to top, var(--abyss), transparent); }
 
-.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 20px; }
-.brand { display: flex; align-items: center; gap: 10px; color: var(--snow); text-decoration: none; font-family: var(--display); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; }
-.brand img { width: 34px; height: 34px; }
-.top nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 6px; }
-.top nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; color: var(--mist); text-decoration: none; font-size: 0.9375rem; border-radius: 10px; }
-.top nav a:hover { color: var(--snow); background: rgba(232, 238, 247, 0.06); }
-.top nav { margin-left: auto; }
+/* The header: the site's name (the menu of Boréale's sites), its links, the
+   way into HACS lit, GitHub, and the languages at the right. */
+.top { display: flex; align-items: center; gap: 20px; padding: 14px var(--side-r) 14px var(--side-l); }
+.brand { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--snow); font: 700 20px var(--display); letter-spacing: -0.02em; white-space: nowrap; }
+.brand b { font-weight: 600; background: var(--aurora-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nav { display: flex; gap: 4px; flex: 1; }
+.nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; color: var(--mist); text-decoration: none; font-weight: 500; font-size: 15px; white-space: nowrap; }
+.nav .nav-try { color: var(--abyss); background: var(--aurora-grad); font-weight: 600; }
+.settings { gap: 8px; }
+/* Eyebrows: a section's subject over its title, in the aurora's colour. */
+.eyebrow { margin: 0 0 10px; font: 400 13px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--aurora); }
 
-/* On a phone: the header on one row; GitHub is in the hero and the footer.
-   The language menu is boreale-site's (boreale.css). */
-@media (max-width: 640px) {
-  .top { gap: 8px; }
-  .top nav a { padding: 0 10px; }
-  .top nav li:has(a[href^="https://github.com"]) { display: none; }
-}
-
-.hero { padding-block: clamp(56px, 11vw, 128px) clamp(40px, 7vw, 80px); display: grid; gap: 22px; }
-.hero h1 { font-weight: 600; font-size: clamp(2.5rem, 7.5vw, 5rem); letter-spacing: -0.035em; max-width: 13ch; }
-.hero h1 em { font-style: normal; background: var(--aurora-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-/* Chinese, Japanese and Korean: their letters are a square em, not a ch
-   wide. Line breaks as each script wants them (PlayGuard's rules): Japanese
-   between phrases, never inside a word (headings and short lines; the
-   browsers without it break as before), Korean between words as its spaces
-   say, Chinese without a punctuation mark opening a line, its titles kept
-   whole between their spaces, punctuation and <wbr> (the catalogs'), broken
-   elsewhere only when a run is wider than its line. */
-:lang(ja) .hero h1, :lang(ko) .hero h1, :lang(zh) .hero h1 { max-width: 11em; }
-:lang(ja) :is(h1, h2, h3, h4, .eyebrow, .lede, .section-head p, .button, .kind, .state, .project p, .other p, .promise p, .hardware p, .links a, .releases a, .sites small, .soon, .lost p) { word-break: auto-phrase; }
-:lang(ko) body { word-break: keep-all; }
-:is(:lang(zh-Hans), :lang(zh-Hant)) body { line-break: strict; }
-:is(:lang(zh-Hans), :lang(zh-Hant)) :is(h1, h2, h3, h4) { word-break: keep-all; overflow-wrap: anywhere; }
-.hero .lede { color: var(--mist); font-size: clamp(1.0625rem, 2.2vw, 1.25rem); max-width: 52ch; }
-.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+/* Buttons */
 .button {
-  display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px;
-  border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 1rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; padding: 0 20px;
+  border-radius: 12px; border: 1px solid var(--line); background: rgb(11 20 36 / 0.4); color: var(--snow);
+  text-decoration: none; font-weight: 600; text-align: center;
 }
-.button.primary { background: var(--snow); color: var(--abyss); }
-.button.primary:hover { background: var(--aurora); color: var(--abyss); }
-.button.ghost { border: 1px solid var(--night-line); color: var(--snow); }
-.button.ghost:hover { border-color: var(--mist); color: var(--snow); }
-
-main section { padding-block: clamp(32px, 5vw, 56px); }
-main section.closing { padding-top: 0; }
-.section-head { display: grid; gap: 10px; margin-bottom: 32px; max-width: 60ch; }
-.eyebrow { font-family: var(--mono); font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--aurora); }
-.section-head h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 600; letter-spacing: -0.025em; }
-.section-head p { color: var(--mist); }
-
-.projects { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
-@media (min-width: 1000px) { .projects { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-/* Each card's parts on the rows it shares with the others (subgrid): the
-   captures, the names, the texts and the links at the same height. */
-.project {
-  position: relative; display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 16px; padding: 26px;
-  background: var(--night); border: 1px solid var(--night-line); border-radius: 20px;
+.button.primary { background: var(--snow); border-color: var(--snow); color: var(--abyss); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+/* Hover only where there is a pointer: a finger's tap would leave it on. */
+@media (hover: hover) {
+  .nav a:hover { color: var(--snow); background: rgb(232 238 247 / 0.06); }
+  .nav .nav-try:hover { color: var(--abyss); background: var(--aurora); }
+  .button:hover { border-color: var(--mist); color: var(--snow); }
+  .button.primary:hover { background: var(--aurora); border-color: var(--aurora); color: var(--abyss); }
+  a:hover { color: var(--aurora); }
 }
-.project .shot {
-  display: block; width: 100%; min-width: 0; height: auto; aspect-ratio: 16 / 9; border-radius: 10px;
-  border: 1px solid var(--night-line); background: var(--abyss);
+
+/* ---- The home page's hero: the text, and what the integration gives
+   beside it (under it on a phone). */
+.hero {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: center;
+  padding: clamp(32px, 6vw, 80px) var(--side-r) clamp(48px, 7vw, 88px) var(--side-l);
 }
-.project .head { display: flex; align-items: flex-start; gap: 14px; }
-.project .head > div { padding-top: 6px; }
-.project .head img { width: 60px; height: 60px; flex: none; }
-/* Between a phone and three cards in a row: each card on its own row, its
-   capture beside the rest. */
-@media (min-width: 641px) and (max-width: 999px) {
-  .project { grid-row: auto; grid-template-rows: auto auto 1fr; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 26px; }
-  .project .shot { grid-row: 1 / -1; align-self: start; }
+.hero h1 { font-size: clamp(2.1rem, 4.6vw, 3.4rem); letter-spacing: -0.035em; line-height: 1.08; margin: 0 0 18px; }
+.hero h1 em { font-style: normal; background: var(--aurora-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .lede { margin: 0; color: var(--mist); font-size: clamp(1.0625rem, 1.6vw, 1.15rem); max-width: 54ch; }
+/* The latest release and its date, over the title: its notes. */
+.release-pill { margin: 0 0 18px; }
+.release-pill a {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 12px;
+  border: 1px solid rgb(0 255 204 / 0.35); border-radius: 999px; background: rgb(0 255 204 / 0.08);
+  color: var(--aurora); font: 500 13px var(--mono); text-decoration: none;
 }
-.project h3 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
-.project h3 a { color: var(--snow); text-decoration: none; }
-.project h3 a::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius); }
-.project .kind { display: block; margin-top: 2px; font-family: var(--mono); font-size: 0.75rem; line-height: 1.5; color: var(--mist); }
-.project p { color: var(--mist); font-size: 1rem; }
-/* The state over the links, the same in each card, at the card's foot. */
-.project .foot { display: grid; justify-items: start; gap: 10px; align-self: end; }
-/* Above the card's link (h3 a::after), which covers the whole card. */
-.project .links { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.9375rem; }
-.project .links a { display: inline-flex; align-items: center; min-height: 32px; }
-.project .state, .hardware .state, .other .state {
-  justify-self: start; font-family: var(--mono); font-size: 0.75rem; border-radius: 99px; padding: 3px 10px;
-  border: 1px solid var(--night-line); color: var(--mist);
+.release-pill a:hover { border-color: var(--aurora); color: var(--aurora); }
+
+/* A console's card on a Home Assistant dashboard, drawn: tiles on the
+   night, the time left in a ring of aurora, extra time in chips, the week
+   in bars. Pictures only (role="img", its label says what it shows). */
+.panel {
+  position: relative; isolation: isolate; padding: 16px; border-radius: 22px;
+  background: linear-gradient(160deg, #15264a 0%, #0f1b35 55%, #0b1529 100%);
+  box-shadow: inset 0 1px 0 rgb(232 238 247 / 0.12), 0 0 0 1px #22324f,
+              0 50px 90px -40px rgb(0 0 0 / 0.9), 0 0 140px -40px rgb(51 187 255 / 0.4);
 }
-.project .state.live, .hardware .state.live, .other .state.live { background: var(--aurora); border-color: transparent; color: var(--abyss); font-weight: 500; }
-
-.project .version { color: var(--aurora); }
-
-/* Under the projects, lighter: the open data and protocols (Atlas,
-   Lantern), each a card without a capture, two in a row on a wide screen. */
-.open { margin-top: 40px; }
-.open-title { margin-bottom: 16px; font-family: var(--mono); font-size: 0.8125rem; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mist); }
-.others { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-@media (min-width: 800px) { .others { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.other {
-  display: grid; grid-template-rows: auto 1fr auto; gap: 12px; padding: 20px;
-  border: 1px solid var(--night-line); border-radius: 16px; background: rgb(14 26 51 / 0.45);
+.panel::after {
+  content: ""; position: absolute; z-index: -1; left: 10%; right: 10%; bottom: -12%; height: 30%;
+  background: radial-gradient(closest-side, rgb(51 187 255 / 0.36), rgb(138 92 255 / 0.16) 60%, transparent); filter: blur(28px);
 }
-.other .head { display: flex; align-items: center; gap: 12px; }
-.other .head img { width: 44px; height: 44px; flex: none; }
-.other h4 { font-size: 1.1875rem; font-weight: 600; letter-spacing: -0.015em; }
-.other h4 a { color: var(--snow); text-decoration: none; }
-.other h4 a:hover { color: var(--aurora); }
-.other .kind { display: block; font-family: var(--mono); font-size: 0.75rem; line-height: 1.5; color: var(--mist); }
-.other p { color: var(--mist); font-size: 0.9375rem; }
-.other .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
-.other .links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.9375rem; }
-.other .links a { display: inline-flex; align-items: center; min-height: 32px; }
+.panel-bar { display: flex; align-items: center; gap: 10px; padding: 2px 4px 14px; }
+.panel-bar img { width: 24px; height: 24px; border-radius: 6px; }
+.panel-title { font: 600 16px var(--display); letter-spacing: -0.01em; }
+.panel-online { margin-left: auto; width: 10px; height: 10px; border-radius: 50%; background: var(--aurora); box-shadow: 0 0 0 4px rgb(0 255 204 / 0.15), 0 0 14px rgb(0 255 204 / 0.7); }
+.panel-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tile {
+  display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; padding: 14px 16px;
+  border-radius: 14px; background: rgb(11 20 36 / 0.65); border: 1px solid rgb(34 50 79 / 0.9);
+}
+.tile-wide { grid-column: 1 / -1; }
+.tile-label { color: var(--mist); font-size: 13.5px; line-height: 1.3; }
+.tile strong { font: 600 22px/1.15 var(--display); letter-spacing: -0.02em; color: var(--snow); }
+.tile-sub { color: var(--dusk); font-size: 13px; }
+/* The time left: a ring of aurora, what is played of the day's limit. */
+.tile-ring { position: relative; align-items: center; padding: 12px; }
+.ring { display: block; width: min(100%, 132px); height: auto; }
+.ring circle { fill: none; stroke-width: 10; }
+.ring-track { stroke: rgb(232 238 247 / 0.08); }
+.ring-value { stroke: url(#ring-colour); stroke-linecap: round; filter: drop-shadow(0 0 6px rgb(0 255 204 / 0.45)); }
+.ring-text { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 2px; }
+.ring-text strong { font-size: 20px; }
+.ring-text span { color: var(--mist); font-size: 12px; max-width: 11ch; line-height: 1.25; }
+.meter { display: block; height: 6px; margin: 8px 0 4px; border-radius: 3px; background: rgb(232 238 247 / 0.08); overflow: hidden; }
+.meter span { display: block; width: 79%; height: 100%; border-radius: inherit; background: var(--aurora-grad); }
+/* The game being played: its cover, made up, and who plays it. */
+.tile-game { flex-direction: row; align-items: center; gap: 14px; }
+.game-art {
+  flex: none; width: 44px; height: 44px; border-radius: 10px;
+  background: radial-gradient(circle at 70% 30%, #ffe08a 0 12%, transparent 13%),
+              radial-gradient(120% 90% at 20% 110%, #2f9e6f 0 45%, transparent 46%),
+              linear-gradient(160deg, #3b2a7a, #1b4d8c);
+  box-shadow: inset 0 0 0 1px rgb(232 238 247 / 0.15);
+}
+.tile-text { display: grid; gap: 2px; min-width: 0; }
+.tile-text strong { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.who { margin-left: auto; padding: 3px 10px; border-radius: 999px; font: 500 12px var(--mono); color: var(--ice); border: 1px solid rgb(51 187 255 / 0.4); background: rgb(51 187 255 / 0.08); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chips span {
+  flex: 1 1 0; min-width: max-content; padding: 8px 10px; border-radius: 10px; text-align: center;
+  font: 600 14px var(--body); color: var(--snow); background: rgb(51 187 255 / 0.1); border: 1px solid rgb(51 187 255 / 0.35);
+}
+.chips span:first-child { color: var(--abyss); background: var(--aurora-grad); border-color: transparent; }
+.tile-icon { width: 22px; height: 22px; fill: rgb(138 92 255 / 0.25); stroke: #b39dff; stroke-width: 1.8; stroke-linejoin: round; }
+.tile-week { justify-content: space-between; }
+.bars { display: flex; align-items: flex-end; gap: 6px; height: 46px; margin-top: 8px; }
+.bars i { flex: 1; border-radius: 4px 4px 2px 2px; background: linear-gradient(to top, rgb(51 187 255 / 0.35), rgb(51 187 255 / 0.8)); }
+.bars i:nth-child(1) { height: 40%; }
+.bars i:nth-child(2) { height: 72%; }
+.bars i:nth-child(3) { height: 30%; }
+.bars i:nth-child(4) { height: 58%; }
+.bars i:nth-child(5) { height: 88%; }
+.bars i:nth-child(6) { height: 100%; }
+.bars i:nth-child(7) { height: 64%; background: var(--aurora-grad); }
 
-.feed { margin-top: 16px; font-size: 0.9375rem; }
+/* ---- The sections: 1180px of content between the gutters, the header's
+   and the hero's edge. */
+.section { max-width: 1212px; margin: 0 auto; padding: clamp(48px, 7vw, 88px) var(--gutter-r) 0 var(--gutter-l); }
+.section h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); letter-spacing: -0.025em; margin: 0 0 14px; }
+.section-lede { margin: 0 0 32px; color: var(--mist); max-width: 64ch; }
+.cards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+.card { position: relative; display: grid; gap: 10px; align-content: start; background: var(--night); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; transition: transform 0.3s, border-color 0.3s; }
+.card h3 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+.card p { margin: 0; color: var(--mist); font-size: 15.5px; }
+/* Each icon on its own tile, in the aurora's colours. */
+.icon {
+  display: block; box-sizing: border-box; width: 44px; height: 44px; padding: 10px; border-radius: 12px;
+  fill: none; stroke: var(--aurora); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  background: linear-gradient(135deg, rgb(0 255 204 / 0.16), rgb(138 92 255 / 0.14)); box-shadow: inset 0 0 0 1px rgb(0 255 204 / 0.22);
+}
+/* Under the pointer, the card's edge lights up in the aurora where the
+   pointer is (site.js). */
+.card::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(0 255 204 / 0.85), rgb(138 92 255 / 0.4) 45%, transparent 75%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+@media (hover: hover) {
+  .card:hover { transform: translateY(-3px); }
+  .card:hover::before { opacity: 1; }
+}
+/* In a row of cards, the icons, titles and texts start at the same height,
+   where the browser has subgrid. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 861px) {
+    .cards > .card { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; }
+  }
+}
+/* Four cards: four in a row on a wide screen, two and two below, one under
+   the other on a phone. */
+@media (min-width: 1100px) { .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 601px) and (max-width: 1099px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-.ground { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 28px 36px; }
-.ground div { display: grid; gap: 6px; align-content: start; }
-.ground h3 { font-size: 1.125rem; font-weight: 600; }
-.ground p { color: var(--mist); font-size: 1rem; }
+/* The install: its text beside the steps, the buttons under them (the
+   first step's "the button below"). */
+.columns { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 0 56px; align-items: start; }
+.columns .actions { margin-top: 32px; padding-left: 50px; }
+/* Numbered steps, each number in the aurora's gradient, joined by a line. */
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 22px; }
+.steps > li { counter-increment: step; position: relative; padding-left: 50px; min-width: 0; }
+.steps > li::before {
+  content: counter(step); position: absolute; left: 0; top: -2px; width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center; font: 600 14px var(--display); color: var(--abyss); background: var(--aurora-grad);
+  box-shadow: 0 0 0 4px rgb(0 255 204 / 0.1), 0 0 20px -2px rgb(0 255 204 / 0.5);
+}
+.steps > li:not(:last-child)::after {
+  content: ""; position: absolute; left: 15px; top: 38px; bottom: -18px; width: 2px; border-radius: 2px;
+  background: linear-gradient(to bottom, rgb(0 255 204 / 0.5), rgb(138 92 255 / 0.25));
+}
+.steps h3 { margin: 0 0 4px; font-size: 18px; }
+.steps p { margin: 0; color: var(--mist); }
+.steps em { font-style: normal; color: var(--snow); }
 
-.promise { border: 1px solid var(--night-line); border-radius: var(--radius); padding: clamp(22px, 4vw, 36px); display: grid; gap: 10px; background: linear-gradient(180deg, rgba(14, 26, 51, 0.7), rgba(14, 26, 51, 0.2)); }
-.promise h2 { font-size: clamp(1.375rem, 3vw, 1.75rem); font-weight: 600; letter-spacing: -0.02em; }
-.promise p { color: var(--mist); max-width: 68ch; }
+/* The move from the PlayGuard integration: a band of aurora. */
+.band {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px 32px;
+  margin-top: clamp(48px, 7vw, 88px); padding: clamp(22px, 4vw, 40px);
+  max-width: 1180px; margin-left: var(--gutter-l); margin-right: var(--gutter-r);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: radial-gradient(80% 140% at 0% 0%, rgb(0 255 204 / 0.14), transparent 60%),
+              radial-gradient(70% 140% at 100% 100%, rgb(138 92 255 / 0.18), transparent 60%), var(--night);
+}
+.band > div { max-width: 66ch; }
+.band h2 { margin: 0 0 10px; font-size: clamp(1.5rem, 3.4vw, 2.1rem); }
+.band p { margin: 0; color: var(--mist); }
+.band .eyebrow { margin-bottom: 10px; }
+.band .button { flex: none; }
+@media (min-width: 1212px) { .band { margin-left: auto; margin-right: auto; } }
 
-footer.site { position: relative; padding-block: 32px 40px; color: var(--dusk); font-size: 0.875rem; }
-footer.site .links ul { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 20px; }
-footer.site .links a { display: inline-flex; align-items: center; min-height: 32px; }
-footer.site .row { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
-footer.site a { color: var(--mist); }
+/* Free, local, without an account: the last word, before the footer. */
+.closing { padding-bottom: clamp(56px, 8vw, 96px); }
+.promise { display: flex; align-items: flex-start; gap: 18px; padding: clamp(22px, 4vw, 32px); border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(180deg, rgb(14 26 51 / 0.7), rgb(14 26 51 / 0.2)); }
+.promise .icon { flex: none; }
+.promise h2 { font-size: clamp(1.375rem, 3vw, 1.75rem); margin: 0 0 8px; }
+.promise p { margin: 0; color: var(--mist); max-width: 70ch; }
 
-.lost { padding-block: clamp(64px, 12vw, 140px); display: grid; gap: 18px; justify-items: start; }
-.lost h1 { font-size: clamp(2.25rem, 6vw, 3.5rem); font-weight: 600; letter-spacing: -0.03em; }
-.lost p { color: var(--mist); max-width: 50ch; }
-
-/* A page of text (legal/): one column, readable lines. */
-.prose { padding-block: clamp(48px, 8vw, 96px); }
+/* ---- The other pages: the legal notice, one column of readable lines;
+   the page not found under the sky. */
+.prose { padding-top: clamp(40px, 7vw, 80px); padding-bottom: clamp(56px, 8vw, 96px); }
 .prose > * { max-width: 68ch; }
-.prose h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 600; letter-spacing: -0.03em; }
-.prose .lede { color: var(--mist); font-size: 1.125rem; margin-top: 14px; }
-.prose .translation { font-size: 0.9375rem; margin-top: 10px; }
-.prose section { padding-block: 40px 0; display: grid; gap: 14px; }
-.prose h2 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
+.prose h1 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -0.03em; margin: 0; }
+.prose .lede { color: var(--mist); font-size: 1.125rem; margin: 14px 0 0; }
+.prose .translation { font-size: 0.9375rem; margin: 10px 0 0; }
+.prose section { padding-top: 36px; }
+.prose h2 { font-size: 1.5rem; margin: 0 0 12px; }
 .prose p, .prose dd { color: var(--mist); }
 .prose dl { margin: 0; display: grid; gap: 4px; }
 .prose dt { font-weight: 600; margin-top: 10px; }
 .prose dd { margin: 0; }
-/* support/: the hardware to fund, in order, each with its state. */
-.hardware { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.hardware li { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; border: 1px solid var(--night-line); border-radius: 12px; padding: 14px 18px; background: rgba(14, 26, 51, 0.5); }
-.hardware li > div { display: grid; gap: 2px; flex: 1 1 24ch; }
-.hardware h3 { font-size: 1.0625rem; font-weight: 600; }
-.hardware p { font-size: 0.9375rem; }
+.lost { padding-top: clamp(56px, 10vw, 120px); padding-bottom: clamp(72px, 12vw, 140px); }
+.lost h1 { font-size: clamp(2.25rem, 6vw, 3.5rem); letter-spacing: -0.03em; margin: 0 0 14px; }
+.lost p { color: var(--mist); max-width: 50ch; margin: 0 0 24px; }
 
-
-/* ---- The showcase: the same blocks in boreale.dev's, PlayGuard's,
-   PlayShelf's and Aurore's site.css (adapted to each site's markup). The
-   night going on down the home page, the cards lit under the pointer and
-   rising into view, a cross-fade from page to page; here also the projects'
-   cards and the releases' timeline. Without script, or with less motion
-   asked, everything stays in place. */
+/* ---- The footer: a horizon of aurora over it. */
+.footer { position: relative; margin-top: 0; border-top: 1px solid transparent; color: var(--dusk); font-size: 14.5px; }
+.footer-inner { max-width: 1212px; margin: 0 auto; padding: 40px var(--gutter-r) 40px var(--gutter-l); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 40px; align-items: start; }
+.footer-brand p { margin: 0 0 6px; }
+.footer-brand img { vertical-align: -6px; margin-right: 4px; }
+.footer-brand strong { color: var(--snow); font-family: var(--display); font-weight: 600; }
+.footer .links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 20px; justify-content: flex-end; }
+.footer .links a { display: inline-flex; align-items: center; min-height: 36px; }
+.footer a { color: var(--mist); }
+.footer .fine { grid-column: 1 / -1; margin: 12px 0 0; font-size: 13px; }
+.footer::before {
+  content: ""; position: absolute; left: 50%; top: 0; width: min(1180px, 100%); height: 140px; transform: translateX(-50%); pointer-events: none;
+  background: radial-gradient(50% 100% at 50% 0%, rgb(0 255 204 / 0.14), rgb(51 187 255 / 0.06) 45%, transparent 75%);
+}
+.footer::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--aurora-grad); opacity: 0.6;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+}
 
 /* The night goes on under the hero: veils of aurora down the home page and
-   faint stars (from the top of main, the sky's own ground above it), then a
-   horizon over the footer. */
-body.home { overflow-x: clip; }
+   faint stars. */
 .home main { position: relative; isolation: isolate; }
-.home main::before, .home main::after {
-  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 100vw; margin-left: -50vw; z-index: -1; pointer-events: none;
-}
+.home main::before, .home main::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 .home main::before {
   background:
-    radial-gradient(45% 20% at -5% 22%, rgb(0 255 204 / 0.07), transparent 70%),
-    radial-gradient(45% 20% at 105% 48%, rgb(138 92 255 / 0.09), transparent 70%),
-    radial-gradient(50% 18% at -5% 80%, rgb(51 187 255 / 0.07), transparent 70%);
+    radial-gradient(45% 22% at -5% 22%, rgb(0 255 204 / 0.07), transparent 70%),
+    radial-gradient(45% 22% at 105% 50%, rgb(138 92 255 / 0.09), transparent 70%),
+    radial-gradient(50% 20% at -5% 85%, rgb(51 187 255 / 0.07), transparent 70%);
 }
 .home main::after {
   opacity: 0.55;
@@ -224,119 +322,68 @@ body.home { overflow-x: clip; }
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 75%, transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 75%, transparent);
 }
-footer.site::before {
-  content: ""; position: absolute; left: 50%; top: 0; width: min(1160px, 100%); height: 140px; transform: translateX(-50%); pointer-events: none;
-  background: radial-gradient(50% 100% at 50% 0%, rgb(0 255 204 / 0.12), rgb(51 187 255 / 0.05) 45%, transparent 75%);
-}
-footer.site::after {
-  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--aurora-grad); opacity: 0.6;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-}
-footer.site > .wrap { position: relative; }
 
-/* The projects' cards: under the pointer, the card lifts, its edge lights
-   up in the aurora where the pointer is (site.js) and the project's mark
-   glows. */
-.project { transition: transform 0.3s, border-color 0.3s; }
-.project::before {
-  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; opacity: 0; transition: opacity 0.3s;
-  background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 0%), rgb(0 255 204 / 0.85), rgb(138 92 255 / 0.4) 45%, transparent 75%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+/* ---- Narrower screens. The header on two rows until its links, menus and
+   name fit on one: up to 1080px, for the longer languages (PlayGuard's). */
+@media (max-width: 1080px) {
+  .top { flex-wrap: wrap; gap: 10px 16px; }
+  /* The links on a row of their own, HACS first; GitHub is in the footer. */
+  .nav { order: 3; flex-basis: 100%; overflow-x: auto; gap: 4px; scrollbar-width: none; margin: -6px 0 -4px; }
+  /* The edge fades only while there is more to scroll to (site.js). */
+  .nav.more { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+              mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent); }
+  .nav a { padding: 0 10px; }
+  .nav a:first-child:not(.nav-try) { padding-left: 0; }
+  .nav .nav-try { order: -1; padding: 0 14px; }
+  .nav .nav-gh { display: none; }
+  .settings { margin-left: auto; gap: 6px; }
+  .lang-name { display: none; }
+  .lang-code { display: inline; }
 }
-.project .head img { transition: filter 0.3s; }
-.project .shot { transition: border-color 0.3s; }
-@media (hover: hover) {
-  .project:hover { transform: translateY(-4px); border-color: #3a4d72; box-shadow: 0 30px 60px -36px rgb(0 0 0 / 0.9); }
-  .project:hover::before { opacity: 1; }
-  .project:hover .shot { border-color: #3a4d72; }
+@media (max-width: 860px) {
+  .brand { font-size: 18px; gap: 8px; }
+  .brand img { width: 28px; height: 28px; }
+  /* The hero: the text, then the dashboard, the buttons a finger's width. */
+  .hero { grid-template-columns: minmax(0, 1fr); padding-top: 24px; padding-bottom: 48px; }
+  .actions .button { flex: 1 1 100%; }
+  .columns { grid-template-columns: minmax(0, 1fr); }
+  .columns .actions { padding-left: 0; }
+  .band { flex-direction: column; align-items: flex-start; margin-top: 48px; padding: 24px 20px; }
+  .band .button { align-self: stretch; }
+  .footer-inner { grid-template-columns: minmax(0, 1fr); }
+  .footer .links ul { justify-content: flex-start; }
 }
-.project:hover .head img, .project:focus-within .head img {
-  filter: drop-shadow(0 0 10px rgb(0 255 204 / 0.45)) drop-shadow(0 0 22px rgb(138 92 255 / 0.35));
-}
-
-/* The latest releases: still a list, drawn as a timeline. The dates beside
-   a line of aurora, a dot on it for each release (the latest lit), the line
-   fading into the older ones. */
-.releases {
-  --date: 7rem; --rail: 20px; --gap: 16px; --dot: 33px;
-  position: relative; list-style: none; margin: 0; padding: 0; display: grid;
-}
-.releases::before {
-  content: ""; position: absolute; top: var(--dot); bottom: 0; width: 2px; border-radius: 2px;
-  left: calc(var(--date) + var(--gap) + var(--rail) / 2 - 1px);
-  background: linear-gradient(to bottom, var(--aurora), var(--ice) 55%, var(--violet));
-  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent); mask-image: linear-gradient(to bottom, #000 70%, transparent);
-  opacity: 0.75;
-}
-.releases li {
-  position: relative; display: grid; grid-template-columns: var(--date) var(--rail) 28px minmax(0, 1fr);
-  align-items: center; gap: 6px var(--gap); padding-block: 18px;
-}
-.releases li::before {
-  content: ""; grid-column: 2; grid-row: 1; justify-self: center; width: 12px; height: 12px; border-radius: 50%;
-  background: var(--abyss); box-shadow: 0 0 0 2px var(--ice), 0 0 14px -2px rgb(51 187 255 / 0.7);
-}
-.releases li:first-child::before { background: var(--aurora); box-shadow: 0 0 0 4px rgb(0 255 204 / 0.18), 0 0 18px 0 rgb(0 255 204 / 0.7); }
-.releases img { grid-column: 3; grid-row: 1; width: 28px; height: 28px; }
-.releases a { grid-column: 4; grid-row: 1; font-family: var(--display); font-weight: 600; font-size: 1.125rem; color: var(--snow); text-decoration: none; }
-.releases a:hover { color: var(--aurora); }
-.releases time { grid-column: 1; grid-row: 1; font-family: var(--mono); font-size: 0.875rem; color: var(--mist); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.releases li:first-child time { color: var(--aurora); }
-.releases p { grid-column: 3 / -1; grid-row: 2; color: var(--mist); font-size: 0.9375rem; max-width: 72ch; }
-@media (max-width: 640px) {
-  .project { padding: 20px; }
-  .project .head img { width: 52px; height: 52px; }
-  /* The date above the release's name, the line at the left. */
-  .releases { --date: 0px; --gap: 12px; --dot: 59px; }
-  .releases::before { left: calc(var(--rail) / 2 - 1px); }
-  .releases li { grid-template-columns: var(--rail) 28px minmax(0, 1fr); padding-block: 18px; }
-  .releases li::before { grid-column: 1; grid-row: 2; }
-  .releases time { grid-column: 2 / -1; grid-row: 1; }
-  .releases img { grid-column: 2; grid-row: 2; }
-  .releases a { grid-column: 3; grid-row: 2; }
-  .releases p { grid-column: 2 / -1; grid-row: 3; }
+@media (max-width: 600px) {
+  .cards { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  /* Each feature's icon beside its title. */
+  .card { grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; padding: 16px; align-items: center; }
+  .card .icon { grid-row: span 2; align-self: start; }
+  .card p { grid-column: 1 / -1; }
+  .panel { padding: 12px; border-radius: 18px; }
+  .panel-grid { gap: 8px; }
+  .tile { padding: 12px; }
+  .tile strong { font-size: 19px; }
+  .promise { flex-direction: column; }
 }
 
-/* The home page's sections rise into view once (site.js; not with less
-   motion asked), the cards one after the other. */
+/* The sections rise into view once (site.js; not with less motion asked),
+   the cards one after the other. */
 @media (prefers-reduced-motion: no-preference) {
   .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
   .reveal.in { opacity: 1; transform: none; }
-  .reveal .project { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease calc(var(--i, 0) * 90ms), transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 90ms), border-color 0.3s; }
-  .reveal.in .project { opacity: 1; transform: none; }
-  .reveal.in .project:hover { transform: translateY(-4px); transition-delay: 0s; }
-}
-
-/* From one page of the site to the next: a short cross-fade, the header
-   staying where it is (where the browser can; not with less motion asked). */
-@media (prefers-reduced-motion: no-preference) {
+  .reveal .card { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease calc(var(--i, 0) * 70ms), transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 70ms), border-color 0.3s; }
+  .reveal.in .card { opacity: 1; transform: none; }
+  /* From one page of the site to the next: a short cross-fade, the header
+     staying where it is (where the browser can). */
   @view-transition { navigation: auto; }
   .top { view-transition-name: top; }
   ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.25s; }
 }
-
 @media (prefers-reduced-motion: reduce) {
-  .project, .project::before, .project .head img, .project .shot { transition: none; }
-  .project:hover { transform: none; }
+  html { scroll-behavior: auto; }
+  .card, .card::before { transition: none; }
 }
-
 @media print {
-  .reveal, .reveal .project { opacity: 1 !important; transform: none !important; }
+  .top, .sky canvas, .footer, .skip, .panel { display: none !important; }
+  .reveal, .reveal .card { opacity: 1 !important; transform: none !important; }
 }
-
-/* insights/: a pointer to Atlas's site, its button under the lede. */
-.insights .actions { margin-top: 24px; }
-
-/* ha.boreale.dev: the latest version under the hero's buttons, the
-   install's buttons under its steps. */
-.hero-version { color: var(--mist); font-size: 0.9375rem; }
-.hero-version:empty { display: none; }
-#install .actions { margin-top: 32px; }
-/* The repository's address in the install's first step: broken anywhere on
-   a narrow phone rather than wider than it. */
-.ground code { overflow-wrap: anywhere; }
-/* Japanese breaks between phrases (word-break: auto-phrase): a phrase wider
-   than a narrow phone may then break anywhere, rather than overflow. */
-:lang(ja) :is(.section-head h2, .section-head p, .ground h3, .ground p, .promise h2, .promise p) { overflow-wrap: anywhere; }

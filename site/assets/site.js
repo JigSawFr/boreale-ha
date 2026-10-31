@@ -1,7 +1,8 @@
-// boreale.dev: the aurora behind the header and the hero (canvas#sky). Three
-// soft curtains in the brand's colours under a few stars, drawn once at load;
-// they move only while the page is visible and the visitor has not asked for
-// less motion. Without script, site.css's gradient stands in.
+// ha.boreale.dev: the aurora behind the home page's header and hero
+// (canvas#sky), and the page not found's. Three soft curtains in the
+// brand's colours under a few stars, drawn once at load; they move only
+// while the page is visible and the visitor has not asked for less motion.
+// Without script, site.css's gradient stands in.
 (function () {
   const canvas = document.getElementById("sky");
   if (!canvas || !canvas.getContext) return;
@@ -99,12 +100,22 @@
   }
 })();
 
-// The showcase (site.css's block of the same name, in boreale.dev's,
-// PlayGuard's, PlayShelf's and Aurore's site.js): the cards' edge lit where
-// the pointer is, and the home page's sections rising into view once (not
-// with less motion asked; those already in view at load shown at once).
+// The header's links on a phone, a row to scroll (site.css): its edge fades
+// only while there are more of them to scroll to.
 (function () {
-  for (const card of document.querySelectorAll(".project")) {
+  const nav = document.querySelector(".nav");
+  if (!nav) return;
+  const fade = () => nav.classList.toggle("more", nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+  nav.addEventListener("scroll", fade, { passive: true });
+  window.addEventListener("resize", fade);
+  fade();
+})();
+
+// The showcase (PlayGuard's site's): the cards' edge lit where the pointer
+// is, and the home page's sections rising into view once (not with less
+// motion asked; those already in view at load shown at once).
+(function () {
+  for (const card of document.querySelectorAll(".card")) {
     card.addEventListener("pointermove", (e) => {
       const box = card.getBoundingClientRect();
       card.style.setProperty("--mx", `${e.clientX - box.left}px`);
@@ -121,7 +132,7 @@
   for (const part of document.querySelectorAll(".home main > section")) {
     if (part.getBoundingClientRect().top < window.innerHeight * 0.88) continue;
     part.classList.add("reveal");
-    [...part.querySelectorAll(".project")].forEach((card, i) => card.style.setProperty("--i", i));
+    [...part.querySelectorAll(".card")].forEach((card, i) => card.style.setProperty("--i", i));
     seen.observe(part);
   }
 })();

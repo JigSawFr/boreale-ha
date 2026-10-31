@@ -66,20 +66,34 @@ def fetch(url: str) -> object:
         return json.load(answer)
 
 
-def versions() -> dict:
+def versions() -> tuple:
     """The projects' latest versions, for the menu of Boréale's sites: the
     others' from boreale.dev's versions.json (boreale-site), this one's from
-    GitHub (none offline, or when they cannot be read: the site builds
+    GitHub; and this one's latest release (version, date, address) for the
+    hero, or None (none offline, or when they cannot be read: the site builds
     without them)."""
     latest = boreale.latest_versions()
     if os.environ.get("SITE_OFFLINE") == "1":
-        return latest
+        return latest, None
     try:
         release = fetch(f"https://api.github.com/repos/{OWNER}/{REPO}/releases/latest")
-        latest[HA.key] = release["tag_name"].lstrip("v")
+        version = release["tag_name"].lstrip("v")
+        published = datetime.fromisoformat(release["published_at"].replace("Z", "+00:00")).date()
     except Exception as error:
         print(f"build_site: the latest release not read ({error})", file=sys.stderr)
-    return latest
+        return latest, None
+    latest[HA.key] = version
+    return latest, (version, published, release["html_url"])
+
+
+def release_pill(release: tuple, language: str) -> str:
+    """The latest release and its date over the hero's title (PlayGuard's
+    pill), leading to its notes; nothing without one."""
+    if not release:
+        return ""
+    version, published, url = release
+    return (f'<p class="release-pill"><a href="{attribute(url)}">v{html.escape(version)} · '
+            f'<time datetime="{published.isoformat()}">{boreale.day(published, language)}</time></a></p>')
 
 
 def structured(language: str, catalog: dict, latest: dict) -> str:
@@ -97,7 +111,7 @@ def structured(language: str, catalog: dict, latest: dict) -> str:
 
 
 def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str, title: str,
-         latest: dict, path: str = "", first_visit: bool = False, lost: bool = False) -> str:
+         latest: dict, release: tuple, path: str = "", first_visit: bool = False, lost: bool = False) -> str:
     values = dict(catalog)
     values["description"] = attribute(catalog["description"])
     title = attribute(title)
@@ -107,8 +121,16 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
     values["hacs"] = HACS
     values["boreale_url"] = "https://boreale.dev/" + folder(language)
     values["playguard_url"] = "https://guard.boreale.dev/" + folder(language)
-    values["version"] = (catalog["hero_version"].replace("{version}", html.escape(latest[HA.key]))
-                         if HA.key in latest else "")
+    values["release"] = release_pill(release, language)
+    # The hero's dashboard: its durations as the language writes them.
+    def minutes(n: int) -> str:
+        return catalog["mock_min"].replace("{n}", str(n))
+
+    def hours(n: int) -> str:
+        return catalog["mock_hour"].replace("{n}", str(n))
+
+    values.update(mock_left_value=minutes(25), mock_played_value=minutes(95), mock_limit_value=hours(2),
+                  mock_extra_15=minutes(15), mock_extra_30=minutes(30), mock_extra_60=hours(1))
     values["legal_translation"] = ("" if language == ORIGINAL else
                                    f'<p class="translation">{catalog["legal_translation"]}</p>')
     values["lang"] = html_lang(language)
@@ -124,10 +146,18 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
     values["lost"] = f' data-lost="{root}"' if lost and language == CODES[0] else ""
     values["indexing"] = HA.indexing(language, path, lost)
     values["page_class"] = ' class="home"' if hero else ""
+    # The aurora's canvas behind the home page's hero and the page not found;
+    # a quieter sky behind the other pages' header (site.css, site.js).
+    aurora = bool(hero) or lost
+    values["sky_class"] = "sky sky-home" if aurora else "sky"
+    values["sky_canvas"] = '<canvas id="sky" aria-hidden="true"></canvas>' if aurora else ""
     values["og_alternates"] = "\n".join(
         f'<meta property="og:locale:alternate" content="{OG_LOCALES[code]}">' for code in CODES if code != language)
     values.update(root=root, site=SITE_URL, url=url, title=title)
-    values["switcher"] = HA.switcher(language, catalog, root, latest)
+    # The header's name: the site's own wordmark, Boréale for HA, with its
+    # mark (PlayGuard's Play<b>Guard</b>), opening the menu of Boréale's sites.
+    values["switcher"] = HA.switcher(language, catalog, root, latest, brand=(
+        f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="34" height="34"><span>Boréale <b>for HA</b></span>'))
     values["audience"] = HA.audience(root)
     values["jsonld"] = structured(language, catalog, latest)
     values["hero"] = fill(hero, values)
@@ -160,7 +190,7 @@ def main() -> None:
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     out = Path(sys.argv[1])
-    latest = versions()
+    latest, release = versions()
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(SITE / "assets", out / "assets")
@@ -181,11 +211,11 @@ def main() -> None:
             (out / where).mkdir(parents=True, exist_ok=True)
             (out / where / "index.html").write_text(
                 page(lang, catalog, hero if home else "", body, root, SITE_URL + where,
-                     catalog["title"] if home else catalog[f"{path.strip('/')}_page_title"], latest, path=path,
+                     catalog["title"] if home else catalog[f"{path.strip('/')}_page_title"], latest, release, path=path,
                      first_visit=home and lang == CODES[0]),
                 encoding="utf-8")
         (out / folder(lang) / "404.html").write_text(
-            page(lang, catalog, "", lost, base, SITE_URL, catalog["lost_page_title"], latest, lost=True),
+            page(lang, catalog, "", lost, base, SITE_URL, catalog["lost_page_title"], latest, release, lost=True),
             encoding="utf-8")
     first = catalogs[CODES[0]]
     (out / "manifest.webmanifest").write_text(manifest(first), encoding="utf-8")

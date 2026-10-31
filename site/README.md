@@ -19,16 +19,22 @@ here. After a clone: `git submodule update --init`.
 
 `python3 tools/build_site.py <out-dir>` (Python 3, nothing to install):
 
-- `template.html`: the page around the content; `hero.html` and `home.html`:
-  the home page (features, the three install steps, the move from PlayGuard);
+- `template.html`: the page around the content, its header in PlayGuard's
+  site's way (guard.boreale.dev, the reference for the look): the site's
+  wordmark, *Boréale for HA*, opening the menu of Boréale's sites, the links,
+  *Open in HACS* lit, GitHub and the languages; on two rows on a phone.
+  `hero.html` and `home.html`: the home page, its hero (the text, and a
+  console's card on a Home Assistant dashboard drawn beside it, `.panel` in
+  `site.css`, its texts `mock_*` and fictional names), then the features,
+  the three install steps, the move from PlayGuard and the promise;
   `legal.html`: `legal/`, the privacy and legal notice, written in French
   (each other language says it is a translation); `lost.html`: `404.html`.
 - `i18n/<language>.json`: each `{{key}}`'s text, English in `en-US.json`.
   The texts every site has (the menu of Boréale's sites, the language
   button) are boreale-site's, never repeated here: the build stops if one
   is.
-- The integration's latest version, under the hero's buttons and in the
-  menu, comes from GitHub's API; the other projects' from boreale.dev's
+- The integration's latest release, over the hero's title (its version and
+  date, leading to its notes) and in the menu, comes from GitHub's API; the other projects' from boreale.dev's
   `versions.json`. `SITE_OFFLINE=1` builds without them; `GITHUB_TOKEN`
   lifts the API's anonymous limit; `SITE_URL` is the site's address.
 - `assets/`: this site's own, `site.css` and `site.js` (the aurora, the

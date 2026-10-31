@@ -1,9 +1,55 @@
-<section class="wrap hero">
-    <h1>{{hero_title}}</h1>
-    <p class="lede">{{hero_lede}}</p>
-    <div class="actions">
-      <a class="button primary" href="{{hacs}}">{{cta_hacs}}</a>
-      <a class="button ghost" href="{{docs}}" referrerpolicy="strict-origin">{{cta_docs}}</a>
+<section class="hero">
+    <div class="hero-text">
+      {{release}}
+      <p class="eyebrow">{{hero_eyebrow}}</p>
+      <h1>{{hero_title}}</h1>
+      <p class="lede">{{hero_lede}}</p>
+      <div class="actions">
+        <a class="button primary" href="{{hacs}}">{{cta_hacs}}</a>
+        <a class="button" href="{{docs}}">{{cta_docs}}</a>
+      </div>
     </div>
-    <p class="hero-version">{{version}}</p>
+    <!-- What it gives, drawn rather than captured: a console's card on a
+         Home Assistant dashboard (site.css's .panel), fictional names. -->
+    <div class="panel" role="img" aria-label="{{mock_label}}">
+      <div class="panel-bar">
+        <img src="{{root}}assets/marks/ha.svg" alt="" width="24" height="24">
+        <span class="panel-title">{{mock_room}}</span>
+        <span class="panel-online"></span>
+      </div>
+      <div class="panel-grid">
+        <div class="tile tile-ring">
+          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <defs><linearGradient id="ring-colour" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00ffcc"/><stop offset="0.6" stop-color="#33bbff"/><stop offset="1" stop-color="#8a5cff"/></linearGradient></defs>
+            <circle class="ring-track" cx="60" cy="60" r="50"/>
+            <circle class="ring-value" cx="60" cy="60" r="50" stroke-dasharray="248.7 314.2" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="ring-text"><strong>{{mock_left_value}}</strong><span>{{mock_left}}</span></div>
+        </div>
+        <div class="tile tile-played">
+          <span class="tile-label">{{mock_played}}</span>
+          <strong>{{mock_played_value}}</strong>
+          <span class="meter"><span></span></span>
+          <span class="tile-sub">{{mock_limit}} · {{mock_limit_value}}</span>
+        </div>
+        <div class="tile tile-wide tile-game">
+          <span class="game-art"></span>
+          <span class="tile-text"><span class="tile-label">{{mock_playing}}</span><strong>Starlit Garden</strong></span>
+          <span class="who">Léa</span>
+        </div>
+        <div class="tile tile-wide">
+          <span class="tile-label">{{mock_extra}}</span>
+          <span class="chips"><span>+{{mock_extra_15}}</span><span>+{{mock_extra_30}}</span><span>+{{mock_extra_60}}</span></span>
+        </div>
+        <div class="tile tile-bedtime">
+          <svg class="tile-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+          <span class="tile-label">{{mock_bedtime}}</span>
+          <strong>{{mock_bedtime_time}}</strong>
+        </div>
+        <div class="tile tile-week">
+          <span class="tile-label">{{mock_week}}</span>
+          <span class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+      </div>
+    </div>
   </section>
