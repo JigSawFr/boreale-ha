@@ -985,6 +985,21 @@ skipped. The contract is PlayGuard's
 - Support PlayGuard: [GitHub Sponsors](https://github.com/sponsors/JigSawFr)
   or [Ko-fi](https://ko-fi.com/jigsawfr).
 
+## 🧭 How it's made
+
+[![Human-led, AI-assisted](https://raw.githubusercontent.com/JigSawFr/boreale/main/branding/badge-ai.svg)](https://boreale.dev/how/?utm_source=github&utm_medium=readme)
+
+Boréale for Home Assistant is built by [JigSawFr](https://github.com/JigSawFr), a full-stack
+engineer who has shipped production software for years, with AI coding
+assistants as part of the toolbox.
+
+- **I decide**: architecture, scope, what ships and what doesn't.
+- **AI helps write**: first drafts of code and tests, docs, and the translations.
+- **I review everything**: every change is read, tested and signed before it reaches
+  `main`.
+
+The integration calls no AI service itself. If you expose a console's entities to Home Assistant's assistant, it offers its actions as tools to the assistant you chose. More on [boreale.dev](https://boreale.dev/how/?utm_source=github&utm_medium=readme).
+
 ## 📜 License
 
 **GPLv3** (see [`LICENSE`](https://github.com/JigSawFr/boreale-ha/blob/main/LICENSE)), as PlayGuard. Maintained by [JigSawFr](https://github.com/JigSawFr).
