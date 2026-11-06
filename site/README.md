@@ -41,9 +41,9 @@ here. After a clone: `git submodule update --init`.
   `versions.json`. `SITE_OFFLINE=1` builds without them; `GITHUB_TOKEN`
   lifts the API's anonymous limit; `SITE_URL` is the site's address.
 - `assets/`: this site's own, `site.css` (the hero, the dashboard drawn
-  beside it, the install steps, the other pages), the icons (`favicon.svg` is `branding/icon.svg`; the PNGs and
-  `favicon.ico` rendered from it) and the social preview
-  (`.github/readme/social-preview.png`). boreale-site's assets (`chrome.css` and `chrome.js` among them) are copied
+  beside it, the install steps, the other pages), the icons (`favicon.svg`, the mark; the PNGs and `favicon.ico`) and
+  the social preview, from Boréale's brand kit (`branding/ha/` in
+  JigSawFr/boreale, copied by its `tools/sync_branding.py`). boreale-site's assets (`chrome.css` and `chrome.js` among them) are copied
   beside them at the build; one of them here too stops it.
 - No contact address: the contact is the repository's issues, a security
   flaw its private advisories (`.well-known/security.txt`).
