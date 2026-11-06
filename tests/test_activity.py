@@ -28,7 +28,7 @@ async def _now(hass: HomeAssistant, state: dict, now: object, **today: object) -
 async def test_activity(hass: HomeAssistant, setup, state) -> None:
     # An older PlayGuard (no "now"): the fixture plays a game, published by the app.
     activity = hass.states.get(_id(hass, "console_activity"))
-    assert activity.state == "game" and activity.attributes["title"] == "Super Mario Odyssey"
+    assert activity.state == "game" and activity.attributes["title"] == "Moonhop Odyssey"
     assert activity.attributes["options"] == ["game", "homebrew", "playguard", "home", "suspended", "offline"]
 
     homebrew = {"app_id": "050537E2542E2000", "name": "sphaira", "kind": "homebrew", "since": 1}

@@ -760,7 +760,7 @@
     },
     "limit_reached": {
       "name": "제한 도달",
-      "description": "본체에서 오늘 제한에 도달했는지 확인합니다.",
+      "description": "본체에서 플레이가 차단되었는지 확인합니다. 오늘 제한에 도달했거나 취침 시간입니다.",
       "fields": {
         "behavior": {
           "name": "조건 충족 기준"

@@ -54,7 +54,7 @@ async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
     used = hass.states.get(_id("sensor", "used_screen_time", hass))
     assert used.attributes["state_class"] == "total_increasing"  # back to 0 at midnight
     assert state("sensor", "screen_time_remaining") == "45"
-    assert state("sensor", "now_playing") == "Super Mario Odyssey"
+    assert state("sensor", "now_playing") == "Moonhop Odyssey"
     assert state("sensor", "firmware") == "23.0.1"
     assert state("number", "limit_mon") == "120"
     assert state("number", "limit_sat") == "1440"
@@ -69,7 +69,7 @@ async def test_entities_from_the_state(hass: HomeAssistant, setup) -> None:
 
     log = hass.states.get(_id("sensor", "used_screen_time_log", hass))
     assert log.state == "74"
-    assert log.attributes["games"] == {"Super Mario Odyssey": 60, "Mario Kart 8 Deluxe": 14}
+    assert log.attributes["games"] == {"Moonhop Odyssey": 60, "Kart Rally Deluxe": 14}
 
     # The integration's own diagnostics: the link, and the agent.
     registry = er.async_get(hass)
@@ -310,7 +310,7 @@ async def test_events(hass: HomeAssistant, setup) -> None:
     await hass.async_block_till_done()
     event = hass.states.get(entity_id)
     assert event.attributes["event_type"] == "time_warning" and event.attributes["minutes_left"] == 10
-    assert event.attributes["game"] == "Super Mario Odyssey" and event.attributes["app_id"] == "0100000000010000"
+    assert event.attributes["game"] == "Moonhop Odyssey" and event.attributes["app_id"] == "0100000000010000"
     blocked = {"schema": 1, "source": "agent", "ts": 3, "event_type": "play_blocked", "app_id": None}
     publish(hass, "event", {**blocked, "minutes_left": None, "blocked_by": "bedtime"})
     await hass.async_block_till_done()
@@ -338,7 +338,7 @@ async def test_week_and_names(hass: HomeAssistant, setup) -> None:
     week = hass.states.get(_id("sensor", "week_play_time", hass))
     assert week.attributes["unit_of_measurement"] == "h"  # minutes, shown in hours
     assert week.attributes["days"] == {"2026-10-03": 30, "2026-10-04": 97}  # 70 + 15 (the week's is more) + 12
-    assert week.attributes["games"] == {"Super Mario Odyssey": 100, "Mario Kart 8 Deluxe": 15, "0100000000020000": 12}
+    assert week.attributes["games"] == {"Moonhop Odyssey": 100, "Kart Rally Deluxe": 15, "0100000000020000": 12}
 
     # The app no longer runs: the agent's finished day and today's log move the week on.
     final = fixture("activity.json") | {"local_date": "2026-10-05", "final": True}
@@ -354,7 +354,7 @@ async def test_week_and_names(hass: HomeAssistant, setup) -> None:
     assert days == {"2026-09-30": 0, "2026-10-01": 0, "2026-10-02": 0, "2026-10-03": 30, "2026-10-04": 75,
                     "2026-10-05": 40, "2026-10-06": 20}  # fmt: skip
     assert week.state == "2.75"
-    assert week.attributes["games"]["Super Mario Odyssey"] == 130
+    assert week.attributes["games"]["Moonhop Odyssey"] == 130
 
     publish(hass, "activity/2026-10-05", "")  # cleared by the console
     await hass.async_block_till_done()

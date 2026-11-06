@@ -1,4 +1,4 @@
-"""The console's events in the logbook: "Salon started Mario Kart 8 Deluxe",
+"""The console's events in the logbook: "Salon started Kart Rally Deluxe",
 "Salon refused Limit Monday: 5000: value out of range"."""
 
 from __future__ import annotations

@@ -76,9 +76,9 @@ async def test_bus_and_logbook(hass: HomeAssistant, setup) -> None:
     await hass.async_block_till_done()
     assert len(events) == 5  # not the event type it does not know
     assert events[0].data["device_id"] == _device(hass, setup).id
-    assert events[0].data["game"] == "Super Mario Odyssey"
+    assert events[0].data["game"] == "Moonhop Odyssey"
     assert [describe(e) for e in events] == [
-        {"name": "Salon", "message": "started Super Mario Odyssey"},
+        {"name": "Salon", "message": "started Moonhop Odyssey"},
         {"name": "Salon", "message": "has 10 minutes of play left"},
         {"name": "Salon", "message": "blocked the games: bedtime"},
         {"name": "Salon", "message": "refused add_bonus_time: 30: there is no limit today"},

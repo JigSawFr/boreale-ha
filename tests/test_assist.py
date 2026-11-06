@@ -34,7 +34,7 @@ async def test_play_time_today(hass: HomeAssistant, setup) -> None:
     assert today["console"] == "Salon"
     assert today["date"] == activity["local_date"] and today["minutes"] == activity["total_min"]
     assert today["games"][0]["minutes"] >= today["games"][-1]["minutes"]
-    assert today["now_playing"]["name"] == "Super Mario Odyssey"
+    assert today["now_playing"]["name"] == "Moonhop Odyssey"
     assert today["limit_minutes"] == 120 and today["remaining_minutes"] == 45 and today["extra_minutes"] == 30
     assert today["blocked"] is False
 
@@ -52,7 +52,7 @@ async def test_play_time_week(hass: HomeAssistant, setup) -> None:
     assert week["minutes"] == 75
     assert week["games"][0] == {
         "app_id": "0100000000010000",
-        "name": "Super Mario Odyssey",
+        "name": "Moonhop Odyssey",
         "minutes": 70,
         "per_day": [0, 0, 0, 0, 0, 0, 70],
     }
@@ -69,7 +69,7 @@ async def test_intent_play_time(hass: HomeAssistant, setup) -> None:
     response = await _intent(hass, INTENT_PLAY_TIME)
     minutes = fixture("activity.json")["total_min"]
     assert response.speech["plain"]["speech"] == (
-        f"Salon: {minutes} minutes played today. Super Mario Odyssey is being played. 45 minutes left."
+        f"Salon: {minutes} minutes played today. Moonhop Odyssey is being played. 45 minutes left."
     )
     assert response.speech_slots["remaining_minutes"] == 45
 

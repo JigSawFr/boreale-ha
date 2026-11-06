@@ -111,7 +111,7 @@ async def _async_setup(hass: HomeAssistant, entry: MockConfigEntry, state: dict)
     publish(hass, "availability", "online", retain=True)
     publish(hass, "state", state, retain=True)
     publish(hass, "activity", fixture("activity.json"), retain=True)
-    names = {"0100000000010000": "Super Mario Odyssey", "01000A10041EA000": "Mario Kart 8 Deluxe"}
+    names = {"0100000000010000": "Moonhop Odyssey", "01000A10041EA000": "Kart Rally Deluxe"}
     publish(hass, "names", {"schema": 1, "ts": 1, "games": names}, retain=True)
     await hass.async_block_till_done()
     return entry

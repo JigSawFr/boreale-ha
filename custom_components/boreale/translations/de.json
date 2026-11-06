@@ -760,7 +760,7 @@
     },
     "limit_reached": {
       "name": "Limit erreicht",
-      "description": "Prüft, ob das heutige Limit auf der Konsole erreicht ist.",
+      "description": "Prüft, ob das Spielen auf der Konsole gesperrt ist (Tageslimit erreicht oder Schlafenszeit).",
       "fields": {
         "behavior": {
           "name": "Bedingung erfüllt, wenn"
