@@ -14,7 +14,7 @@
 
 **English** · [Français](https://github.com/JigSawFr/boreale-ha/blob/main/README.fr.md)
 
-[![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=boreale-ha&category=integration)
+[![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=JigSawFr&repository=boreale-ha&category=integration)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=boreale)
 
 [**Install**](#-installation) ·
@@ -141,7 +141,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   and a console without PlayGuard. For Nintendo's own Parental Controls app
   and account, see Home Assistant's *Nintendo Switch Parental Controls*
   integration instead.
-- **Home Assistant 2026.10 or newer**, and an MQTT broker in version 5.0 or
+- **Home Assistant 2026.11 or newer**, and an MQTT broker in version 5.0 or
   3.1.1: the Mosquitto app, or EMQX, HiveMQ, NanoMQ, VerneMQ and others.
   The console speaks 5.0 and falls back to 3.1.1. Home Assistant's MQTT
   integration moves to 5.0 by itself when the broker takes it, else it raises
@@ -196,11 +196,6 @@ Nintendo Switch repository's device in *Settings › Devices & services ›
 Marketplace* (disabled by default: enable it on the device's page first); the
 update then offers the pre-releases too, and the release once it is out. Turn
 it back off to stay on releases: the next release replaces the pre-release.
-
-On Home Assistant 2026.10, with [HACS](https://hacs.xyz/), which the
-Marketplace replaced: *HACS › ⋮ › Custom repositories*, the same address and
-type, then *Download* the repository and restart Home Assistant. Updating to
-2026.11 carries the installation over to the Marketplace, nothing to do.
 
 By hand: download `boreale.zip` from the
 [latest release](https://github.com/JigSawFr/boreale-ha/releases/latest),

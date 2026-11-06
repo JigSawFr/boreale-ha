@@ -51,9 +51,7 @@ DOCS = {"en": f"https://github.com/{OWNER}/{REPO}#readme", "fr": f"https://githu
 GUIDE = {"en": f"https://github.com/{OWNER}/PlayGuard/blob/main/docs/home-assistant.md",
          "fr": f"https://github.com/{OWNER}/PlayGuard/blob/main/docs/home-assistant.fr.md"}
 # My Home Assistant's link that opens this repository in the visitor's Marketplace
-# (hacs_repository: HACS before Home Assistant 2026.11, the Marketplace after;
-# marketplace_repository once hacs.json asks for 2026.11).
-MARKETPLACE = (f"https://my.home-assistant.io/redirect/hacs_repository/?owner={OWNER}&amp;repository={REPO}"
+MARKETPLACE = (f"https://my.home-assistant.io/redirect/marketplace_repository/?owner={OWNER}&amp;repository={REPO}"
         "&amp;category=integration")
 
 # The pages other than 404.html, by their path under each language's folder.
