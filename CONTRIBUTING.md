@@ -86,11 +86,11 @@ desktop and axe's accessibility checks ([`site/README.md`](site/README.md)).
 | `services.py`, `services.yaml` | The actions (`get_play_time` with a response) |
 | `statistics.py` | Finished days into the recorder's long-term statistics |
 | `repairs.py`, `diagnostics.py` | The fixable repair, the redacted diagnostics |
-| `brand/` | The integration's icon and logos (Home Assistant 2026.3+), rendered from `branding/` by `scripts/render_branding.mjs` |
+| `brand/` | The integration's icon (from Boréale's brand kit) and logos (rendered from `branding/` by `scripts/render_branding.mjs`), for Home Assistant 2026.3+ |
 | `blueprints/automation/boreale/` | The blueprints the README offers to import (`tests/test_blueprints.py` sets each one up) |
 | `tests/` | One test module per part, PlayGuard's fixtures, the parity, translation and quality-scale checks |
-| `scripts/` | The per-module coverage gate, the release zip, the pre-release's version (`prerelease.py`), the README's branding |
-| `branding/` | The icon (a house around Aurore's night and PlayGuard's play sign), the logos, the README's banner and the social preview, as SVG, in Aurore's aurora (its sky, its colours, Sora): `node scripts/render_branding.mjs` (Node and Playwright) renders them to `brand/` and `.github/readme/` |
+| `scripts/` | The per-module coverage gate, the release zip, the pre-release's version (`prerelease.py`), the Home Assistant logos (`render_branding.mjs`) |
+| `branding/` | The icon (a house around the aurora's night and a console) and the mark, from Boréale's brand kit (`branding/ha/` in JigSawFr/boreale, with the README's banner and icon, the social preview and the site's icons, copied by its `tools/sync_branding.py`: change them there); the logos, this repository's own, which `node scripts/render_branding.mjs` (Node and Playwright) renders to `brand/` |
 | `.github/readme/` | The README's images: the banner, the social preview (uploaded by hand in *Settings › General*), the screenshots (a demo console in a real Home Assistant) |
 
 ## Formats
