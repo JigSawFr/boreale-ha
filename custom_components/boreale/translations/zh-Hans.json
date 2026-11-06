@@ -576,7 +576,7 @@
     },
     "taken_over_installed": {
       "title": "PlayGuard 现已更名为 Boréale for Nintendo Switch",
-      "description": "你的主机已从集成 {legacy} 迁移到 Boréale，实体、历史记录和统计数据都已保留。使用其动作、触发器和条件（{legacy}.add_bonus_time、{legacy}.game_started、{legacy}.is_playing…）的自动化、脚本和蓝图现在必须改用 boreale.…：旧名称已不再响应。完成后忽略此提示即可。\n\n旧集成仍已安装：请在 HACS 中删除 PlayGuard，或删除文件夹 custom_components/{legacy}，然后重启 Home Assistant。"
+      "description": "你的主机已从集成 {legacy} 迁移到 Boréale，实体、历史记录和统计数据都已保留。使用其动作、触发器和条件（{legacy}.add_bonus_time、{legacy}.game_started、{legacy}.is_playing…）的自动化、脚本和蓝图现在必须改用 boreale.…：旧名称已不再响应。完成后忽略此提示即可。\n\n旧集成仍已安装：请在“设置 › Marketplace”中卸载 PlayGuard（Home Assistant 2026.11 之前为 HACS），或删除文件夹 custom_components/{legacy}，然后重启 Home Assistant。"
     }
   },
   "selector": {

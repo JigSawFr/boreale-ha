@@ -35,7 +35,7 @@ body:
     id: version
     attributes:
       label: Integration version
-      description: Shown in HACS, or in `custom_components/playguard/manifest.json`.
+      description: Shown in *Settings › Marketplace*, or in `custom_components/boreale/manifest.json`.
       placeholder: 0.1.0
     validations:
       required: true

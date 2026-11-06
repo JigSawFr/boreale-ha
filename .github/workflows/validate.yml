@@ -6,7 +6,7 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    - cron: "17 4 * * 1"   # weekly: Home Assistant and HACS change their checks
+    - cron: "17 4 * * 1"   # weekly: Home Assistant and the HACS action change their checks
 
 permissions:
   contents: read
@@ -24,8 +24,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: home-assistant/actions/hassfest@86d4564712fa02543c808e3a693dd04f9d3f8361 # master
 
-  # What HACS checks before it lists a repository (the brand images are the
-  # integration's own: custom_components/boreale/brand/).
+  # What the catalog (hacs/default, which the Marketplace reads) checks before
+  # it lists a repository (the brand images are the integration's own:
+  # custom_components/boreale/brand/).
   hacs:
     runs-on: ubuntu-26.04
     steps:
@@ -59,5 +60,5 @@ jobs:
       - run: python -m pytest -q --cov=custom_components.boreale --cov-branch --cov-report=term --cov-report=json
       # Home Assistant's quality scale: more than 95% of every module.
       - run: python scripts/coverage_per_module.py coverage.json
-      # What a release attaches for HACS (release-please.yml), built the same way.
+      # What a release attaches for the Marketplace (release-please.yml), built the same way.
       - run: python scripts/package.py --out dist/boreale.zip

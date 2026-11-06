@@ -24,7 +24,7 @@ here. After a clone: `git submodule update --init`.
   and footer are written by boreale-site's `Site.skip()`, `sky()`, `header()`
   and `footer()` (`header()` and `footer()` in `build_site.py` give them this
   site's links): the site's wordmark, *Boréale for HA*, opening the menu of
-  Boréale's sites, the links, *Open in HACS* lit, GitHub and the languages;
+  Boréale's sites, the links, *Open in the Marketplace* lit, GitHub and the languages;
   on two rows on a phone.
   `hero.html` and `home.html`: the home page, its hero (the text, and a
   console's card on a Home Assistant dashboard drawn beside it, `.panel` in

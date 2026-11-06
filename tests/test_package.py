@@ -1,4 +1,4 @@
-"""scripts/package.py: the zip HACS installs from a release."""
+"""scripts/package.py: the zip the Marketplace installs from a release."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ _spec.loader.exec_module(package)
 
 
 def test_contents(tmp_path: Path) -> None:
-    """The integration's files at the root, as HACS extracts them, and nothing else."""
+    """The integration's files at the root, as the Marketplace extracts them, and nothing else."""
     out = tmp_path / "boreale.zip"
     package.build(out, epoch=1_760_000_000)
     with zipfile.ZipFile(out) as zf:

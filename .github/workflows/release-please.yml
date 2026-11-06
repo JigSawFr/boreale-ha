@@ -3,11 +3,11 @@ name: release-please
 # On every push to main, release-please keeps a "chore(main): release X.Y.Z"
 # pull request up to date (CHANGELOG.md, the version in manifest.json) from the
 # conventional commits. Merging that PR creates the vX.Y.Z tag and the GitHub
-# release; the job below then attaches boreale.zip, what HACS installs
+# release; the job below then attaches boreale.zip, what the Marketplace installs
 # (hacs.json's zip_release), its SHA256SUMS.txt and their provenance.
 #
 # Each update of the release PR is also published as a pre-release of the
-# next version, vX.Y.Z-dev.N (scripts/prerelease.py): HACS offers it to
+# next version, vX.Y.Z-dev.N (scripts/prerelease.py): the Marketplace offers it to
 # whoever turns the repository's Pre-release switch on. The 5 newest of a
 # version are kept, and all of them go once vX.Y.Z is released.
 on:

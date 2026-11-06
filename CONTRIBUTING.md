@@ -33,7 +33,7 @@ python scripts/package.py                             # dist/boreale.zip, as a r
 ```
 
 `validate.yml` runs the same on every pull request, plus Home Assistant's hassfest and
-HACS's checks, and `codeql.yml` the static analysis. A new code path comes with its test:
+the HACS action (the checks of the catalog the Marketplace reads), and `codeql.yml` the static analysis. A new code path comes with its test:
 the coverage gate is per module, not the total.
 
 The website, [ha.boreale.dev](https://ha.boreale.dev/?utm_source=github&utm_medium=docs) (`site/`), is built on
@@ -123,7 +123,7 @@ which reads [conventional commits](https://www.conventionalcommits.org/), as Pla
 - release-please keeps a `chore(main): release X.Y.Z` PR open
   ([`CHANGELOG.md`](CHANGELOG.md), `version` in `manifest.json`); merging it tags
   `vX.Y.Z` and publishes the release. `release-please.yml` then attaches **`boreale.zip`**
-  (what HACS installs, `hacs.json`'s `zip_release`), `SHA256SUMS.txt` and a
+  (what the Marketplace installs, `hacs.json`'s `zip_release`), `SHA256SUMS.txt` and a
   [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations):
   `gh attestation verify boreale.zip -R JigSawFr/boreale-ha` checks that a download was
   built by this repository's CI. `scripts/package.py` gives the zip fixed dates (the tag's
@@ -132,7 +132,7 @@ which reads [conventional commits](https://www.conventionalcommits.org/), as Pla
 - **Pre-releases**: each update of the release PR is also published, by `release-please.yml`'s
   `prerelease` job, as a GitHub pre-release `vX.Y.Z-dev.N` of the PR's head: the next
   version, `manifest.json` stamped with it (`scripts/prerelease.py stamp`), the PR's
-  changelog section as its notes, the same zip, checksum and attestation. HACS offers it to
+  changelog section as its notes, the same zip, checksum and attestation. The Marketplace offers it to
   whoever turns the repository's *Pre-release* switch on. A head already published is not
   published again; the 5 newest of a version are kept, and all of them are deleted once
   `vX.Y.Z` is released. Nothing to merge for a pre-release: merging the release PR stays the
