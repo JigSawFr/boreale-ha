@@ -79,13 +79,13 @@ async def test_games(hass: HomeAssistant, setup) -> None:
     assert installed.state == "2"
     # Every game the console lists, the last played first.
     assert [g["name"] for g in installed.attributes["games"]] == [
-        "Super Mario Odyssey",
-        "Mario Kart 8 Deluxe",
-        "Xenoblade Chronicles 2",
+        "Moonhop Odyssey",
+        "Kart Rally Deluxe",
+        "Starblade Chronicles 2",
     ]
     assert installed.attributes["games"][2] == {
         "app_id": "0100E95004038000",
-        "name": "Xenoblade Chronicles 2",
+        "name": "Starblade Chronicles 2",
         "minutes": 186,
         "installed": False,
         "last_played": "2024-10-27T03:33:20+00:00",
@@ -96,13 +96,13 @@ async def test_games(hass: HomeAssistant, setup) -> None:
     assert total.attributes["unit_of_measurement"] == "h"
     assert _state(hass, "sensor", "accounts").state == "3"
 
-    # Xenoblade played again: first on the list. A new game never played,
+    # Starblade played again: first on the list. A new game never played,
     # last; none gets a sensor of its own.
     doc = fixture("games.json")
     doc["ts"] = 1793000000
     doc["games"]["0100E95004038000"]["last_played"] = 1792990000
     doc["games"]["0100F8F0000A2000"] = {
-        "name": "Splatoon 3",
+        "name": "Lagoon Splash 3",
         "version": "9.1.0",
         "installed": True,
         "total_min": 0,
@@ -113,8 +113,8 @@ async def test_games(hass: HomeAssistant, setup) -> None:
     publish(hass, "games", doc)
     await hass.async_block_till_done()
     games = _state(hass, "sensor", "games_installed").attributes["games"]
-    assert games[0]["name"] == "Xenoblade Chronicles 2"
-    assert games[-1]["name"] == "Splatoon 3" and games[-1]["last_played"] is None and games[-1]["minutes"] == 0
+    assert games[0]["name"] == "Starblade Chronicles 2"
+    assert games[-1]["name"] == "Lagoon Splash 3" and games[-1]["last_played"] is None and games[-1]["minutes"] == 0
     registry = er.async_get(hass)
     entries = er.async_entries_for_config_entry(registry, setup.entry_id)
     assert not [e for e in entries if e.unique_id.startswith(f"{CONSOLE_ID}_game_")]

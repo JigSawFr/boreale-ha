@@ -760,7 +760,7 @@
     },
     "limit_reached": {
       "name": "已达到限制",
-      "description": "检测主机上是否已达到今天的限制。",
+      "description": "检测主机上是否已禁止游玩：已达到今天的限制，或已到就寝时间。",
       "fields": {
         "behavior": {
           "name": "条件满足于"

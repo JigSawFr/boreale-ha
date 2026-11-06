@@ -156,9 +156,9 @@ async def test_dashboard_example(hass: HomeAssistant, setup, readme: str) -> Non
     [markdown] = [c for c in dashboard["cards"] if c["type"] == "markdown"]
     text = template.Template(markdown["content"], hass).async_render(parse_result=False)
     assert text.split("\n") == [
-        "- **Super Mario Odyssey** 20 h 34",
-        "- **Mario Kart 8 Deluxe** 16 h 20",
-        "- **Xenoblade Chronicles 2** 3 h 06",
+        "- **Moonhop Odyssey** 20 h 34",
+        "- **Kart Rally Deluxe** 16 h 20",
+        "- **Starblade Chronicles 2** 3 h 06",
     ]
 
 
@@ -203,7 +203,7 @@ async def test_time_is_up(hass: HomeAssistant, setup, mqtt_mock, state, phone, n
 
 
 async def test_time_warning(hass: HomeAssistant, setup, mqtt_mock, phone, notified) -> None:
-    publish(hass, "names", {"schema": 1, "ts": 1, "games": {"0100000000010000": "Super Mario Odyssey"}})
+    publish(hass, "names", {"schema": 1, "ts": 1, "games": {"0100000000010000": "Moonhop Odyssey"}})
     await _automation(hass, "time_warning.yaml", {"events": _id(hass, "event", "events"), "phone": phone})
     started = {"schema": 1, "source": "agent", "ts": 1, "event_type": "play_started", "app_id": "0100000000010000"}
     publish(hass, "event", started)
@@ -214,7 +214,7 @@ async def test_time_warning(hass: HomeAssistant, setup, mqtt_mock, phone, notifi
 
     [sent] = notified
     assert sent["title"] == "Salon"
-    assert sent["message"] == "10 min left on Super Mario Odyssey."
+    assert sent["message"] == "10 min left on Moonhop Odyssey."
     assert sent["data"]["tag"].startswith("playguard_time_warning_")
     [button] = sent["data"]["actions"]
     assert button["title"] == "+15 min" and button["action"].startswith("PLAYGUARD_MORE_")
@@ -281,7 +281,7 @@ async def test_bedtime_reminder(
     _local(freezer, hass, "21:15:00")
     await hass.async_block_till_done()
     assert notified == [
-        {"title": "Salon", "message": "Bedtime in 15 minutes: Super Mario Odyssey is still on.", "data": None}
+        {"title": "Salon", "message": "Bedtime in 15 minutes: Moonhop Odyssey is still on.", "data": None}
     ]
 
     # Once a day.
@@ -342,7 +342,7 @@ async def test_after_bedtime(
     _local(freezer, hass, "21:30:00")  # bedtime, the game still on
     await hass.async_block_till_done()
     assert notified == [
-        {"title": "Salon", "message": "Super Mario Odyssey is still being played after bedtime (21:30).", "data": None}
+        {"title": "Salon", "message": "Moonhop Odyssey is still being played after bedtime (21:30).", "data": None}
     ]
     _local(freezer, hass, "21:45:00")
     await hass.async_block_till_done()
@@ -381,7 +381,7 @@ async def test_evening_summary(hass: HomeAssistant, freezer: FrozenDateTimeFacto
     ]
     publish(hass, "activity", activity)
     names = {"accounts": {"00112233445566778899AABBCCDDEEFF": "Léa", "FFEEDDCCBBAA99887766554433221100": "Tom"}}
-    names["games"] = {"0100000000010000": "Super Mario Odyssey", "01000A10041EA000": "Mario Kart 8 Deluxe"}
+    names["games"] = {"0100000000010000": "Moonhop Odyssey", "01000A10041EA000": "Kart Rally Deluxe"}
     publish(hass, "names", {"schema": 1, "ts": 1, **names})
     _local(freezer, hass, "20:00:00")
     inputs = {"today": _id(hass, "sensor", "used_screen_time_log"), "phone": phone, "top": 1}
@@ -391,7 +391,7 @@ async def test_evening_summary(hass: HomeAssistant, freezer: FrozenDateTimeFacto
     assert notified == [
         {
             "title": "Salon",
-            "message": "Play today: 1 h 14. Léa 1 h 04, Tom 10 min. Most played: Super Mario Odyssey 1 h 00.",
+            "message": "Play today: 1 h 14. Léa 1 h 04, Tom 10 min. Most played: Moonhop Odyssey 1 h 00.",
             "data": None,
         }
     ]
@@ -430,7 +430,7 @@ async def test_weekly_summary(hass: HomeAssistant, freezer: FrozenDateTimeFactor
     assert notified == [
         {
             "title": "Salon",
-            "message": "Play this week: 1 h 45. Most played: Super Mario Odyssey 1 h 30, Mario Kart 8 Deluxe 15 min.",
+            "message": "Play this week: 1 h 45. Most played: Moonhop Odyssey 1 h 30, Kart Rally Deluxe 15 min.",
             "data": None,
         }
     ]

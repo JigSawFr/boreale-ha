@@ -31,8 +31,8 @@ def test_sessions() -> None:
     history = {
         playing: [
             _state(playing, "unknown", 0),
-            _state(playing, "Mario", 10),
-            _state(playing, "Zelda", 40),  # straight from one game to another
+            _state(playing, "Moonhop", 10),
+            _state(playing, "Glimmer", 40),  # straight from one game to another
             _state(playing, "unknown", 70),
             _state(playing, "Kart", 80),  # still shown while it sleeps
         ],
@@ -40,8 +40,8 @@ def test_sessions() -> None:
     }
     found = sessions(history, playing, online, T + timedelta(minutes=150))
     assert [(e.summary, e.start, e.end) for e in found] == [
-        ("Mario", T + timedelta(minutes=10), T + timedelta(minutes=40)),
-        ("Zelda", T + timedelta(minutes=40), T + timedelta(minutes=70)),
+        ("Moonhop", T + timedelta(minutes=10), T + timedelta(minutes=40)),
+        ("Glimmer", T + timedelta(minutes=40), T + timedelta(minutes=70)),
         ("Kart", T + timedelta(minutes=80), T + timedelta(minutes=90)),
         ("Kart", T + timedelta(minutes=120), T + timedelta(minutes=150)),  # awake again, not over
     ]
@@ -67,10 +67,10 @@ async def test_calendar(hass: HomeAssistant, freezer: FrozenDateTimeFactory, set
     assert hass.states.get(calendar).state == "off"  # nothing played
 
     freezer.tick(timedelta(minutes=5))
-    publish(hass, "state", state)  # the fixture plays Super Mario Odyssey
+    publish(hass, "state", state)  # the fixture plays Moonhop Odyssey
     await hass.async_block_till_done()
     current = hass.states.get(calendar)
-    assert current.state == "on" and current.attributes["message"] == "Super Mario Odyssey"
+    assert current.state == "on" and current.attributes["message"] == "Moonhop Odyssey"
 
     freezer.tick(timedelta(minutes=30))
     publish(hass, "state", doc)
@@ -85,5 +85,5 @@ async def test_calendar(hass: HomeAssistant, freezer: FrozenDateTimeFactory, set
         return_response=True,
     )
     [event] = events[calendar]["events"]
-    assert event["summary"] == "Super Mario Odyssey"
+    assert event["summary"] == "Moonhop Odyssey"
     assert dt_util.parse_datetime(event["end"]) - dt_util.parse_datetime(event["start"]) == timedelta(minutes=30)

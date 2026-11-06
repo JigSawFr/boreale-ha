@@ -760,7 +760,7 @@
     },
     "limit_reached": {
       "name": "已達上限",
-      "description": "檢查主機上是否已達今天的上限。",
+      "description": "檢查主機上是否已禁止遊玩：已達今天的上限，或已到就寢時間。",
       "fields": {
         "behavior": {
           "name": "條件成立於"

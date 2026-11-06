@@ -760,7 +760,7 @@
     },
     "limit_reached": {
       "name": "Limit reached",
-      "description": "Tests if today's limit is reached on the console.",
+      "description": "Tests if playing is blocked on the console: today's limit is reached, or it is bedtime.",
       "fields": {
         "behavior": {
           "name": "Condition passes if"

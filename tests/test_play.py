@@ -68,7 +68,7 @@ async def test_play_ends(hass: HomeAssistant, setup, state: dict) -> None:
 
 
 async def test_accounts(hass: HomeAssistant, setup) -> None:
-    names = {"games": {"0100000000010000": "Super Mario Odyssey"}, "accounts": {LEA: "Léa"}}
+    names = {"games": {"0100000000010000": "Moonhop Odyssey"}, "accounts": {LEA: "Léa"}}
     publish(hass, "names", {"schema": 1, "ts": 1, **names})
     today = _id(hass, "used_screen_time_log")
     week = _id(hass, "week_play_time")

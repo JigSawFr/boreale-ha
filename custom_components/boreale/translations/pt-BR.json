@@ -760,7 +760,7 @@
     },
     "limit_reached": {
       "name": "Limite atingido",
-      "description": "Testa se o limite de hoje foi atingido no console.",
+      "description": "Testa se o jogo está bloqueado no console: o limite de hoje foi atingido ou é hora de dormir.",
       "fields": {
         "behavior": {
           "name": "A condição é cumprida se"

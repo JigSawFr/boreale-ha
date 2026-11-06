@@ -760,7 +760,7 @@
     },
     "limit_reached": {
       "name": "Limiet bereikt",
-      "description": "Test of de limiet van vandaag is bereikt op de console.",
+      "description": "Test of spelen op de console geblokkeerd is: de limiet van vandaag is bereikt, of het is bedtijd.",
       "fields": {
         "behavior": {
           "name": "Voorwaarde is waar als"

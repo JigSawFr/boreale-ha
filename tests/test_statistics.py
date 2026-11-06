@@ -43,7 +43,7 @@ async def test_finished_days(hass: HomeAssistant, mqtt_mock, entry) -> None:
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    publish(hass, "names", {"schema": 1, "ts": 1, "games": {"0100000000010000": "Super Mario Odyssey"}}, retain=True)
+    publish(hass, "names", {"schema": 1, "ts": 1, "games": {"0100000000010000": "Moonhop Odyssey"}}, retain=True)
     publish(hass, "activity/2026-10-04", _day("2026-10-04", 90, {"0100000000010000": 60, "01000A10041EA000": 30}), True)
     publish(hass, "activity/2026-10-03", _day("2026-10-03", 45, {"0100000000010000": 45}), True)
     publish(hass, "activity/2026-09-01", "", True)  # cleared by the console: nothing
@@ -56,16 +56,16 @@ async def test_finished_days(hass: HomeAssistant, mqtt_mock, entry) -> None:
     start = day_start("2026-10-03", tz)
     assert start.isoformat() == "2026-10-02T22:00:00+00:00"  # Paris midnight, summer time
 
-    total, mario, kart = (
+    total, moonhop, kart = (
         total_id(CONSOLE_ID),
         game_id(CONSOLE_ID, "0100000000010000"),
         game_id(CONSOLE_ID, "01000A10041EA000"),
     )
     stats = await hass.async_add_executor_job(
-        statistics_during_period, hass, start, None, {total, mario, kart}, "hour", None, {"mean"}
+        statistics_during_period, hass, start, None, {total, moonhop, kart}, "hour", None, {"mean"}
     )
     assert [r["mean"] for r in stats[total]] == [45.0, 90.0]
-    assert [r["mean"] for r in stats[mario]] == [45.0, 60.0]
+    assert [r["mean"] for r in stats[moonhop]] == [45.0, 60.0]
     assert [r["mean"] for r in stats[kart]] == [0.0, 30.0]  # not played on the 3rd
     metadata = await hass.async_add_executor_job(partial(get_metadata, hass, statistic_ids={total}))
     assert metadata[total][1]["unit_of_measurement"] == "min"
