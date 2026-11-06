@@ -576,7 +576,7 @@
     },
     "taken_over_installed": {
       "title": "PlayGuard is now Boréale for Nintendo Switch",
-      "description": "Your consoles moved from the integration {legacy} to Boréale, with their entities, their history and their statistics. Automations, scripts and blueprints that use its actions, triggers and conditions ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) must now use boreale.… instead: the old names no longer answer. Ignore this once done.\n\nThe old integration is still installed: remove PlayGuard in HACS, or delete the folder custom_components/{legacy}, then restart Home Assistant."
+      "description": "Your consoles moved from the integration {legacy} to Boréale, with their entities, their history and their statistics. Automations, scripts and blueprints that use its actions, triggers and conditions ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) must now use boreale.… instead: the old names no longer answer. Ignore this once done.\n\nThe old integration is still installed: uninstall PlayGuard in Settings › Marketplace (HACS before Home Assistant 2026.11), or delete the folder custom_components/{legacy}, then restart Home Assistant."
     }
   },
   "selector": {

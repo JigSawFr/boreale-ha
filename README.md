@@ -8,13 +8,13 @@
 
 [![validate](https://github.com/JigSawFr/boreale-ha/actions/workflows/validate.yml/badge.svg)](https://github.com/JigSawFr/boreale-ha/actions/workflows/validate.yml)
 [![latest release](https://img.shields.io/github/v/release/JigSawFr/boreale-ha)](https://github.com/JigSawFr/boreale-ha/releases/latest)
-[![HACS: custom](https://img.shields.io/badge/HACS-custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![Marketplace: custom](https://img.shields.io/badge/Marketplace-custom-41BDF5.svg)](https://www.home-assistant.io/integrations/marketplace/#custom-repositories)
 [![quality scale: platinum](https://img.shields.io/badge/quality%20scale-platinum-a8b5c5.svg)](https://github.com/JigSawFr/boreale-ha/blob/main/custom_components/boreale/quality_scale.yaml)
 [![license: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/JigSawFr/boreale-ha/blob/main/LICENSE)
 
 **English** · [Français](https://github.com/JigSawFr/boreale-ha/blob/main/README.fr.md)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=boreale-ha&category=integration)
+[![Open your Home Assistant instance and open a repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JigSawFr&repository=boreale-ha&category=integration)
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=boreale)
 
 [**Install**](#-installation) ·
@@ -169,30 +169,38 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
 
 ## 📦 Installation
 
-With [HACS](https://hacs.xyz/):
+From Home Assistant's [Marketplace](https://www.home-assistant.io/integrations/marketplace/)
+(*Settings › Marketplace*, Home Assistant 2026.11 and later):
 
-1. *HACS › ⋮ › Custom repositories*: add
+1. *Settings › Marketplace › Add from link*: enter
    `https://github.com/JigSawFr/boreale-ha`, type *Integration*; or the
    first button at the top of this page (My Home Assistant opens the
-   repository in your HACS). In PlayGuard, *Remote access › Home Assistant ›
-   Install the Home Assistant integration* shows the same two buttons as QR
-   codes, for a phone.
-2. Open **Boréale for Nintendo Switch** in HACS and *Download* it: HACS installs the
-   `boreale.zip` of the release you pick.
-3. Restart Home Assistant.
+   repository in your Marketplace, and offers to add it). Adding a repository
+   from a link asks you to connect a GitHub account, once. In PlayGuard,
+   *Remote access › Home Assistant › Install the Home Assistant integration*
+   shows the same two buttons as QR codes, for a phone.
+2. Open **Boréale for Nintendo Switch** and *Install* it: the Marketplace
+   installs the `boreale.zip` of the latest release (*⋮ › Install another
+   version* for another one), then opens the [set-up](#-set-up) at once,
+   without a restart.
 
-A new release shows up in HACS by itself, within a few hours (HACS checks
-GitHub on a schedule); to see it at once, *HACS › Boréale for Nintendo Switch › ⋮ › Update
-information*. Then *Update*, and restart Home Assistant.
+A new release shows up in *Settings › Updates*, next to Home Assistant's own,
+with its notes: the Marketplace checks a repository added from a link every
+48 hours, through the GitHub account you connected. *Install* it, then
+restart Home Assistant (a repair offers to).
 
 **Pre-releases**: what the next version holds so far, published as
 `X.Y.Z-dev.N` each time it changes (the changelog of the coming release in
-its notes). To get them, turn on the *Pre-release* switch of the Boréale for Nintendo Switch
-repository's device in *Settings › Devices & services › HACS* (disabled by
-default: enable it on the device's page first); the update then offers the
-pre-releases too, and the release once it is out. Turn it back off to stay
-on releases: the next release replaces the pre-release (*HACS › Boréale for Nintendo Switch ›
-⋮ › Redownload* picks a release at once).
+its notes). To get them, turn on the *Pre-release* switch of the Boréale for
+Nintendo Switch repository's device in *Settings › Devices & services ›
+Marketplace* (disabled by default: enable it on the device's page first); the
+update then offers the pre-releases too, and the release once it is out. Turn
+it back off to stay on releases: the next release replaces the pre-release.
+
+On Home Assistant 2026.10, with [HACS](https://hacs.xyz/), which the
+Marketplace replaced: *HACS › ⋮ › Custom repositories*, the same address and
+type, then *Download* the repository and restart Home Assistant. Updating to
+2026.11 carries the installation over to the Marketplace, nothing to do.
 
 By hand: download `boreale.zip` from the
 [latest release](https://github.com/JigSawFr/boreale-ha/releases/latest),
@@ -214,8 +222,8 @@ asking. A repair then says what is left to you:
   change the `playguard.…` ones in your automations and scripts, the old
   names no longer answer;
 - the blueprints are in `blueprints/automation/boreale/`: import them again;
-- the old integration, if still there, is removed in HACS (or delete
-  `custom_components/playguard`), then Home Assistant restarted.
+- the old integration, if still there, is uninstalled in the Marketplace
+  (or delete `custom_components/playguard`), then Home Assistant restarted.
 
 ## 🔌 Set-up
 
@@ -613,7 +621,7 @@ listens.
   Home Assistant's, retained, on `playguard/<id>/integration`. PlayGuard
   shows it in *Remote access › Home Assistant* and, when it checks for
   updates, says in its notifications that a newer release of the integration
-  is out, with what changed and the QR code that opens it in HACS.
+  is out, with what changed and the QR code that opens it in the Marketplace.
 
 ## 💡 Examples
 
@@ -907,8 +915,8 @@ Optional modules › Link agent*. The repair goes once both versions match.
 <details>
 <summary>Repair: "… speaks a newer PlayGuard protocol"</summary>
 
-The console's PlayGuard is newer than this integration: update the PlayGuard
-integration (HACS). Until then, a document of that newer schema is not read:
+The console's PlayGuard is newer than this integration: update it
+(*Settings › Updates*). Until then, a document of that newer schema is not read:
 its entities keep what the last document it knew said (or stay unknown), no
 entity is removed, and no statistic is imported from it.
 </details>
@@ -945,7 +953,8 @@ report, names left out) and open an
    and clears the integration's version on the broker (PlayGuard no longer
    warns of its releases); to do without the console's own device, turn off
    *Create the device in Home Assistant* in PlayGuard.
-2. With HACS: *HACS › Boréale for Nintendo Switch › ⋮ › Remove*; by hand: delete
+2. *Settings › Marketplace › Boréale for Nintendo Switch › ⋮ › Uninstall*
+   (deleting the last console's entry offers it too); by hand: delete
    `custom_components/boreale`. Restart Home Assistant.
 3. The long-term statistics stay in the recorder: delete them in *Settings ›
    Tools › Statistics* if you do not want them any more.

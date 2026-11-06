@@ -1,6 +1,6 @@
 {
   "cta_docs": "Lire la documentation",
-  "cta_hacs": "Ouvrir dans HACS",
+  "cta_marketplace": "Ouvrir dans la Marketplace",
   "description": "Boréale for Home Assistant, l'intégration des homebrews Boréale : le temps de jeu, les limites, le temps en plus et les statistiques de PlayGuard, par votre propre broker MQTT.",
   "f1_text": "Le temps de jeu du jour par jeu et par compte, la limite du jour et ce qu'il reste, l'heure du coucher, la semaine : et les commandes pour les changer, avec les mêmes contrôles que sur la console.",
   "f1_title": "Temps de jeu et limites",
@@ -66,8 +66,8 @@
   "privacy_title": "Confidentialité",
   "promise_text": "Un logiciel libre sous GPLv3, sans compte, sans cloud et sans publicité. Son code est sur GitHub, pour qui veut le lire, le vérifier ou l'améliorer.",
   "promise_title": "Libre, local, sans compte",
-  "step1_text": "Le bouton ci-dessous ouvre le dépôt dans votre HACS (ou ajoutez <code>https://github.com/JigSawFr/boreale-ha</code> comme dépôt personnalisé, type Intégration), puis téléchargez-la et redémarrez Home Assistant.",
-  "step1_title": "L'ajouter à HACS",
+  "step1_text": "Le bouton ci-dessous ouvre le dépôt dans la Marketplace de votre Home Assistant (ou <em>Paramètres › Marketplace › Ajouter depuis un lien</em> : <code>https://github.com/JigSawFr/boreale-ha</code>, type Intégration), puis installez-la. Home Assistant 2026.10 a encore HACS : ajoutez-y le même dépôt, téléchargez-la et redémarrez.",
+  "step1_title": "L'installer depuis la Marketplace",
   "step2_text": "Dans PlayGuard, <em>Console › Accès à distance</em> : le même broker que celui de Home Assistant, jusqu'à ce que l'état affiche En ligne. Son guide donne le détail.",
   "step2_title": "Activer le lien",
   "step3_text": "Elle apparaît dans <em>Paramètres › Appareils et services › Découvertes</em> : confirmez-la. Rien à saisir.",

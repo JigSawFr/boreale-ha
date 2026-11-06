@@ -3,7 +3,7 @@
 The release PR (branch release-please--branches--main) carries the next
 version (.release-please-manifest.json) and its changelog (CHANGELOG.md's
 first section). Each update of it is published as a GitHub pre-release,
-vX.Y.Z-dev.N, which HACS offers to whoever turns the repository's
+vX.Y.Z-dev.N, which the Marketplace offers to whoever turns the repository's
 Pre-release switch on; merging the PR publishes vX.Y.Z as before.
 
     python scripts/prerelease.py version < tags.txt    # the next pre-release's version
@@ -64,7 +64,7 @@ def notes(version: str, changelog: Path = CHANGELOG) -> str:
     base = version.split("-", 1)[0]
     head = (
         f"Pre-release of {base}, built from the release pull request: what {base} will hold so far. "
-        "HACS offers it with the repository's *Pre-release* switch on.\n\n"
+        "The Marketplace offers it with the repository's *Pre-release* switch on.\n\n"
     )
     return head + (body or "_No change listed yet._") + "\n"
 

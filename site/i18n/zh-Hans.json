@@ -1,6 +1,6 @@
 {
   "cta_docs": "阅读文档",
-  "cta_hacs": "在 HACS 中打开",
+  "cta_marketplace": "在 Marketplace 中打开",
   "description": "Boréale for Home Assistant 是 Boréale 自制软件的集成：通过你自己的 MQTT 代理，获得 PlayGuard 的游戏时间、限制、额外时间和统计。",
   "f1_text": "按游戏和账户统计的今日游戏时间、当天限制和剩余时间、就寝时间、本周情况；还有修改它们的控件，检查与主机上相同。",
   "f1_title": "游戏时间与限制",
@@ -67,8 +67,8 @@
   "privacy_title": "隐私",
   "promise_text": "基于 GPLv3 的自由软件，没有账户、没有云、没有广告。代码在 GitHub 上，任何人都可以阅读、检查或改进。",
   "promise_title": "自由、本地、无需账户",
-  "step1_text": "下面的按钮会在你的 HACS 中打开仓库（或把 <code>https://github.com/JigSawFr/boreale-ha</code> 添加为自定义仓库，类型为集成），然后下载并重启 Home Assistant。",
-  "step1_title": "添加到 HACS",
+  "step1_text": "下面的按钮会在你的 Home Assistant 的 Marketplace 中打开仓库（或在<em>设置 › Marketplace › 通过链接添加</em>中填写 <code>https://github.com/JigSawFr/boreale-ha</code>，类型为集成），然后安装。Home Assistant 2026.10 仍使用 HACS：在其中添加同一仓库，下载后重启。",
+  "step1_title": "从 Marketplace 安装",
   "step2_text": "在 PlayGuard 的<em>主机 › 远程访问</em>中，设置与 Home Assistant 相同的代理，直到状态显示在线。详情见指南。",
   "step2_title": "开启连接",
   "step3_text": "它会出现在<em>设置 › 设备与服务 › 已发现</em>中：确认即可，无需输入。",

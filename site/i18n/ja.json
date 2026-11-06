@@ -1,6 +1,6 @@
 {
   "cta_docs": "ドキュメントを読む",
-  "cta_hacs": "HACS で開く",
+  "cta_marketplace": "Marketplace で開く",
   "description": "Boréale for Home Assistant は Boréale の自作ソフトのためのインテグレーションです。PlayGuard のプレイ時間、制限、延長時間、統計を、あなた自身の MQTT ブローカー経由で。",
   "f1_text": "ゲーム別・アカウント別の今日のプレイ時間、1日の制限と残り時間、就寝時刻、1週間。そしてそれらを変えるコントロールも、本体と同じチェック付きで。",
   "f1_title": "プレイ時間と制限",
@@ -67,8 +67,8 @@
   "privacy_title": "プライバシー",
   "promise_text": "GPLv3 のフリーソフトウェア。アカウントもクラウドも広告もありません。コードは GitHub にあり、誰でも読んで、確かめて、改善できます。",
   "promise_title": "自由、<wbr>ローカル、<wbr>アカウント不要",
-  "step1_text": "下のボタンであなたの HACS にリポジトリが開きます（または <code>https://github.com/JigSawFr/boreale-ha</code> をカスタムリポジトリ、タイプ「インテグレーション」として追加）。ダウンロードしたら Home Assistant を再起動します。",
-  "step1_title": "HACS に追加",
+  "step1_text": "下のボタンで Home Assistant の Marketplace にリポジトリが開きます（または <em>設定 › Marketplace › リンクから追加</em>：<code>https://github.com/JigSawFr/boreale-ha</code>、タイプ「インテグレーション」）。そのままインストールします。Home Assistant 2026.10 にはまだ HACS があります。同じリポジトリを追加し、ダウンロードして再起動してください。",
+  "step1_title": "Marketplace からインストール",
   "step2_text": "PlayGuard の <em>本体 › リモートアクセス</em> で、Home Assistant と同じブローカーを設定し、状態が「オンライン」になるまで待ちます。詳しくはガイドへ。",
   "step2_title": "接続をオンに",
   "step3_text": "<em>設定 › デバイスとサービス › 検出済み</em> に表示されるので、確認するだけ。入力は不要です。",

@@ -1,7 +1,7 @@
-"""boreale.zip: what HACS installs from a release (hacs.json's zip_release).
+"""boreale.zip: what the Marketplace installs from a release (hacs.json's zip_release).
 
 The files of custom_components/boreale/ at the zip's root (manifest.json
-first-level, as HACS extracts it into custom_components/boreale/), Python's
+first-level, as the Marketplace extracts it into custom_components/boreale/), Python's
 caches left out, in a fixed order with fixed dates and modes, so the same
 commit gives the same bytes. The date is SOURCE_DATE_EPOCH (POSIX seconds),
 else the last commit's time.

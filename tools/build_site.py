@@ -50,8 +50,10 @@ REPO = "boreale-ha"
 DOCS = {"en": f"https://github.com/{OWNER}/{REPO}#readme", "fr": f"https://github.com/{OWNER}/{REPO}/blob/main/README.fr.md"}
 GUIDE = {"en": f"https://github.com/{OWNER}/PlayGuard/blob/main/docs/home-assistant.md",
          "fr": f"https://github.com/{OWNER}/PlayGuard/blob/main/docs/home-assistant.fr.md"}
-# My Home Assistant's link that opens this repository in the visitor's HACS.
-HACS = (f"https://my.home-assistant.io/redirect/hacs_repository/?owner={OWNER}&amp;repository={REPO}"
+# My Home Assistant's link that opens this repository in the visitor's Marketplace
+# (hacs_repository: HACS before Home Assistant 2026.11, the Marketplace after;
+# marketplace_repository once hacs.json asks for 2026.11).
+MARKETPLACE = (f"https://my.home-assistant.io/redirect/hacs_repository/?owner={OWNER}&amp;repository={REPO}"
         "&amp;category=integration")
 
 # The pages other than 404.html, by their path under each language's folder.
@@ -113,14 +115,14 @@ def structured(language: str, catalog: dict, latest: dict) -> str:
 def header(language: str, catalog: dict, root: str, path: str, latest: dict) -> str:
     """The header: the site's own wordmark, Boréale for HA, with its mark
     (PlayGuard's Play<b>Guard</b>), opening the menu of Boréale's sites; the
-    page's links, the way into HACS as its call to action, GitHub."""
+    page's links, the way into the Marketplace as its call to action, GitHub."""
     home = root + folder(language)
     french = language.startswith("fr")
     return HA.header(
         language, catalog, root, path,
         links=[("nav_features", f"{home}#features"), ("nav_install", f"{home}#install"),
                ("nav_docs", DOCS["fr" if french else "en"])],
-        cta=("cta_hacs", HACS), github=f"https://github.com/{OWNER}/{REPO}", label=catalog["nav_label"], latest=latest,
+        cta=("cta_marketplace", MARKETPLACE), github=f"https://github.com/{OWNER}/{REPO}", label=catalog["nav_label"], latest=latest,
         brand=f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="34" height="34"><span>Boréale <b>for HA</b></span>')
 
 
@@ -146,7 +148,7 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
     french = language.startswith("fr")
     values["docs"] = DOCS["fr" if french else "en"]
     values["guide"] = GUIDE["fr" if french else "en"]
-    values["hacs"] = HACS
+    values["marketplace"] = MARKETPLACE
     values["release"] = release_pill(release, language)
     # The hero's dashboard: its durations as the language writes them.
     def minutes(n: int) -> str:

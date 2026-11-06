@@ -1,6 +1,6 @@
 {
   "cta_docs": "Documentatie lezen",
-  "cta_hacs": "Openen in HACS",
+  "cta_marketplace": "Openen in de Marketplace",
   "description": "Boréale for Home Assistant, de integratie van de Boréale-homebrews: de speeltijd, limieten, extra tijd en statistieken van PlayGuard, via je eigen MQTT-broker.",
   "f1_text": "De speeltijd van vandaag per spel en per account, de daglimiet en wat er over is, bedtijd, de week: en de bedieningen om ze te veranderen, met dezelfde controles als op de console.",
   "f1_title": "Speeltijd en limieten",
@@ -67,8 +67,8 @@
   "privacy_title": "Privacy",
   "promise_text": "Vrije software onder de GPLv3, zonder account, zonder cloud en zonder reclame. De code staat op GitHub, voor iedereen om te lezen, te controleren of te verbeteren.",
   "promise_title": "Vrij, lokaal, zonder account",
-  "step1_text": "De knop hieronder opent de repository in je HACS (of voeg <code>https://github.com/JigSawFr/boreale-ha</code> toe als aangepaste repository, type Integratie), download haar en herstart Home Assistant.",
-  "step1_title": "Toevoegen aan HACS",
+  "step1_text": "De knop hieronder opent de repository in de Marketplace van je Home Assistant (of <em>Instellingen › Marketplace › Toevoegen via link</em>: <code>https://github.com/JigSawFr/boreale-ha</code>, type Integratie); installeer hem daarna. Home Assistant 2026.10 heeft nog HACS: voeg daar dezelfde repository toe, download hem en start opnieuw.",
+  "step1_title": "Installeren via de Marketplace",
   "step2_text": "In PlayGuard, <em>Console › Externe toegang</em>: dezelfde broker als die van Home Assistant, tot de status Online toont. De handleiding geeft de details.",
   "step2_title": "De verbinding aanzetten",
   "step3_text": "Ze verschijnt onder <em>Instellingen › Apparaten &amp; diensten › Ontdekt</em>: bevestig haar. Niets te typen.",
