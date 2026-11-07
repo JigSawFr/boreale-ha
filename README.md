@@ -265,6 +265,7 @@ its prefix changes, it follows by discovery, or *Reconfigure* gives it.
 | **Titles**, **Files to hash**, **Transfers**, **Errors**, **Sources down** | The library and the traffic, pushed with the state (every 30 seconds). |
 | **Version**, **Reachable** | Diagnostics: the bridge's version, and whether it is on the broker (its last will). |
 | **Rescan** (button) | Orders the bridge to read all its sources again now. |
+| **Lantern bridge** (update) | The bridge's version, and `on` when the bridge's own check (daily, GitHub's latest release; it can be turned off in the bridge) found a newer one, with the release page. Nothing is installed from Home Assistant. |
 
 Everything is unavailable while the bridge is off the broker, except
 *Reachable*, which says so.

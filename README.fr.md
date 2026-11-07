@@ -281,6 +281,7 @@ découverte, ou *Reconfigurer* le donne.
 | **Titres**, **Fichiers à hacher**, **Transferts**, **Erreurs**, **Sources hors service** | La bibliothèque et le trafic, poussés avec l'état (toutes les 30 secondes). |
 | **Version**, **Joignable** | Diagnostic : la version du pont, et s'il est sur le broker (son dernier testament). |
 | **Rescanner** (bouton) | Ordonne au pont de relire toutes ses sources maintenant. |
+| **Pont Lantern** (mise à jour) | La version du pont, et `on` quand la vérification du pont lui-même (quotidienne, dernière release GitHub ; elle se désactive dans le pont) en a trouvé une plus récente, avec la page de la release. Rien n'est installé depuis Home Assistant. |
 
 Tout est indisponible tant que le pont est hors du broker, sauf *Joignable*, qui
 le dit.

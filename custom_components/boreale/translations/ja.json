@@ -460,6 +460,9 @@
     "update": {
       "playguard_update": {
         "name": "PlayGuard"
+      },
+      "bridge_update": {
+        "name": "Lantern ブリッジ"
       }
     },
     "image": {

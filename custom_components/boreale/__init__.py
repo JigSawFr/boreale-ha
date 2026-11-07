@@ -53,7 +53,7 @@ PLATFORMS: list[Platform] = [
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 # A bridge's entry holds a BridgeHub instead (bridge.py) and sets up only these platforms.
-BRIDGE_PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.SENSOR]
+BRIDGE_PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.SENSOR, Platform.UPDATE]
 
 type PlayGuardConfigEntry = ConfigEntry[PlayGuardConsole]
 

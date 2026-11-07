@@ -187,6 +187,30 @@ async def test_its_status_and_figures_are_pushed(hass: HomeAssistant, mqtt_mock)
     assert _state(hass, "sensor", "status").state == "warn"
 
 
+async def test_the_update_entity_follows_the_bridges_own_check(hass: HomeAssistant, mqtt_mock) -> None:
+    await _set_up(hass, mqtt_mock)
+    entity_id = er.async_get(hass).async_get_entity_id("update", DOMAIN, f"bridge_{UID}_bridge_update")
+    assert entity_id
+    # No check in the state (off, or not made yet): the installed version, nothing to update.
+    shown = hass.states.get(entity_id)
+    assert shown.state == "off" and shown.attributes["installed_version"] == "0.1.0"
+    assert shown.attributes["latest_version"] == "0.1.0" and shown.attributes["release_url"] is None
+    # A newer release found by the bridge.
+    _publish(hass, "state", {**STATE, "update": {"available": True, "latest": "v0.2.0"}})
+    await hass.async_block_till_done()
+    shown = hass.states.get(entity_id)
+    assert shown.state == "on" and shown.attributes["latest_version"] == "0.2.0"
+    assert shown.attributes["release_url"].endswith("/releases/tag/v0.2.0")
+    # Checked and up to date, or a malformed answer: not an update.
+    for answer in ({"available": False, "latest": "v0.1.0"}, {"available": True, "latest": None}, "nonsense"):
+        _publish(hass, "state", {**STATE, "update": answer})
+        await hass.async_block_till_done()
+        shown = hass.states.get(entity_id)
+        assert shown.state == "off" and shown.attributes["release_url"] is None, answer
+    # The entity cannot install anything.
+    assert not shown.attributes["supported_features"]
+
+
 async def test_a_state_this_version_does_not_read_is_skipped(hass: HomeAssistant, mqtt_mock) -> None:
     await _set_up(hass, mqtt_mock)
     for bad in ("garbage", json.dumps({**STATE, "schema": 2, "status": "fail"})):
@@ -240,6 +264,7 @@ def test_every_bridge_entity_is_named_and_has_its_icon() -> None:
         "sensor": ["status", "version", "titles", "files_pending", "transfers", "errors", "sources_down"],
         "binary_sensor": ["reachable"],
         "button": ["rescan"],
+        "update": ["update"],
     }
     for platform, found in keys.items():
         for key in found:

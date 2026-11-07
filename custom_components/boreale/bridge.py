@@ -19,6 +19,7 @@ from homeassistant.components.binary_sensor.const import BinarySensorDeviceClass
 from homeassistant.components.button import ButtonEntity
 from homeassistant.components.mqtt import ReceiveMessage
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.components.update import UpdateEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -250,6 +251,36 @@ class BridgeRescan(BridgeEntity, ButtonEntity):
         await self.hub.async_rescan()
 
 
+RELEASE_PAGE = "https://github.com/JigSawFr/lantern-bridge/releases/tag/"
+
+
+class BridgeUpdate(BridgeEntity, UpdateEntity):
+    """The bridge's version and, when its own check found one, the newer release. Nothing is installed from here."""
+
+    _attr_title = "Lantern bridge"
+
+    def __init__(self, hub: BridgeHub) -> None:
+        super().__init__(hub, "bridge_update")
+
+    @property
+    def installed_version(self) -> str | None:
+        version = self.hub.read("bridge", "version")
+        return version if isinstance(version, str) and version else None
+
+    @property
+    def latest_version(self) -> str | None:
+        latest = self.hub.read("update", "latest")
+        newer = self.hub.read("update", "available") is True and isinstance(latest, str) and latest
+        # No check yet, check off, or up to date: the installed one, not "update available".
+        return latest.removeprefix("v") if newer else self.installed_version
+
+    @property
+    def release_url(self) -> str | None:
+        latest = self.hub.read("update", "latest")
+        newer = self.hub.read("update", "available") is True and isinstance(latest, str) and latest
+        return RELEASE_PAGE + latest if newer else None
+
+
 FIGURES = (
     ("bridge_titles", ("library", "titles"), SensorStateClass.MEASUREMENT),
     ("bridge_files_pending", ("files", "pending"), SensorStateClass.MEASUREMENT),
@@ -268,6 +299,10 @@ def async_add_sensors(entry: BridgeConfigEntry, async_add_entities: AddConfigEnt
 
 def async_add_binary_sensors(entry: BridgeConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
     async_add_entities([BridgeReachable(entry.runtime_data)])
+
+
+def async_add_updates(entry: BridgeConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
+    async_add_entities([BridgeUpdate(entry.runtime_data)])
 
 
 def async_add_buttons(entry: BridgeConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
