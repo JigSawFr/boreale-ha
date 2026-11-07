@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.binary_sensor.const import BinarySensorDeviceClass
@@ -10,7 +10,8 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from . import PlayGuardConfigEntry
+from . import PlayGuardConfigEntry, bridge, is_bridge
+from .bridge import BridgeConfigEntry
 from .coordinator import PlayGuardConsole
 from .entities import EntityDef, dig, for_platform
 from .entity import PlayGuardEntity
@@ -21,6 +22,9 @@ PARALLEL_UPDATES = 0
 async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
+    if is_bridge(entry):
+        bridge.async_add_binary_sensors(cast(BridgeConfigEntry, entry), async_add_entities)
+        return
     console = entry.runtime_data
     classes: dict[str, type[PlayGuardBinarySensor]] = {
         "online": OnlineSensor,

@@ -172,3 +172,12 @@ def tree_topic(prefix: str, console_id: str, tree: int, sub: str) -> str:
     if tree >= 2 and sub.split("/", 1)[0] not in DEVICE_TOPICS:
         return f"{prefix}/{console_id}/{MODULE}/{sub}"
     return f"{prefix}/{console_id}/{sub}"
+
+
+# A Lantern bridge (lantern-bridge) is the other kind of entry: it publishes its
+# state on the broker under `<prefix>/<bridge id>`, and is told apart by its own id.
+CONF_KIND: Final = "kind"
+KIND_BRIDGE: Final = "bridge"
+CONF_BRIDGE_ID: Final = "bridge_id"
+CONF_BRIDGE_PREFIX: Final = "bridge_prefix"
+DEFAULT_BRIDGE_PREFIX: Final = "lantern-bridge"

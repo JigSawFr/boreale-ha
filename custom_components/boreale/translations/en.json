@@ -7,13 +7,10 @@
         "description": "Add **{name}** (console id `{console_id}`)? Its own Home Assistant device (MQTT discovery) is replaced by this integration's, with the same entities, game names, the week's play time and long-term statistics."
       },
       "user": {
-        "title": "Add a PlayGuard console",
-        "description": "The consoles whose state is on the broker and not set up yet. Pick one, or another console to add it by its id.",
-        "data": {
-          "console": "Console"
-        },
-        "data_description": {
-          "console": "Its name and id, and its topic prefix when it is not playguard."
+        "title": "Add a device",
+        "menu_options": {
+          "console": "A PlayGuard console",
+          "bridge": "A Lantern bridge"
         }
       },
       "manual": {
@@ -37,12 +34,47 @@
         "data_description": {
           "topic_prefix": "playguard, unless sync.conf says otherwise."
         }
+      },
+      "console": {
+        "title": "Add a PlayGuard console",
+        "description": "The consoles whose state is on the broker and not set up yet. Pick one, or another console to add it by its id.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "Its name and id, and its topic prefix when it is not playguard."
+        }
+      },
+      "bridge": {
+        "title": "Add a Lantern bridge",
+        "description": "The topic prefix the bridge publishes under: `prefix` in its MQTT settings, `lantern-bridge` unless you changed it. The integration waits up to 10 seconds for its state on the broker.",
+        "data": {
+          "bridge_prefix": "Topic prefix"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, unless the bridge's settings say otherwise."
+        }
+      },
+      "confirm_bridge": {
+        "title": "Lantern bridge found",
+        "description": "Add **{name}**?"
+      },
+      "reconfigure_bridge": {
+        "title": "Change the bridge's topic prefix",
+        "description": "The prefix the bridge publishes under now: `prefix` in its MQTT settings.",
+        "data": {
+          "bridge_prefix": "Topic prefix"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, unless the bridge's settings say otherwise."
+        }
       }
     },
     "error": {
       "invalid_console_id": "A console id is 8 characters, 0 to 9 and a to f.",
       "invalid_prefix": "This prefix cannot be part of an MQTT topic.",
-      "no_state": "This console has published nothing on the broker under this prefix. Check the console id and the prefix, and that the console's link is up once (PlayGuard › Console › Remote access › Status)."
+      "no_state": "This console has published nothing on the broker under this prefix. Check the console id and the prefix, and that the console's link is up once (PlayGuard › Console › Remote access › Status).",
+      "no_bridge": "No bridge has published its state under this prefix. Check the prefix, that the bridge has an MQTT broker in its settings, and that it runs."
     },
     "abort": {
       "already_configured": "This console is already set up.",
@@ -109,6 +141,9 @@
       },
       "docked": {
         "name": "Docked"
+      },
+      "bridge_reachable": {
+        "name": "Reachable"
       }
     },
     "button": {
@@ -132,6 +167,9 @@
       },
       "remove_limit": {
         "name": "Remove the limit"
+      },
+      "bridge_rescan": {
+        "name": "Rescan"
       }
     },
     "calendar": {
@@ -363,6 +401,32 @@
       },
       "forwarders": {
         "name": "Forwarders"
+      },
+      "bridge_status": {
+        "name": "Status",
+        "state": {
+          "ok": "OK",
+          "warn": "Warning",
+          "fail": "Failing"
+        }
+      },
+      "bridge_version": {
+        "name": "Version"
+      },
+      "bridge_titles": {
+        "name": "Titles"
+      },
+      "bridge_files_pending": {
+        "name": "Files to hash"
+      },
+      "bridge_transfers": {
+        "name": "Transfers"
+      },
+      "bridge_errors": {
+        "name": "Errors"
+      },
+      "bridge_sources_down": {
+        "name": "Sources down"
       }
     },
     "switch": {

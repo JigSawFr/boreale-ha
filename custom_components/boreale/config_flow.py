@@ -26,18 +26,24 @@ from homeassistant.helpers.selector import (
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import probatio
 
+from .bridge import bridge_of
 from .const import (
     BOREALE_PREFIX,
+    CONF_BRIDGE_ID,
+    CONF_BRIDGE_PREFIX,
     CONF_CONSOLE_ID,
     CONF_IMPORTED,
     CONF_KEEP_VALUES,
+    CONF_KIND,
     CONF_NOTIFY_REFUSED,
     CONF_PREFIX,
     CONF_TAKE_OVER,
     CONF_TREE,
     CONSOLE_ID_RE,
+    DEFAULT_BRIDGE_PREFIX,
     DEFAULT_PREFIX,
     DOMAIN,
+    KIND_BRIDGE,
     LEGACY_DOMAIN,
     MODULE,
     tree_prefix,
@@ -54,6 +60,7 @@ SCAN_TOPICS = ("+/+/state", "+/+/+/state", "+/+/+/+/state")
 CONF_CONSOLE = "console"
 MANUAL = "manual"  # the list's last choice: another console, by its id
 
+BRIDGE_SCHEMA = probatio.Schema({probatio.Required(CONF_BRIDGE_PREFIX, default=DEFAULT_BRIDGE_PREFIX): str})
 RECONFIGURE_SCHEMA = probatio.Schema({probatio.Required(CONF_PREFIX): str})
 OPTIONS_SCHEMA = probatio.Schema(
     {
@@ -166,6 +173,29 @@ async def _async_scan(hass: HomeAssistant) -> dict[str, tuple[str, str, int, int
     return found
 
 
+async def _async_wait_for_bridge(
+    hass: HomeAssistant, prefix: str, bridge_id: str | None = None, skip: set[str] | None = None
+) -> tuple[str, str, str] | None:
+    """The first bridge (not in `skip`) whose state is on the broker under `prefix`: (prefix, id, name), else
+    None. A state is retained, so it comes at once when the bridge ever published."""
+    found: asyncio.Future[tuple[str, str, str]] = hass.loop.create_future()
+
+    @callback
+    def _on_state(msg: ReceiveMessage) -> None:
+        who = bridge_of(msg.topic, msg.payload)
+        if who is not None and who[0] == prefix and who[1] not in (skip or set()) and not found.done():
+            found.set_result(who)
+
+    unsub = await mqtt.async_subscribe(hass, f"{prefix}/{bridge_id or '+'}/state", _on_state, 1)
+    try:
+        async with asyncio.timeout(STATE_TIMEOUT):
+            return await found
+    except TimeoutError:
+        return None
+    finally:
+        unsub()
+
+
 class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
     """A console per entry, its id as the unique id."""
 
@@ -179,11 +209,14 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         self._tree = 1
         self._name = ""
         self._found: dict[str, tuple[str, str, int, int]] = {}
+        self._bridge = (DEFAULT_BRIDGE_PREFIX, "", "Lantern bridge")
 
     async def async_step_mqtt(self, discovery_info: MqttServiceInfo) -> ConfigFlowResult:
         """A console published its state (`playguard/<id>/state`, or
         `boreale/<id>/playguard/state` on Boréale's tree; retained: at every
         start of Home Assistant too)."""
+        if (bridge := bridge_of(discovery_info.topic, discovery_info.payload)) is not None:
+            return await self._found_bridge(*bridge)
         where = _where(discovery_info.topic)
         if where is None or (doc := _state(discovery_info.payload)) is None:
             return self.async_abort(reason="invalid_discovery_info")
@@ -212,6 +245,54 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """A console or a Lantern bridge."""
+        return self.async_show_menu(step_id="user", menu_options=["console", "bridge"])
+
+    async def _found_bridge(self, prefix: str, bridge_id: str, name: str) -> ConfigFlowResult:
+        """A bridge's state is on the broker: add it, or follow it to its new prefix."""
+        self._bridge = (prefix, bridge_id, name)
+        await self.async_set_unique_id(f"bridge_{bridge_id}")
+        self._abort_if_unique_id_configured(updates={CONF_BRIDGE_PREFIX: prefix})
+        self.context["title_placeholders"] = {"name": name}
+        return await self.async_step_confirm_bridge()
+
+    async def async_step_confirm_bridge(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Add the bridge found?"""
+        prefix, bridge_id, name = self._bridge
+        if user_input is not None:
+            return self.async_create_entry(
+                title=name,
+                data={CONF_KIND: KIND_BRIDGE, CONF_BRIDGE_ID: bridge_id, CONF_BRIDGE_PREFIX: prefix},
+            )
+        self._set_confirm_only()
+        return self.async_show_form(step_id="confirm_bridge", description_placeholders={"name": name})
+
+    async def async_step_bridge(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """A Lantern bridge by its topic prefix: the first one not set up whose state is on the broker."""
+        if not await mqtt.async_wait_for_mqtt_client(self.hass):
+            return self.async_abort(reason="mqtt_not_ready")
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            prefix = user_input[CONF_BRIDGE_PREFIX].strip().strip("/")
+            if not _valid_prefix(prefix, "x"):
+                errors[CONF_BRIDGE_PREFIX] = "invalid_prefix"
+            else:
+                configured = {
+                    str(e.unique_id).removeprefix("bridge_")
+                    for e in self._async_current_entries(include_ignore=False)
+                    if e.unique_id
+                }
+                if (found := await _async_wait_for_bridge(self.hass, prefix, skip=configured)) is None:
+                    errors["base"] = "no_bridge"
+                else:
+                    return await self._found_bridge(*found)
+        return self.async_show_form(
+            step_id="bridge",
+            data_schema=self.add_suggested_values_to_schema(BRIDGE_SCHEMA, user_input or {}),
+            errors=errors,
+        )
+
+    async def async_step_console(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """The consoles on the broker not set up yet, to pick one; another one,
         or none found: by its id."""
         if not await mqtt.async_wait_for_mqtt_client(self.hass):
@@ -240,7 +321,7 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
             SelectSelectorConfig(options=options, translation_key=CONF_CONSOLE, mode=SelectSelectorMode.LIST)
         )
         return self.async_show_form(
-            step_id="user", data_schema=probatio.Schema({probatio.Required(CONF_CONSOLE): selector})
+            step_id="console", data_schema=probatio.Schema({probatio.Required(CONF_CONSOLE): selector})
         )
 
     async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
@@ -279,6 +360,8 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Another topic prefix (sync.conf's topic_prefix on the console)."""
         entry = self._get_reconfigure_entry()
+        if entry.data.get(CONF_KIND) == KIND_BRIDGE:
+            return await self.async_step_reconfigure_bridge(user_input)
         if not await mqtt.async_wait_for_mqtt_client(self.hass):
             return self.async_abort(reason="mqtt_not_ready")
         errors: dict[str, str] = {}
@@ -299,6 +382,28 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
                 RECONFIGURE_SCHEMA, {CONF_PREFIX: entry.data.get(CONF_PREFIX, DEFAULT_PREFIX)}
             ),
             description_placeholders={"name": entry.title},
+            errors=errors,
+        )
+
+    async def async_step_reconfigure_bridge(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """The topic prefix the bridge publishes under now (`[mqtt] prefix` in its settings)."""
+        entry = self._get_reconfigure_entry()
+        if not await mqtt.async_wait_for_mqtt_client(self.hass):
+            return self.async_abort(reason="mqtt_not_ready")
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            prefix = user_input[CONF_BRIDGE_PREFIX].strip().strip("/")
+            if not _valid_prefix(prefix, "x"):
+                errors[CONF_BRIDGE_PREFIX] = "invalid_prefix"
+            elif await _async_wait_for_bridge(self.hass, prefix, entry.data[CONF_BRIDGE_ID]) is None:
+                errors["base"] = "no_bridge"
+            else:
+                return self.async_update_reload_and_abort(entry, data_updates={CONF_BRIDGE_PREFIX: prefix})
+        return self.async_show_form(
+            step_id="reconfigure_bridge",
+            data_schema=self.add_suggested_values_to_schema(
+                BRIDGE_SCHEMA, {CONF_BRIDGE_PREFIX: entry.data.get(CONF_BRIDGE_PREFIX, DEFAULT_BRIDGE_PREFIX)}
+            ),
             errors=errors,
         )
 

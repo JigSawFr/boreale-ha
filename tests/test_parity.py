@@ -97,6 +97,8 @@ def test_icons_are_for_entities_and_actions() -> None:
     icons = json.loads(ICONS.read_text(encoding="utf-8"))
     for platform, keys in icons["entity"].items():
         for key in keys:
+            if key.startswith("bridge_"):  # a Lantern bridge's entities (tests/test_bridge.py)
+                continue
             d = BY_KEY.get(key) or next((a for a in ACCOUNT_ENTITIES if a.key == key), None)
             assert d and str(d.platform) == platform, key
     assert set(icons["services"]) == set(load_yaml(INTEGRATION / "services.yaml"))

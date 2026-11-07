@@ -28,7 +28,7 @@ from custom_components.boreale.const import (
     LEGACY_DOMAIN,
 )
 
-from .conftest import BASE, CONSOLE_ID, fixture, publish
+from .conftest import BASE, CONSOLE_ID, fixture, publish, start_console_flow
 
 
 @pytest.fixture
@@ -150,7 +150,7 @@ async def test_taken_over_when_added_by_hand(hass: HomeAssistant, mqtt_mock, leg
     """Confirmed from Discovered, or added by hand: the same."""
     state = fixture("state.json")
     flow = hass.config_entries.flow
-    result = await flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await start_console_flow(hass)
     assert result["step_id"] == "manual"
     flow_id = result["flow_id"]
     task = hass.async_create_task(

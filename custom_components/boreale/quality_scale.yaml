@@ -3,7 +3,7 @@ rules:
   action-setup: done
   appropriate-polling:
     status: exempt
-    comment: Nothing is polled; the console pushes its documents over MQTT.
+    comment: Nothing is polled; a console, and a Lantern bridge, push their documents over MQTT.
   brands: done
   common-modules: done
   config-flow: done

@@ -7,13 +7,10 @@
         "description": "**{name}** (Konsolen-ID `{console_id}`) hinzufügen? Ihr eigenes Home-Assistant-Gerät (MQTT-Discovery) wird durch das dieser Integration ersetzt, mit denselben Entitäten, den Spielnamen, der Spielzeit der Woche und den Langzeitstatistiken."
       },
       "user": {
-        "title": "PlayGuard-Konsole hinzufügen",
-        "description": "Die Konsolen, deren Status auf dem Broker liegt und die noch nicht eingerichtet sind. Wählen Sie eine aus, oder eine andere Konsole, um sie über ihre ID hinzuzufügen.",
-        "data": {
-          "console": "Konsole"
-        },
-        "data_description": {
-          "console": "Ihr Name und ihre ID, dazu ihr Topic-Präfix, wenn es nicht playguard ist."
+        "title": "Gerät hinzufügen",
+        "menu_options": {
+          "console": "Eine PlayGuard-Konsole",
+          "bridge": "Eine Lantern-Bridge"
         }
       },
       "manual": {
@@ -37,12 +34,47 @@
         "data_description": {
           "topic_prefix": "playguard, sofern sync.conf nichts anderes angibt."
         }
+      },
+      "console": {
+        "title": "PlayGuard-Konsole hinzufügen",
+        "description": "Die Konsolen, deren Status auf dem Broker liegt und die noch nicht eingerichtet sind. Wählen Sie eine aus, oder eine andere Konsole, um sie über ihre ID hinzuzufügen.",
+        "data": {
+          "console": "Konsole"
+        },
+        "data_description": {
+          "console": "Ihr Name und ihre ID, dazu ihr Topic-Präfix, wenn es nicht playguard ist."
+        }
+      },
+      "bridge": {
+        "title": "Lantern-Bridge hinzufügen",
+        "description": "Das Topic-Präfix, unter dem die Bridge veröffentlicht: `prefix` in ihren MQTT-Einstellungen, `lantern-bridge`, sofern nicht geändert. Die Integration wartet bis zu 10 Sekunden auf ihren Zustand im Broker.",
+        "data": {
+          "bridge_prefix": "Topic-Präfix"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, sofern die Einstellungen der Bridge nichts anderes sagen."
+        }
+      },
+      "confirm_bridge": {
+        "title": "Lantern-Bridge gefunden",
+        "description": "**{name}** hinzufügen?"
+      },
+      "reconfigure_bridge": {
+        "title": "Topic-Präfix der Bridge ändern",
+        "description": "Das Präfix, unter dem die Bridge jetzt veröffentlicht: `prefix` in ihren MQTT-Einstellungen.",
+        "data": {
+          "bridge_prefix": "Topic-Präfix"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, sofern die Einstellungen der Bridge nichts anderes sagen."
+        }
       }
     },
     "error": {
       "invalid_console_id": "Eine Konsolen-ID hat 8 Zeichen, 0 bis 9 und a bis f.",
       "invalid_prefix": "Dieses Präfix kann nicht Teil eines MQTT-Topics sein.",
-      "no_state": "Diese Konsole hat unter diesem Präfix nichts auf dem Broker veröffentlicht. Prüfen Sie die Konsolen-ID und das Präfix und ob die Verbindung der Konsole einmal aktiv war (PlayGuard › Konsole › Fernzugriff › Status)."
+      "no_state": "Diese Konsole hat unter diesem Präfix nichts auf dem Broker veröffentlicht. Prüfen Sie die Konsolen-ID und das Präfix und ob die Verbindung der Konsole einmal aktiv war (PlayGuard › Konsole › Fernzugriff › Status).",
+      "no_bridge": "Keine Bridge hat unter diesem Präfix ihren Zustand veröffentlicht. Prüfe das Präfix, ob die Bridge in ihren Einstellungen einen MQTT-Broker hat und ob sie läuft."
     },
     "abort": {
       "already_configured": "Diese Konsole ist bereits eingerichtet.",
@@ -109,6 +141,9 @@
       },
       "docked": {
         "name": "In der Station"
+      },
+      "bridge_reachable": {
+        "name": "Erreichbar"
       }
     },
     "button": {
@@ -132,6 +167,9 @@
       },
       "remove_limit": {
         "name": "Limit entfernen"
+      },
+      "bridge_rescan": {
+        "name": "Neu scannen"
       }
     },
     "calendar": {
@@ -363,6 +401,32 @@
       },
       "forwarders": {
         "name": "Forwarder"
+      },
+      "bridge_status": {
+        "name": "Status",
+        "state": {
+          "ok": "OK",
+          "warn": "Warnung",
+          "fail": "Gestört"
+        }
+      },
+      "bridge_version": {
+        "name": "Version"
+      },
+      "bridge_titles": {
+        "name": "Titel"
+      },
+      "bridge_files_pending": {
+        "name": "Zu hashende Dateien"
+      },
+      "bridge_transfers": {
+        "name": "Übertragungen"
+      },
+      "bridge_errors": {
+        "name": "Fehler"
+      },
+      "bridge_sources_down": {
+        "name": "Quellen offline"
       }
     },
     "switch": {

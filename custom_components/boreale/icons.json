@@ -24,6 +24,9 @@
       },
       "clock_accurate": {
         "default": "mdi:clock-check-outline"
+      },
+      "bridge_reachable": {
+        "default": "mdi:lan-connect"
       }
     },
     "button": {
@@ -47,6 +50,9 @@
       },
       "export_report": {
         "default": "mdi:file-document-outline"
+      },
+      "bridge_rescan": {
+        "default": "mdi:folder-refresh-outline"
       }
     },
     "calendar": {
@@ -122,6 +128,27 @@
       },
       "homebrew_notices": {
         "default": "mdi:bell-badge"
+      },
+      "bridge_status": {
+        "default": "mdi:lan-check"
+      },
+      "bridge_version": {
+        "default": "mdi:tag-outline"
+      },
+      "bridge_titles": {
+        "default": "mdi:bookshelf"
+      },
+      "bridge_files_pending": {
+        "default": "mdi:file-clock-outline"
+      },
+      "bridge_transfers": {
+        "default": "mdi:swap-vertical"
+      },
+      "bridge_errors": {
+        "default": "mdi:alert-circle-outline"
+      },
+      "bridge_sources_down": {
+        "default": "mdi:database-off-outline"
       }
     },
     "switch": {

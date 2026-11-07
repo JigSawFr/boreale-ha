@@ -12,6 +12,7 @@ the integration "playguard" before Boréale: its entries are taken over.
 from __future__ import annotations
 
 import logging
+from typing import Any, cast
 
 from homeassistant.components import mqtt
 from homeassistant.config_entries import SOURCE_IGNORE, ConfigEntry, ConfigEntryState
@@ -27,7 +28,8 @@ from homeassistant.helpers import (
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.loader import IntegrationNotFound, async_get_integration
 
-from .const import CONF_CONSOLE_ID, CONF_IMPORTED, DOMAIN, LEGACY_DOMAIN, RETIRED
+from . import bridge
+from .const import CONF_CONSOLE_ID, CONF_IMPORTED, CONF_KIND, DOMAIN, KIND_BRIDGE, LEGACY_DOMAIN, RETIRED
 from .coordinator import PlayGuardConsole
 from .services import async_setup_services
 
@@ -50,7 +52,14 @@ PLATFORMS: list[Platform] = [
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
+# A bridge's entry holds a BridgeHub instead (bridge.py) and sets up only these platforms.
+BRIDGE_PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.SENSOR]
+
 type PlayGuardConfigEntry = ConfigEntry[PlayGuardConsole]
+
+
+def is_bridge(entry: ConfigEntry[Any]) -> bool:
+    return entry.data.get(CONF_KIND) == KIND_BRIDGE
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -66,7 +75,8 @@ async def async_migrate_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) 
     button Turn parental controls back on and the binary sensor Temporarily
     unlocked. (An entry from a newer integration, Home Assistant refuses
     before asking.)"""
-    _retire(hass, entry, entry.minor_version)
+    if not is_bridge(entry):
+        _retire(hass, entry, entry.minor_version)
     hass.config_entries.async_update_entry(entry, minor_version=3)
     return True
 
@@ -145,9 +155,15 @@ async def _async_take_over(hass: HomeAssistant, entry: PlayGuardConfigEntry) -> 
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) -> bool:
-    """One console."""
+    """One console, or one bridge."""
     if not await mqtt.async_wait_for_mqtt_client(hass):
         raise ConfigEntryNotReady(translation_domain=DOMAIN, translation_key="mqtt_not_ready")
+    if is_bridge(entry):
+        hub = await bridge.async_setup_entry(hass, cast("bridge.BridgeConfigEntry", entry))
+        await hass.config_entries.async_forward_entry_setups(entry, BRIDGE_PLATFORMS)
+        entry.async_on_unload(hub.async_stop)
+        await hub.async_start()  # after the platforms: the retained state arrives at once
+        return True
     if CONF_IMPORTED in entry.data:
         await _async_take_over(hass, entry)
     console = PlayGuardConsole(hass, entry)
@@ -161,13 +177,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) ->
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) -> bool:
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    return await hass.config_entries.async_unload_platforms(entry, BRIDGE_PLATFORMS if is_bridge(entry) else PLATFORMS)
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: PlayGuardConfigEntry) -> None:
     """The console's own discovery comes back when the integration goes, and
-    the console forgets the integration's version."""
-    if not mqtt.mqtt_config_entry_enabled(hass):
+    the console forgets the integration's version. (A bridge has nothing to give back.)"""
+    if is_bridge(entry) or not mqtt.mqtt_config_entry_enabled(hass):
         return
     console = PlayGuardConsole(hass, entry)
     try:

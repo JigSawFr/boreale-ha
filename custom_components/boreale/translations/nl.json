@@ -7,13 +7,10 @@
         "description": "**{name}** (console-ID `{console_id}`) toevoegen? Het eigen Home Assistant-apparaat van de console (MQTT-discovery) wordt vervangen door dat van deze integratie, met dezelfde entiteiten, de namen van de games, de speeltijd van de week en langetermijnstatistieken."
       },
       "user": {
-        "title": "Een PlayGuard-console toevoegen",
-        "description": "De consoles waarvan de status op de broker staat en die nog niet zijn ingesteld. Kies er een, of een andere console om die via zijn ID toe te voegen.",
-        "data": {
-          "console": "Console"
-        },
-        "data_description": {
-          "console": "De naam en ID, en het topicvoorvoegsel als dat niet playguard is."
+        "title": "Een apparaat toevoegen",
+        "menu_options": {
+          "console": "Een PlayGuard-console",
+          "bridge": "Een Lantern-bridge"
         }
       },
       "manual": {
@@ -37,12 +34,47 @@
         "data_description": {
           "topic_prefix": "playguard, tenzij sync.conf iets anders zegt."
         }
+      },
+      "console": {
+        "title": "Een PlayGuard-console toevoegen",
+        "description": "De consoles waarvan de status op de broker staat en die nog niet zijn ingesteld. Kies er een, of een andere console om die via zijn ID toe te voegen.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "De naam en ID, en het topicvoorvoegsel als dat niet playguard is."
+        }
+      },
+      "bridge": {
+        "title": "Een Lantern-bridge toevoegen",
+        "description": "Het topicvoorvoegsel waaronder de bridge publiceert: `prefix` in de MQTT-instellingen, `lantern-bridge` tenzij gewijzigd. De integratie wacht maximaal 10 seconden op de status op de broker.",
+        "data": {
+          "bridge_prefix": "Topicvoorvoegsel"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, tenzij de instellingen van de bridge anders zeggen."
+        }
+      },
+      "confirm_bridge": {
+        "title": "Lantern-bridge gevonden",
+        "description": "**{name}** toevoegen?"
+      },
+      "reconfigure_bridge": {
+        "title": "Het topicvoorvoegsel van de bridge wijzigen",
+        "description": "Het voorvoegsel waaronder de bridge nu publiceert: `prefix` in de MQTT-instellingen.",
+        "data": {
+          "bridge_prefix": "Topicvoorvoegsel"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, tenzij de instellingen van de bridge anders zeggen."
+        }
       }
     },
     "error": {
       "invalid_console_id": "Een console-ID heeft 8 tekens, 0 tot 9 en a tot f.",
       "invalid_prefix": "Dit voorvoegsel kan geen deel zijn van een MQTT-topic.",
-      "no_state": "Deze console heeft onder dit voorvoegsel niets op de broker gepubliceerd. Controleer de console-ID en het voorvoegsel, en of de verbinding van de console één keer actief is geweest (PlayGuard › Console › Toegang op afstand › Status)."
+      "no_state": "Deze console heeft onder dit voorvoegsel niets op de broker gepubliceerd. Controleer de console-ID en het voorvoegsel, en of de verbinding van de console één keer actief is geweest (PlayGuard › Console › Toegang op afstand › Status).",
+      "no_bridge": "Geen bridge heeft onder dit voorvoegsel zijn status gepubliceerd. Controleer het voorvoegsel, of de bridge een MQTT-broker in de instellingen heeft en of hij draait."
     },
     "abort": {
       "already_configured": "Deze console is al ingesteld.",
@@ -109,6 +141,9 @@
       },
       "docked": {
         "name": "In het dock"
+      },
+      "bridge_reachable": {
+        "name": "Bereikbaar"
       }
     },
     "button": {
@@ -132,6 +167,9 @@
       },
       "remove_limit": {
         "name": "De limiet verwijderen"
+      },
+      "bridge_rescan": {
+        "name": "Opnieuw scannen"
       }
     },
     "calendar": {
@@ -363,6 +401,32 @@
       },
       "forwarders": {
         "name": "Forwarders"
+      },
+      "bridge_status": {
+        "name": "Status",
+        "state": {
+          "ok": "OK",
+          "warn": "Waarschuwing",
+          "fail": "Storing"
+        }
+      },
+      "bridge_version": {
+        "name": "Versie"
+      },
+      "bridge_titles": {
+        "name": "Titels"
+      },
+      "bridge_files_pending": {
+        "name": "Te hashen bestanden"
+      },
+      "bridge_transfers": {
+        "name": "Overdrachten"
+      },
+      "bridge_errors": {
+        "name": "Fouten"
+      },
+      "bridge_sources_down": {
+        "name": "Bronnen offline"
       }
     },
     "switch": {

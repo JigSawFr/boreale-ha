@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.const import Platform
@@ -12,7 +12,8 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
-from . import PlayGuardConfigEntry, play
+from . import PlayGuardConfigEntry, bridge, is_bridge, play
+from .bridge import BridgeConfigEntry
 from .const import ACTIVITY_OPTIONS, PUBLISH_ACTIVITY
 from .coordinator import PlayGuardConsole
 from .entities import ACCOUNT_ENTITIES, EntityDef, for_platform
@@ -24,6 +25,9 @@ PARALLEL_UPDATES = 0
 async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
+    if is_bridge(entry):
+        bridge.async_add_sensors(cast(BridgeConfigEntry, entry), async_add_entities)
+        return
     console = entry.runtime_data
     classes = {
         "now_playing": NowPlayingSensor,

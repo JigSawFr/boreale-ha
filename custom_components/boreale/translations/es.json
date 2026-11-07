@@ -7,13 +7,10 @@
         "description": "¿Añadir **{name}** (ID de la consola `{console_id}`)? Su propio dispositivo de Home Assistant (descubrimiento MQTT) se sustituye por el de esta integración, con las mismas entidades, los nombres de los juegos, el tiempo de juego de la semana y las estadísticas a largo plazo."
       },
       "user": {
-        "title": "Añadir una consola PlayGuard",
-        "description": "Las consolas cuyo estado está en el broker y que aún no están configuradas. Elige una, u otra consola para añadirla por su ID.",
-        "data": {
-          "console": "Consola"
-        },
-        "data_description": {
-          "console": "Su nombre y su ID, y su prefijo de tema cuando no es playguard."
+        "title": "Añadir un dispositivo",
+        "menu_options": {
+          "console": "Una consola PlayGuard",
+          "bridge": "Un puente Lantern"
         }
       },
       "manual": {
@@ -37,12 +34,47 @@
         "data_description": {
           "topic_prefix": "playguard, salvo que sync.conf indique otra cosa."
         }
+      },
+      "console": {
+        "title": "Añadir una consola PlayGuard",
+        "description": "Las consolas cuyo estado está en el broker y que aún no están configuradas. Elige una, u otra consola para añadirla por su ID.",
+        "data": {
+          "console": "Consola"
+        },
+        "data_description": {
+          "console": "Su nombre y su ID, y su prefijo de tema cuando no es playguard."
+        }
+      },
+      "bridge": {
+        "title": "Añadir un puente Lantern",
+        "description": "El prefijo de topic bajo el que publica el puente: `prefix` en sus ajustes MQTT, `lantern-bridge` salvo cambio. La integración espera hasta 10 segundos su estado en el broker.",
+        "data": {
+          "bridge_prefix": "Prefijo de topic"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, salvo que los ajustes del puente digan otra cosa."
+        }
+      },
+      "confirm_bridge": {
+        "title": "Puente Lantern encontrado",
+        "description": "¿Añadir **{name}**?"
+      },
+      "reconfigure_bridge": {
+        "title": "Cambiar el prefijo de topic del puente",
+        "description": "El prefijo bajo el que publica ahora el puente: `prefix` en sus ajustes MQTT.",
+        "data": {
+          "bridge_prefix": "Prefijo de topic"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, salvo que los ajustes del puente digan otra cosa."
+        }
       }
     },
     "error": {
       "invalid_console_id": "Un ID de consola tiene 8 caracteres, de 0 a 9 y de a a f.",
       "invalid_prefix": "Este prefijo no puede formar parte de un tema MQTT.",
-      "no_state": "Esta consola no ha publicado nada en el broker con este prefijo. Comprueba el ID de la consola y el prefijo, y que el enlace de la consola haya estado activo al menos una vez (PlayGuard › Consola › Acceso remoto › Estado)."
+      "no_state": "Esta consola no ha publicado nada en el broker con este prefijo. Comprueba el ID de la consola y el prefijo, y que el enlace de la consola haya estado activo al menos una vez (PlayGuard › Consola › Acceso remoto › Estado).",
+      "no_bridge": "Ningún puente ha publicado su estado bajo este prefijo. Comprueba el prefijo, que el puente tenga un broker MQTT en sus ajustes y que esté en marcha."
     },
     "abort": {
       "already_configured": "Esta consola ya está configurada.",
@@ -109,6 +141,9 @@
       },
       "docked": {
         "name": "En la base"
+      },
+      "bridge_reachable": {
+        "name": "Accesible"
       }
     },
     "button": {
@@ -132,6 +167,9 @@
       },
       "remove_limit": {
         "name": "Quitar el límite"
+      },
+      "bridge_rescan": {
+        "name": "Volver a escanear"
       }
     },
     "calendar": {
@@ -363,6 +401,32 @@
       },
       "forwarders": {
         "name": "Forwarders"
+      },
+      "bridge_status": {
+        "name": "Estado",
+        "state": {
+          "ok": "OK",
+          "warn": "Aviso",
+          "fail": "Averiado"
+        }
+      },
+      "bridge_version": {
+        "name": "Versión"
+      },
+      "bridge_titles": {
+        "name": "Títulos"
+      },
+      "bridge_files_pending": {
+        "name": "Archivos por calcular"
+      },
+      "bridge_transfers": {
+        "name": "Transferencias"
+      },
+      "bridge_errors": {
+        "name": "Errores"
+      },
+      "bridge_sources_down": {
+        "name": "Fuentes caídas"
       }
     },
     "switch": {

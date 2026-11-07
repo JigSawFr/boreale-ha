@@ -7,13 +7,10 @@
         "description": "添加 **{name}**（主机 ID `{console_id}`）？主机自身的 Home Assistant 设备（MQTT 发现）将由本集成的设备取代，实体、游戏名称、本周游戏时间和长期统计数据都会保留。"
       },
       "user": {
-        "title": "添加 PlayGuard 主机",
-        "description": "以下主机的状态已在代理服务器上，但尚未设置。选择一台，或选择其他主机并通过 ID 添加。",
-        "data": {
-          "console": "主机"
-        },
-        "data_description": {
-          "console": "名称和 ID；主题前缀不是 playguard 时也会显示。"
+        "title": "添加设备",
+        "menu_options": {
+          "console": "PlayGuard 主机",
+          "bridge": "Lantern 桥"
         }
       },
       "manual": {
@@ -37,12 +34,47 @@
         "data_description": {
           "topic_prefix": "除非 sync.conf 另有设置，否则为 playguard。"
         }
+      },
+      "console": {
+        "title": "添加 PlayGuard 主机",
+        "description": "以下主机的状态已在代理服务器上，但尚未设置。选择一台，或选择其他主机并通过 ID 添加。",
+        "data": {
+          "console": "主机"
+        },
+        "data_description": {
+          "console": "名称和 ID；主题前缀不是 playguard 时也会显示。"
+        }
+      },
+      "bridge": {
+        "title": "添加 Lantern 桥",
+        "description": "桥发布所用的主题前缀：其 MQTT 设置中的 `prefix`，未更改则为 `lantern-bridge`。集成最多等待 10 秒以在代理上获取它的状态。",
+        "data": {
+          "bridge_prefix": "主题前缀"
+        },
+        "data_description": {
+          "bridge_prefix": "除非桥的设置另有说明，否则为 lantern-bridge。"
+        }
+      },
+      "confirm_bridge": {
+        "title": "找到 Lantern 桥",
+        "description": "添加 **{name}**？"
+      },
+      "reconfigure_bridge": {
+        "title": "更改桥的主题前缀",
+        "description": "桥当前发布所用的前缀：其 MQTT 设置中的 `prefix`。",
+        "data": {
+          "bridge_prefix": "主题前缀"
+        },
+        "data_description": {
+          "bridge_prefix": "除非桥的设置另有说明，否则为 lantern-bridge。"
+        }
       }
     },
     "error": {
       "invalid_console_id": "主机 ID 为 8 个字符，由 0 至 9 和 a 至 f 组成。",
       "invalid_prefix": "此前缀不能用于 MQTT 主题。",
-      "no_state": "此主机未在代理服务器上以此前缀发布任何内容。请检查主机 ID 和前缀，并确认主机的连接至少建立过一次（PlayGuard › 主机 › 远程访问 › 状态）。"
+      "no_state": "此主机未在代理服务器上以此前缀发布任何内容。请检查主机 ID 和前缀，并确认主机的连接至少建立过一次（PlayGuard › 主机 › 远程访问 › 状态）。",
+      "no_bridge": "没有桥在此前缀下发布状态。请检查前缀、桥的设置中是否配置了 MQTT 代理，以及它是否在运行。"
     },
     "abort": {
       "already_configured": "此主机已设置。",
@@ -109,6 +141,9 @@
       },
       "docked": {
         "name": "已插入底座"
+      },
+      "bridge_reachable": {
+        "name": "可访问"
       }
     },
     "button": {
@@ -132,6 +167,9 @@
       },
       "remove_limit": {
         "name": "取消限制"
+      },
+      "bridge_rescan": {
+        "name": "重新扫描"
       }
     },
     "calendar": {
@@ -363,6 +401,32 @@
       },
       "forwarders": {
         "name": "转发程序"
+      },
+      "bridge_status": {
+        "name": "状态",
+        "state": {
+          "ok": "正常",
+          "warn": "警告",
+          "fail": "故障"
+        }
+      },
+      "bridge_version": {
+        "name": "版本"
+      },
+      "bridge_titles": {
+        "name": "游戏"
+      },
+      "bridge_files_pending": {
+        "name": "待哈希文件"
+      },
+      "bridge_transfers": {
+        "name": "传输"
+      },
+      "bridge_errors": {
+        "name": "错误"
+      },
+      "bridge_sources_down": {
+        "name": "离线的来源"
       }
     },
     "switch": {

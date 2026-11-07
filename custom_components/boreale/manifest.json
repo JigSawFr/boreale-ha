@@ -20,7 +20,8 @@
   "issue_tracker": "https://github.com/JigSawFr/boreale-ha/issues",
   "mqtt": [
     "playguard/+/state",
-    "boreale/+/playguard/state"
+    "boreale/+/playguard/state",
+    "lantern-bridge/+/state"
   ],
   "quality_scale": "platinum",
   "requirements": [],
