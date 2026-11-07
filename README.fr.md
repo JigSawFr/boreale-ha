@@ -842,6 +842,53 @@ cards:
       {%- endfor %}
 ```
 
+Un tableau de bord pour un pont Lantern : sa santé, la bibliothèque et le
+trafic, les sources qui ne répondent pas (affichées seulement s'il y en a), la
+mise à jour, et un bouton qui relit les sources. Remplacez `shelf` par le nom
+de votre pont (*Paramètres › Appareils et services › Boréale for Nintendo
+Switch*, l'appareil du pont) :
+
+```yaml
+type: vertical-stack
+cards:
+  - type: tile
+    entity: sensor.shelf_status
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.shelf_titles
+      - type: tile
+        entity: sensor.shelf_files_to_hash
+      - type: tile
+        entity: sensor.shelf_transfers
+  - type: conditional
+    conditions:
+      - condition: numeric_state
+        entity: sensor.shelf_sources_down
+        above: 0
+    card:
+      type: tile
+      entity: sensor.shelf_sources_down
+      icon: mdi:alert-circle-outline
+  - type: tile
+    entity: update.shelf_lantern_bridge
+  - type: button
+    name: Rescan
+    icon: mdi:folder-refresh-outline
+    tap_action:
+      action: perform-action
+      perform_action: button.press
+      target:
+        entity_id: button.shelf_rescan
+  - type: entities
+    entities:
+      - entity: sensor.shelf_errors
+      - entity: sensor.shelf_version
+      - entity: binary_sensor.shelf_reachable
+```
+
 ## 📘 Blueprints
 
 Des automatisations toutes prêtes : importez-en une, puis *Créer une

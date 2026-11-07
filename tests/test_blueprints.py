@@ -138,6 +138,15 @@ def test_blueprint_file(path: Path) -> None:
         assert f"/redirect/blueprint_import/?blueprint_url={quote(url, safe='')})" in readme
 
 
+def _entities(node: Any) -> list[str]:
+    """The entity ids a dashboard card (and the cards in it) names."""
+    if isinstance(node, dict):
+        return [v for k, v in node.items() if k in ("entity_id", "entity")] + [
+            i for v in node.values() for i in _entities(v)
+        ]
+    return [i for v in node for i in _entities(v)] if isinstance(node, list) else []
+
+
 @pytest.mark.parametrize("readme", READMES, ids=("en", "fr"))
 async def test_dashboard_example(hass: HomeAssistant, setup, readme: str) -> None:
     """The README's dashboard: its entities are the console's, its list renders."""
@@ -147,14 +156,7 @@ async def test_dashboard_example(hass: HomeAssistant, setup, readme: str) -> Non
     publish(hass, "games", fixture("games.json"))
     await hass.async_block_till_done()
 
-    def walk(node: Any) -> list[str]:
-        if isinstance(node, dict):
-            return [v for k, v in node.items() if k == "entity_id" or k == "entity"] + [
-                i for v in node.values() for i in walk(v)
-            ]
-        return [i for v in node for i in walk(v)] if isinstance(node, list) else []
-
-    ids = walk(dashboard)
+    ids = _entities(dashboard)
     assert len(ids) == 7
     for entity_id in ids:
         assert hass.states.get(entity_id), entity_id
@@ -554,3 +556,23 @@ async def test_bridge_rescan_when_a_tracker_is_home(
     await _yield()
     _later(freezer, hass, 2)
     await _soon(lambda: _rescans(mqtt_mock) == 1)
+
+
+@pytest.mark.parametrize("readme", READMES, ids=("en", "fr"))
+async def test_bridge_dashboard_example(hass: HomeAssistant, mqtt_mock, readme: str) -> None:
+    """The README's dashboard for a bridge: every entity it names is the bridge's, and its conditions are met."""
+    block = readme[readme.rindex("type: vertical-stack") :]
+    dashboard = yaml.safe_load(block[: block.index("```")])
+    await set_up_bridge(hass, mqtt_mock, ONE_DOWN)  # the bridge is named Shelf: its entities are `shelf_…`
+    ids = _entities(dashboard)
+    assert len(ids) == 11 and len(set(ids)) == 10  # the sources-down sensor is the condition and the card
+    for entity_id in ids:
+        assert hass.states.get(entity_id), entity_id
+    [shown] = [c for c in dashboard["cards"] if c["type"] == "conditional"]
+    [condition] = shown["conditions"]
+    assert float(hass.states.get(condition["entity"]).state) > condition["above"]  # a source down: the card shows
+    bridge_publish(hass, "state", ALL_UP)
+    await hass.async_block_till_done()
+    assert float(hass.states.get(condition["entity"]).state) <= condition["above"]  # none: it goes
+    [press] = [c for c in dashboard["cards"] if c["type"] == "button"]
+    assert press["tap_action"]["target"]["entity_id"] == _bridge_id(hass, "button", "rescan")

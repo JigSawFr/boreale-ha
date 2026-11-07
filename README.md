@@ -801,6 +801,53 @@ cards:
       {%- endfor %}
 ```
 
+A dashboard for a Lantern bridge: its health, the library and the traffic, the
+sources that do not answer (shown only when there are some), the update, and a
+button that reads the sources again. Change `shelf` to your bridge's name
+(*Settings › Devices & services › Boréale for Nintendo Switch*, the bridge's
+device):
+
+```yaml
+type: vertical-stack
+cards:
+  - type: tile
+    entity: sensor.shelf_status
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.shelf_titles
+      - type: tile
+        entity: sensor.shelf_files_to_hash
+      - type: tile
+        entity: sensor.shelf_transfers
+  - type: conditional
+    conditions:
+      - condition: numeric_state
+        entity: sensor.shelf_sources_down
+        above: 0
+    card:
+      type: tile
+      entity: sensor.shelf_sources_down
+      icon: mdi:alert-circle-outline
+  - type: tile
+    entity: update.shelf_lantern_bridge
+  - type: button
+    name: Rescan
+    icon: mdi:folder-refresh-outline
+    tap_action:
+      action: perform-action
+      perform_action: button.press
+      target:
+        entity_id: button.shelf_rescan
+  - type: entities
+    entities:
+      - entity: sensor.shelf_errors
+      - entity: sensor.shelf_version
+      - entity: binary_sensor.shelf_reachable
+```
+
 ## 📘 Blueprints
 
 Ready-made automations: import one, then *Create automation* from it and pick
