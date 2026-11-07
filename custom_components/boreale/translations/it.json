@@ -7,13 +7,10 @@
         "description": "Aggiungere **{name}** (ID console `{console_id}`)? Il suo dispositivo Home Assistant (rilevamento MQTT) viene sostituito da quello di questa integrazione, con le stesse entità, i nomi dei giochi, il tempo di gioco della settimana e le statistiche a lungo termine."
       },
       "user": {
-        "title": "Aggiungi una console PlayGuard",
-        "description": "Le console il cui stato è sul broker e che non sono ancora configurate. Scegline una, o un'altra console per aggiungerla tramite il suo ID.",
-        "data": {
-          "console": "Console"
-        },
-        "data_description": {
-          "console": "Il suo nome e il suo ID, e il prefisso dei topic quando non è playguard."
+        "title": "Aggiungi un dispositivo",
+        "menu_options": {
+          "console": "Una console PlayGuard",
+          "bridge": "Un bridge Lantern"
         }
       },
       "manual": {
@@ -37,12 +34,45 @@
         "data_description": {
           "topic_prefix": "playguard, salvo diversa indicazione in sync.conf."
         }
+      },
+      "console": {
+        "title": "Aggiungi una console PlayGuard",
+        "description": "Le console il cui stato è sul broker e che non sono ancora configurate. Scegline una, o un'altra console per aggiungerla tramite il suo ID.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "Il suo nome e il suo ID, e il prefisso dei topic quando non è playguard."
+        }
+      },
+      "bridge": {
+        "title": "Aggiungi un bridge Lantern",
+        "description": "L'indirizzo dell'interfaccia web del bridge, ad esempio `http://192.168.1.20:8080`. Attiva le metriche nelle impostazioni del bridge per avere i contatori; stato e versione non richiedono nulla.",
+        "data": {
+          "url": "Indirizzo"
+        },
+        "data_description": {
+          "url": "L'indirizzo del bridge sulla tua rete, con la porta."
+        }
+      },
+      "reconfigure_bridge": {
+        "title": "Cambia l'indirizzo del bridge",
+        "description": "Il nuovo indirizzo dello stesso bridge.",
+        "data": {
+          "url": "Indirizzo"
+        },
+        "data_description": {
+          "url": "L'indirizzo del bridge sulla tua rete, con la porta."
+        }
       }
     },
     "error": {
       "invalid_console_id": "Un ID console ha 8 caratteri, da 0 a 9 e da a a f.",
       "invalid_prefix": "Questo prefisso non può far parte di un topic MQTT.",
-      "no_state": "Questa console non ha pubblicato nulla sul broker con questo prefisso. Controlla l'ID della console e il prefisso, e che il collegamento della console sia stato attivo almeno una volta (PlayGuard › Console › Accesso remoto › Stato)."
+      "no_state": "Questa console non ha pubblicato nulla sul broker con questo prefisso. Controlla l'ID della console e il prefisso, e che il collegamento della console sia stato attivo almeno una volta (PlayGuard › Console › Accesso remoto › Stato).",
+      "cannot_connect": "Nessuna risposta a questo indirizzo.",
+      "not_a_bridge": "Questo indirizzo risponde, ma non come un bridge Lantern di una versione recente.",
+      "other_bridge": "A questo indirizzo risponde un altro bridge."
     },
     "abort": {
       "already_configured": "Questa console è già configurata.",
@@ -109,6 +139,9 @@
       },
       "docked": {
         "name": "Nella base"
+      },
+      "bridge_reachable": {
+        "name": "Raggiungibile"
       }
     },
     "button": {
@@ -363,6 +396,29 @@
       },
       "forwarders": {
         "name": "Forwarder"
+      },
+      "bridge_status": {
+        "name": "Stato",
+        "state": {
+          "ok": "OK",
+          "warn": "Avviso",
+          "fail": "Guasto"
+        }
+      },
+      "bridge_version": {
+        "name": "Versione"
+      },
+      "bridge_titles": {
+        "name": "Titoli"
+      },
+      "bridge_files_pending": {
+        "name": "File da calcolare"
+      },
+      "bridge_transfers": {
+        "name": "Trasferimenti"
+      },
+      "bridge_errors": {
+        "name": "Errori"
       }
     },
     "switch": {
@@ -536,7 +592,8 @@
     },
     "logbook_command_waiting": {
       "message": "attende la conferma di PlayGuard: {order}"
-    }
+    },
+    "bridge_unreachable": "Il bridge Lantern non risponde a {url}."
   },
   "issues": {
     "newer_schema": {

@@ -7,13 +7,10 @@
         "description": "**{name}**（本体 ID `{console_id}`）を追加しますか？本体自身の Home Assistant デバイス（MQTT 自動検出）は、このインテグレーションのデバイスに置き換わります。エンティティ、ソフト名、今週のプレイ時間、長期統計はそのまま引き継がれます。"
       },
       "user": {
-        "title": "PlayGuard の本体を追加",
-        "description": "状態がブローカーにあり、まだ設定されていない本体です。1台選ぶか、「別の本体」を選んで ID で追加してください。",
-        "data": {
-          "console": "本体"
-        },
-        "data_description": {
-          "console": "名前と ID。トピックのプレフィックスが playguard 以外ならそれも表示します。"
+        "title": "デバイスを追加",
+        "menu_options": {
+          "console": "PlayGuard コンソール",
+          "bridge": "Lantern ブリッジ"
         }
       },
       "manual": {
@@ -37,12 +34,45 @@
         "data_description": {
           "topic_prefix": "sync.conf で別の値にしていなければ playguard。"
         }
+      },
+      "console": {
+        "title": "PlayGuard の本体を追加",
+        "description": "状態がブローカーにあり、まだ設定されていない本体です。1台選ぶか、「別の本体」を選んで ID で追加してください。",
+        "data": {
+          "console": "本体"
+        },
+        "data_description": {
+          "console": "名前と ID。トピックのプレフィックスが playguard 以外ならそれも表示します。"
+        }
+      },
+      "bridge": {
+        "title": "Lantern ブリッジを追加",
+        "description": "ブリッジの Web インターフェースのアドレス（例: `http://192.168.1.20:8080`）。カウンターを使うには、ブリッジの設定でメトリクスを有効にしてください。状態とバージョンは設定不要です。",
+        "data": {
+          "url": "アドレス"
+        },
+        "data_description": {
+          "url": "ネットワーク上のブリッジのアドレス（ポート付き）。"
+        }
+      },
+      "reconfigure_bridge": {
+        "title": "ブリッジのアドレスを変更",
+        "description": "同じブリッジの新しいアドレス。",
+        "data": {
+          "url": "アドレス"
+        },
+        "data_description": {
+          "url": "ネットワーク上のブリッジのアドレス（ポート付き）。"
+        }
       }
     },
     "error": {
       "invalid_console_id": "本体 ID は 0〜9 と a〜f の8文字です。",
       "invalid_prefix": "このプレフィックスは MQTT トピックに使えません。",
-      "no_state": "この本体は、このプレフィックスでブローカーに何も送信していません。本体 ID とプレフィックスを確認し、本体の接続が一度確立されていることを確認してください（PlayGuard › 本体 › リモートアクセス › 状態）。"
+      "no_state": "この本体は、このプレフィックスでブローカーに何も送信していません。本体 ID とプレフィックスを確認し、本体の接続が一度確立されていることを確認してください（PlayGuard › 本体 › リモートアクセス › 状態）。",
+      "cannot_connect": "このアドレスは応答しません。",
+      "not_a_bridge": "このアドレスは応答しますが、最近のバージョンの Lantern ブリッジではありません。",
+      "other_bridge": "このアドレスでは別のブリッジが応答しています。"
     },
     "abort": {
       "already_configured": "この本体はすでに設定されています。",
@@ -109,6 +139,9 @@
       },
       "docked": {
         "name": "ドック接続中"
+      },
+      "bridge_reachable": {
+        "name": "接続可能"
       }
     },
     "button": {
@@ -363,6 +396,29 @@
       },
       "forwarders": {
         "name": "フォワーダー"
+      },
+      "bridge_status": {
+        "name": "状態",
+        "state": {
+          "ok": "OK",
+          "warn": "警告",
+          "fail": "異常"
+        }
+      },
+      "bridge_version": {
+        "name": "バージョン"
+      },
+      "bridge_titles": {
+        "name": "タイトル"
+      },
+      "bridge_files_pending": {
+        "name": "ハッシュ待ちファイル"
+      },
+      "bridge_transfers": {
+        "name": "転送"
+      },
+      "bridge_errors": {
+        "name": "エラー"
       }
     },
     "switch": {
@@ -536,7 +592,8 @@
     },
     "logbook_command_waiting": {
       "message": "{order} について PlayGuard の確認を待っています"
-    }
+    },
+    "bridge_unreachable": "Lantern ブリッジが {url} で応答しません。"
   },
   "issues": {
     "newer_schema": {

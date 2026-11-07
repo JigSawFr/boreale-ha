@@ -26,18 +26,23 @@ from homeassistant.helpers.selector import (
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
 import probatio
 
+from .bridge import async_probe
 from .const import (
     BOREALE_PREFIX,
+    CONF_BRIDGE_ID,
     CONF_CONSOLE_ID,
     CONF_IMPORTED,
     CONF_KEEP_VALUES,
+    CONF_KIND,
     CONF_NOTIFY_REFUSED,
     CONF_PREFIX,
     CONF_TAKE_OVER,
     CONF_TREE,
+    CONF_URL,
     CONSOLE_ID_RE,
     DEFAULT_PREFIX,
     DOMAIN,
+    KIND_BRIDGE,
     LEGACY_DOMAIN,
     MODULE,
     tree_prefix,
@@ -54,6 +59,7 @@ SCAN_TOPICS = ("+/+/state", "+/+/+/state", "+/+/+/+/state")
 CONF_CONSOLE = "console"
 MANUAL = "manual"  # the list's last choice: another console, by its id
 
+BRIDGE_SCHEMA = probatio.Schema({probatio.Required(CONF_URL): str})
 RECONFIGURE_SCHEMA = probatio.Schema({probatio.Required(CONF_PREFIX): str})
 OPTIONS_SCHEMA = probatio.Schema(
     {
@@ -212,6 +218,35 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """A console or a Lantern bridge."""
+        return self.async_show_menu(step_id="user", menu_options=["console", "bridge"])
+
+    async def async_step_bridge(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """A Lantern bridge by its address: it must answer `/healthz` and say who it is."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            url = user_input[CONF_URL].strip().rstrip("/")
+            if not url.startswith(("http://", "https://")):
+                url = f"http://{url}"
+            doc = await async_probe(self.hass, url)
+            bridge_id = doc.get("uid") if doc else None
+            if doc is None:
+                errors[CONF_URL] = "cannot_connect"
+            elif not isinstance(bridge_id, str) or not bridge_id:
+                errors[CONF_URL] = "not_a_bridge"
+            else:
+                await self.async_set_unique_id(f"bridge_{bridge_id}")
+                self._abort_if_unique_id_configured(updates={CONF_URL: url})
+                return self.async_create_entry(
+                    title="Lantern bridge", data={CONF_KIND: KIND_BRIDGE, CONF_URL: url, CONF_BRIDGE_ID: bridge_id}
+                )
+        return self.async_show_form(
+            step_id="bridge",
+            data_schema=self.add_suggested_values_to_schema(BRIDGE_SCHEMA, user_input or {CONF_URL: "http://"}),
+            errors=errors,
+        )
+
+    async def async_step_console(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """The consoles on the broker not set up yet, to pick one; another one,
         or none found: by its id."""
         if not await mqtt.async_wait_for_mqtt_client(self.hass):
@@ -240,7 +275,7 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
             SelectSelectorConfig(options=options, translation_key=CONF_CONSOLE, mode=SelectSelectorMode.LIST)
         )
         return self.async_show_form(
-            step_id="user", data_schema=probatio.Schema({probatio.Required(CONF_CONSOLE): selector})
+            step_id="console", data_schema=probatio.Schema({probatio.Required(CONF_CONSOLE): selector})
         )
 
     async def async_step_manual(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
@@ -279,6 +314,8 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Another topic prefix (sync.conf's topic_prefix on the console)."""
         entry = self._get_reconfigure_entry()
+        if entry.data.get(CONF_KIND) == KIND_BRIDGE:
+            return await self.async_step_reconfigure_bridge(user_input)
         if not await mqtt.async_wait_for_mqtt_client(self.hass):
             return self.async_abort(reason="mqtt_not_ready")
         errors: dict[str, str] = {}
@@ -299,6 +336,27 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
                 RECONFIGURE_SCHEMA, {CONF_PREFIX: entry.data.get(CONF_PREFIX, DEFAULT_PREFIX)}
             ),
             description_placeholders={"name": entry.title},
+            errors=errors,
+        )
+
+    async def async_step_reconfigure_bridge(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """The bridge's new address: the same bridge must answer there."""
+        entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            url = user_input[CONF_URL].strip().rstrip("/")
+            if not url.startswith(("http://", "https://")):
+                url = f"http://{url}"
+            doc = await async_probe(self.hass, url)
+            if doc is None:
+                errors[CONF_URL] = "cannot_connect"
+            elif doc.get("uid") != entry.data[CONF_BRIDGE_ID]:
+                errors[CONF_URL] = "other_bridge"
+            else:
+                return self.async_update_reload_and_abort(entry, data_updates={CONF_URL: url})
+        return self.async_show_form(
+            step_id="reconfigure_bridge",
+            data_schema=self.add_suggested_values_to_schema(BRIDGE_SCHEMA, {CONF_URL: entry.data[CONF_URL]}),
             errors=errors,
         )
 

@@ -27,6 +27,13 @@ def fixture(name: str) -> Any:
     return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
 
 
+async def start_console_flow(hass: HomeAssistant) -> Any:
+    """The user's flow, past its menu: a console (not a bridge)."""
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    assert result["type"] == "menu" and result["menu_options"] == ["console", "bridge"]
+    return await hass.config_entries.flow.async_configure(result["flow_id"], {"next_step_id": "console"})
+
+
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
     """Loads custom_components/."""

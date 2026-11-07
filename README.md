@@ -137,6 +137,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   (limits, bedtime, extra time, blocking all games).
 - A console's **sysMMC and emuMMC** are two devices: each has its own
   parental controls and its own console id.
+- A **Lantern bridge** ([lantern-bridge](https://github.com/JigSawFr/lantern-bridge), 0.1 or newer): its status, version and counters, read over HTTP. See *Set-up › A Lantern bridge*.
 - **Not supported**: the Nintendo Switch 2 (there is no Atmosphère for it),
   and a console without PlayGuard. For Nintendo's own Parental Controls app
   and account, see Home Assistant's *Nintendo Switch Parental Controls*
@@ -248,6 +249,22 @@ agent running) shows up in *Settings › Devices & services › Discovered*:
 
 Each console is one entry and one device; the same console cannot be added
 twice.
+
+**A Lantern bridge.** *Add integration › Boréale for Nintendo Switch*, then
+*A Lantern bridge*, and the address of its web interface (such as
+`http://192.168.1.20:8080`). The bridge must answer `/healthz` from your
+network and say who it is, which it does from 0.1. It is one entry and one
+device, known by the bridge's own id: if its address changes, *Reconfigure*
+gives the new one, and another bridge there is refused.
+
+| Entity | What it is |
+|---|---|
+| **Status** | `ok`, `warn` or `fail`, the bridge's own health (sources reachable, recent scans, disk, index). |
+| **Version**, **Reachable** | Diagnostics: the bridge's version, and whether it answers. |
+| **Titles**, **Files to hash**, **Transfers**, **Errors** | The bridge's counters. They need *Metrics* turned on in the bridge's settings; without it these four are unavailable and the status and the version still come. |
+
+The bridge is read every 60 seconds; Home Assistant must be on its local network (the
+version, the id and `/metrics` are given to the local network only).
 
 ## 🔧 Options and reconfiguration
 
@@ -582,8 +599,9 @@ lists:
 
 ## 🔄 Data updates
 
-Nothing is polled: the console pushes over MQTT, and Home Assistant only
-listens.
+Nothing is polled for a console: it pushes over MQTT, and Home Assistant only
+listens. (A Lantern bridge is the exception: it is read every 60 seconds over
+HTTP.)
 
 - The console publishes its **state** when it changes, and every `poll_s`
   seconds for a fresh time stamp (30 by default, 10 to 300, in its
@@ -809,6 +827,7 @@ copy in `blueprints/automation/boreale/`.
 
 ## 🚧 Known limitations
 
+- A Lantern bridge's entry still needs Home Assistant's MQTT integration to be set up (the integration loads it for the consoles).
 - PlayGuard runs on a console with custom firmware (Atmosphère); there is
   none for the Nintendo Switch 2.
 - Some things are never possible from Home Assistant, by PlayGuard's design:

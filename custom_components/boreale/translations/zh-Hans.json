@@ -7,13 +7,10 @@
         "description": "添加 **{name}**（主机 ID `{console_id}`）？主机自身的 Home Assistant 设备（MQTT 发现）将由本集成的设备取代，实体、游戏名称、本周游戏时间和长期统计数据都会保留。"
       },
       "user": {
-        "title": "添加 PlayGuard 主机",
-        "description": "以下主机的状态已在代理服务器上，但尚未设置。选择一台，或选择其他主机并通过 ID 添加。",
-        "data": {
-          "console": "主机"
-        },
-        "data_description": {
-          "console": "名称和 ID；主题前缀不是 playguard 时也会显示。"
+        "title": "添加设备",
+        "menu_options": {
+          "console": "PlayGuard 主机",
+          "bridge": "Lantern 桥"
         }
       },
       "manual": {
@@ -37,12 +34,45 @@
         "data_description": {
           "topic_prefix": "除非 sync.conf 另有设置，否则为 playguard。"
         }
+      },
+      "console": {
+        "title": "添加 PlayGuard 主机",
+        "description": "以下主机的状态已在代理服务器上，但尚未设置。选择一台，或选择其他主机并通过 ID 添加。",
+        "data": {
+          "console": "主机"
+        },
+        "data_description": {
+          "console": "名称和 ID；主题前缀不是 playguard 时也会显示。"
+        }
+      },
+      "bridge": {
+        "title": "添加 Lantern 桥",
+        "description": "桥的网页界面地址，例如 `http://192.168.1.20:8080`。要获得计数器，请在桥的设置中启用指标；状态和版本无需任何设置。",
+        "data": {
+          "url": "地址"
+        },
+        "data_description": {
+          "url": "桥在你的网络中的地址，含端口。"
+        }
+      },
+      "reconfigure_bridge": {
+        "title": "更改桥的地址",
+        "description": "同一座桥的新地址。",
+        "data": {
+          "url": "地址"
+        },
+        "data_description": {
+          "url": "桥在你的网络中的地址，含端口。"
+        }
       }
     },
     "error": {
       "invalid_console_id": "主机 ID 为 8 个字符，由 0 至 9 和 a 至 f 组成。",
       "invalid_prefix": "此前缀不能用于 MQTT 主题。",
-      "no_state": "此主机未在代理服务器上以此前缀发布任何内容。请检查主机 ID 和前缀，并确认主机的连接至少建立过一次（PlayGuard › 主机 › 远程访问 › 状态）。"
+      "no_state": "此主机未在代理服务器上以此前缀发布任何内容。请检查主机 ID 和前缀，并确认主机的连接至少建立过一次（PlayGuard › 主机 › 远程访问 › 状态）。",
+      "cannot_connect": "此地址没有响应。",
+      "not_a_bridge": "此地址有响应，但不是较新版本的 Lantern 桥。",
+      "other_bridge": "此地址上响应的是另一座桥。"
     },
     "abort": {
       "already_configured": "此主机已设置。",
@@ -109,6 +139,9 @@
       },
       "docked": {
         "name": "已插入底座"
+      },
+      "bridge_reachable": {
+        "name": "可访问"
       }
     },
     "button": {
@@ -363,6 +396,29 @@
       },
       "forwarders": {
         "name": "转发程序"
+      },
+      "bridge_status": {
+        "name": "状态",
+        "state": {
+          "ok": "正常",
+          "warn": "警告",
+          "fail": "故障"
+        }
+      },
+      "bridge_version": {
+        "name": "版本"
+      },
+      "bridge_titles": {
+        "name": "游戏"
+      },
+      "bridge_files_pending": {
+        "name": "待哈希文件"
+      },
+      "bridge_transfers": {
+        "name": "传输"
+      },
+      "bridge_errors": {
+        "name": "错误"
       }
     },
     "switch": {
@@ -536,7 +592,8 @@
     },
     "logbook_command_waiting": {
       "message": "正在等待 PlayGuard 确认 {order}"
-    }
+    },
+    "bridge_unreachable": "Lantern 桥在 {url} 没有响应。"
   },
   "issues": {
     "newer_schema": {

@@ -26,7 +26,7 @@ from custom_components.boreale.const import (
     DOMAIN,
 )
 
-from .conftest import CONSOLE_ID, fixture
+from .conftest import CONSOLE_ID, fixture, start_console_flow
 
 
 def _info(topic: str, payload: str) -> MqttServiceInfo:
@@ -68,9 +68,7 @@ def short_scan():
 async def _scanned(hass: HomeAssistant, mqtt_mock, retained: list[tuple[str, str]]) -> dict:
     """Adding a console by hand, the broker handing these retained states over
     once the flow listens."""
-    task = hass.async_create_task(
-        hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
-    )
+    task = hass.async_create_task(start_console_flow(hass))
     with patch("custom_components.boreale.config_flow.SCAN_TIMEOUT", 0.5):
         for _ in range(100):
             subscribed = {c.args[0] for c in mqtt_mock.async_subscribe.call_args_list}
@@ -218,7 +216,7 @@ async def test_found_on_the_broker(hass: HomeAssistant, mqtt_mock) -> None:
         ],
     )
     assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "user"
+    assert result["step_id"] == "console"
     assert _choices(result) == [
         ("0badc0de", "Chambre (0badc0de), home/playguard"),
         ("0000abcd", "Nintendo Switch (0000abcd)"),
@@ -256,7 +254,7 @@ async def test_found_already_set_up(hass: HomeAssistant, setup, mqtt_mock) -> No
 
 async def test_by_hand(hass: HomeAssistant, mqtt_mock, no_wait) -> None:
     # No console on the broker: its id is asked at once.
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await start_console_flow(hass)
     assert result["step_id"] == "manual"
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_CONSOLE_ID: "nope", CONF_PREFIX: "playguard"}
@@ -291,7 +289,7 @@ async def test_by_hand_while_discovered(hass: HomeAssistant, mqtt_mock) -> None:
         DOMAIN, context={"source": config_entries.SOURCE_MQTT}, data=info
     )
     assert discovered["step_id"] == "confirm"
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await start_console_flow(hass)
     topic = f"playguard/{CONSOLE_ID}/state"
     step = hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"}
@@ -302,7 +300,7 @@ async def test_by_hand_while_discovered(hass: HomeAssistant, mqtt_mock) -> None:
 
 
 async def test_by_hand_already_configured(hass: HomeAssistant, setup) -> None:
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await start_console_flow(hass)
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"}
     )
@@ -311,7 +309,7 @@ async def test_by_hand_already_configured(hass: HomeAssistant, setup) -> None:
 
 
 async def test_by_hand_without_mqtt(hass: HomeAssistant) -> None:
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await start_console_flow(hass)
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "mqtt_not_ready"
 

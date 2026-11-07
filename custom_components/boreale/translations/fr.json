@@ -7,13 +7,10 @@
         "description": "Ajouter **{name}** (identifiant `{console_id}`) ? Son appareil Home Assistant d'origine (découverte MQTT) est remplacé par celui de cette intégration, avec les mêmes entités, les noms des jeux, le temps de jeu de la semaine et des statistiques à long terme."
       },
       "user": {
-        "title": "Ajouter une console PlayGuard",
-        "description": "Les consoles dont l'état est sur le broker et qui ne sont pas encore ajoutées. Choisissez-en une, ou une autre console pour l'ajouter par son identifiant.",
-        "data": {
-          "console": "Console"
-        },
-        "data_description": {
-          "console": "Son nom et son identifiant, et son préfixe de topics quand ce n'est pas playguard."
+        "title": "Ajouter un appareil",
+        "menu_options": {
+          "console": "Une console PlayGuard",
+          "bridge": "Un pont Lantern"
         }
       },
       "manual": {
@@ -37,12 +34,45 @@
         "data_description": {
           "topic_prefix": "playguard, sauf si sync.conf dit autre chose."
         }
+      },
+      "console": {
+        "title": "Ajouter une console PlayGuard",
+        "description": "Les consoles dont l'état est sur le broker et qui ne sont pas encore ajoutées. Choisissez-en une, ou une autre console pour l'ajouter par son identifiant.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "Son nom et son identifiant, et son préfixe de topics quand ce n'est pas playguard."
+        }
+      },
+      "bridge": {
+        "title": "Ajouter un pont Lantern",
+        "description": "L'adresse de l'interface web du pont, par exemple `http://192.168.1.20:8080`. Activez les métriques dans les réglages du pont pour avoir les compteurs ; l'état et la version n'ont besoin de rien.",
+        "data": {
+          "url": "Adresse"
+        },
+        "data_description": {
+          "url": "L'adresse du pont sur votre réseau, avec son port."
+        }
+      },
+      "reconfigure_bridge": {
+        "title": "Changer l'adresse du pont",
+        "description": "La nouvelle adresse du même pont.",
+        "data": {
+          "url": "Adresse"
+        },
+        "data_description": {
+          "url": "L'adresse du pont sur votre réseau, avec son port."
+        }
       }
     },
     "error": {
       "invalid_console_id": "Un identifiant de console fait 8 caractères, de 0 à 9 et de a à f.",
       "invalid_prefix": "Ce préfixe ne peut pas faire partie d'un topic MQTT.",
-      "no_state": "Cette console n'a rien publié sur le broker sous ce préfixe. Vérifiez l'identifiant de la console et le préfixe, et que le lien de la console a fonctionné une fois (PlayGuard › Console › Accès à distance › État)."
+      "no_state": "Cette console n'a rien publié sur le broker sous ce préfixe. Vérifiez l'identifiant de la console et le préfixe, et que le lien de la console a fonctionné une fois (PlayGuard › Console › Accès à distance › État).",
+      "cannot_connect": "Rien ne répond à cette adresse.",
+      "not_a_bridge": "Cette adresse répond, mais pas comme un pont Lantern d'une version récente.",
+      "other_bridge": "Un autre pont répond à cette adresse."
     },
     "abort": {
       "already_configured": "Cette console est déjà configurée.",
@@ -109,6 +139,9 @@
       },
       "docked": {
         "name": "Sur le dock"
+      },
+      "bridge_reachable": {
+        "name": "Joignable"
       }
     },
     "button": {
@@ -363,6 +396,29 @@
       },
       "forwarders": {
         "name": "Forwarders"
+      },
+      "bridge_status": {
+        "name": "État",
+        "state": {
+          "ok": "OK",
+          "warn": "Avertissement",
+          "fail": "En panne"
+        }
+      },
+      "bridge_version": {
+        "name": "Version"
+      },
+      "bridge_titles": {
+        "name": "Titres"
+      },
+      "bridge_files_pending": {
+        "name": "Fichiers à hacher"
+      },
+      "bridge_transfers": {
+        "name": "Transferts"
+      },
+      "bridge_errors": {
+        "name": "Erreurs"
       }
     },
     "switch": {
@@ -536,7 +592,8 @@
     },
     "logbook_command_waiting": {
       "message": "attend la confirmation de PlayGuard pour {order}"
-    }
+    },
+    "bridge_unreachable": "Le pont Lantern ne répond pas à l'adresse {url}."
   },
   "issues": {
     "newer_schema": {

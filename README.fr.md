@@ -146,6 +146,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   console).
 - La **sysMMC et l'emuMMC** d'une console sont deux appareils : chacune a son
   propre contrôle parental et son propre identifiant de console.
+- Un **pont Lantern** ([lantern-bridge](https://github.com/JigSawFr/lantern-bridge), 0.1 ou plus récent) : son état, sa version et ses compteurs, lus en HTTP. Voir *Configuration › Un pont Lantern*.
 - **Non pris en charge** : la Nintendo Switch 2 (Atmosphère n'existe pas pour
   elle), et une console sans PlayGuard. Pour l'application et le compte
   Contrôle parental de Nintendo, voyez plutôt l'intégration *Nintendo Switch
@@ -263,6 +264,22 @@ agent actif) apparaît dans *Paramètres › Appareils et services › Découver
 
 Chaque console est une entrée et un appareil ; la même console ne peut pas être
 ajoutée deux fois.
+
+**Un pont Lantern.** *Ajouter une intégration › Boréale for Nintendo Switch*, puis
+*Un pont Lantern*, et l'adresse de son interface web (par exemple
+`http://192.168.1.20:8080`). Le pont doit répondre à `/healthz` depuis votre
+réseau et dire qui il est, ce que font les versions 0.1 et suivantes. C'est une entrée et
+un appareil, reconnu par l'identifiant du pont : si son adresse change,
+*Reconfigurer* donne la nouvelle, et un autre pont à cette adresse est refusé.
+
+| Entité | Ce que c'est |
+|---|---|
+| **État** | `ok`, `warn` ou `fail`, la santé du pont (sources joignables, scans récents, disque, index). |
+| **Version**, **Joignable** | Diagnostic : la version du pont, et s'il répond. |
+| **Titres**, **Fichiers à hacher**, **Transferts**, **Erreurs** | Les compteurs du pont. Ils demandent d'activer les *Métriques* dans les réglages du pont ; sans elles, ces quatre entités sont indisponibles, l'état et la version viennent quand même. |
+
+Le pont est lu toutes les 60 secondes ; Home Assistant doit être sur son réseau local (la
+version, l'identifiant et `/metrics` ne sont donnés qu'au réseau local).
 
 ## 🔧 Options et reconfiguration
 
@@ -613,8 +630,9 @@ lists:
 
 ## 🔄 Mise à jour des données
 
-Rien n'est interrogé : la console pousse par MQTT, et Home Assistant ne fait
-qu'écouter.
+Rien n'est interrogé pour une console : elle pousse par MQTT, et Home Assistant ne fait
+qu'écouter. (Le pont Lantern fait exception : il est lu toutes les 60 secondes en
+HTTP.)
 
 - La console publie son **état** quand il change, et toutes les `poll_s`
   secondes pour un horodatage frais (30 par défaut, de 10 à 300, dans son
@@ -850,6 +868,7 @@ de ses entrées), ou dans la copie du blueprint dans
 
 ## 🚧 Limites connues
 
+- L'entrée d'un pont Lantern demande encore que l'intégration MQTT de Home Assistant soit configurée (l'intégration la charge pour les consoles).
 - PlayGuard tourne sur une console sous firmware personnalisé (Atmosphère) ; il
   n'y en a pas pour la Nintendo Switch 2.
 - Certaines choses ne sont jamais possibles depuis Home Assistant, par

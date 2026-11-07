@@ -3,7 +3,10 @@ rules:
   action-setup: done
   appropriate-polling:
     status: exempt
-    comment: Nothing is polled; the console pushes its documents over MQTT.
+    comment: >-
+      A console pushes its documents over MQTT, nothing is polled. A Lantern
+      bridge, which cannot push, is read every 60 seconds (its status is one
+      light request, its figures a second one).
   brands: done
   common-modules: done
   config-flow: done

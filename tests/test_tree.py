@@ -15,7 +15,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, async_
 from custom_components.boreale.config_flow import _where
 from custom_components.boreale.const import CONF_CONSOLE_ID, CONF_PREFIX, CONF_TAKE_OVER, CONF_TREE, DOMAIN
 
-from .conftest import BASE, CONSOLE_ID, fixture
+from .conftest import BASE, CONSOLE_ID, fixture, start_console_flow
 from .test_config_flow import _answered, _choices, _scanned, _state_of
 
 TREE = f"boreale/{CONSOLE_ID}"  # the device's topics
@@ -135,7 +135,7 @@ async def test_set_up_on_the_tree(hass: HomeAssistant, mqtt_mock, tree_entry: Mo
 
 async def test_by_hand_on_the_tree(hass: HomeAssistant, mqtt_mock) -> None:
     """The default prefix finds a console on Boréale's tree too."""
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    result = await start_console_flow(hass)
     assert result["step_id"] == "manual"
     step = hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "playguard"}

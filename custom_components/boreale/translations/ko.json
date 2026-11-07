@@ -7,13 +7,10 @@
         "description": "**{name}**(본체 ID `{console_id}`)을(를) 추가할까요? 본체 자체의 Home Assistant 기기(MQTT 자동 검색)는 이 통합구성요소의 기기로 대체되며, 엔티티, 소프트웨어 이름, 이번 주 플레이 시간과 장기 통계는 그대로 유지됩니다."
       },
       "user": {
-        "title": "PlayGuard 본체 추가",
-        "description": "브로커에 상태가 있고 아직 설정되지 않은 본체입니다. 하나를 선택하거나, 다른 본체를 선택해 ID로 추가하세요.",
-        "data": {
-          "console": "본체"
-        },
-        "data_description": {
-          "console": "이름과 ID, 그리고 토픽 접두사가 playguard가 아닐 때는 그 접두사."
+        "title": "기기 추가",
+        "menu_options": {
+          "console": "PlayGuard 콘솔",
+          "bridge": "Lantern 브리지"
         }
       },
       "manual": {
@@ -37,12 +34,45 @@
         "data_description": {
           "topic_prefix": "sync.conf에서 따로 정하지 않았다면 playguard."
         }
+      },
+      "console": {
+        "title": "PlayGuard 본체 추가",
+        "description": "브로커에 상태가 있고 아직 설정되지 않은 본체입니다. 하나를 선택하거나, 다른 본체를 선택해 ID로 추가하세요.",
+        "data": {
+          "console": "본체"
+        },
+        "data_description": {
+          "console": "이름과 ID, 그리고 토픽 접두사가 playguard가 아닐 때는 그 접두사."
+        }
+      },
+      "bridge": {
+        "title": "Lantern 브리지 추가",
+        "description": "브리지 웹 인터페이스의 주소입니다. 예: `http://192.168.1.20:8080`. 카운터를 보려면 브리지 설정에서 메트릭을 켜세요. 상태와 버전은 설정이 필요 없습니다.",
+        "data": {
+          "url": "주소"
+        },
+        "data_description": {
+          "url": "네트워크에서의 브리지 주소(포트 포함)."
+        }
+      },
+      "reconfigure_bridge": {
+        "title": "브리지 주소 변경",
+        "description": "같은 브리지의 새 주소입니다.",
+        "data": {
+          "url": "주소"
+        },
+        "data_description": {
+          "url": "네트워크에서의 브리지 주소(포트 포함)."
+        }
       }
     },
     "error": {
       "invalid_console_id": "본체 ID는 0~9와 a~f로 된 8자입니다.",
       "invalid_prefix": "이 접두사는 MQTT 토픽에 사용할 수 없습니다.",
-      "no_state": "이 본체는 이 접두사로 브로커에 아무것도 게시하지 않았습니다. 본체 ID와 접두사를 확인하고, 본체 연결이 한 번은 이루어졌는지 확인하세요(PlayGuard › 본체 › 원격 접속 › 상태)."
+      "no_state": "이 본체는 이 접두사로 브로커에 아무것도 게시하지 않았습니다. 본체 ID와 접두사를 확인하고, 본체 연결이 한 번은 이루어졌는지 확인하세요(PlayGuard › 본체 › 원격 접속 › 상태).",
+      "cannot_connect": "이 주소는 응답하지 않습니다.",
+      "not_a_bridge": "이 주소는 응답하지만 최근 버전의 Lantern 브리지가 아닙니다.",
+      "other_bridge": "이 주소에서는 다른 브리지가 응답합니다."
     },
     "abort": {
       "already_configured": "이 본체는 이미 설정되어 있습니다.",
@@ -109,6 +139,9 @@
       },
       "docked": {
         "name": "독 연결됨"
+      },
+      "bridge_reachable": {
+        "name": "연결 가능"
       }
     },
     "button": {
@@ -363,6 +396,29 @@
       },
       "forwarders": {
         "name": "포워더"
+      },
+      "bridge_status": {
+        "name": "상태",
+        "state": {
+          "ok": "정상",
+          "warn": "경고",
+          "fail": "고장"
+        }
+      },
+      "bridge_version": {
+        "name": "버전"
+      },
+      "bridge_titles": {
+        "name": "타이틀"
+      },
+      "bridge_files_pending": {
+        "name": "해시할 파일"
+      },
+      "bridge_transfers": {
+        "name": "전송"
+      },
+      "bridge_errors": {
+        "name": "오류"
       }
     },
     "switch": {
@@ -536,7 +592,8 @@
     },
     "logbook_command_waiting": {
       "message": "{order}에 대한 PlayGuard의 확인을 기다리는 중"
-    }
+    },
+    "bridge_unreachable": "Lantern 브리지가 {url}에서 응답하지 않습니다."
   },
   "issues": {
     "newer_schema": {

@@ -24,6 +24,9 @@
       },
       "clock_accurate": {
         "default": "mdi:clock-check-outline"
+      },
+      "bridge_reachable": {
+        "default": "mdi:lan-connect"
       }
     },
     "button": {
@@ -122,6 +125,24 @@
       },
       "homebrew_notices": {
         "default": "mdi:bell-badge"
+      },
+      "bridge_status": {
+        "default": "mdi:lan-check"
+      },
+      "bridge_version": {
+        "default": "mdi:tag-outline"
+      },
+      "bridge_titles": {
+        "default": "mdi:bookshelf"
+      },
+      "bridge_files_pending": {
+        "default": "mdi:file-clock-outline"
+      },
+      "bridge_transfers": {
+        "default": "mdi:swap-vertical"
+      },
+      "bridge_errors": {
+        "default": "mdi:alert-circle-outline"
       }
     },
     "switch": {

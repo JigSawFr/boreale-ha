@@ -7,13 +7,10 @@
         "description": "**{name}** (console-ID `{console_id}`) toevoegen? Het eigen Home Assistant-apparaat van de console (MQTT-discovery) wordt vervangen door dat van deze integratie, met dezelfde entiteiten, de namen van de games, de speeltijd van de week en langetermijnstatistieken."
       },
       "user": {
-        "title": "Een PlayGuard-console toevoegen",
-        "description": "De consoles waarvan de status op de broker staat en die nog niet zijn ingesteld. Kies er een, of een andere console om die via zijn ID toe te voegen.",
-        "data": {
-          "console": "Console"
-        },
-        "data_description": {
-          "console": "De naam en ID, en het topicvoorvoegsel als dat niet playguard is."
+        "title": "Een apparaat toevoegen",
+        "menu_options": {
+          "console": "Een PlayGuard-console",
+          "bridge": "Een Lantern-bridge"
         }
       },
       "manual": {
@@ -37,12 +34,45 @@
         "data_description": {
           "topic_prefix": "playguard, tenzij sync.conf iets anders zegt."
         }
+      },
+      "console": {
+        "title": "Een PlayGuard-console toevoegen",
+        "description": "De consoles waarvan de status op de broker staat en die nog niet zijn ingesteld. Kies er een, of een andere console om die via zijn ID toe te voegen.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "De naam en ID, en het topicvoorvoegsel als dat niet playguard is."
+        }
+      },
+      "bridge": {
+        "title": "Een Lantern-bridge toevoegen",
+        "description": "Het adres van de webinterface van de bridge, zoals `http://192.168.1.20:8080`. Zet de statistieken aan in de instellingen van de bridge voor de tellers; status en versie hebben niets nodig.",
+        "data": {
+          "url": "Adres"
+        },
+        "data_description": {
+          "url": "Het adres van de bridge in je netwerk, met poort."
+        }
+      },
+      "reconfigure_bridge": {
+        "title": "Het adres van de bridge wijzigen",
+        "description": "Het nieuwe adres van dezelfde bridge.",
+        "data": {
+          "url": "Adres"
+        },
+        "data_description": {
+          "url": "Het adres van de bridge in je netwerk, met poort."
+        }
       }
     },
     "error": {
       "invalid_console_id": "Een console-ID heeft 8 tekens, 0 tot 9 en a tot f.",
       "invalid_prefix": "Dit voorvoegsel kan geen deel zijn van een MQTT-topic.",
-      "no_state": "Deze console heeft onder dit voorvoegsel niets op de broker gepubliceerd. Controleer de console-ID en het voorvoegsel, en of de verbinding van de console één keer actief is geweest (PlayGuard › Console › Toegang op afstand › Status)."
+      "no_state": "Deze console heeft onder dit voorvoegsel niets op de broker gepubliceerd. Controleer de console-ID en het voorvoegsel, en of de verbinding van de console één keer actief is geweest (PlayGuard › Console › Toegang op afstand › Status).",
+      "cannot_connect": "Op dit adres antwoordt niets.",
+      "not_a_bridge": "Dit adres antwoordt, maar niet als een Lantern-bridge van een recente versie.",
+      "other_bridge": "Op dit adres antwoordt een andere bridge."
     },
     "abort": {
       "already_configured": "Deze console is al ingesteld.",
@@ -109,6 +139,9 @@
       },
       "docked": {
         "name": "In het dock"
+      },
+      "bridge_reachable": {
+        "name": "Bereikbaar"
       }
     },
     "button": {
@@ -363,6 +396,29 @@
       },
       "forwarders": {
         "name": "Forwarders"
+      },
+      "bridge_status": {
+        "name": "Status",
+        "state": {
+          "ok": "OK",
+          "warn": "Waarschuwing",
+          "fail": "Storing"
+        }
+      },
+      "bridge_version": {
+        "name": "Versie"
+      },
+      "bridge_titles": {
+        "name": "Titels"
+      },
+      "bridge_files_pending": {
+        "name": "Te hashen bestanden"
+      },
+      "bridge_transfers": {
+        "name": "Overdrachten"
+      },
+      "bridge_errors": {
+        "name": "Fouten"
       }
     },
     "switch": {
@@ -536,7 +592,8 @@
     },
     "logbook_command_waiting": {
       "message": "wacht op de bevestiging van PlayGuard: {order}"
-    }
+    },
+    "bridge_unreachable": "De Lantern-bridge antwoordt niet op {url}."
   },
   "issues": {
     "newer_schema": {
