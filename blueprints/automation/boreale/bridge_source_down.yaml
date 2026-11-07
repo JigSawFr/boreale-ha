@@ -1,0 +1,102 @@
+blueprint:
+  name: Lantern bridge — a source stopped answering
+  description: >-
+    When a Lantern bridge has had a source that does not answer for a while, a
+    notification on a phone, with a button that asks the bridge to read its
+    sources again. Needs the Home Assistant app on the phone.
+  domain: automation
+  author: JigSawFr
+  homeassistant:
+    min_version: 2026.10.0
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/boreale/bridge_source_down.yaml
+  input:
+    sources_down:
+      name: Sources down
+      description: The bridge's *Sources down* sensor.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: sensor
+    rescan:
+      name: Rescan
+      description: The bridge's *Rescan* button, pressed by the notification's button.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: button
+    phone:
+      name: Phone
+      description: The phone told (the Home Assistant app).
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+    down_for:
+      name: Down for
+      description: How long a source must stay down before anyone is told.
+      default:
+        hours: 0
+        minutes: 5
+        seconds: 0
+      selector:
+        duration:
+    message:
+      name: Message
+      default: A source of the bridge does not answer.
+      selector:
+        text:
+    button:
+      name: Button
+      description: The notification button's label.
+      default: Read again
+      selector:
+        text:
+    wait:
+      name: Button valid for
+      description: How long the notification's button asks for a new read.
+      default:
+        hours: 1
+        minutes: 0
+        seconds: 0
+      selector:
+        duration:
+
+mode: single
+max_exceeded: silent
+
+triggers:
+  - trigger: numeric_state
+    entity_id: !input sources_down
+    above: 0
+    for: !input down_for
+
+variables:
+  sources_down: !input sources_down
+  bridge: "{{ device_id(sources_down) }}"
+
+actions:
+  # The button's id: this run's own, so an older notification's does nothing.
+  - variables:
+      again: "{{ 'LANTERN_BRIDGE_RESCAN_' ~ context.id }}"
+  - domain: mobile_app
+    type: notify
+    device_id: !input phone
+    title: "{{ device_attr(bridge, 'name_by_user') or device_attr(bridge, 'name') }}"
+    message: !input message
+    data:
+      tag: "{{ 'lantern_bridge_source_down_' ~ bridge }}"
+      actions:
+        - action: "{{ again }}"
+          title: !input button
+  - wait_for_trigger:
+      - trigger: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ again }}"
+    timeout: !input wait
+    continue_on_timeout: false
+  - action: button.press
+    target:
+      entity_id: !input rescan

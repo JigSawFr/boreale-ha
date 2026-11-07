@@ -27,6 +27,13 @@ import yaml
 from custom_components.boreale.const import DOMAIN
 
 from .conftest import BASE, CONSOLE_ID, fixture, publish
+from .test_bridge import (
+    BASE as BRIDGE_BASE,
+    STATE as BRIDGE_STATE,
+    UID as BRIDGE_UID,
+    _publish as bridge_publish,
+    _set_up as set_up_bridge,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 BLUEPRINTS = ROOT / "blueprints"
@@ -445,3 +452,105 @@ async def test_weekly_summary_other_days(
     _local(freezer, hass, "09:00:00")
     await hass.async_block_till_done()
     assert notified == []  # Sunday
+
+
+def _bridge_id(hass: HomeAssistant, platform: str, key: str) -> str:
+    entity_id = er.async_get(hass).async_get_entity_id(platform, DOMAIN, f"bridge_{BRIDGE_UID}_bridge_{key}")
+    assert entity_id, key
+    return entity_id
+
+
+async def _yield() -> None:
+    """Lets the loop run a little: an automation in a delay keeps hass.async_block_till_done() waiting."""
+    for _ in range(50):
+        await asyncio.sleep(0)
+
+
+def _rescans(mqtt_mock) -> int:
+    return sum(1 for c in mqtt_mock.async_publish.call_args_list if c.args[0] == f"{BRIDGE_BASE}/order/rescan")
+
+
+def _later(freezer: FrozenDateTimeFactory, hass: HomeAssistant, minutes: int) -> None:
+    freezer.tick(minutes * 60)
+    async_fire_time_changed(hass)
+
+
+ALL_UP = {**BRIDGE_STATE, "sources": [{"id": "games", "kind": "folder", "up": True}]}
+ONE_DOWN = {**BRIDGE_STATE, "sources": [{"id": "games", "kind": "folder", "up": False}]}
+
+
+async def test_bridge_source_down(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, mqtt_mock, phone, notified
+) -> None:
+    await set_up_bridge(hass, mqtt_mock, ALL_UP)
+    inputs = {
+        "sources_down": _bridge_id(hass, "sensor", "sources_down"),
+        "rescan": _bridge_id(hass, "button", "rescan"),
+        "phone": phone,
+    }
+    await _automation(hass, "bridge_source_down.yaml", inputs)
+    # A source that is back before the wait is over tells nobody.
+    bridge_publish(hass, "state", ONE_DOWN)
+    await hass.async_block_till_done()
+    _later(freezer, hass, 2)
+    bridge_publish(hass, "state", ALL_UP)
+    await hass.async_block_till_done()
+    _later(freezer, hass, 10)
+    await hass.async_block_till_done()
+    assert notified == []
+    # One that stays down does, once the wait is over.
+    bridge_publish(hass, "state", ONE_DOWN)
+    await hass.async_block_till_done()
+    assert notified == []
+    _later(freezer, hass, 6)
+    await _soon(lambda: notified)
+    [sent] = notified
+    assert sent["title"] == "Shelf" and sent["message"] == "A source of the bridge does not answer."
+    assert sent["data"]["tag"].startswith("lantern_bridge_source_down_")
+    [button] = sent["data"]["actions"]
+    assert button["title"] == "Read again" and button["action"].startswith("LANTERN_BRIDGE_RESCAN_")
+    # Another notification's button does nothing; this one's asks for a new read.
+    assert _rescans(mqtt_mock) == 0
+    hass.bus.async_fire("mobile_app_notification_action", {"action": "LANTERN_BRIDGE_RESCAN_other"})
+    for _ in range(20):
+        await asyncio.sleep(0)
+    assert _rescans(mqtt_mock) == 0
+    hass.bus.async_fire("mobile_app_notification_action", {"action": button["action"]})
+    await hass.async_block_till_done()
+    assert _rescans(mqtt_mock) == 1
+
+
+async def test_bridge_rescan_when_back(hass: HomeAssistant, freezer: FrozenDateTimeFactory, mqtt_mock) -> None:
+    await set_up_bridge(hass, mqtt_mock, ALL_UP)
+    hass.states.async_set("binary_sensor.nas", "off")
+    await _automation(
+        hass,
+        "bridge_rescan_when_back.yaml",
+        {"machine": "binary_sensor.nas", "rescan": _bridge_id(hass, "button", "rescan")},
+    )
+    hass.states.async_set("binary_sensor.nas", "on")
+    await _yield()
+    assert _rescans(mqtt_mock) == 0  # it waits for the services to start
+    _later(freezer, hass, 2)
+    await _soon(lambda: _rescans(mqtt_mock) == 1)
+    hass.states.async_set("binary_sensor.nas", "off")  # going away asks for nothing
+    await _yield()
+    _later(freezer, hass, 5)
+    await _yield()
+    assert _rescans(mqtt_mock) == 1
+
+
+async def test_bridge_rescan_when_a_tracker_is_home(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, mqtt_mock
+) -> None:
+    await set_up_bridge(hass, mqtt_mock, ALL_UP)
+    hass.states.async_set("device_tracker.nas", "not_home")
+    await _automation(
+        hass,
+        "bridge_rescan_when_back.yaml",
+        {"machine": "device_tracker.nas", "state": "home", "rescan": _bridge_id(hass, "button", "rescan")},
+    )
+    hass.states.async_set("device_tracker.nas", "home")
+    await _yield()
+    _later(freezer, hass, 2)
+    await _soon(lambda: _rescans(mqtt_mock) == 1)
