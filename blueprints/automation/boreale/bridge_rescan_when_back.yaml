@@ -1,0 +1,56 @@
+blueprint:
+  name: Lantern bridge — read the sources again when a machine is back
+  description: >-
+    When the machine that holds your games (a NAS, a PC, a shop's server) turns
+    on or is back on the network, wait a little and ask the bridge to read its
+    sources again, so what was out of reach while it slept is read at once.
+  domain: automation
+  author: JigSawFr
+  homeassistant:
+    min_version: 2026.10.0
+  source_url: https://github.com/JigSawFr/boreale-ha/blob/main/blueprints/automation/boreale/bridge_rescan_when_back.yaml
+  input:
+    machine:
+      name: Machine
+      description: >-
+        What says the machine is there: a switch, a binary sensor (a ping, a
+        power plug) or a device tracker.
+      selector:
+        entity:
+    state:
+      name: State when it is there
+      description: "`on` for a switch or a binary sensor, `home` for a device tracker."
+      default: "on"
+      selector:
+        text:
+    rescan:
+      name: Rescan
+      description: The bridge's *Rescan* button.
+      selector:
+        entity:
+          filter:
+            - integration: boreale
+              domain: button
+    delay:
+      name: Wait
+      description: Time for its services to start before the bridge reads.
+      default:
+        hours: 0
+        minutes: 1
+        seconds: 0
+      selector:
+        duration:
+
+mode: single
+max_exceeded: silent
+
+triggers:
+  - trigger: state
+    entity_id: !input machine
+    to: !input state
+
+actions:
+  - delay: !input delay
+  - action: button.press
+    target:
+      entity_id: !input rescan
