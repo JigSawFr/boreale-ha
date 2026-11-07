@@ -2,20 +2,28 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 import json
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
 from homeassistant import config_entries
+from homeassistant.components.repairs import repairs_flow_manager
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import entity_registry as er, issue_registry as ir
 from homeassistant.helpers.service_info.mqtt import MqttServiceInfo
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_mqtt_message
+from homeassistant.setup import async_setup_component
+from homeassistant.util import dt as dt_util
+from pytest_homeassistant_custom_component.common import (
+    MockConfigEntry,
+    async_fire_mqtt_message,
+    async_fire_time_changed,
+)
 
-from custom_components.boreale.bridge import bridge_of, parse_state
+from custom_components.boreale.bridge import GONE_AFTER, bridge_of, newer_schema, parse_state
 from custom_components.boreale.const import (
     CONF_BRIDGE_ID,
     CONF_BRIDGE_PREFIX,
@@ -269,3 +277,126 @@ def test_every_bridge_entity_is_named_and_has_its_icon() -> None:
     for platform, found in keys.items():
         for key in found:
             assert f"bridge_{key}" in names[platform] and f"bridge_{key}" in icons[platform], key
+
+
+def _issues(hass: HomeAssistant) -> dict[str, ir.IssueEntry]:
+    return {
+        issue_id: issue
+        for (domain, issue_id), issue in ir.async_get(hass).issues.items()
+        if domain == DOMAIN and issue_id.startswith("bridge_")
+    }
+
+
+async def test_a_source_that_does_not_answer_is_a_repair_that_goes_with_it(hass: HomeAssistant, mqtt_mock) -> None:
+    await _set_up(hass, mqtt_mock)
+    issues = _issues(hass)
+    assert list(issues) == [f"bridge_source_{UID}_shop"]  # STATE has the shop down, the folder up
+    issue = issues[f"bridge_source_{UID}_shop"]
+    assert issue.is_fixable and issue.translation_key == "bridge_source_down"
+    assert issue.translation_placeholders == {"name": "Shelf", "source": "shop"}
+    assert issue.severity is ir.IssueSeverity.WARNING
+    up = {
+        **STATE,
+        "sources": [{"id": "games", "kind": "folder", "up": True}, {"id": "shop", "kind": "tinfoil", "up": True}],
+    }
+    _publish(hass, "state", up)
+    await hass.async_block_till_done()
+    assert _issues(hass) == {}
+
+
+async def test_the_repair_asks_the_bridge_to_read_its_sources_again(hass: HomeAssistant, mqtt_mock) -> None:
+    assert await async_setup_component(hass, "repairs", {})
+    await _set_up(hass, mqtt_mock)
+    mqtt_mock.async_publish.reset_mock()
+    flows = repairs_flow_manager(hass)
+    result = await flows.async_init(DOMAIN, context={"issue_id": f"bridge_source_{UID}_shop"})
+    assert result["step_id"] == "confirm"
+    result = await flows.async_configure(result["flow_id"], {})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert mqtt_mock.async_publish.call_args.args == (f"{BASE}/order/rescan", "", 0, False)
+
+
+async def test_a_repair_for_an_entry_that_is_not_loaded_orders_nothing(hass: HomeAssistant, mqtt_mock) -> None:
+    assert await async_setup_component(hass, "repairs", {})
+    entry = await _set_up(hass, mqtt_mock)
+    flows = repairs_flow_manager(hass)
+    result = await flows.async_init(DOMAIN, context={"issue_id": f"bridge_source_{UID}_shop"})
+    ir.async_create_issue(  # the repair is still there when the entry is unloaded: the order has nobody to go to
+        hass, DOMAIN, "bridge_other", is_fixable=True, severity=ir.IssueSeverity.WARNING,
+        translation_key="bridge_source_down", translation_placeholders={"name": "x", "source": "y"},
+        data={"entry_id": entry.entry_id, "kind": "rescan"},
+    )  # fmt: skip
+    await hass.config_entries.async_unload(entry.entry_id)
+    mqtt_mock.async_publish.reset_mock()
+    other = await flows.async_init(DOMAIN, context={"issue_id": "bridge_other"})
+    done = await flows.async_configure(other["flow_id"], {})
+    assert done["type"] is FlowResultType.CREATE_ENTRY and not mqtt_mock.async_publish.called
+    assert result["step_id"] == "confirm"
+
+
+async def test_the_disk_is_a_repair_by_its_gravity(hass: HomeAssistant, mqtt_mock) -> None:
+    await _set_up(hass, mqtt_mock, {**STATE, "checks": [{"name": "disk", "status": "warn"}]})
+    issue = _issues(hass)[f"bridge_disk_{UID}"]
+    assert issue.severity is ir.IssueSeverity.WARNING and not issue.is_fixable
+    _publish(hass, "state", {**STATE, "checks": [{"name": "disk", "status": "fail"}]})
+    await hass.async_block_till_done()
+    assert _issues(hass)[f"bridge_disk_{UID}"].severity is ir.IssueSeverity.ERROR
+    _publish(hass, "state", {**STATE, "checks": [{"name": "disk", "status": "ok"}, "odd", {"name": "x"}]})
+    await hass.async_block_till_done()
+    assert f"bridge_disk_{UID}" not in _issues(hass)
+
+
+async def test_a_bridge_gone_for_a_while_is_a_repair_but_not_a_restart(hass: HomeAssistant, mqtt_mock) -> None:
+    await _set_up(hass, mqtt_mock)
+    _publish(hass, "availability", "offline")
+    await hass.async_block_till_done()
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=GONE_AFTER // 2))
+    await hass.async_block_till_done()
+    assert f"bridge_gone_{UID}" not in _issues(hass)  # not yet
+    _publish(hass, "availability", "offline")  # a second will changes nothing
+    _publish(hass, "availability", "online")
+    await hass.async_block_till_done()
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=GONE_AFTER + 5))
+    await hass.async_block_till_done()
+    assert f"bridge_gone_{UID}" not in _issues(hass)  # it came back in time: the timer is gone
+    _publish(hass, "availability", "offline")
+    await hass.async_block_till_done()
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=GONE_AFTER + 5))
+    await hass.async_block_till_done()
+    assert _issues(hass)[f"bridge_gone_{UID}"].translation_key == "bridge_gone"
+    _publish(hass, "availability", "online")
+    await hass.async_block_till_done()
+    assert f"bridge_gone_{UID}" not in _issues(hass)
+
+
+async def test_a_newer_schema_is_a_repair_until_a_state_is_read(hass: HomeAssistant, mqtt_mock) -> None:
+    assert newer_schema(json.dumps({**STATE, "schema": 2})) == 2
+    for fine in (
+        "",
+        "nope",
+        "[]",
+        json.dumps(STATE),
+        json.dumps({**STATE, "schema": True}),
+        json.dumps({"schema": "2"}),
+    ):
+        assert newer_schema(fine) is None
+    await _set_up(hass, mqtt_mock, None)
+    _publish(hass, "state", "nope")  # not a state at all: nothing to say
+    await hass.async_block_till_done()
+    assert _issues(hass) == {}
+    _publish(hass, "state", {**STATE, "schema": 2})
+    await hass.async_block_till_done()
+    issue = _issues(hass)[f"bridge_schema_{UID}"]
+    assert issue.translation_placeholders == {"name": "Shelf", "schema": "2", "known": "1"}
+    _publish(hass, "state", STATE)
+    await hass.async_block_till_done()
+    assert f"bridge_schema_{UID}" not in _issues(hass)
+
+
+async def test_nothing_is_left_to_repair_once_the_entry_is_unloaded(hass: HomeAssistant, mqtt_mock) -> None:
+    entry = await _set_up(hass, mqtt_mock)
+    _publish(hass, "availability", "offline")
+    await hass.async_block_till_done()
+    assert _issues(hass)
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    assert _issues(hass) == {}

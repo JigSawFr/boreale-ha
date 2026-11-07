@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard is now Boréale for Nintendo Switch",
       "description": "Your consoles moved from the integration {legacy} to Boréale, with their entities, their history and their statistics. Automations, scripts and blueprints that use its actions, triggers and conditions ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) must now use boreale.… instead: the old names no longer answer. Ignore this once done.\n\nThe old integration is still installed: uninstall PlayGuard in Settings › Marketplace (HACS before Home Assistant 2026.11), or delete the folder custom_components/{legacy}, then restart Home Assistant."
+    },
+    "bridge_source_down": {
+      "title": "{name}: the source {source} does not answer",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Read {source} again",
+            "description": "{name} cannot read its source {source}. Submit to ask the bridge to read its sources again now.\n\nIf it stays down, check the folder or the shop on the machine that runs the bridge. This goes away once the source answers."
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "The disk of {name} is nearly full",
+      "description": "{name} is short of room for its index. Free some space on the volume that holds its state folder, or lower the limit in its settings (Free space). This goes away once the bridge says so."
+    },
+    "bridge_gone": {
+      "title": "{name} has not answered for a while",
+      "description": "{name} told the broker it went away and has not come back for ten minutes. Check that the bridge runs and that its MQTT settings point to the same broker as Home Assistant. This goes away when it is back."
+    },
+    "bridge_newer_schema": {
+      "title": "{name} speaks a newer protocol",
+      "description": "{name} publishes schema {schema}; this integration knows schema {known}. Update the Boréale integration: its values are not shown until then."
     }
   },
   "selector": {

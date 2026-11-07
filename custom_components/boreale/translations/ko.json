@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard가 Boréale for Nintendo Switch가 되었습니다",
       "description": "콘솔이 엔터티, 기록, 통계와 함께 통합 {legacy}에서 Boréale로 옮겨졌습니다. 해당 액션, 트리거, 조건({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…)을 사용하는 자동화, 스크립트, 블루프린트는 이제 대신 boreale.…을 사용해야 합니다. 예전 이름은 더 이상 응답하지 않습니다. 처리가 끝나면 이 알림을 무시하세요.\n\n이전 통합이 아직 설치되어 있습니다. 설정 › Marketplace에서 PlayGuard를 제거하거나(Home Assistant 2026.11 이전에는 HACS) custom_components/{legacy} 폴더를 삭제한 다음 Home Assistant를 다시 시작하세요."
+    },
+    "bridge_source_down": {
+      "title": "{name}: 소스 {source}이(가) 응답하지 않습니다",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{source} 다시 읽기",
+            "description": "{name}이(가) 소스 {source}을(를) 읽지 못합니다. 제출하면 브리지가 지금 소스를 다시 읽도록 요청합니다.\n\n계속 중단되어 있으면 브리지가 실행되는 컴퓨터의 폴더나 상점을 확인하세요. 소스가 응답하면 이 항목은 사라집니다."
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "{name}의 디스크가 거의 가득 찼습니다",
+      "description": "{name}의 색인을 둘 공간이 부족합니다. 상태 폴더가 있는 볼륨의 공간을 확보하거나 설정(여유 공간)의 한도를 낮추세요. 브리지가 해소를 알리면 이 항목은 사라집니다."
+    },
+    "bridge_gone": {
+      "title": "{name}이(가) 한동안 응답하지 않습니다",
+      "description": "{name}이(가) 브로커에 떠난다고 알린 뒤 10분째 돌아오지 않았습니다. 브리지가 실행 중인지, MQTT 설정이 Home Assistant와 같은 브로커를 가리키는지 확인하세요. 돌아오면 이 항목은 사라집니다."
+    },
+    "bridge_newer_schema": {
+      "title": "{name}이(가) 더 새로운 프로토콜을 사용합니다",
+      "description": "{name}이(가) 스키마 {schema}을(를) 게시하지만 이 통합은 스키마 {known}까지만 압니다. Boréale 통합을 업데이트하세요. 그때까지 값이 표시되지 않습니다."
     }
   },
   "selector": {

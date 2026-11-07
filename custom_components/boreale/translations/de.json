@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard ist jetzt Boréale for Nintendo Switch",
       "description": "Deine Konsolen sind von der Integration {legacy} zu Boréale umgezogen, mit ihren Entitäten, ihrem Verlauf und ihren Statistiken. Automationen, Skripte und Blueprints, die ihre Aktionen, Auslöser und Bedingungen ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) verwenden, müssen jetzt stattdessen boreale.… verwenden: die alten Namen antworten nicht mehr. Ignoriere dies, sobald es erledigt ist.\n\nDie alte Integration ist noch installiert: deinstalliere PlayGuard unter Einstellungen › Marketplace (vor Home Assistant 2026.11 in HACS) oder lösche den Ordner custom_components/{legacy} und starte Home Assistant neu."
+    },
+    "bridge_source_down": {
+      "title": "{name}: Die Quelle {source} antwortet nicht",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{source} erneut lesen",
+            "description": "{name} kann seine Quelle {source} nicht lesen. Bestätigen Sie, um die Bridge jetzt ihre Quellen erneut lesen zu lassen.\n\nBleibt sie offline, prüfen Sie den Ordner oder den Shop auf dem Rechner, auf dem die Bridge läuft. Das verschwindet, sobald die Quelle antwortet."
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "Der Datenträger von {name} ist fast voll",
+      "description": "{name} hat zu wenig Platz für seinen Index. Schaffen Sie Platz auf dem Volume mit dem Statusordner oder senken Sie die Grenze in den Einstellungen (Freier Speicher). Das verschwindet, sobald die Bridge es meldet."
+    },
+    "bridge_gone": {
+      "title": "{name} antwortet seit einiger Zeit nicht",
+      "description": "{name} hat dem Broker gemeldet, dass sie weg ist, und ist seit zehn Minuten nicht zurück. Prüfen Sie, ob die Bridge läuft und ihre MQTT-Einstellungen auf denselben Broker wie Home Assistant zeigen. Das verschwindet, sobald sie zurück ist."
+    },
+    "bridge_newer_schema": {
+      "title": "{name} spricht ein neueres Protokoll",
+      "description": "{name} veröffentlicht Schema {schema}; diese Integration kennt Schema {known}. Aktualisieren Sie die Boréale-Integration: Bis dahin werden ihre Werte nicht angezeigt."
     }
   },
   "selector": {

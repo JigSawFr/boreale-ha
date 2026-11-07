@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "O PlayGuard agora é Boréale for Nintendo Switch",
       "description": "Seus consoles passaram da integração {legacy} para o Boréale, com suas entidades, seu histórico e suas estatísticas. Automações, scripts e blueprints que usam suas ações, gatilhos e condições ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) devem agora usar boreale.… no lugar: os nomes antigos não respondem mais. Ignore isto quando terminar.\n\nA integração antiga ainda está instalada: desinstale o PlayGuard em Configurações › Marketplace (no HACS antes do Home Assistant 2026.11), ou apague a pasta custom_components/{legacy}, e reinicie o Home Assistant."
+    },
+    "bridge_source_down": {
+      "title": "{name}: a fonte {source} não responde",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Ler {source} novamente",
+            "description": "{name} não consegue ler a sua fonte {source}. Confirme para pedir à ponte que releia agora as suas fontes.\n\nSe continuar fora do ar, verifique a pasta ou a loja na máquina em que a ponte roda. Isto desaparece quando a fonte responder."
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "O disco de {name} está quase cheio",
+      "description": "{name} está sem espaço para o seu índice. Libere espaço no volume que contém a sua pasta de estado ou diminua o limite nas configurações (Espaço livre). Isto desaparece quando a ponte informar."
+    },
+    "bridge_gone": {
+      "title": "{name} não responde há algum tempo",
+      "description": "{name} avisou o broker de que estava saindo e não voltou há dez minutos. Verifique se a ponte está rodando e se as suas configurações MQTT apontam para o mesmo broker que o Home Assistant. Isto desaparece quando voltar."
+    },
+    "bridge_newer_schema": {
+      "title": "{name} fala um protocolo mais recente",
+      "description": "{name} publica o esquema {schema}; esta integração conhece o esquema {known}. Atualize a integração Boréale: até lá os valores não são exibidos."
     }
   },
   "selector": {

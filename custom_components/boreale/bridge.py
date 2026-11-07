@@ -23,9 +23,11 @@ from homeassistant.components.update import UpdateEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.event import async_call_later
 
 from .const import CONF_BRIDGE_ID, CONF_BRIDGE_PREFIX, DEFAULT_BRIDGE_PREFIX, DOMAIN
 
@@ -35,6 +37,8 @@ type BridgeConfigEntry = ConfigEntry[BridgeHub]
 
 SCHEMA = 1
 STATUSES = ["ok", "warn", "fail"]
+GONE_AFTER = 600  # seconds without the bridge before a repair says so (a restart is not worth one)
+RESCAN = "rescan"  # the kind of the repair that asks the bridge to read its sources again
 
 
 def parse_state(payload: str | bytes | bytearray) -> dict[str, Any] | None:
@@ -63,6 +67,16 @@ def bridge_of(topic: str, payload: str | bytes | bytearray) -> tuple[str, str, s
     return "/".join(parts[:-2]), uid, name
 
 
+def newer_schema(payload: str | bytes | bytearray) -> int | None:
+    """The schema of a state document this version does not read yet, else None."""
+    try:
+        doc = json.loads(payload) if payload else None
+    except ValueError:
+        return None
+    schema = doc.get("schema") if isinstance(doc, dict) else None
+    return schema if isinstance(schema, int) and not isinstance(schema, bool) and schema > SCHEMA else None
+
+
 class BridgeHub:
     """One bridge on the broker: its last state and whether it is there."""
 
@@ -76,6 +90,11 @@ class BridgeHub:
         self.online: bool | None = None  # None: no availability seen yet
         self._listeners: list[Callable[[], None]] = []
         self._unsub: list[CALLBACK_TYPE] = []
+        self.entry_id = entry.entry_id
+        self._derived: set[str] = set()  # the repairs that follow the state (a source down, the disk)
+        self._gone: CALLBACK_TYPE | None = None
+        self._issue_gone = f"bridge_gone_{self.bridge_id}"
+        self._issue_schema = f"bridge_schema_{self.bridge_id}"
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -99,6 +118,12 @@ class BridgeHub:
         for unsub in self._unsub:
             unsub()
         self._unsub = []
+        if self._gone is not None:
+            self._gone()
+            self._gone = None
+        for issue in (*self._derived, self._issue_gone, self._issue_schema):
+            ir.async_delete_issue(self.hass, DOMAIN, issue)  # nothing to repair once the entry is gone
+        self._derived = set()
 
     @callback
     def async_add_listener(self, listener: Callable[[], None]) -> CALLBACK_TYPE:
@@ -110,13 +135,81 @@ class BridgeHub:
         for listener in list(self._listeners):
             listener()
 
+    @property
+    def name(self) -> str:
+        return ((self.state or {}).get("bridge") or {}).get("name") or self.title
+
     @callback
     def _on_state(self, message: ReceiveMessage) -> None:
         if (doc := parse_state(message.payload)) is None:
             _LOGGER.debug("%s: a state this version does not read was skipped", self.base)
+            if (newer := newer_schema(message.payload)) is not None:
+                ir.async_create_issue(
+                    self.hass,
+                    DOMAIN,
+                    self._issue_schema,
+                    is_fixable=False,
+                    severity=ir.IssueSeverity.WARNING,
+                    translation_key="bridge_newer_schema",
+                    translation_placeholders={"name": self.name, "schema": str(newer), "known": str(SCHEMA)},
+                )
             return
+        ir.async_delete_issue(self.hass, DOMAIN, self._issue_schema)
         self.state = doc
+        self._repair()
         self._notify()
+
+    @callback
+    def _repair(self) -> None:
+        """The repairs that follow the state: one per source that does not answer, one for the disk."""
+        wanted: dict[
+            str, tuple[str, ir.IssueSeverity, bool, dict[str, str], dict[str, str | int | float | None] | None]
+        ] = {}
+        for source in self.read("sources") or []:
+            if isinstance(source, dict) and source.get("up") is False and isinstance(source.get("id"), str):
+                wanted[f"bridge_source_{self.bridge_id}_{source['id']}"] = (
+                    "bridge_source_down",
+                    ir.IssueSeverity.WARNING,
+                    True,
+                    {"name": self.name, "source": source["id"]},
+                    {"entry_id": self.entry_id, "kind": RESCAN},
+                )
+        for check in self.read("checks") or []:
+            if isinstance(check, dict) and check.get("name") == "disk" and check.get("status") in ("warn", "fail"):
+                wanted[f"bridge_disk_{self.bridge_id}"] = (
+                    "bridge_disk",
+                    ir.IssueSeverity.ERROR if check["status"] == "fail" else ir.IssueSeverity.WARNING,
+                    False,
+                    {"name": self.name},
+                    None,
+                )
+        for issue, (key, severity, fixable, placeholders, data) in wanted.items():
+            ir.async_create_issue(
+                self.hass,
+                DOMAIN,
+                issue,
+                is_fixable=fixable,
+                severity=severity,
+                translation_key=key,
+                translation_placeholders=placeholders,
+                data=data,
+            )
+        for gone in self._derived - wanted.keys():
+            ir.async_delete_issue(self.hass, DOMAIN, gone)
+        self._derived = set(wanted)
+
+    @callback
+    def _raise_gone(self, _now: object) -> None:
+        self._gone = None
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            self._issue_gone,
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="bridge_gone",
+            translation_placeholders={"name": self.name},
+        )
 
     @callback
     def _on_availability(self, message: ReceiveMessage) -> None:
@@ -126,6 +219,13 @@ class BridgeHub:
                 "%s: the bridge is %s", self.base, "back" if online else "gone"
             )
         self.online = online
+        if online:
+            if self._gone is not None:
+                self._gone()
+                self._gone = None
+            ir.async_delete_issue(self.hass, DOMAIN, self._issue_gone)
+        elif self._gone is None:
+            self._gone = async_call_later(self.hass, GONE_AFTER, self._raise_gone)
         self._notify()
 
     async def async_rescan(self) -> None:

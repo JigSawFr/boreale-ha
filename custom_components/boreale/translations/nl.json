@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard is nu Boréale for Nintendo Switch",
       "description": "Je consoles zijn verhuisd van de integratie {legacy} naar Boréale, met hun entiteiten, hun geschiedenis en hun statistieken. Automatiseringen, scripts en blueprints die de acties, triggers en voorwaarden ervan gebruiken ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) moeten nu boreale.… gebruiken: de oude namen reageren niet meer. Negeer dit zodra het klaar is.\n\nDe oude integratie is nog geïnstalleerd: verwijder PlayGuard via Instellingen › Marketplace (vóór Home Assistant 2026.11 in HACS), of verwijder de map custom_components/{legacy}, en start Home Assistant opnieuw."
+    },
+    "bridge_source_down": {
+      "title": "{name}: de bron {source} antwoordt niet",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{source} opnieuw lezen",
+            "description": "{name} kan zijn bron {source} niet lezen. Bevestig om de bridge zijn bronnen nu opnieuw te laten lezen.\n\nBlijft hij offline, controleer dan de map of de shop op de machine waarop de bridge draait. Dit verdwijnt zodra de bron antwoordt."
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "De schijf van {name} is bijna vol",
+      "description": "{name} heeft te weinig ruimte voor zijn index. Maak ruimte vrij op het volume met zijn statusmap, of verlaag de limiet in de instellingen (Vrije ruimte). Dit verdwijnt zodra de bridge het meldt."
+    },
+    "bridge_gone": {
+      "title": "{name} antwoordt al een tijd niet",
+      "description": "{name} heeft de broker gemeld dat hij wegging en is sinds tien minuten niet terug. Controleer of de bridge draait en of zijn MQTT-instellingen naar dezelfde broker wijzen als Home Assistant. Dit verdwijnt zodra hij terug is."
+    },
+    "bridge_newer_schema": {
+      "title": "{name} spreekt een nieuwer protocol",
+      "description": "{name} publiceert schema {schema}; deze integratie kent schema {known}. Werk de Boréale-integratie bij: tot dan worden de waarden niet getoond."
     }
   },
   "selector": {

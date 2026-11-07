@@ -270,6 +270,13 @@ its prefix changes, it follows by discovery, or *Reconfigure* gives it.
 Everything is unavailable while the bridge is off the broker, except
 *Reachable*, which says so.
 
+Four **repairs** (*Settings › Repairs*) say what needs a look, and go by
+themselves once it is fixed: a source of the bridge does not answer (one repair
+per source; *Fix* asks the bridge to read its sources again), its disk is
+nearly full (a warning, an error when the index can no longer be written), the
+bridge has been gone from the broker for ten minutes (a restart is not worth
+one), and the bridge speaks a newer protocol than this integration reads.
+
 ## 🔧 Options and reconfiguration
 
 *Settings › Devices & services › Boréale for Nintendo Switch › ⚙ (Configure)*:
