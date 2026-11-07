@@ -279,6 +279,8 @@ découverte, ou *Reconfigurer* le donne.
 |---|---|
 | **État** | `ok`, `warn` ou `fail`, la santé du pont (sources joignables, scans récents, disque, index). |
 | **Titres**, **Fichiers à hacher**, **Transferts**, **Erreurs**, **Sources hors service** | La bibliothèque et le trafic, poussés avec l'état (toutes les 30 secondes). |
+| **Problèmes** | Le nombre de contrôles du pont qui ne sont pas bons (le pont les compte). |
+| **Journal** (événement) | Un événement par ligne du journal du pont, au moment où elle s'écrit (`started`, `scan`, `source_down`, `source_up`, `update`, `settings`, `paired`, `pairing_refused`, `revoked`, `restored`), avec `subject` et `detail`. Rien n'est conservé : une automatisation réagit quand ça arrive. |
 | **Version**, **Joignable** | Diagnostic : la version du pont, et s'il est sur le broker (son dernier testament). |
 | **Rescanner** (bouton) | Ordonne au pont de relire toutes ses sources maintenant. |
 | **Pont Lantern** (mise à jour) | La version du pont, et `on` quand la vérification du pont lui-même (quotidienne, dernière release GitHub ; elle se désactive dans le pont) en a trouvé une plus récente, avec la page de la release. Rien n'est installé depuis Home Assistant. |

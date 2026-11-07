@@ -193,6 +193,9 @@
             }
           }
         }
+      },
+      "bridge_journal": {
+        "name": "저널"
       }
     },
     "lock": {
@@ -427,6 +430,9 @@
       },
       "bridge_sources_down": {
         "name": "중단된 소스"
+      },
+      "bridge_problems": {
+        "name": "문제"
       }
     },
     "switch": {

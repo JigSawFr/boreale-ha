@@ -193,6 +193,9 @@
             }
           }
         }
+      },
+      "bridge_journal": {
+        "name": "日誌"
       }
     },
     "lock": {
@@ -427,6 +430,9 @@
       },
       "bridge_sources_down": {
         "name": "離線的來源"
+      },
+      "bridge_problems": {
+        "name": "問題"
       }
     },
     "switch": {

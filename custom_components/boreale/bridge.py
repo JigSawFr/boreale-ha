@@ -3,7 +3,8 @@
 The bridge (https://github.com/JigSawFr/lantern-bridge) publishes under
 `<prefix>/<bridge id>`: `state`, a retained JSON document with a `schema`
 (this reads schema 1, and skips a newer one), and `availability` (`online` or
-`offline`, its last will). `order/rescan` makes it read its sources again.
+`offline`, its last will), and `event`, one journal line as it happens (not
+retained). `order/rescan` makes it read its sources again.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from homeassistant.components import mqtt
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.binary_sensor.const import BinarySensorDeviceClass
 from homeassistant.components.button import ButtonEntity
+from homeassistant.components.event import EventEntity
 from homeassistant.components.mqtt import ReceiveMessage
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.components.update import UpdateEntity
@@ -89,6 +91,7 @@ class BridgeHub:
         self.state: dict[str, Any] | None = None
         self.online: bool | None = None  # None: no availability seen yet
         self._listeners: list[Callable[[], None]] = []
+        self._event_listeners: list[Callable[[str, dict[str, Any]], None]] = []
         self._unsub: list[CALLBACK_TYPE] = []
         self.entry_id = entry.entry_id
         self._derived: set[str] = set()  # the repairs that follow the state (a source down, the disk)
@@ -111,6 +114,7 @@ class BridgeHub:
         self._unsub = [
             await mqtt.async_subscribe(self.hass, f"{self.base}/state", self._on_state, 1),
             await mqtt.async_subscribe(self.hass, f"{self.base}/availability", self._on_availability, 1),
+            await mqtt.async_subscribe(self.hass, f"{self.base}/event", self._on_event, 1),
         ]
 
     @callback
@@ -129,6 +133,24 @@ class BridgeHub:
     def async_add_listener(self, listener: Callable[[], None]) -> CALLBACK_TYPE:
         self._listeners.append(listener)
         return lambda: self._listeners.remove(listener)
+
+    @callback
+    def async_add_event_listener(self, listener: Callable[[str, dict[str, Any]], None]) -> CALLBACK_TYPE:
+        self._event_listeners.append(listener)
+        return lambda: self._event_listeners.remove(listener)
+
+    @callback
+    def _on_event(self, message: ReceiveMessage) -> None:
+        """A journal line: schema 1 and a known shape, else skipped (a newer schema is not guessed at)."""
+        try:
+            doc = json.loads(message.payload)
+        except ValueError:
+            return
+        if not isinstance(doc, dict) or doc.get("schema") != SCHEMA or not isinstance(doc.get("kind"), str):
+            return
+        data = {k: doc[k] for k in ("subject", "detail", "ts") if isinstance(doc.get(k), (str, int))}
+        for listener in list(self._event_listeners):
+            listener(doc["kind"], data)
 
     @callback
     def _notify(self) -> None:
@@ -323,6 +345,54 @@ class BridgeSourcesDown(BridgeEntity, SensorEntity):
         return sum(1 for s in sources if isinstance(s, dict) and not s.get("up"))
 
 
+class BridgeProblems(BridgeEntity, SensorEntity):
+    """How many of the bridge's checks are not good (the bridge counts them; an older one has no count)."""
+
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, hub: BridgeHub) -> None:
+        super().__init__(hub, "bridge_problems")
+
+    @property
+    def native_value(self) -> int | None:
+        value = self.hub.read("problems")
+        return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+#: What the bridge's journal says happened (lantern-bridge, admin/__init__.py `_JOURNAL`).
+JOURNAL_KINDS = (
+    "started",
+    "scan",
+    "source_down",
+    "source_up",
+    "update",
+    "settings",
+    "paired",
+    "pairing_refused",
+    "revoked",
+    "restored",
+)
+
+
+class BridgeJournal(BridgeEntity, EventEntity):
+    """One event per line of the bridge's journal, for automations (a source down, a device paired…)."""
+
+    _attr_event_types = list(JOURNAL_KINDS)
+
+    def __init__(self, hub: BridgeHub) -> None:
+        super().__init__(hub, "bridge_journal")
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self.async_on_remove(self.hub.async_add_event_listener(self._handle_event))
+
+    @callback
+    def _handle_event(self, kind: str, data: dict[str, Any]) -> None:
+        if kind in JOURNAL_KINDS:  # a kind a newer bridge adds is not a type this knows
+            self._trigger_event(kind, data)
+            self.async_write_ha_state()
+
+
 class BridgeReachable(BridgeEntity, BinarySensorEntity):
     _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
     _attr_entity_category = EntityCategory.DIAGNOSTIC
@@ -392,7 +462,7 @@ FIGURES = (
 def async_add_sensors(entry: BridgeConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
     hub = entry.runtime_data
     async_add_entities(
-        [BridgeStatus(hub), BridgeVersion(hub), BridgeSourcesDown(hub)]
+        [BridgeStatus(hub), BridgeVersion(hub), BridgeSourcesDown(hub), BridgeProblems(hub)]
         + [BridgeFigure(hub, key, path, state_class) for key, path, state_class in FIGURES]
     )
 
@@ -407,3 +477,7 @@ def async_add_updates(entry: BridgeConfigEntry, async_add_entities: AddConfigEnt
 
 def async_add_buttons(entry: BridgeConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
     async_add_entities([BridgeRescan(entry.runtime_data)])
+
+
+def async_add_events(entry: BridgeConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> None:
+    async_add_entities([BridgeJournal(entry.runtime_data)])

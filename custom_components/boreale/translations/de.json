@@ -193,6 +193,9 @@
             }
           }
         }
+      },
+      "bridge_journal": {
+        "name": "Journal"
       }
     },
     "lock": {
@@ -427,6 +430,9 @@
       },
       "bridge_sources_down": {
         "name": "Quellen offline"
+      },
+      "bridge_problems": {
+        "name": "Probleme"
       }
     },
     "switch": {

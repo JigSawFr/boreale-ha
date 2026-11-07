@@ -193,6 +193,9 @@
             }
           }
         }
+      },
+      "bridge_journal": {
+        "name": "Журнал"
       }
     },
     "lock": {
@@ -427,6 +430,9 @@
       },
       "bridge_sources_down": {
         "name": "Недоступные источники"
+      },
+      "bridge_problems": {
+        "name": "Проблемы"
       }
     },
     "switch": {

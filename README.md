@@ -263,6 +263,8 @@ its prefix changes, it follows by discovery, or *Reconfigure* gives it.
 |---|---|
 | **Status** | `ok`, `warn` or `fail`, the bridge's own health (sources reachable, recent scans, disk, index). |
 | **Titles**, **Files to hash**, **Transfers**, **Errors**, **Sources down** | The library and the traffic, pushed with the state (every 30 seconds). |
+| **Problems** | How many of the bridge's checks are not good (the bridge counts them). |
+| **Journal** (event) | One event per line of the bridge's journal as it happens (`started`, `scan`, `source_down`, `source_up`, `update`, `settings`, `paired`, `pairing_refused`, `revoked`, `restored`), with `subject` and `detail`. Not kept: an automation reacts when it happens. |
 | **Version**, **Reachable** | Diagnostics: the bridge's version, and whether it is on the broker (its last will). |
 | **Rescan** (button) | Orders the bridge to read all its sources again now. |
 | **Lantern bridge** (update) | The bridge's version, and `on` when the bridge's own check (daily, GitHub's latest release; it can be turned off in the bridge) found a newer one, with the release page. Nothing is installed from Home Assistant. |

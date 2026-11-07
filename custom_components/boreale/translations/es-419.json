@@ -193,6 +193,9 @@
             }
           }
         }
+      },
+      "bridge_journal": {
+        "name": "Diario"
       }
     },
     "lock": {
@@ -427,6 +430,9 @@
       },
       "bridge_sources_down": {
         "name": "Fuentes caídas"
+      },
+      "bridge_problems": {
+        "name": "Problemas"
       }
     },
     "switch": {

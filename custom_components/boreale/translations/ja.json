@@ -193,6 +193,9 @@
             }
           }
         }
+      },
+      "bridge_journal": {
+        "name": "ジャーナル"
       }
     },
     "lock": {
@@ -427,6 +430,9 @@
       },
       "bridge_sources_down": {
         "name": "停止中のソース"
+      },
+      "bridge_problems": {
+        "name": "問題"
       }
     },
     "switch": {
