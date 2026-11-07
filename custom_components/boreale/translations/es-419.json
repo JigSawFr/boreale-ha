@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard ahora es Boréale for Nintendo Switch",
       "description": "Tus consolas pasaron de la integración {legacy} a Boréale, con sus entidades, su historial y sus estadísticas. Las automatizaciones, scripts y blueprints que usan sus acciones, disparadores y condiciones ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) deben usar ahora boreale.… en su lugar: los nombres anteriores ya no responden. Ignora esto una vez hecho.\n\nLa integración anterior sigue instalada: desinstala PlayGuard en Configuración › Marketplace (HACS antes de Home Assistant 2026.11), o borra la carpeta custom_components/{legacy}, y reinicia Home Assistant."
+    },
+    "bridge_source_down": {
+      "title": "{name}: la fuente {source} no responde",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Volver a leer {source}",
+            "description": "{name} no puede leer su fuente {source}. Envíe para pedir al puente que vuelva a leer sus fuentes ahora.\n\nSi sigue caída, revise la carpeta o la tienda en el equipo donde se ejecuta el puente. Esto desaparece cuando la fuente responda."
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "El disco de {name} está casi lleno",
+      "description": "A {name} le falta espacio para su índice. Libere espacio en el volumen que contiene su carpeta de estado, o baje el límite en sus ajustes (Espacio libre). Esto desaparece cuando el puente lo indique."
+    },
+    "bridge_gone": {
+      "title": "{name} no responde desde hace un rato",
+      "description": "{name} avisó al broker de que se iba y no ha vuelto en diez minutos. Compruebe que el puente se ejecuta y que sus ajustes MQTT apuntan al mismo broker que Home Assistant. Esto desaparece cuando vuelva."
+    },
+    "bridge_newer_schema": {
+      "title": "{name} habla un protocolo más reciente",
+      "description": "{name} publica el esquema {schema}; esta integración conoce el esquema {known}. Actualice la integración Boréale: hasta entonces no se muestran sus valores."
     }
   },
   "selector": {

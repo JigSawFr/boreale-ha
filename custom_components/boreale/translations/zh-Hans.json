@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard 现已更名为 Boréale for Nintendo Switch",
       "description": "你的主机已从集成 {legacy} 迁移到 Boréale，实体、历史记录和统计数据都已保留。使用其动作、触发器和条件（{legacy}.add_bonus_time、{legacy}.game_started、{legacy}.is_playing…）的自动化、脚本和蓝图现在必须改用 boreale.…：旧名称已不再响应。完成后忽略此提示即可。\n\n旧集成仍已安装：请在“设置 › Marketplace”中卸载 PlayGuard（Home Assistant 2026.11 之前为 HACS），或删除文件夹 custom_components/{legacy}，然后重启 Home Assistant。"
+    },
+    "bridge_source_down": {
+      "title": "{name}：来源 {source} 没有响应",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "重新读取 {source}",
+            "description": "{name} 无法读取其来源 {source}。提交后，将请求桥接器立即重新读取其来源。\n\n如果仍然离线，请检查运行桥接器的机器上的文件夹或商店。来源恢复响应后，此项会消失。"
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "{name} 的磁盘几乎已满",
+      "description": "{name} 的索引空间不足。请在其状态文件夹所在的卷上释放空间，或在其设置（可用空间）中降低下限。桥接器报告恢复后，此项会消失。"
+    },
+    "bridge_gone": {
+      "title": "{name} 已有一段时间没有响应",
+      "description": "{name} 已告知代理它将离开，并且十分钟没有回来。请检查桥接器是否在运行，以及其 MQTT 设置是否指向与 Home Assistant 相同的代理。它回来后，此项会消失。"
+    },
+    "bridge_newer_schema": {
+      "title": "{name} 使用了更新的协议",
+      "description": "{name} 发布的是架构 {schema}，而此集成只认识架构 {known}。请更新 Boréale 集成：在此之前不会显示其值。"
     }
   },
   "selector": {

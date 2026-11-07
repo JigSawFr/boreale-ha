@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard ora è Boréale for Nintendo Switch",
       "description": "Le tue console sono passate dall'integrazione {legacy} a Boréale, con le loro entità, la cronologia e le statistiche. Automazioni, script e blueprint che usano le sue azioni, i suoi trigger e le sue condizioni ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) ora devono usare boreale.… al loro posto: i vecchi nomi non rispondono più. Ignora questo avviso una volta fatto.\n\nLa vecchia integrazione è ancora installata: disinstalla PlayGuard in Impostazioni › Marketplace (HACS prima di Home Assistant 2026.11), o elimina la cartella custom_components/{legacy}, poi riavvia Home Assistant."
+    },
+    "bridge_source_down": {
+      "title": "{name}: la fonte {source} non risponde",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Rileggi {source}",
+            "description": "{name} non riesce a leggere la sua fonte {source}. Conferma per chiedere al bridge di rileggere subito le sue fonti.\n\nSe resta irraggiungibile, controlla la cartella o il negozio sulla macchina che esegue il bridge. Scompare quando la fonte risponde."
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "Il disco di {name} è quasi pieno",
+      "description": "{name} ha poco spazio per il suo indice. Libera spazio sul volume che contiene la sua cartella di stato, oppure abbassa il limite nelle impostazioni (Spazio libero). Scompare quando il bridge lo segnala."
+    },
+    "bridge_gone": {
+      "title": "{name} non risponde da un po'",
+      "description": "{name} ha detto al broker di essersene andato e non è tornato da dieci minuti. Controlla che il bridge sia in esecuzione e che le sue impostazioni MQTT puntino allo stesso broker di Home Assistant. Scompare quando torna."
+    },
+    "bridge_newer_schema": {
+      "title": "{name} parla un protocollo più recente",
+      "description": "{name} pubblica lo schema {schema}; questa integrazione conosce lo schema {known}. Aggiorna l'integrazione Boréale: fino ad allora i suoi valori non vengono mostrati."
     }
   },
   "selector": {

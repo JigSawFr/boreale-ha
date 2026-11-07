@@ -146,7 +146,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   console).
 - La **sysMMC et l'emuMMC** d'une console sont deux appareils : chacune a son
   propre contrôle parental et son propre identifiant de console.
-- Un **pont Lantern** ([lantern-bridge](https://github.com/JigSawFr/lantern-bridge), 0.1 ou plus récent) : son état, sa version et ses compteurs, lus en HTTP. Voir *Configuration › Un pont Lantern*.
+- Un **pont Lantern** ([lantern-bridge](https://github.com/JigSawFr/lantern-bridge), 0.1 ou plus récent) : son état, sa version et ses compteurs, poussés par MQTT. Voir *Configuration › Un pont Lantern*.
 - **Non pris en charge** : la Nintendo Switch 2 (Atmosphère n'existe pas pour
   elle), et une console sans PlayGuard. Pour l'application et le compte
   Contrôle parental de Nintendo, voyez plutôt l'intégration *Nintendo Switch
@@ -285,6 +285,14 @@ découverte, ou *Reconfigurer* le donne.
 
 Tout est indisponible tant que le pont est hors du broker, sauf *Joignable*, qui
 le dit.
+
+Quatre **réparations** (*Paramètres › Réparations*) disent ce qui demande un
+coup d'œil, et disparaissent d'elles-mêmes une fois réglé : une source du pont
+ne répond pas (une réparation par source ; *Corriger* demande au pont de relire
+ses sources), son disque est presque plein (un avertissement, une erreur quand
+l'index ne peut plus être écrit), le pont a quitté le broker depuis dix minutes
+(un redémarrage n'en vaut pas une), et le pont parle un protocole plus récent
+que celui que lit cette intégration.
 
 ## 🔧 Options et reconfiguration
 

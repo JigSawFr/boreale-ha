@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard は Boréale for Nintendo Switch になりました",
       "description": "コンソールは、エンティティ、履歴、統計とともに、インテグレーション {legacy} から Boréale へ移行しました。そのアクション、トリガー、条件（{legacy}.add_bonus_time、{legacy}.game_started、{legacy}.is_playing…）を使うオートメーション、スクリプト、ブループリントは、代わりに boreale.… を使う必要があります。古い名前はもう応答しません。対応が済んだら、これを無視してください。\n\n古いインテグレーションがまだインストールされています。設定 › Marketplace で PlayGuard をアンインストールするか（Home Assistant 2026.11 より前は HACS）、フォルダー custom_components/{legacy} を削除してから、Home Assistant を再起動してください。"
+    },
+    "bridge_source_down": {
+      "title": "{name}：ソース {source} が応答しません",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{source} をもう一度読み込む",
+            "description": "{name} はソース {source} を読み込めません。送信すると、ブリッジにいますぐソースを読み直すよう依頼します。\n\n停止したままの場合は、ブリッジが動いているマシンのフォルダまたはショップを確認してください。ソースが応答すると、この表示は消えます。"
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "{name} のディスクの空きがほとんどありません",
+      "description": "{name} はインデックス用の空き容量が不足しています。状態フォルダのあるボリュームの空きを増やすか、設定（空き容量）の下限を下げてください。ブリッジが解消を報告すると、この表示は消えます。"
+    },
+    "bridge_gone": {
+      "title": "{name} がしばらく応答していません",
+      "description": "{name} はブローカーに離脱を通知し、10分間戻っていません。ブリッジが動作していること、MQTT 設定が Home Assistant と同じブローカーを指していることを確認してください。戻ると、この表示は消えます。"
+    },
+    "bridge_newer_schema": {
+      "title": "{name} はより新しいプロトコルを使っています",
+      "description": "{name} はスキーマ {schema} を公開していますが、この統合はスキーマ {known} までしか知りません。Boréale 統合を更新してください。それまで値は表示されません。"
     }
   },
   "selector": {

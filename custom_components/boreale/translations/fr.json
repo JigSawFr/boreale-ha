@@ -644,6 +644,29 @@
     "taken_over_installed": {
       "title": "PlayGuard devient Boréale for Nintendo Switch",
       "description": "Vos consoles sont passées de l'intégration {legacy} à Boréale, avec leurs entités, leur historique et leurs statistiques. Les automatisations, scripts et blueprints qui utilisent ses actions, déclencheurs et conditions ({legacy}.add_bonus_time, {legacy}.game_started, {legacy}.is_playing…) doivent maintenant utiliser boreale.… à la place : les anciens noms ne répondent plus. Ignorez ceci une fois fait.\n\nL'ancienne intégration est toujours installée : désinstallez PlayGuard dans Paramètres › Marketplace (HACS avant Home Assistant 2026.11), ou supprimez le dossier custom_components/{legacy}, puis redémarrez Home Assistant."
+    },
+    "bridge_source_down": {
+      "title": "{name} : la source {source} ne répond pas",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Relire {source}",
+            "description": "{name} ne peut pas lire sa source {source}. Validez pour demander au pont de relire ses sources maintenant.\n\nSi elle reste hors service, vérifiez le dossier ou la boutique sur la machine qui fait tourner le pont. Cela disparaît dès que la source répond."
+          }
+        }
+      }
+    },
+    "bridge_disk": {
+      "title": "Le disque de {name} est presque plein",
+      "description": "{name} manque de place pour son index. Libérez de l'espace sur le volume qui contient son dossier d'état, ou baissez la limite dans ses réglages (Espace libre). Cela disparaît dès que le pont le dit."
+    },
+    "bridge_gone": {
+      "title": "{name} ne répond plus depuis un moment",
+      "description": "{name} a dit au broker qu'il s'en allait et n'est pas revenu depuis dix minutes. Vérifiez que le pont tourne et que ses réglages MQTT pointent vers le même broker que Home Assistant. Cela disparaît à son retour."
+    },
+    "bridge_newer_schema": {
+      "title": "{name} parle un protocole plus récent",
+      "description": "{name} publie le schéma {schema} ; cette intégration connaît le schéma {known}. Mettez l'intégration Boréale à jour : ses valeurs ne sont pas affichées d'ici là."
     }
   },
   "selector": {
