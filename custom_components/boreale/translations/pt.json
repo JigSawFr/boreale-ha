@@ -193,6 +193,9 @@
             }
           }
         }
+      },
+      "bridge_journal": {
+        "name": "Diário"
       }
     },
     "lock": {
@@ -427,6 +430,9 @@
       },
       "bridge_sources_down": {
         "name": "Fontes em baixo"
+      },
+      "bridge_problems": {
+        "name": "Problemas"
       }
     },
     "switch": {

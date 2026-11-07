@@ -269,10 +269,11 @@ def test_every_bridge_entity_is_named_and_has_its_icon() -> None:
     names = json.loads((INTEGRATION / "translations" / "en.json").read_text(encoding="utf-8"))["entity"]
     icons = json.loads((INTEGRATION / "icons.json").read_text(encoding="utf-8"))["entity"]
     keys = {
-        "sensor": ["status", "version", "titles", "files_pending", "transfers", "errors", "sources_down"],
+        "sensor": ["status", "version", "titles", "files_pending", "transfers", "errors", "sources_down", "problems"],
         "binary_sensor": ["reachable"],
         "button": ["rescan"],
         "update": ["update"],
+        "event": ["journal"],
     }
     for platform, found in keys.items():
         for key in found:
@@ -400,3 +401,30 @@ async def test_nothing_is_left_to_repair_once_the_entry_is_unloaded(hass: HomeAs
     assert _issues(hass)
     assert await hass.config_entries.async_unload(entry.entry_id)
     assert _issues(hass) == {}
+
+
+async def test_the_problems_are_counted_and_each_journal_line_is_an_event(hass: HomeAssistant, mqtt_mock) -> None:
+    await _set_up(hass, mqtt_mock, {**STATE, "problems": 2})
+    assert _state(hass, "sensor", "problems").state == "2"
+    seen = _state(hass, "event", "journal")
+    assert seen is not None and seen.state == "unknown"  # nothing happened since it was set up
+    line = {"schema": 1, "ts": 1_000_100, "kind": "source_down", "subject": "shop", "detail": "gone"}
+    _publish(hass, "event", line)
+    await hass.async_block_till_done()
+    seen = _state(hass, "event", "journal")
+    assert seen.attributes["event_type"] == "source_down"
+    assert seen.attributes["subject"] == "shop" and seen.attributes["detail"] == "gone"
+    for skipped in (
+        {**line, "schema": 2, "kind": "scan"},  # a newer schema is not guessed at
+        {**line, "kind": "from_the_future"},  # a kind this version does not know
+        {"schema": 1, "kind": 3},
+        "not json",
+    ):
+        _publish(hass, "event", skipped)
+        await hass.async_block_till_done()
+    assert _state(hass, "event", "journal").attributes["event_type"] == "source_down"
+
+
+async def test_an_older_bridge_without_a_count_leaves_the_sensor_unknown(hass: HomeAssistant, mqtt_mock) -> None:
+    await _set_up(hass, mqtt_mock)
+    assert _state(hass, "sensor", "problems").state == "unknown"

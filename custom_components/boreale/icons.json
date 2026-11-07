@@ -149,6 +149,9 @@
       },
       "bridge_sources_down": {
         "default": "mdi:database-off-outline"
+      },
+      "bridge_problems": {
+        "default": "mdi:alert-outline"
       }
     },
     "switch": {
@@ -190,6 +193,11 @@
     "update": {
       "bridge_update": {
         "default": "mdi:bridge"
+      }
+    },
+    "event": {
+      "bridge_journal": {
+        "default": "mdi:format-list-bulleted"
       }
     }
   },

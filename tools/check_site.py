@@ -15,11 +15,12 @@
   original), no common text repeated here;
 - sitemap.xml reads as XML, manifest.webmanifest's icons are there.
 """
+
 import json
 import os
+from pathlib import Path
 import sys
 import xml.etree.ElementTree as ElementTree
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "library" / "boreale-site"))

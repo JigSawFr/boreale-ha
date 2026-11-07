@@ -19,15 +19,16 @@ when set, lifts the API's rate limit; SITE_OFFLINE=1 builds without them.
 SITE_URL is the site's address (https://ha.boreale.dev/ by default).
 build.sha256 is a hash of everything built.
 """
+
+from datetime import UTC, datetime
 import html
 import json
 import os
+from pathlib import Path
 import shutil
 import sys
-import urllib.request
-from datetime import datetime, timezone
-from pathlib import Path
 from urllib.parse import urlparse
+import urllib.request
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
@@ -47,12 +48,19 @@ OWNER = "JigSawFr"
 REPO = "boreale-ha"
 # The documentation (the README, in French for French readers) and
 # PlayGuard's guide to its side of the link, on GitHub.
-DOCS = {"en": f"https://github.com/{OWNER}/{REPO}#readme", "fr": f"https://github.com/{OWNER}/{REPO}/blob/main/README.fr.md"}
-GUIDE = {"en": f"https://github.com/{OWNER}/PlayGuard/blob/main/docs/home-assistant.md",
-         "fr": f"https://github.com/{OWNER}/PlayGuard/blob/main/docs/home-assistant.fr.md"}
+DOCS = {
+    "en": f"https://github.com/{OWNER}/{REPO}#readme",
+    "fr": f"https://github.com/{OWNER}/{REPO}/blob/main/README.fr.md",
+}
+GUIDE = {
+    "en": f"https://github.com/{OWNER}/PlayGuard/blob/main/docs/home-assistant.md",
+    "fr": f"https://github.com/{OWNER}/PlayGuard/blob/main/docs/home-assistant.fr.md",
+}
 # My Home Assistant's link that opens this repository in the visitor's Marketplace
-MARKETPLACE = (f"https://my.home-assistant.io/redirect/marketplace_repository/?owner={OWNER}&amp;repository={REPO}"
-        "&amp;category=integration")
+MARKETPLACE = (
+    f"https://my.home-assistant.io/redirect/marketplace_repository/?owner={OWNER}&amp;repository={REPO}"
+    "&amp;category=integration"
+)
 
 # The pages other than 404.html, by their path under each language's folder.
 PAGES = {"": "home.html", "legal/": "legal.html"}
@@ -92,18 +100,27 @@ def release_pill(release: tuple, language: str) -> str:
     if not release:
         return ""
     version, published, url = release
-    return (f'<p class="pill-eyebrow"><a href="{attribute(url)}">v{html.escape(version)} · '
-            f'<time datetime="{published.isoformat()}">{boreale.day(published, language)}</time></a></p>')
+    return (
+        f'<p class="pill-eyebrow"><a href="{attribute(url)}">v{html.escape(version)} · '
+        f'<time datetime="{published.isoformat()}">{boreale.day(published, language)}</time></a></p>'
+    )
 
 
 def structured(language: str, catalog: dict, latest: dict) -> str:
     """schema.org data for search engines: the integration, by Boréale."""
-    item = {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Boréale for Home Assistant",
-            "url": HA.address(language), "description": catalog["description"], "inLanguage": html_lang(language),
-            "applicationCategory": "HomeAutomationApplication", "operatingSystem": "Home Assistant",
-            "license": "https://www.gnu.org/licenses/gpl-3.0.html",
-            "sameAs": f"https://github.com/{OWNER}/{REPO}",
-            "publisher": {"@type": "Organization", "name": "Boréale", "url": "https://boreale.dev/"}}
+    item = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Boréale for Home Assistant",
+        "url": HA.address(language),
+        "description": catalog["description"],
+        "inLanguage": html_lang(language),
+        "applicationCategory": "HomeAutomationApplication",
+        "operatingSystem": "Home Assistant",
+        "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+        "sameAs": f"https://github.com/{OWNER}/{REPO}",
+        "publisher": {"@type": "Organization", "name": "Boréale", "url": "https://boreale.dev/"},
+    }
     if HA.key in latest:
         item["softwareVersion"] = latest[HA.key]
     text = json.dumps(item, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
@@ -117,11 +134,21 @@ def header(language: str, catalog: dict, root: str, path: str, latest: dict) -> 
     home = root + folder(language)
     french = language.startswith("fr")
     return HA.header(
-        language, catalog, root, path,
-        links=[("nav_features", f"{home}#features"), ("nav_install", f"{home}#install"),
-               ("nav_docs", DOCS["fr" if french else "en"])],
-        cta=("cta_marketplace", MARKETPLACE), github=f"https://github.com/{OWNER}/{REPO}", label=catalog["nav_label"], latest=latest,
-        brand=f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="34" height="34"><span>Boréale <b>for HA</b></span>')
+        language,
+        catalog,
+        root,
+        path,
+        links=[
+            ("nav_features", f"{home}#features"),
+            ("nav_install", f"{home}#install"),
+            ("nav_docs", DOCS["fr" if french else "en"]),
+        ],
+        cta=("cta_marketplace", MARKETPLACE),
+        github=f"https://github.com/{OWNER}/{REPO}",
+        label=catalog["nav_label"],
+        latest=latest,
+        brand=f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="34" height="34"><span>Boréale <b>for HA</b></span>',
+    )
 
 
 def footer(language: str, catalog: dict, root: str) -> str:
@@ -131,15 +158,31 @@ def footer(language: str, catalog: dict, root: str) -> str:
     home = root + folder(language)
     github = f"https://github.com/{OWNER}/{REPO}"
     return HA.footer(
-        language, catalog, root,
+        language,
+        catalog,
+        root,
         columns=[("Boréale for HA", [("GitHub", github), (catalog["footer_issues"], f"{github}/issues")])],
         legal=(catalog["footer_legal"], f"{home}legal/"),
         brand=f'<img src="{root}assets/marks/{HA.key}.svg" alt="" width="20" height="20"> <strong>Boréale for Home Assistant</strong>',
-        about=[catalog["footer_made"]], fine=catalog["footer_ha"])
+        about=[catalog["footer_made"]],
+        fine=catalog["footer_ha"],
+    )
 
 
-def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str, title: str,
-         latest: dict, release: tuple, path: str = "", first_visit: bool = False, lost: bool = False) -> str:
+def page(
+    language: str,
+    catalog: dict,
+    hero: str,
+    body: str,
+    root: str,
+    url: str,
+    title: str,
+    latest: dict,
+    release: tuple,
+    path: str = "",
+    first_visit: bool = False,
+    lost: bool = False,
+) -> str:
     values = dict(catalog)
     values["description"] = attribute(catalog["description"])
     title = attribute(title)
@@ -148,6 +191,7 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
     values["guide"] = GUIDE["fr" if french else "en"]
     values["marketplace"] = MARKETPLACE
     values["release"] = release_pill(release, language)
+
     # The hero's dashboard: its durations as the language writes them.
     def minutes(n: int) -> str:
         return catalog["mock_min"].replace("{n}", str(n))
@@ -155,10 +199,17 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
     def hours(n: int) -> str:
         return catalog["mock_hour"].replace("{n}", str(n))
 
-    values.update(mock_left_value=minutes(25), mock_played_value=minutes(95), mock_limit_value=hours(2),
-                  mock_extra_15=minutes(15), mock_extra_30=minutes(30), mock_extra_60=hours(1))
-    values["legal_translation"] = ("" if language == ORIGINAL else
-                                   f'<p class="translation">{catalog["legal_translation"]}</p>')
+    values.update(
+        mock_left_value=minutes(25),
+        mock_played_value=minutes(95),
+        mock_limit_value=hours(2),
+        mock_extra_15=minutes(15),
+        mock_extra_30=minutes(30),
+        mock_extra_60=hours(1),
+    )
+    values["legal_translation"] = (
+        "" if language == ORIGINAL else f'<p class="translation">{catalog["legal_translation"]}</p>'
+    )
     values["lang"] = html_lang(language)
     values["home"] = folder(language)
     values["og_locale"] = OG_LOCALES[language]
@@ -179,7 +230,8 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
     values["header"] = header(language, catalog, root, path if not lost else "", latest)
     values["footer"] = footer(language, catalog, root)
     values["og_alternates"] = "\n".join(
-        f'<meta property="og:locale:alternate" content="{OG_LOCALES[code]}">' for code in CODES if code != language)
+        f'<meta property="og:locale:alternate" content="{OG_LOCALES[code]}">' for code in CODES if code != language
+    )
     values.update(root=root, site=SITE_URL, url=url, title=title)
     values["audience"] = HA.audience(root)
     values["jsonld"] = structured(language, catalog, latest)
@@ -189,13 +241,27 @@ def page(language: str, catalog: dict, hero: str, body: str, root: str, url: str
 
 
 def manifest(catalog: dict) -> str:
-    return json.dumps({
-        "name": "Boréale for Home Assistant", "short_name": "Boréale HA", "description": catalog["description"],
-        "start_url": "/", "display": "browser", "background_color": "#0b1424", "theme_color": "#0b1424",
-        "icons": [{"src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png"},
-                  {"src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png"},
-                  {"src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml"}],
-    }, ensure_ascii=False, indent=2) + "\n"
+    return (
+        json.dumps(
+            {
+                "name": "Boréale for Home Assistant",
+                "short_name": "Boréale HA",
+                "description": catalog["description"],
+                "start_url": "/",
+                "display": "browser",
+                "background_color": "#0b1424",
+                "theme_color": "#0b1424",
+                "icons": [
+                    {"src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png"},
+                    {"src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png"},
+                    {"src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml"},
+                ],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n"
+    )
 
 
 def security(now: datetime) -> str:
@@ -203,10 +269,12 @@ def security(now: datetime) -> str:
     It expires a year after the month it was built in, so that a daily build
     changes it only once a month."""
     expires = now.replace(year=now.year + 1, month=now.month, day=1, hour=0, minute=0, second=0, microsecond=0)
-    return (f"Contact: https://github.com/{OWNER}/{REPO}/security/advisories/new\n"
-            f"Expires: {expires.strftime('%Y-%m-%dT%H:%M:%SZ')}\n"
-            "Preferred-Languages: en, fr\n"
-            f"Canonical: {SITE_URL}.well-known/security.txt\n")
+    return (
+        f"Contact: https://github.com/{OWNER}/{REPO}/security/advisories/new\n"
+        f"Expires: {expires.strftime('%Y-%m-%dT%H:%M:%SZ')}\n"
+        "Preferred-Languages: en, fr\n"
+        f"Canonical: {SITE_URL}.well-known/security.txt\n"
+    )
 
 
 def main() -> None:
@@ -233,19 +301,31 @@ def main() -> None:
             home = not path
             (out / where).mkdir(parents=True, exist_ok=True)
             (out / where / "index.html").write_text(
-                page(lang, catalog, hero if home else "", body, root, SITE_URL + where,
-                     catalog["title"] if home else catalog[f"{path.strip('/')}_page_title"], latest, release, path=path,
-                     first_visit=home and lang == CODES[0]),
-                encoding="utf-8")
+                page(
+                    lang,
+                    catalog,
+                    hero if home else "",
+                    body,
+                    root,
+                    SITE_URL + where,
+                    catalog["title"] if home else catalog[f"{path.strip('/')}_page_title"],
+                    latest,
+                    release,
+                    path=path,
+                    first_visit=home and lang == CODES[0],
+                ),
+                encoding="utf-8",
+            )
         (out / folder(lang) / "404.html").write_text(
             page(lang, catalog, "", lost, base, SITE_URL, catalog["lost_page_title"], latest, release, lost=True),
-            encoding="utf-8")
+            encoding="utf-8",
+        )
     first = catalogs[CODES[0]]
     (out / "manifest.webmanifest").write_text(manifest(first), encoding="utf-8")
     shutil.copy(SITE / "assets" / "favicon.ico", out / "favicon.ico")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}sitemap.xml\n", encoding="utf-8")
     (out / ".well-known").mkdir()
-    (out / ".well-known" / "security.txt").write_text(security(datetime.now(timezone.utc)), encoding="utf-8")
+    (out / ".well-known" / "security.txt").write_text(security(datetime.now(UTC)), encoding="utf-8")
     (out / "sitemap.xml").write_text(HA.sitemap(PAGES), encoding="utf-8")
     (out / ".nojekyll").touch()
     (out / "build.sha256").write_text(boreale.digest(out) + "\n", encoding="utf-8")

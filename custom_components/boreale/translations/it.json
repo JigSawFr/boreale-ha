@@ -193,6 +193,9 @@
             }
           }
         }
+      },
+      "bridge_journal": {
+        "name": "Registro"
       }
     },
     "lock": {
@@ -427,6 +430,9 @@
       },
       "bridge_sources_down": {
         "name": "Fonti non raggiungibili"
+      },
+      "bridge_problems": {
+        "name": "Problemi"
       }
     },
     "switch": {
