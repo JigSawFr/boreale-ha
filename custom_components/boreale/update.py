@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 import logging
-from typing import Any
+from typing import Any, cast
 
 import aiohttp
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
@@ -20,7 +20,8 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
-from . import PlayGuardConfigEntry
+from . import PlayGuardConfigEntry, bridge, is_bridge
+from .bridge import BridgeConfigEntry
 from .entities import dig, for_platform
 from .entity import PlayGuardEntity
 
@@ -37,6 +38,9 @@ SUMMARY_MAX = 255  # Home Assistant's limit for release_summary
 async def async_setup_entry(
     hass: HomeAssistant, entry: PlayGuardConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
+    if is_bridge(entry):
+        bridge.async_add_updates(cast(BridgeConfigEntry, entry), async_add_entities)
+        return
     console = entry.runtime_data
     async_add_entities(PlayGuardUpdate(console, d) for d in for_platform(Platform.UPDATE, console.unpublished))
 

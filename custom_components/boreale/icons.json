@@ -186,6 +186,11 @@
       "profile": {
         "default": "mdi:account-switch"
       }
+    },
+    "update": {
+      "bridge_update": {
+        "default": "mdi:bridge"
+      }
     }
   },
   "services": {
