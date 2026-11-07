@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.11.0](https://github.com/JigSawFr/boreale-ha/compare/v0.10.0...v0.11.0) (2026-11-07)
+
+
+### 🚀 Features
+
+* **blueprints:** a bridge's source that stopped answering, and a read when a machine is back ([#67](https://github.com/JigSawFr/boreale-ha/issues/67)) ([d9f5fd6](https://github.com/JigSawFr/boreale-ha/commit/d9f5fd64613d6173ef0537aaf2c58958d0e46201))
+* **branding:** redraw the icon as a console in a house, after Boréale's marks ([#53](https://github.com/JigSawFr/boreale-ha/issues/53)) ([3783243](https://github.com/JigSawFr/boreale-ha/commit/37832434179491cb383a6b6d0cb078d6985d53a9))
+* **bridge:** a problems sensor and an event for each journal line ([#71](https://github.com/JigSawFr/boreale-ha/issues/71)) ([c4ec985](https://github.com/JigSawFr/boreale-ha/commit/c4ec98588d17fd8367e2995d06190cec650d1b7b))
+* **bridge:** add a Lantern bridge as a device, its state pushed over MQTT ([#64](https://github.com/JigSawFr/boreale-ha/issues/64)) ([e2be578](https://github.com/JigSawFr/boreale-ha/commit/e2be5782137862e67078af7a1121cc5c589d439d))
+* **bridge:** add an update entity to the bridge, from its own release check ([#65](https://github.com/JigSawFr/boreale-ha/issues/65)) ([deb1ed9](https://github.com/JigSawFr/boreale-ha/commit/deb1ed95e0d1b1e62c35b8b691dde0fc001d0072))
+* **bridge:** repairs for a source that does not answer, the disk, a bridge gone, a newer protocol ([#66](https://github.com/JigSawFr/boreale-ha/issues/66)) ([82e87cf](https://github.com/JigSawFr/boreale-ha/commit/82e87cf4ac90e2ad65abeb57db72c46c4186f7db))
+
+
+### 🐞 Bug Fixes
+
+* **branding:** favicon drawn from the kit's small mark ([#60](https://github.com/JigSawFr/boreale-ha/issues/60)) ([78b52a4](https://github.com/JigSawFr/boreale-ha/commit/78b52a4acfbddae564c7bfe946ac95c4f45aefc6))
+* **conditions:** describe limit_reached as playing blocked, and use fictional games in the tests ([#62](https://github.com/JigSawFr/boreale-ha/issues/62)) ([4f40973](https://github.com/JigSawFr/boreale-ha/commit/4f409739e20ef07e9f13f6ea8c3416e63af1e42e))
+* **install:** require Home Assistant 2026.11 and link the Marketplace directly ([#61](https://github.com/JigSawFr/boreale-ha/issues/61)) ([543005b](https://github.com/JigSawFr/boreale-ha/commit/543005bea690a85dc440824341d758d3611b69a1))
+
+
+### ✨ Polish
+
+* **site:** the header and page chrome come from boreale-site ([#55](https://github.com/JigSawFr/boreale-ha/issues/55)) ([9f1f75b](https://github.com/JigSawFr/boreale-ha/commit/9f1f75b1639357988c191d1791609a0e85df0d11))
+
+
+### 🧰 Other
+
+* **branding:** take the icon, banner, social preview and site icons from Boréale's kit ([#58](https://github.com/JigSawFr/boreale-ha/issues/58)) ([bab3822](https://github.com/JigSawFr/boreale-ha/commit/bab3822130a5263262439d5a36366ea1ecfe3cc2))
+* **site:** move boreale-site to the new ha mark ([#54](https://github.com/JigSawFr/boreale-ha/issues/54)) ([f572873](https://github.com/JigSawFr/boreale-ha/commit/f5728737f81abb264d96443bdeeb4e9d7c46da17))
+
+
+### 📚 Documentation
+
+* **branding:** rename the README and brand images to Boréale for Home Assistant ([#50](https://github.com/JigSawFr/boreale-ha/issues/50)) ([c3962ee](https://github.com/JigSawFr/boreale-ha/commit/c3962ee19f077cd8d24a5979b4666ca5a2bc8699))
+* **readme:** a dashboard for a Lantern bridge, tested against the bridge's entities ([#68](https://github.com/JigSawFr/boreale-ha/issues/68)) ([1c02375](https://github.com/JigSawFr/boreale-ha/commit/1c0237533d4cc24512d79f953c754df659f82fc1))
+* **readme:** install from the Marketplace, which replaces HACS in Home Assistant 2026.11 ([#59](https://github.com/JigSawFr/boreale-ha/issues/59)) ([c4f9dd3](https://github.com/JigSawFr/boreale-ha/commit/c4f9dd3b30448de488f942ca32d93c6ec7171c7e))
+* **site:** name Boréale for Home Assistant in the home page's lede and use fictional captures in the README ([#52](https://github.com/JigSawFr/boreale-ha/issues/52)) ([b5ff4a6](https://github.com/JigSawFr/boreale-ha/commit/b5ff4a66488cdb2a9b6919cf0812f615b252ac6d))
+* **site:** say how the integration is made, in the READMEs and the site's footer ([#57](https://github.com/JigSawFr/boreale-ha/issues/57)) ([644bdcd](https://github.com/JigSawFr/boreale-ha/commit/644bdcd32008a0dd8d69a8bd19b683420f5b4188))
+
 ## [0.10.0](https://github.com/JigSawFr/boreale-ha/compare/v0.9.0...v0.10.0) (2026-10-31)
 
 
