@@ -137,6 +137,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   (limits, bedtime, extra time, blocking all games).
 - A console's **sysMMC and emuMMC** are two devices: each has its own
   parental controls and its own console id.
+- A **Lantern bridge** ([lantern-bridge](https://github.com/JigSawFr/lantern-bridge), with an MQTT broker in its settings): its status, counters and a rescan button. See *Set-up › A Lantern bridge*.
 - **Not supported**: the Nintendo Switch 2 (there is no Atmosphère for it),
   and a console without PlayGuard. For Nintendo's own Parental Controls app
   and account, see Home Assistant's *Nintendo Switch Parental Controls*
@@ -248,6 +249,25 @@ agent running) shows up in *Settings › Devices & services › Discovered*:
 
 Each console is one entry and one device; the same console cannot be added
 twice.
+
+**A Lantern bridge.** Give the bridge an MQTT broker (its *Settings › MQTT
+broker*, on the same broker as Home Assistant's). It then publishes under
+`lantern-bridge/<its id>`, and shows up in *Settings › Devices & services ›
+Discovered* like a console: confirm it. By hand: *Add integration › Boréale
+for Nintendo Switch › A Lantern bridge*, and the topic prefix (`lantern-bridge`
+unless its settings say otherwise); the first bridge on the broker not set up
+yet is added. It is one entry and one device, known by the bridge's own id: if
+its prefix changes, it follows by discovery, or *Reconfigure* gives it.
+
+| Entity | What it is |
+|---|---|
+| **Status** | `ok`, `warn` or `fail`, the bridge's own health (sources reachable, recent scans, disk, index). |
+| **Titles**, **Files to hash**, **Transfers**, **Errors**, **Sources down** | The library and the traffic, pushed with the state (every 30 seconds). |
+| **Version**, **Reachable** | Diagnostics: the bridge's version, and whether it is on the broker (its last will). |
+| **Rescan** (button) | Orders the bridge to read all its sources again now. |
+
+Everything is unavailable while the bridge is off the broker, except
+*Reachable*, which says so.
 
 ## 🔧 Options and reconfiguration
 
@@ -582,8 +602,8 @@ lists:
 
 ## 🔄 Data updates
 
-Nothing is polled: the console pushes over MQTT, and Home Assistant only
-listens.
+Nothing is polled: a console pushes over MQTT, and Home Assistant only
+listens. (A Lantern bridge pushes its state the same way, every 30 seconds.)
 
 - The console publishes its **state** when it changes, and every `poll_s`
   seconds for a fresh time stamp (30 by default, 10 to 300, in its

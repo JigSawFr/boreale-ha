@@ -7,13 +7,10 @@
         "description": "要新增 **{name}**（主機 ID `{console_id}`）嗎？主機本身的 Home Assistant 裝置（MQTT 探索）將由本整合的裝置取代，實體、遊戲名稱、本週遊玩時間和長期統計都會保留。"
       },
       "user": {
-        "title": "新增 PlayGuard 主機",
-        "description": "以下主機的狀態已在 Broker 上，但尚未設定。請選擇一台，或選擇其他主機並以 ID 新增。",
-        "data": {
-          "console": "主機"
-        },
-        "data_description": {
-          "console": "名稱和 ID；主題前綴不是 playguard 時也會顯示。"
+        "title": "新增裝置",
+        "menu_options": {
+          "console": "PlayGuard 主機",
+          "bridge": "Lantern 橋接器"
         }
       },
       "manual": {
@@ -37,12 +34,47 @@
         "data_description": {
           "topic_prefix": "除非 sync.conf 另有設定，否則為 playguard。"
         }
+      },
+      "console": {
+        "title": "新增 PlayGuard 主機",
+        "description": "以下主機的狀態已在 Broker 上，但尚未設定。請選擇一台，或選擇其他主機並以 ID 新增。",
+        "data": {
+          "console": "主機"
+        },
+        "data_description": {
+          "console": "名稱和 ID；主題前綴不是 playguard 時也會顯示。"
+        }
+      },
+      "bridge": {
+        "title": "新增 Lantern 橋接器",
+        "description": "橋接器發佈所用的主題前綴：其 MQTT 設定中的 `prefix`，未變更則為 `lantern-bridge`。整合最多等待 10 秒以在代理上取得它的狀態。",
+        "data": {
+          "bridge_prefix": "主題前綴"
+        },
+        "data_description": {
+          "bridge_prefix": "除非橋接器的設定另有說明，否則為 lantern-bridge。"
+        }
+      },
+      "confirm_bridge": {
+        "title": "找到 Lantern 橋接器",
+        "description": "新增 **{name}**？"
+      },
+      "reconfigure_bridge": {
+        "title": "變更橋接器的主題前綴",
+        "description": "橋接器目前發佈所用的前綴：其 MQTT 設定中的 `prefix`。",
+        "data": {
+          "bridge_prefix": "主題前綴"
+        },
+        "data_description": {
+          "bridge_prefix": "除非橋接器的設定另有說明，否則為 lantern-bridge。"
+        }
       }
     },
     "error": {
       "invalid_console_id": "主機 ID 為 8 個字元，由 0 至 9 和 a 至 f 組成。",
       "invalid_prefix": "此前綴不能用於 MQTT 主題。",
-      "no_state": "此主機未在 Broker 上以此前綴發布任何內容。請檢查主機 ID 和前綴，並確認主機的連線至少建立過一次（PlayGuard › 主機 › 遠端存取 › 狀態）。"
+      "no_state": "此主機未在 Broker 上以此前綴發布任何內容。請檢查主機 ID 和前綴，並確認主機的連線至少建立過一次（PlayGuard › 主機 › 遠端存取 › 狀態）。",
+      "no_bridge": "沒有橋接器在此前綴下發佈狀態。請檢查前綴、橋接器設定中是否有 MQTT 代理，以及它是否在執行。"
     },
     "abort": {
       "already_configured": "此主機已設定。",
@@ -109,6 +141,9 @@
       },
       "docked": {
         "name": "已插入底座"
+      },
+      "bridge_reachable": {
+        "name": "可存取"
       }
     },
     "button": {
@@ -132,6 +167,9 @@
       },
       "remove_limit": {
         "name": "移除上限"
+      },
+      "bridge_rescan": {
+        "name": "重新掃描"
       }
     },
     "calendar": {
@@ -363,6 +401,32 @@
       },
       "forwarders": {
         "name": "轉送程式"
+      },
+      "bridge_status": {
+        "name": "狀態",
+        "state": {
+          "ok": "正常",
+          "warn": "警告",
+          "fail": "故障"
+        }
+      },
+      "bridge_version": {
+        "name": "版本"
+      },
+      "bridge_titles": {
+        "name": "遊戲"
+      },
+      "bridge_files_pending": {
+        "name": "待雜湊檔案"
+      },
+      "bridge_transfers": {
+        "name": "傳輸"
+      },
+      "bridge_errors": {
+        "name": "錯誤"
+      },
+      "bridge_sources_down": {
+        "name": "離線的來源"
       }
     },
     "switch": {

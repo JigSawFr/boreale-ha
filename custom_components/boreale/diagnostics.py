@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntry
 
-from . import PlayGuardConfigEntry
+from . import PlayGuardConfigEntry, is_bridge
+from .bridge import BridgeHub
 
 # What may name someone: the console's name and nickname (often a child's),
 # the saved profiles' names, the accounts' ids; the serial number, the
@@ -21,6 +22,12 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: PlayGua
     PlayGuard never publishes the PIN or the broker's credentials, and the
     serial number only when asked to; the report is the one the console
     published (Remote access › Publish the diagnostic reports)."""
+    if is_bridge(entry):
+        hub = cast("BridgeHub", entry.runtime_data)
+        return async_redact_data(
+            {"entry": {"data": dict(entry.data)}, "online": hub.online, "state": hub.state},
+            {"bridge_id", "uid", "name", "id"},
+        )
     console = entry.runtime_data
     return async_redact_data(
         {

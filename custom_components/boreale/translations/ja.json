@@ -7,13 +7,10 @@
         "description": "**{name}**（本体 ID `{console_id}`）を追加しますか？本体自身の Home Assistant デバイス（MQTT 自動検出）は、このインテグレーションのデバイスに置き換わります。エンティティ、ソフト名、今週のプレイ時間、長期統計はそのまま引き継がれます。"
       },
       "user": {
-        "title": "PlayGuard の本体を追加",
-        "description": "状態がブローカーにあり、まだ設定されていない本体です。1台選ぶか、「別の本体」を選んで ID で追加してください。",
-        "data": {
-          "console": "本体"
-        },
-        "data_description": {
-          "console": "名前と ID。トピックのプレフィックスが playguard 以外ならそれも表示します。"
+        "title": "デバイスを追加",
+        "menu_options": {
+          "console": "PlayGuard コンソール",
+          "bridge": "Lantern ブリッジ"
         }
       },
       "manual": {
@@ -37,12 +34,47 @@
         "data_description": {
           "topic_prefix": "sync.conf で別の値にしていなければ playguard。"
         }
+      },
+      "console": {
+        "title": "PlayGuard の本体を追加",
+        "description": "状態がブローカーにあり、まだ設定されていない本体です。1台選ぶか、「別の本体」を選んで ID で追加してください。",
+        "data": {
+          "console": "本体"
+        },
+        "data_description": {
+          "console": "名前と ID。トピックのプレフィックスが playguard 以外ならそれも表示します。"
+        }
+      },
+      "bridge": {
+        "title": "Lantern ブリッジを追加",
+        "description": "ブリッジが公開するトピックのプレフィックス。MQTT 設定の `prefix`（変更していなければ `lantern-bridge`）。連携はブローカー上のブリッジの状態を最大 10 秒待ちます。",
+        "data": {
+          "bridge_prefix": "トピックのプレフィックス"
+        },
+        "data_description": {
+          "bridge_prefix": "ブリッジの設定に別の指定がなければ lantern-bridge。"
+        }
+      },
+      "confirm_bridge": {
+        "title": "Lantern ブリッジが見つかりました",
+        "description": "**{name}** を追加しますか？"
+      },
+      "reconfigure_bridge": {
+        "title": "ブリッジのトピックのプレフィックスを変更",
+        "description": "ブリッジが現在公開しているプレフィックス。MQTT 設定の `prefix`。",
+        "data": {
+          "bridge_prefix": "トピックのプレフィックス"
+        },
+        "data_description": {
+          "bridge_prefix": "ブリッジの設定に別の指定がなければ lantern-bridge。"
+        }
       }
     },
     "error": {
       "invalid_console_id": "本体 ID は 0〜9 と a〜f の8文字です。",
       "invalid_prefix": "このプレフィックスは MQTT トピックに使えません。",
-      "no_state": "この本体は、このプレフィックスでブローカーに何も送信していません。本体 ID とプレフィックスを確認し、本体の接続が一度確立されていることを確認してください（PlayGuard › 本体 › リモートアクセス › 状態）。"
+      "no_state": "この本体は、このプレフィックスでブローカーに何も送信していません。本体 ID とプレフィックスを確認し、本体の接続が一度確立されていることを確認してください（PlayGuard › 本体 › リモートアクセス › 状態）。",
+      "no_bridge": "このプレフィックスで状態を公開したブリッジはありません。プレフィックス、ブリッジの設定に MQTT ブローカーがあること、起動していることを確認してください。"
     },
     "abort": {
       "already_configured": "この本体はすでに設定されています。",
@@ -109,6 +141,9 @@
       },
       "docked": {
         "name": "ドック接続中"
+      },
+      "bridge_reachable": {
+        "name": "接続可能"
       }
     },
     "button": {
@@ -132,6 +167,9 @@
       },
       "remove_limit": {
         "name": "上限を解除"
+      },
+      "bridge_rescan": {
+        "name": "再スキャン"
       }
     },
     "calendar": {
@@ -363,6 +401,32 @@
       },
       "forwarders": {
         "name": "フォワーダー"
+      },
+      "bridge_status": {
+        "name": "状態",
+        "state": {
+          "ok": "OK",
+          "warn": "警告",
+          "fail": "異常"
+        }
+      },
+      "bridge_version": {
+        "name": "バージョン"
+      },
+      "bridge_titles": {
+        "name": "タイトル"
+      },
+      "bridge_files_pending": {
+        "name": "ハッシュ待ちファイル"
+      },
+      "bridge_transfers": {
+        "name": "転送"
+      },
+      "bridge_errors": {
+        "name": "エラー"
+      },
+      "bridge_sources_down": {
+        "name": "停止中のソース"
       }
     },
     "switch": {

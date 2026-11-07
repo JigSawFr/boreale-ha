@@ -146,6 +146,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   console).
 - La **sysMMC et l'emuMMC** d'une console sont deux appareils : chacune a son
   propre contrôle parental et son propre identifiant de console.
+- Un **pont Lantern** ([lantern-bridge](https://github.com/JigSawFr/lantern-bridge), 0.1 ou plus récent) : son état, sa version et ses compteurs, lus en HTTP. Voir *Configuration › Un pont Lantern*.
 - **Non pris en charge** : la Nintendo Switch 2 (Atmosphère n'existe pas pour
   elle), et une console sans PlayGuard. Pour l'application et le compte
   Contrôle parental de Nintendo, voyez plutôt l'intégration *Nintendo Switch
@@ -263,6 +264,26 @@ agent actif) apparaît dans *Paramètres › Appareils et services › Découver
 
 Chaque console est une entrée et un appareil ; la même console ne peut pas être
 ajoutée deux fois.
+
+**Un pont Lantern.** Donnez un broker MQTT au pont (ses *Réglages › Broker
+MQTT*, le même que celui de Home Assistant). Il publie alors sous
+`lantern-bridge/<son identifiant>` et apparaît dans *Paramètres › Appareils et
+services › Découvertes* comme une console : confirmez-le. À la main :
+*Ajouter une intégration › Boréale for Nintendo Switch › Un pont Lantern*, et
+le préfixe de topic (`lantern-bridge` sauf réglage contraire) ; le premier pont
+du broker pas encore configuré est ajouté. C'est une entrée et un appareil,
+reconnu par l'identifiant du pont : si son préfixe change, il suit par la
+découverte, ou *Reconfigurer* le donne.
+
+| Entité | Ce que c'est |
+|---|---|
+| **État** | `ok`, `warn` ou `fail`, la santé du pont (sources joignables, scans récents, disque, index). |
+| **Titres**, **Fichiers à hacher**, **Transferts**, **Erreurs**, **Sources hors service** | La bibliothèque et le trafic, poussés avec l'état (toutes les 30 secondes). |
+| **Version**, **Joignable** | Diagnostic : la version du pont, et s'il est sur le broker (son dernier testament). |
+| **Rescanner** (bouton) | Ordonne au pont de relire toutes ses sources maintenant. |
+
+Tout est indisponible tant que le pont est hors du broker, sauf *Joignable*, qui
+le dit.
 
 ## 🔧 Options et reconfiguration
 
@@ -613,8 +634,9 @@ lists:
 
 ## 🔄 Mise à jour des données
 
-Rien n'est interrogé : la console pousse par MQTT, et Home Assistant ne fait
-qu'écouter.
+Rien n'est interrogé : une console pousse par MQTT, et Home Assistant ne fait
+qu'écouter. (Le pont Lantern fait exception : il est lu toutes les 60 secondes en
+HTTP.)
 
 - La console publie son **état** quand il change, et toutes les `poll_s`
   secondes pour un horodatage frais (30 par défaut, de 10 à 300, dans son

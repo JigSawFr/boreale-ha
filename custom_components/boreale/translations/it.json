@@ -7,13 +7,10 @@
         "description": "Aggiungere **{name}** (ID console `{console_id}`)? Il suo dispositivo Home Assistant (rilevamento MQTT) viene sostituito da quello di questa integrazione, con le stesse entità, i nomi dei giochi, il tempo di gioco della settimana e le statistiche a lungo termine."
       },
       "user": {
-        "title": "Aggiungi una console PlayGuard",
-        "description": "Le console il cui stato è sul broker e che non sono ancora configurate. Scegline una, o un'altra console per aggiungerla tramite il suo ID.",
-        "data": {
-          "console": "Console"
-        },
-        "data_description": {
-          "console": "Il suo nome e il suo ID, e il prefisso dei topic quando non è playguard."
+        "title": "Aggiungi un dispositivo",
+        "menu_options": {
+          "console": "Una console PlayGuard",
+          "bridge": "Un bridge Lantern"
         }
       },
       "manual": {
@@ -37,12 +34,47 @@
         "data_description": {
           "topic_prefix": "playguard, salvo diversa indicazione in sync.conf."
         }
+      },
+      "console": {
+        "title": "Aggiungi una console PlayGuard",
+        "description": "Le console il cui stato è sul broker e che non sono ancora configurate. Scegline una, o un'altra console per aggiungerla tramite il suo ID.",
+        "data": {
+          "console": "Console"
+        },
+        "data_description": {
+          "console": "Il suo nome e il suo ID, e il prefisso dei topic quando non è playguard."
+        }
+      },
+      "bridge": {
+        "title": "Aggiungi un bridge Lantern",
+        "description": "Il prefisso di topic con cui il bridge pubblica: `prefix` nelle sue impostazioni MQTT, `lantern-bridge` se non cambiato. L'integrazione attende fino a 10 secondi il suo stato sul broker.",
+        "data": {
+          "bridge_prefix": "Prefisso di topic"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, salvo diversa indicazione nelle impostazioni del bridge."
+        }
+      },
+      "confirm_bridge": {
+        "title": "Bridge Lantern trovato",
+        "description": "Aggiungere **{name}**?"
+      },
+      "reconfigure_bridge": {
+        "title": "Cambia il prefisso di topic del bridge",
+        "description": "Il prefisso con cui il bridge pubblica ora: `prefix` nelle sue impostazioni MQTT.",
+        "data": {
+          "bridge_prefix": "Prefisso di topic"
+        },
+        "data_description": {
+          "bridge_prefix": "lantern-bridge, salvo diversa indicazione nelle impostazioni del bridge."
+        }
       }
     },
     "error": {
       "invalid_console_id": "Un ID console ha 8 caratteri, da 0 a 9 e da a a f.",
       "invalid_prefix": "Questo prefisso non può far parte di un topic MQTT.",
-      "no_state": "Questa console non ha pubblicato nulla sul broker con questo prefisso. Controlla l'ID della console e il prefisso, e che il collegamento della console sia stato attivo almeno una volta (PlayGuard › Console › Accesso remoto › Stato)."
+      "no_state": "Questa console non ha pubblicato nulla sul broker con questo prefisso. Controlla l'ID della console e il prefisso, e che il collegamento della console sia stato attivo almeno una volta (PlayGuard › Console › Accesso remoto › Stato).",
+      "no_bridge": "Nessun bridge ha pubblicato il suo stato con questo prefisso. Controlla il prefisso, che il bridge abbia un broker MQTT nelle impostazioni e che sia in esecuzione."
     },
     "abort": {
       "already_configured": "Questa console è già configurata.",
@@ -109,6 +141,9 @@
       },
       "docked": {
         "name": "Nella base"
+      },
+      "bridge_reachable": {
+        "name": "Raggiungibile"
       }
     },
     "button": {
@@ -132,6 +167,9 @@
       },
       "remove_limit": {
         "name": "Rimuovi il limite"
+      },
+      "bridge_rescan": {
+        "name": "Scansiona di nuovo"
       }
     },
     "calendar": {
@@ -363,6 +401,32 @@
       },
       "forwarders": {
         "name": "Forwarder"
+      },
+      "bridge_status": {
+        "name": "Stato",
+        "state": {
+          "ok": "OK",
+          "warn": "Avviso",
+          "fail": "Guasto"
+        }
+      },
+      "bridge_version": {
+        "name": "Versione"
+      },
+      "bridge_titles": {
+        "name": "Titoli"
+      },
+      "bridge_files_pending": {
+        "name": "File da calcolare"
+      },
+      "bridge_transfers": {
+        "name": "Trasferimenti"
+      },
+      "bridge_errors": {
+        "name": "Errori"
+      },
+      "bridge_sources_down": {
+        "name": "Fonti non raggiungibili"
       }
     },
     "switch": {
