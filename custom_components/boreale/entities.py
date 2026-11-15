@@ -19,6 +19,7 @@ from homeassistant.const import PERCENTAGE, Platform, UnitOfInformation, UnitOfT
 from .const import (
     ACTIVITY_OPTIONS,
     DAYS,
+    NO_PLAYGUARD,
     PUBLISH_ACTIVITY,
     PUBLISH_CONSOLE,
     PUBLISH_CONTROLS,
@@ -57,6 +58,7 @@ class EntityDef:
     step: int | None = None
     suggested_unit: str | None = None  # the unit Home Assistant shows it in
     precision: int | None = None  # the decimals Home Assistant shows
+    playguard: bool = True  # needs PlayGuard's module (its documents): not there on a console without it
     publish: str = PUBLISH_CONTROLS  # what it shows: there while PlayGuard publishes it (link.publishes)
     extra: bool = False  # this integration's own: not in PlayGuard's table
 
@@ -105,7 +107,7 @@ def _system(
     key: str, path: tuple[str, ...], publish: str, platform: Platform = Platform.SENSOR, **kw: Any
 ) -> EntityDef:
     """An entity of the system document (the console itself)."""
-    return EntityDef(key=key, platform=platform, topic="system", path=path, publish=publish, **kw)
+    return EntityDef(key=key, platform=platform, topic="system", path=path, publish=publish, playguard=False, **kw)
 
 
 def _space(key: str, path: tuple[str, ...], **kw: Any) -> EntityDef:
@@ -361,7 +363,9 @@ ENTITIES: tuple[EntityDef, ...] = (
         publish=PUBLISH_GAMES,
     ),
     # this integration's own
-    _binary("online", ("availability",), device_class="connectivity", category="diagnostic", extra=True),
+    _binary(
+        "online", ("availability",), device_class="connectivity", category="diagnostic", playguard=False, extra=True
+    ),
     _binary("agent", ("link", "agent"), device_class="running", category="diagnostic", enabled=False, extra=True),
     _minutes(
         "week_play_time",
@@ -404,7 +408,13 @@ ENTITIES: tuple[EntityDef, ...] = (
     ),
     # What waits on the user or failed in the Boréale homebrews of the console
     # (their shared bell: <base>/notices, sensor.py).
-    EntityDef(key="homebrew_notices", platform=Platform.SENSOR, state_class=SensorStateClass.MEASUREMENT, extra=True),
+    EntityDef(
+        key="homebrew_notices",
+        platform=Platform.SENSOR,
+        state_class=SensorStateClass.MEASUREMENT,
+        playguard=False,
+        extra=True,
+    ),
     # The icon of the game being played (PlayGuard's icon/<APP_ID>).
     EntityDef(key="now_playing_icon", platform=Platform.IMAGE, publish=PUBLISH_ICONS, extra=True),
     # PlayGuard's version against its latest release (update.py).
@@ -416,6 +426,7 @@ ENTITIES: tuple[EntityDef, ...] = (
         platform=Platform.SENSOR,
         device_class="timestamp",
         category="diagnostic",
+        playguard=False,
         extra=True,
     ),
 )
@@ -440,8 +451,14 @@ ACCOUNT_ENTITIES: tuple[EntityDef, ...] = (
 
 
 def for_platform(platform: Platform, unpublished: frozenset[str] = frozenset()) -> list[EntityDef]:
-    """The entities of one platform, but those of what is not published."""
-    return [e for e in ENTITIES if e.platform == platform and e.publish not in unpublished]
+    """The entities of one platform, but those of what is not published (and,
+    on a console without PlayGuard's module, those that need it)."""
+    return [e for e in ENTITIES if e.platform == platform and is_published(e, unpublished)]
+
+
+def is_published(definition: EntityDef, unpublished: frozenset[str]) -> bool:
+    """Whether the console gives what `definition` shows."""
+    return definition.publish not in unpublished and not (definition.playguard and NO_PLAYGUARD in unpublished)
 
 
 def dig(doc: dict[str, Any] | None, path: tuple[str, ...] | None) -> Any:

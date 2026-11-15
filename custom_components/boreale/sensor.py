@@ -14,7 +14,7 @@ from homeassistant.util import dt as dt_util
 
 from . import PlayGuardConfigEntry, bridge, is_bridge, play, playshelf
 from .bridge import BridgeConfigEntry
-from .const import ACTIVITY_OPTIONS, PUBLISH_ACTIVITY
+from .const import ACTIVITY_OPTIONS, NO_PLAYGUARD, PUBLISH_ACTIVITY
 from .coordinator import PlayGuardConsole
 from .entities import ACCOUNT_ENTITIES, EntityDef, for_platform
 from .entity import PlayGuardEntity
@@ -43,7 +43,7 @@ async def async_setup_entry(
         classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR, console.unpublished)
     )
     playshelf.async_add(entry, Platform.SENSOR, async_add_entities)
-    if PUBLISH_ACTIVITY in console.unpublished:
+    if PUBLISH_ACTIVITY in console.unpublished or NO_PLAYGUARD in console.unpublished:
         return
 
     # Each account's pair: the ones already in the registry at once, the

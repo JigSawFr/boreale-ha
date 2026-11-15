@@ -44,7 +44,9 @@ from .const import (
     MANUFACTURER,
     MODEL,
     MODEL_NAMES,
+    MODULE,
     NATIVE_STATES_MAX,
+    NO_PLAYGUARD,
     ORDER_TIMEOUT,
     PLAYSHELF,
     PUBLISH_HARDWARE,
@@ -58,7 +60,7 @@ from .const import (
     tree_prefix,
     tree_topic,
 )
-from .entities import ENTITIES, dig
+from .entities import ENTITIES, dig, is_published
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -316,6 +318,7 @@ class PlayGuardConsole:
         if not self._readable("capabilities", doc):
             return
         self.capabilities = doc
+        self._follow_publishes()  # PlayGuard's module listed or not
         self._changed()
 
     @callback
@@ -325,6 +328,14 @@ class PlayGuardConsole:
             return
         self.playshelf = doc
         self._changed()
+
+    @property
+    def playguard_absent(self) -> bool:
+        """Whether the console says it runs without PlayGuard's module
+        (`capabilities` lists modules, and not PlayGuard). Unknown (no
+        capabilities yet, an older console): not absent."""
+        modules = (self.capabilities or {}).get("modules")
+        return isinstance(modules, dict) and MODULE not in modules
 
     @property
     def has_playshelf(self) -> bool:
@@ -551,9 +562,12 @@ class PlayGuardConsole:
         not: everything). The entities of what it turned off go; what it
         turned back on comes back with a reload of the entry."""
         publishes = dig(self.state, ("link", "publishes"))
-        if not isinstance(publishes, dict):
+        absent = self.playguard_absent
+        if not isinstance(publishes, dict) and not absent:
             return
-        off = {k for k, v in publishes.items() if v is False}
+        off = {k for k, v in publishes.items() if v is False} if isinstance(publishes, dict) else set()
+        if absent:
+            off.add(NO_PLAYGUARD)  # no PlayGuard, no documents of its: what needs them is not there
         if PUBLISH_HARDWARE in off:
             off.add(PUBLISH_SERIAL)  # the serial number goes with the hardware
         unpublished = frozenset(off)
@@ -572,17 +586,22 @@ class PlayGuardConsole:
 
     @callback
     def _remove_unpublished(self) -> None:
-        """Removes the entities of what PlayGuard does not publish."""
+        """Removes the entities of what the console does not publish."""
         if not self.unpublished:
             return
         registry = er.async_get(self.hass)
         for definition in ENTITIES:
-            if definition.publish not in self.unpublished:
+            if is_published(definition, self.unpublished):
                 continue
             unique_id = f"{self.console_id}_{definition.key}"
             entity_id = registry.async_get_entity_id(definition.platform, DOMAIN, unique_id)
             if entity_id:
                 registry.async_remove(entity_id)
+        if NO_PLAYGUARD in self.unpublished:  # and each account's pair (created as the console speaks of them)
+            prefix = f"{self.console_id}_account_"
+            for registered in er.async_entries_for_config_entry(registry, self.entry.entry_id):
+                if registered.unique_id.startswith(prefix):
+                    registry.async_remove(registered.entity_id)
 
     @callback
     def _readable(self, topic: str, doc: dict[str, Any] | None) -> bool:

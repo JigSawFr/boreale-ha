@@ -456,6 +456,14 @@ Home Assistant (and are not created again at the next start); turned back
 on, the entry reloads and they come back. The parental controls are always
 published.
 
+**A console without PlayGuard.** The agent can run on its own, with PlayGuard
+not installed or its remote link not allowed: the console then says so in
+`capabilities` and publishes only its own documents. It is found by its system
+document, under its nickname; the parental controls, play time, games and
+PlayGuard's update entities are not created (and go when PlayGuard leaves), the
+console's own ones stay (hardware, power, network, storage, the notices, *Last
+seen*, *Online*). With PlayGuard back, the entry reloads and they come back.
+
 **PlayShelf** (needs the PlayGuard agent and a PlayShelf that announces itself):
 while PlayShelf is open, the agent publishes its state and the console lists it
 as a module; these entities then appear on the console's device, and go

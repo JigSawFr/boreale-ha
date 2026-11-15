@@ -21,6 +21,7 @@
   "mqtt": [
     "playguard/+/state",
     "boreale/+/playguard/state",
+    "boreale/+/system",
     "lantern-bridge/+/state"
   ],
   "quality_scale": "platinum",
