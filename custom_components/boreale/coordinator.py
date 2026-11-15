@@ -46,6 +46,7 @@ from .const import (
     MODEL_NAMES,
     NATIVE_STATES_MAX,
     ORDER_TIMEOUT,
+    PLAYSHELF,
     PUBLISH_HARDWARE,
     PUBLISH_SERIAL,
     REFUSAL_REASONS,
@@ -105,6 +106,8 @@ class PlayGuardConsole:
         self.capabilities: dict[str, Any] | None = None
         # Every Boréale homebrew's shared bell (Boréale's tree only).
         self.notices: dict[str, Any] | None = None
+        # PlayShelf's state, while it publishes through the agent (tree 2 only).
+        self.playshelf: dict[str, Any] | None = None
         self.online: bool | None = None
         self.activity: dict[str, Any] | None = None
         self.names: dict[str, Any] = {}
@@ -164,6 +167,7 @@ class PlayGuardConsole:
         if tree >= 2:
             topics["capabilities"] = self._on_capabilities
             topics["notices"] = self._on_notices
+            topics[f"{PLAYSHELF}/state"] = self._on_playshelf
         for sub, handler in topics.items():
             self._unsubscribe.append(
                 await mqtt.async_subscribe(
@@ -313,6 +317,28 @@ class PlayGuardConsole:
             return
         self.capabilities = doc
         self._changed()
+
+    @callback
+    def _on_playshelf(self, msg: ReceiveMessage) -> None:
+        doc = _json(msg.payload)
+        if not self._readable(f"{PLAYSHELF}/state", doc):
+            return
+        self.playshelf = doc
+        self._changed()
+
+    @property
+    def has_playshelf(self) -> bool:
+        """Whether the console announces PlayShelf (`capabilities`: its session
+        with the agent is open)."""
+        modules = (self.capabilities or {}).get("modules")
+        return isinstance(modules, dict) and PLAYSHELF in modules
+
+    async def async_playshelf_order(self, sub: str, payload: str) -> None:
+        """An order for PlayShelf's module (`pause_downloads/set`), not retained: it
+        is for the session open now. Boréale's tree only."""
+        if self.tree < 2:
+            return
+        await mqtt.async_publish(self.hass, f"{self.base}/{PLAYSHELF}/{sub}", payload, qos=1, retain=False)
 
     @callback
     def _on_notices(self, msg: ReceiveMessage) -> None:

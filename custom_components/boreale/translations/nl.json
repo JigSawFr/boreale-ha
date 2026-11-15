@@ -144,6 +144,12 @@
       },
       "bridge_reachable": {
         "name": "Bereikbaar"
+      },
+      "shelf_downloading": {
+        "name": "PlayShelf downloadt"
+      },
+      "shelf_failed": {
+        "name": "PlayShelf-downloadprobleem"
       }
     },
     "button": {
@@ -170,6 +176,9 @@
       },
       "bridge_rescan": {
         "name": "Opnieuw scannen"
+      },
+      "shelf_pause": {
+        "name": "PlayShelf-downloads pauzeren"
       }
     },
     "calendar": {
@@ -433,6 +442,18 @@
       },
       "bridge_problems": {
         "name": "Problemen"
+      },
+      "shelf_pending": {
+        "name": "Resterende PlayShelf-downloads"
+      },
+      "shelf_progress": {
+        "name": "Voortgang PlayShelf-download"
+      },
+      "shelf_last_installed": {
+        "name": "Laatst geïnstalleerd met PlayShelf"
+      },
+      "shelf_free": {
+        "name": "Vrije ruimte op de sd-kaart (PlayShelf)"
       }
     },
     "switch": {

@@ -144,6 +144,12 @@
       },
       "bridge_reachable": {
         "name": "接続可能"
+      },
+      "shelf_downloading": {
+        "name": "PlayShelf ダウンロード中"
+      },
+      "shelf_failed": {
+        "name": "PlayShelf のダウンロードの問題"
       }
     },
     "button": {
@@ -170,6 +176,9 @@
       },
       "bridge_rescan": {
         "name": "再スキャン"
+      },
+      "shelf_pause": {
+        "name": "PlayShelf のダウンロードを一時停止"
       }
     },
     "calendar": {
@@ -433,6 +442,18 @@
       },
       "bridge_problems": {
         "name": "問題"
+      },
+      "shelf_pending": {
+        "name": "PlayShelf の残りダウンロード"
+      },
+      "shelf_progress": {
+        "name": "PlayShelf のダウンロード進捗"
+      },
+      "shelf_last_installed": {
+        "name": "PlayShelf で最後にインストール"
+      },
+      "shelf_free": {
+        "name": "PlayShelf の SD カード空き容量"
       }
     },
     "switch": {

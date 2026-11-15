@@ -144,6 +144,12 @@
       },
       "bridge_reachable": {
         "name": "Доступен"
+      },
+      "shelf_downloading": {
+        "name": "PlayShelf загружает"
+      },
+      "shelf_failed": {
+        "name": "Проблема загрузки PlayShelf"
       }
     },
     "button": {
@@ -170,6 +176,9 @@
       },
       "bridge_rescan": {
         "name": "Пересканировать"
+      },
+      "shelf_pause": {
+        "name": "Приостановить загрузки PlayShelf"
       }
     },
     "calendar": {
@@ -433,6 +442,18 @@
       },
       "bridge_problems": {
         "name": "Проблемы"
+      },
+      "shelf_pending": {
+        "name": "Оставшиеся загрузки PlayShelf"
+      },
+      "shelf_progress": {
+        "name": "Ход загрузки PlayShelf"
+      },
+      "shelf_last_installed": {
+        "name": "Последняя установка PlayShelf"
+      },
+      "shelf_free": {
+        "name": "Свободное место на SD-карте (PlayShelf)"
       }
     },
     "switch": {

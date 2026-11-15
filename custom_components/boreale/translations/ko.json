@@ -144,6 +144,12 @@
       },
       "bridge_reachable": {
         "name": "연결 가능"
+      },
+      "shelf_downloading": {
+        "name": "PlayShelf 다운로드 중"
+      },
+      "shelf_failed": {
+        "name": "PlayShelf 다운로드 문제"
       }
     },
     "button": {
@@ -170,6 +176,9 @@
       },
       "bridge_rescan": {
         "name": "다시 스캔"
+      },
+      "shelf_pause": {
+        "name": "PlayShelf 다운로드 일시 중지"
       }
     },
     "calendar": {
@@ -433,6 +442,18 @@
       },
       "bridge_problems": {
         "name": "문제"
+      },
+      "shelf_pending": {
+        "name": "PlayShelf 남은 다운로드"
+      },
+      "shelf_progress": {
+        "name": "PlayShelf 다운로드 진행률"
+      },
+      "shelf_last_installed": {
+        "name": "PlayShelf 마지막 설치"
+      },
+      "shelf_free": {
+        "name": "PlayShelf SD 카드 여유 공간"
       }
     },
     "switch": {
