@@ -414,6 +414,8 @@ while PlayGuard is closed):
 | PRODINFO blanked | Atmosphère hides the console's identity. | diagnostic, disabled by default |
 | Temperature, Connection, IP address, Wi-Fi signal | The internal sensor, Wi-Fi or ethernet, the console's address, 0–3 bars. | diagnostic, disabled by default |
 | Last started | When the console started (not when it last woke up). | diagnostic, disabled by default |
+| Agent memory used | What the agent holds of its fixed heap (bytes, shown in KiB), from the `agent` block of its system document; the budget to watch when a module is added. | diagnostic, disabled by default |
+| Agent uptime | How long the agent has been running (seconds, shown in hours). | diagnostic, disabled by default |
 | Serial number | The console's real serial number (from Atmosphère's backup when PRODINFO is blanked). | diagnostic, disabled by default; only with *Publish the serial number* on the console |
 | Wi-Fi network | The network's name. | diagnostic, disabled by default |
 

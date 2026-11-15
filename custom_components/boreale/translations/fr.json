@@ -454,6 +454,12 @@
       },
       "shelf_free": {
         "name": "Espace libre de la carte SD (PlayShelf)"
+      },
+      "agent_memory": {
+        "name": "Mémoire utilisée par l'agent"
+      },
+      "agent_uptime": {
+        "name": "Durée de fonctionnement de l'agent"
       }
     },
     "switch": {

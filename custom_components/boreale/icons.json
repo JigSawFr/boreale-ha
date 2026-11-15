@@ -176,6 +176,12 @@
       },
       "shelf_free": {
         "default": "mdi:sd"
+      },
+      "agent_memory": {
+        "default": "mdi:memory"
+      },
+      "agent_uptime": {
+        "default": "mdi:timer-outline"
       }
     },
     "switch": {

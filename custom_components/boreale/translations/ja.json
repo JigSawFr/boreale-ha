@@ -454,6 +454,12 @@
       },
       "shelf_free": {
         "name": "PlayShelf の SD カード空き容量"
+      },
+      "agent_memory": {
+        "name": "エージェントのメモリ使用量"
+      },
+      "agent_uptime": {
+        "name": "エージェントの稼働時間"
       }
     },
     "switch": {

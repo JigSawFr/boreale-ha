@@ -454,6 +454,12 @@
       },
       "shelf_free": {
         "name": "PlayShelf SD 카드 여유 공간"
+      },
+      "agent_memory": {
+        "name": "에이전트 메모리 사용량"
+      },
+      "agent_uptime": {
+        "name": "에이전트 가동 시간"
       }
     },
     "switch": {

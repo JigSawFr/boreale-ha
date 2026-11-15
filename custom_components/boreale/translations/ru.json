@@ -454,6 +454,12 @@
       },
       "shelf_free": {
         "name": "Свободное место на SD-карте (PlayShelf)"
+      },
+      "agent_memory": {
+        "name": "Память агента"
+      },
+      "agent_uptime": {
+        "name": "Время работы агента"
       }
     },
     "switch": {

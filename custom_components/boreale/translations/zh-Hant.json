@@ -454,6 +454,12 @@
       },
       "shelf_free": {
         "name": "PlayShelf SD 卡可用空間"
+      },
+      "agent_memory": {
+        "name": "代理程式記憶體用量"
+      },
+      "agent_uptime": {
+        "name": "代理程式運行時間"
       }
     },
     "switch": {
