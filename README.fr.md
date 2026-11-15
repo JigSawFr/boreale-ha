@@ -438,6 +438,8 @@ quand PlayGuard est fermé) :
 | PRODINFO masqué | Atmosphère cache l'identité de la console. | diagnostic, désactivé par défaut |
 | Température, Connexion, Adresse IP, Signal Wi-Fi | Le capteur interne, Wi-Fi ou ethernet, l'adresse de la console, 0 à 3 barres. | diagnostic, désactivés par défaut |
 | Dernier démarrage | Quand la console a démarré (pas quand elle est sortie de veille). | diagnostic, désactivé par défaut |
+| Mémoire utilisée par l'agent | Ce que l'agent occupe de son tas fixe (octets, affichés en Kio), d'après le bloc `agent` de son document système ; le budget à surveiller quand on ajoute un module. | diagnostic, désactivé par défaut |
+| Durée de fonctionnement de l'agent | Depuis combien de temps l'agent tourne (secondes, affichées en heures). | diagnostic, désactivé par défaut |
 | Numéro de série | Le vrai numéro de série de la console (tiré de la sauvegarde d'Atmosphère quand le PRODINFO est masqué). | diagnostic, désactivé par défaut ; seulement avec *Publier le numéro de série* sur la console |
 | Réseau Wi-Fi | Le nom du réseau. | diagnostic, désactivé par défaut |
 

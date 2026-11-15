@@ -136,3 +136,29 @@ async def test_not_created_without_playguard(hass: HomeAssistant, mqtt_mock, tre
         assert _id(hass, platform, key) is None, key
     for platform, key in CONSOLE:
         assert _id(hass, platform, key), key
+
+
+async def test_the_agent_says_how_it_is_doing(hass: HomeAssistant, mqtt_mock, tree_entry, state: dict) -> None:
+    """The agent's own diagnostics, from the system document's `agent` block."""
+    registry = er.async_get(hass)
+    for key in ("agent_memory", "agent_uptime"):
+        registry.async_get_or_create("sensor", DOMAIN, f"{CONSOLE_ID}_{key}", disabled_by=None)
+    tree_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(tree_entry.entry_id)
+    await hass.async_block_till_done()
+    system = {
+        **fixture("system.json"),
+        "agent": {
+            "uptime_s": 7200,
+            "heap_used": 409600,
+            "heap_total": 1572864,
+            "protocols": {"relay": 1, "ipc": 3},
+            "module": False,
+        },
+    }
+    async_fire_mqtt_message(hass, f"{TREE}/system", json.dumps(system), retain=True)
+    await hass.async_block_till_done()
+    memory = hass.states.get(_id(hass, Platform.SENSOR, "agent_memory") or "")
+    uptime = hass.states.get(_id(hass, Platform.SENSOR, "agent_uptime") or "")
+    assert memory is not None and float(memory.state) == 409600.0  # bytes (the suggested unit is the registry's, for a new entity)
+    assert uptime is not None and float(uptime.state) == 7200.0  # seconds

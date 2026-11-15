@@ -335,6 +335,32 @@ ENTITIES: tuple[EntityDef, ...] = (
     ),
     _system("ssid", ("network", "ssid"), PUBLISH_NETWORK, category="diagnostic", enabled=False),
     _system("last_boot", ("boot_ts",), PUBLISH_CONSOLE, device_class="timestamp", category="diagnostic", enabled=False),
+    # How the agent is doing (the system document's `agent` block, only an agent has one).
+    _system(
+        "agent_memory",
+        ("agent", "heap_used"),
+        PUBLISH_CONSOLE,
+        unit=UnitOfInformation.BYTES,
+        device_class="data_size",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_unit=UnitOfInformation.KIBIBYTES,
+        precision=0,
+        category="diagnostic",
+        enabled=False,
+        extra=True,
+    ),
+    _system(
+        "agent_uptime",
+        ("agent", "uptime_s"),
+        PUBLISH_CONSOLE,
+        unit=UnitOfTime.SECONDS,
+        device_class="duration",
+        suggested_unit=UnitOfTime.HOURS,
+        precision=1,
+        category="diagnostic",
+        enabled=False,
+        extra=True,
+    ),
     # the games (the games document), each game listed on Games installed
     EntityDef(
         key="games_installed",

@@ -454,6 +454,12 @@
       },
       "shelf_free": {
         "name": "Freier SD-Karten-Speicher (PlayShelf)"
+      },
+      "agent_memory": {
+        "name": "Speicher des Agenten"
+      },
+      "agent_uptime": {
+        "name": "Laufzeit des Agenten"
       }
     },
     "switch": {
