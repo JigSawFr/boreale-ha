@@ -160,5 +160,7 @@ async def test_the_agent_says_how_it_is_doing(hass: HomeAssistant, mqtt_mock, tr
     await hass.async_block_till_done()
     memory = hass.states.get(_id(hass, Platform.SENSOR, "agent_memory") or "")
     uptime = hass.states.get(_id(hass, Platform.SENSOR, "agent_uptime") or "")
-    assert memory is not None and float(memory.state) == 409600.0  # bytes (the suggested unit is the registry's, for a new entity)
+    assert (
+        memory is not None and float(memory.state) == 409600.0
+    )  # bytes (the suggested unit is the registry's, for a new entity)
     assert uptime is not None and float(uptime.state) == 7200.0  # seconds
