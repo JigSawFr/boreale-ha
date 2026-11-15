@@ -144,6 +144,12 @@
       },
       "bridge_reachable": {
         "name": "Reachable"
+      },
+      "shelf_downloading": {
+        "name": "PlayShelf downloading"
+      },
+      "shelf_failed": {
+        "name": "PlayShelf download problem"
       }
     },
     "button": {
@@ -170,6 +176,9 @@
       },
       "bridge_rescan": {
         "name": "Rescan"
+      },
+      "shelf_pause": {
+        "name": "Pause PlayShelf downloads"
       }
     },
     "calendar": {
@@ -433,6 +442,18 @@
       },
       "bridge_problems": {
         "name": "Problems"
+      },
+      "shelf_pending": {
+        "name": "PlayShelf downloads left"
+      },
+      "shelf_progress": {
+        "name": "PlayShelf download progress"
+      },
+      "shelf_last_installed": {
+        "name": "PlayShelf last installed"
+      },
+      "shelf_free": {
+        "name": "PlayShelf SD card free space"
       }
     },
     "switch": {

@@ -15,6 +15,7 @@ from homeassistant.util.yaml import load_yaml
 
 from custom_components.boreale.const import RETIRED
 from custom_components.boreale.entities import ACCOUNT_ENTITIES, BY_KEY, ENTITIES, EntityDef
+from custom_components.boreale.playshelf import SHELF_ENTITIES
 
 from .conftest import fixture
 
@@ -93,11 +94,21 @@ def test_every_entity_is_named() -> None:
         assert d.key in names[str(d.platform)], d.key
 
 
+def test_every_playshelf_entity_is_named_and_has_an_icon() -> None:
+    names = json.loads(STRINGS.read_text(encoding="utf-8"))["entity"]
+    icons = json.loads(ICONS.read_text(encoding="utf-8"))["entity"]
+    for d in SHELF_ENTITIES:
+        assert d.key in names[str(d.platform)], d.key
+        assert d.key in icons[str(d.platform)], d.key
+
+
 def test_icons_are_for_entities_and_actions() -> None:
     icons = json.loads(ICONS.read_text(encoding="utf-8"))
     for platform, keys in icons["entity"].items():
         for key in keys:
             if key.startswith("bridge_"):  # a Lantern bridge's entities (tests/test_bridge.py)
+                continue
+            if key.startswith("shelf_"):  # PlayShelf's module (tests/test_playshelf.py)
                 continue
             d = BY_KEY.get(key) or next((a for a in ACCOUNT_ENTITIES if a.key == key), None)
             assert d and str(d.platform) == platform, key

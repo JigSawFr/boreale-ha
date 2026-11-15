@@ -144,6 +144,12 @@
       },
       "bridge_reachable": {
         "name": "Raggiungibile"
+      },
+      "shelf_downloading": {
+        "name": "PlayShelf sta scaricando"
+      },
+      "shelf_failed": {
+        "name": "Problema di download PlayShelf"
       }
     },
     "button": {
@@ -170,6 +176,9 @@
       },
       "bridge_rescan": {
         "name": "Scansiona di nuovo"
+      },
+      "shelf_pause": {
+        "name": "Metti in pausa i download PlayShelf"
       }
     },
     "calendar": {
@@ -433,6 +442,18 @@
       },
       "bridge_problems": {
         "name": "Problemi"
+      },
+      "shelf_pending": {
+        "name": "Download PlayShelf rimasti"
+      },
+      "shelf_progress": {
+        "name": "Avanzamento del download PlayShelf"
+      },
+      "shelf_last_installed": {
+        "name": "Ultimo installato con PlayShelf"
+      },
+      "shelf_free": {
+        "name": "Spazio libero della scheda SD (PlayShelf)"
       }
     },
     "switch": {

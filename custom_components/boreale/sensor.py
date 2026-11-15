@@ -12,7 +12,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
-from . import PlayGuardConfigEntry, bridge, is_bridge, play
+from . import PlayGuardConfigEntry, bridge, is_bridge, play, playshelf
 from .bridge import BridgeConfigEntry
 from .const import ACTIVITY_OPTIONS, PUBLISH_ACTIVITY
 from .coordinator import PlayGuardConsole
@@ -42,6 +42,7 @@ async def async_setup_entry(
     async_add_entities(
         classes.get(d.key, PlayGuardSensor)(console, d) for d in for_platform(Platform.SENSOR, console.unpublished)
     )
+    playshelf.async_add(entry, Platform.SENSOR, async_add_entities)
     if PUBLISH_ACTIVITY in console.unpublished:
         return
 

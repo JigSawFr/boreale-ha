@@ -9,7 +9,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from . import PlayGuardConfigEntry, bridge, is_bridge
+from . import PlayGuardConfigEntry, bridge, is_bridge, playshelf
 from .bridge import BridgeConfigEntry
 from .entities import for_platform
 from .entity import PlayGuardEntity
@@ -25,6 +25,7 @@ async def async_setup_entry(
         return
     console = entry.runtime_data
     async_add_entities(PlayGuardButton(console, d) for d in for_platform(Platform.BUTTON, console.unpublished))
+    playshelf.async_add(entry, Platform.BUTTON, async_add_entities)
 
 
 class PlayGuardButton(PlayGuardEntity, ButtonEntity):

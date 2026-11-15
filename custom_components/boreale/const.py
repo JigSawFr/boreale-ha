@@ -41,7 +41,12 @@ CONF_TREE: Final = "tree"
 BOREALE_PREFIX: Final = "boreale"
 MODULE: Final = "playguard"
 # The device's topics on tree 2 (and "icon/<APP_ID>"); the rest is the module's.
-DEVICE_TOPICS: Final = frozenset({"availability", "capabilities", "system", "notices", "integration", "icon"})
+# PlayShelf's module (the homebrew relays through the agent): its topics are
+# `<prefix>/<id>/playshelf/…`, at the device's level, not under PlayGuard's.
+PLAYSHELF: Final = "playshelf"
+DEVICE_TOPICS: Final = frozenset(
+    {"availability", "capabilities", "system", "notices", "integration", "icon", PLAYSHELF}
+)
 # Turn the console's own Home Assistant discovery off (the integration's
 # entities replace it).
 CONF_TAKE_OVER: Final = "take_over_discovery"

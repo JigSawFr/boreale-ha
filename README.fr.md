@@ -483,6 +483,18 @@ quittent alors Home Assistant (et ne sont pas recréées au prochain démarrage)
 réactivé, l'entrée se recharge et elles reviennent. Le contrôle parental est
 toujours publié.
 
+**PlayShelf** (demande l'agent PlayGuard et un PlayShelf qui s'annonce) : tant
+que PlayShelf est ouvert, l'agent publie son état et la console l'annonce comme
+module ; ces entités apparaissent alors sur l'appareil de la console, et
+deviennent indisponibles quand PlayShelf se ferme. *Téléchargements PlayShelf
+restants* (le nombre non terminés), *Progression du téléchargement PlayShelf*
+(celui en cours, en %), *Dernière installation PlayShelf* (le dernier jeu terminé
+de sa file), *Espace libre de la carte SD (PlayShelf)*, *PlayShelf télécharge* et
+*Problème de téléchargement PlayShelf* (actif quand un téléchargement tourne, ou
+qu'un a échoué), et le bouton *Mettre en pause les téléchargements PlayShelf*, qui
+met la file en pause tant que PlayShelf est ouvert (pressé quand il est fermé,
+il ne fait rien ; reprenez depuis la console).
+
 La 0.5 remplace *Déverrouillé*, *Réactiver le contrôle parental* et
 *Déverrouillé temporairement* par le verrou : la mise à jour les supprime,
 vérifiez donc les automatisations qui les utilisaient.

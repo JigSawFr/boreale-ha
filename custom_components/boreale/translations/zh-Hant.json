@@ -144,6 +144,12 @@
       },
       "bridge_reachable": {
         "name": "可存取"
+      },
+      "shelf_downloading": {
+        "name": "PlayShelf 正在下載"
+      },
+      "shelf_failed": {
+        "name": "PlayShelf 下載問題"
       }
     },
     "button": {
@@ -170,6 +176,9 @@
       },
       "bridge_rescan": {
         "name": "重新掃描"
+      },
+      "shelf_pause": {
+        "name": "暫停 PlayShelf 下載"
       }
     },
     "calendar": {
@@ -433,6 +442,18 @@
       },
       "bridge_problems": {
         "name": "問題"
+      },
+      "shelf_pending": {
+        "name": "PlayShelf 剩餘下載"
+      },
+      "shelf_progress": {
+        "name": "PlayShelf 下載進度"
+      },
+      "shelf_last_installed": {
+        "name": "PlayShelf 最近安裝"
+      },
+      "shelf_free": {
+        "name": "PlayShelf SD 卡可用空間"
       }
     },
     "switch": {

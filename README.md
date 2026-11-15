@@ -456,6 +456,17 @@ Home Assistant (and are not created again at the next start); turned back
 on, the entry reloads and they come back. The parental controls are always
 published.
 
+**PlayShelf** (needs the PlayGuard agent and a PlayShelf that announces itself):
+while PlayShelf is open, the agent publishes its state and the console lists it
+as a module; these entities then appear on the console's device, and go
+unavailable when PlayShelf closes. *PlayShelf downloads left* (the count not
+finished), *PlayShelf download progress* (the running one, in %), *PlayShelf last
+installed* (the last game finished in its queue), *PlayShelf SD card free space*,
+*PlayShelf downloading* and *PlayShelf download problem* (on when a download runs,
+or one failed), and the button *Pause PlayShelf downloads*, which pauses the
+queue while PlayShelf is open (pressed while it is closed, it does nothing; resume
+from the console).
+
 0.5 replaces *Unlocked*, *Turn parental controls back on* and *Temporarily
 unlocked* with the lock: updating removes them, so check the automations that
 used them.

@@ -10,7 +10,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from . import PlayGuardConfigEntry, bridge, is_bridge
+from . import PlayGuardConfigEntry, bridge, is_bridge, playshelf
 from .bridge import BridgeConfigEntry
 from .coordinator import PlayGuardConsole
 from .entities import EntityDef, dig, for_platform
@@ -35,6 +35,7 @@ async def async_setup_entry(
         classes.get(d.key, PlayGuardBinarySensor)(console, d)
         for d in for_platform(Platform.BINARY_SENSOR, console.unpublished)
     )
+    playshelf.async_add(entry, Platform.BINARY_SENSOR, async_add_entities)
 
 
 class PlayGuardBinarySensor(PlayGuardEntity, BinarySensorEntity):

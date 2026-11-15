@@ -144,6 +144,12 @@
       },
       "bridge_reachable": {
         "name": "Erreichbar"
+      },
+      "shelf_downloading": {
+        "name": "PlayShelf lädt herunter"
+      },
+      "shelf_failed": {
+        "name": "PlayShelf-Download-Problem"
       }
     },
     "button": {
@@ -170,6 +176,9 @@
       },
       "bridge_rescan": {
         "name": "Neu scannen"
+      },
+      "shelf_pause": {
+        "name": "PlayShelf-Downloads pausieren"
       }
     },
     "calendar": {
@@ -433,6 +442,18 @@
       },
       "bridge_problems": {
         "name": "Probleme"
+      },
+      "shelf_pending": {
+        "name": "Offene PlayShelf-Downloads"
+      },
+      "shelf_progress": {
+        "name": "PlayShelf-Download-Fortschritt"
+      },
+      "shelf_last_installed": {
+        "name": "Zuletzt über PlayShelf installiert"
+      },
+      "shelf_free": {
+        "name": "Freier SD-Karten-Speicher (PlayShelf)"
       }
     },
     "switch": {

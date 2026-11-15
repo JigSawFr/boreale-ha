@@ -27,6 +27,15 @@
       },
       "bridge_reachable": {
         "default": "mdi:lan-connect"
+      },
+      "shelf_downloading": {
+        "default": "mdi:download",
+        "state": {
+          "off": "mdi:download-off"
+        }
+      },
+      "shelf_failed": {
+        "default": "mdi:download-off-outline"
       }
     },
     "button": {
@@ -53,6 +62,9 @@
       },
       "bridge_rescan": {
         "default": "mdi:folder-refresh-outline"
+      },
+      "shelf_pause": {
+        "default": "mdi:pause-circle-outline"
       }
     },
     "calendar": {
@@ -152,6 +164,18 @@
       },
       "bridge_problems": {
         "default": "mdi:alert-outline"
+      },
+      "shelf_pending": {
+        "default": "mdi:download-multiple"
+      },
+      "shelf_progress": {
+        "default": "mdi:progress-download"
+      },
+      "shelf_last_installed": {
+        "default": "mdi:check-circle-outline"
+      },
+      "shelf_free": {
+        "default": "mdi:sd"
       }
     },
     "switch": {
