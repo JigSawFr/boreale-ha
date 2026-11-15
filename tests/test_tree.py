@@ -31,7 +31,10 @@ def test_where() -> None:
     assert _where(f"home/playguard/{CONSOLE_ID}/state") == ("home/playguard", CONSOLE_ID, 1)
     assert _where(f"boreale/{CONSOLE_ID}/playguard/state") == ("boreale", CONSOLE_ID, 2)
     assert _where(f"home/switch/{CONSOLE_ID}/playguard/state") == ("home/switch", CONSOLE_ID, 2)
-    for topic in ("state", f"{CONSOLE_ID}/state", "boreale/nope/playguard/state", f"boreale/{CONSOLE_ID}/system"):
+    # The system document: a console that runs without PlayGuard says nothing on `state`.
+    assert _where(f"boreale/{CONSOLE_ID}/system") == ("boreale", CONSOLE_ID, 2)
+    assert _where(f"home/switch/{CONSOLE_ID}/system") == ("home/switch", CONSOLE_ID, 2)
+    for topic in ("state", f"{CONSOLE_ID}/state", "boreale/nope/playguard/state", "boreale/nope/system", "system"):
         assert _where(topic) is None, topic
 
 

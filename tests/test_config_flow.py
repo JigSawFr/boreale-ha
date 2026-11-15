@@ -355,3 +355,47 @@ async def test_options(hass: HomeAssistant, setup) -> None:
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     assert setup.options == {CONF_TAKE_OVER: False, CONF_KEEP_VALUES: False, CONF_NOTIFY_REFUSED: False}
+
+
+async def test_discovered_without_playguard(hass: HomeAssistant) -> None:
+    """A console that runs without PlayGuard's module says nothing on `state`:
+    its system document is enough, and its nickname names it."""
+    info = _info(f"boreale/{CONSOLE_ID}/system", json.dumps(fixture("system.json")))
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_MQTT}, data=info
+    )
+    assert result["type"] is FlowResultType.FORM and result["step_id"] == "confirm"
+    assert result["description_placeholders"] == {"name": "Switch de Léa", "console_id": CONSOLE_ID}
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
+    assert result["type"] is FlowResultType.CREATE_ENTRY and result["title"] == "Switch de Léa"
+    assert result["data"] == {CONF_CONSOLE_ID: CONSOLE_ID, CONF_PREFIX: "boreale", CONF_TREE: 2}
+
+    # Not a document of ours, or a topic that is not a console's: ignored.
+    for topic, payload in (
+        (f"boreale/{CONSOLE_ID}/system", "not json"),
+        (f"boreale/{CONSOLE_ID}/system", json.dumps({"no": "schema"})),
+        ("boreale/nope/system", json.dumps(fixture("system.json"))),
+    ):
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_MQTT}, data=_info(topic, payload)
+        )
+        assert result["type"] is FlowResultType.ABORT and result["reason"] == "invalid_discovery_info"
+
+
+async def test_scan_lists_a_console_without_playguard(hass: HomeAssistant, mqtt_mock) -> None:
+    """Listed by its system document, under its nickname; a state, once seen,
+    names it (PlayGuard's name for it) and is not replaced by a system document."""
+    other = "b2c3d4e5"
+    result = await _scanned(
+        hass,
+        mqtt_mock,
+        [
+            (f"boreale/{CONSOLE_ID}/system", json.dumps(fixture("system.json"))),
+            (f"boreale/{other}/system", json.dumps(fixture("system.json"))),
+            (f"boreale/{other}/playguard/state", _state_of("Chambre", 1790000000)),
+            (f"boreale/{other}/system", json.dumps(fixture("system.json"))),
+        ],
+    )
+    labels = dict(_choices(result))
+    assert CONSOLE_ID in labels and other in labels
+    assert "Switch de Léa" in labels[CONSOLE_ID] and "Chambre" in labels[other]

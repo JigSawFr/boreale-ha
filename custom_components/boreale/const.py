@@ -60,6 +60,10 @@ CONF_NOTIFY_REFUSED: Final = "notify_refused"
 # What PlayGuard last said it does not publish (in the entry's data, kept
 # across restarts): those entities are not created.
 CONF_UNPUBLISHED: Final = "unpublished"
+# Kept in that set (and so in the entry) while the console does not announce
+# PlayGuard in `capabilities` (an agent that runs without it): the entities
+# that need its documents are not created, the console's own ones are.
+NO_PLAYGUARD: Final = "no_playguard"
 
 CONSOLE_ID_RE: Final = re.compile(r"^[0-9a-f]{8}$")
 

@@ -56,7 +56,7 @@ STATE_TIMEOUT = 10.0
 # How long adding a console by hand listens for the consoles' states, retained
 # under a prefix of one level or two, on either tree, before it lists them.
 SCAN_TIMEOUT = 3.0
-SCAN_TOPICS = ("+/+/state", "+/+/+/state", "+/+/+/+/state")
+SCAN_TOPICS = ("+/+/state", "+/+/+/state", "+/+/+/+/state", "+/+/system", "+/+/+/system")
 CONF_CONSOLE = "console"
 MANUAL = "manual"  # the list's last choice: another console, by its id
 
@@ -90,8 +90,12 @@ def _state(payload: str | bytes | bytearray) -> dict[str, Any] | None:
 
 def _where(topic: str) -> tuple[str, str, int] | None:
     """A state topic's (prefix, console id, tree), else None:
-    `<prefix>/<id>/state` (tree 1) or `<prefix>/<id>/playguard/state` (tree 2)."""
+    `<prefix>/<id>/state` (tree 1) or `<prefix>/<id>/playguard/state` (tree 2).
+    The console's system document (`<prefix>/<id>/system`, tree 2) says the
+    same of a console that runs without PlayGuard."""
     parts = topic.split("/")
+    if len(parts) >= 3 and parts[-1] == "system" and CONSOLE_ID_RE.match(parts[-2]):
+        return "/".join(parts[:-2]), parts[-2], 2
     if len(parts) < 3 or parts[-1] != "state":
         return None
     tree = 2 if len(parts) >= 4 and parts[-2] == MODULE and CONSOLE_ID_RE.match(parts[-3]) else 1
@@ -99,6 +103,13 @@ def _where(topic: str) -> tuple[str, str, int] | None:
     if not CONSOLE_ID_RE.match(parts[-1]):
         return None
     return "/".join(parts[:-1]), parts[-1], tree
+
+
+def _name_of(doc: dict[str, Any]) -> str:
+    """The console's name in its state (the name PlayGuard was given) or, in a
+    system document, its nickname."""
+    named = (doc.get("console") or {}).get("name") or (doc.get("hardware") or {}).get("nickname")
+    return named if isinstance(named, str) and named else "Nintendo Switch"
 
 
 def _posix(value: Any) -> int | None:
@@ -140,6 +151,9 @@ async def _async_wait_for_state(
         await mqtt.async_subscribe(hass, tree_topic(at, console_id, tree, "state"), _on_state, qos=1)
         for at, tree in ((prefix, 1), (tree_prefix(prefix), 2))
     ]
+    unsubscribe.append(  # a console without PlayGuard says nothing on `state`
+        await mqtt.async_subscribe(hass, tree_topic(tree_prefix(prefix), console_id, 2, "system"), _on_state, qos=1)
+    )
     try:
         async with asyncio.timeout(STATE_TIMEOUT):
             return await received
@@ -154,15 +168,23 @@ async def _async_scan(hass: HomeAssistant) -> dict[str, tuple[str, str, int, int
     """The consoles whose state is on the broker: {id: (prefix, name, ts, tree)},
     the newest state when one is under two prefixes (a console moved)."""
     found: dict[str, tuple[str, str, int, int]] = {}
+    by_state: set[str] = set()  # the consoles whose state was seen: its name and time win over the system document's
 
     @callback
     def _on_state(msg: ReceiveMessage) -> None:
         if (where := _where(msg.topic)) is None or (doc := _state(msg.payload)) is None:
             return
         prefix, console_id, tree = where
+        is_system = msg.topic.endswith("/system")
+        if is_system and console_id in by_state:
+            return
+        if not is_system:
+            if console_id not in by_state:
+                found.pop(console_id, None)  # what its system document gave
+            by_state.add(console_id)
         ts = _posix(doc.get("ts")) or 0
         if console_id not in found or found[console_id][2] < ts:
-            found[console_id] = (prefix, (doc.get("console") or {}).get("name") or "Nintendo Switch", ts, tree)
+            found[console_id] = (prefix, _name_of(doc), ts, tree)
 
     unsubscribe = [await mqtt.async_subscribe(hass, topic, _on_state, qos=0) for topic in SCAN_TOPICS]
     try:
@@ -230,7 +252,7 @@ class PlayGuardConfigFlow(ConfigFlow, domain=DOMAIN):
         self._abort_if_unique_id_configured(
             updates={CONF_PREFIX: self._prefix, CONF_TREE: self._tree} if moved else None
         )
-        self._name = ((doc.get("console") or {}).get("name")) or "Nintendo Switch"
+        self._name = _name_of(doc)
         self.context["title_placeholders"] = {"name": self._name}
         return await self.async_step_confirm()
 

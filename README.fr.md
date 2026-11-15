@@ -483,6 +483,15 @@ quittent alors Home Assistant (et ne sont pas recréées au prochain démarrage)
 réactivé, l'entrée se recharge et elles reviennent. Le contrôle parental est
 toujours publié.
 
+**Une console sans PlayGuard.** L'agent peut tourner seul, PlayGuard n'étant
+pas installé ou son lien distant pas autorisé : la console le dit dans
+`capabilities` et ne publie que ses propres documents. Elle est trouvée par son
+document système, sous son surnom ; le contrôle parental, le temps de jeu, les
+jeux et la mise à jour de PlayGuard ne sont pas créés (et partent quand
+PlayGuard s'en va), ceux de la console restent (matériel, alimentation, réseau,
+stockage, notifications, *Dernière activité*, *En ligne*). PlayGuard de retour,
+l'entrée se recharge et ils reviennent.
+
 **PlayShelf** (demande l'agent PlayGuard et un PlayShelf qui s'annonce) : tant
 que PlayShelf est ouvert, l'agent publie son état et la console l'annonce comme
 module ; ces entités apparaissent alors sur l'appareil de la console, et
