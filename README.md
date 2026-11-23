@@ -52,7 +52,7 @@ publishes Home Assistant's MQTT discovery itself. The integration adds:
   options), replacing it (no duplicates; turn it back on in the options),
   plus **Online**, **Agent running**, **Last seen**, **Play time this week**,
   **Play ends**, **Activity**, **Homebrews**, **Forwarders** and **Homebrew
-  notifications**, the **Play sessions** calendar, the **Now playing icon** and a **PlayGuard** update
+  notifications**, the **Play sessions** calendar, the **Current app icon** and a **PlayGuard** update
   entity (the console's version against PlayGuard's latest release).
 - **Game names** on *Now playing*, and each game's time today and this week as
   attributes; every game on *Games installed* (`games`), with its play time:
@@ -350,7 +350,8 @@ the play timer*); lock it to turn them back on, always allowed.
 | Play ends | While a game is played, when play has to stop: the end of today's limit or bedtime, whichever comes first (attribute `ends_by`: `limit` or `bedtime`). For a countdown on a dashboard, a watch or a Live Activity. | this integration's; unknown when no game is played, when games are already blocked, with the play timer off, or with neither a limit nor bedtime |
 | *Account*'s play time today, *Account*'s play time this week | One pair per user account, created as the console speaks of it (its name, or its play time). Minutes, the week's shown in hours. | this integration's; unknown when nobody's time was read (the app reads the accounts when asked, the agent from the play log) |
 | Last seen | When the console last said something (its state comes every 30 s while it is awake). | diagnostic, this integration's |
-| Now playing | The game being played, by name (attributes `app_id`, `since`); a homebrew too, by its name. | unknown while PlayGuard is open (nobody plays then) |
+| Now playing | The game being played, by name (attributes `app_id`, `since`). Games only: a homebrew or a system program is *Current app*. | unknown while PlayGuard is open, or when no game is played |
+| Current app | The app in front, of any type, by name; attribute `type`: `game`, `homebrew`, `system` (a system program, by its id when its name is unknown) or `applet` (Boréale's own applet, named *Boréale*), plus `app_id` and `since`. The agent gives the kind (an older one gives games only). | this integration's; unknown when no app is in front (the HOME menu) |
 | Activity | What the console is doing: *Playing a game*, *In a homebrew*, *In PlayGuard*, *HOME menu* (or a system applet over it), *Game suspended* (HOME pressed in a game, not closed), *Asleep or off* (off the broker); attributes `title` and `app_id` of the game or homebrew. From PlayGuard 1.5's `activity_today.now`, within 30 s; an older PlayGuard gives only game, PlayGuard and HOME menu. | this integration's; shown while the console sleeps too |
 | Age rating | The age rating of the restriction level. | diagnostic, disabled by default |
 | Firmware, Atmosphère | The console's versions (the device's info shows them too). | diagnostic, disabled by default |
@@ -387,12 +388,13 @@ history of *Now playing* and *Online*, so it goes back as far as the recorder
 keeps them (10 days by default); empty without the recorder or with *Now
 playing* off. This integration's.
 
-**Image**: *Now playing icon*, the icon of the game being played, from a
-PlayGuard that publishes the games' icons (*Remote access › Publish the
-games' icons*: every installed or played game's, and the agent the game
-being played's when PlayGuard is closed): for a picture card or a
-notification's image. Unknown while no game is played, or before its icon
-arrived (a game installed since PlayGuard last ran: once PlayGuard opens).
+**Image**: *Current app icon*, the icon of the app in front, of any type (a
+homebrew's too), from a PlayGuard that publishes the games' icons (*Remote
+access › Publish the games' icons*: every installed or played game's, and the
+agent's for the app in front when PlayGuard is closed): for a picture card or
+a notification's image. Boréale's own icon while its applet is in front.
+Unknown while no app is in front, for a system program (it has no icon), or
+before its icon arrived (a game installed since PlayGuard last ran: once PlayGuard opens).
 
 **Update**: *PlayGuard*, config: the version installed on the console against
 the latest release on GitHub, with its release notes, in *Settings ›

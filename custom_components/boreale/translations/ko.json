@@ -272,6 +272,9 @@
       "now_playing": {
         "name": "플레이 중"
       },
+      "current_app": {
+        "name": "실행 중인 앱"
+      },
       "rating_age": {
         "name": "연령 등급"
       },
@@ -500,7 +503,7 @@
     },
     "image": {
       "now_playing_icon": {
-        "name": "플레이 중인 게임 아이콘"
+        "name": "실행 중인 앱 아이콘"
       }
     }
   },

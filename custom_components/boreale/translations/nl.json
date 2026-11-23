@@ -272,6 +272,9 @@
       "now_playing": {
         "name": "Speelt nu"
       },
+      "current_app": {
+        "name": "Huidige app"
+      },
       "rating_age": {
         "name": "Leeftijdsclassificatie"
       },
@@ -500,7 +503,7 @@
     },
     "image": {
       "now_playing_icon": {
-        "name": "Pictogram van het huidige spel"
+        "name": "Pictogram van de huidige app"
       }
     }
   },

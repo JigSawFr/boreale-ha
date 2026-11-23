@@ -160,6 +160,9 @@ ENTITIES: tuple[EntityDef, ...] = (
         fallback=("activity_today", "now_playing", "app_id"),
         publish=PUBLISH_ACTIVITY,
     ),
+    # The app in front, whatever it is (game, homebrew, system program, or
+    # Boréale's own applet): sensor.py.
+    EntityDef(key="current_app", platform=Platform.SENSOR, publish=PUBLISH_ACTIVITY, extra=True),
     EntityDef(
         key="rating_age",
         platform=Platform.SENSOR,
@@ -441,7 +444,7 @@ ENTITIES: tuple[EntityDef, ...] = (
         playguard=False,
         extra=True,
     ),
-    # The icon of the game being played (PlayGuard's icon/<APP_ID>).
+    # The icon of the app in front (PlayGuard's icon/<APP_ID>; Boréale's own in its applet).
     EntityDef(key="now_playing_icon", platform=Platform.IMAGE, publish=PUBLISH_ICONS, extra=True),
     # PlayGuard's version against its latest release (update.py).
     EntityDef(key="playguard_update", platform=Platform.UPDATE, category="config", extra=True),

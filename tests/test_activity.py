@@ -87,3 +87,35 @@ async def test_homebrews(hass: HomeAssistant, setup, state) -> None:
         DOMAIN, "get_play_time", {"device_id": device.id}, blocking=True, return_response=True
     )
     assert today["homebrew_minutes"] == 10 and today["activity"] == "game"
+
+
+async def test_current_app(hass: HomeAssistant, setup, state) -> None:
+    """The app in front, of any type, against the games-only Now playing."""
+    now_playing = _id(hass, "now_playing")
+    current = hass.states.get(_id(hass, "current_app"))
+    # An older agent gives no kind: a game.
+    assert current.state == "Moonhop Odyssey" and current.attributes["type"] == "game"
+    assert current.attributes["app_id"] == "0100000000010000"
+    assert hass.states.get(now_playing).state == "Moonhop Odyssey"
+
+    homebrew = {"app_id": "050537E2542E2000", "name": "sphaira", "kind": "homebrew", "since": 1}
+    await _now(hass, state, "homebrew", now_playing=homebrew)
+    current = hass.states.get(_id(hass, "current_app"))
+    assert current.state == "sphaira" and current.attributes["type"] == "homebrew"
+    assert hass.states.get(now_playing).state == STATE_UNKNOWN
+    assert hass.states.get(now_playing).attributes["app_id"] is None
+
+    system = {"app_id": "0100000000001000", "kind": "system", "since": 2}
+    await _now(hass, state, "home", now_playing=system)
+    current = hass.states.get(_id(hass, "current_app"))
+    assert current.state == "0100000000001000" and current.attributes["type"] == "system"
+
+    # Boréale's own applet in front: no id.
+    await _now(hass, state, "playguard", now_playing=None)
+    current = hass.states.get(_id(hass, "current_app"))
+    assert current.state == "Boréale" and current.attributes["type"] == "applet"
+    assert current.attributes["app_id"] is None
+
+    await _now(hass, state, "home", now_playing=None)
+    current = hass.states.get(_id(hass, "current_app"))
+    assert current.state == STATE_UNKNOWN and current.attributes["type"] is None

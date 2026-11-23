@@ -124,6 +124,10 @@ EVENT_PLAYGUARD: Final = "playguard_event"
 # and "offline" while it is off the broker (asleep, off, out of reach).
 ACTIVITY_OPTIONS: Final = ("game", "homebrew", "playguard", "home", "suspended", "offline")
 
+# The name of the app in front when it is Boréale's own applet (the console's
+# state gives it no name: it has no title id).
+APPLET_NAME: Final = "Boréale"
+
 # Write classes of the entity table (source/sync/sync_entities.c).
 WRITE_NONE: Final = "none"
 WRITE_FREE: Final = "free"  # an order, refused only in read-only mode or under the "off" policy

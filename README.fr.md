@@ -54,7 +54,7 @@ publie elle-même la découverte MQTT de Home Assistant. L'intégration ajoute :
   options), plus **En ligne**, **Agent actif**, **Vu pour la dernière fois**,
   **Temps de jeu cette semaine**, **Fin de partie prévue**, **Activité**,
   **Homebrews**, **Forwarders** et **Notifications des homebrews**, le
-  calendrier **Parties**, l'**Icône du jeu
+  calendrier **Parties**, l'**Icône de l'app
   en cours** et une entité de mise à jour **PlayGuard** (la version de la
   console face à la dernière release de PlayGuard).
 - **Les noms des jeux** sur *Jeu en cours*, et le temps de chaque jeu
@@ -371,7 +371,8 @@ en heures)
 | Fin de partie prévue | Pendant une partie, l'heure où le jeu doit s'arrêter : la fin de la limite du jour ou le coucher, le premier des deux (attribut `ends_by` : `limit` ou `bedtime`). Pour un compte à rebours sur un tableau de bord, une montre ou une Live Activity. | propre à cette intégration ; inconnue quand personne ne joue, quand les jeux sont déjà bloqués, avec le minuteur de jeu désactivé, ou sans limite ni coucher |
 | Temps de jeu aujourd'hui de *Compte*, Temps de jeu cette semaine de *Compte* | Une paire par compte utilisateur, créée dès que la console en parle (son nom, ou son temps de jeu). En minutes, celui de la semaine affiché en heures. | propres à cette intégration ; inconnus tant que le temps des comptes n'a pas été lu (l'app lit les comptes à la demande, l'agent d'après le journal de jeu) |
 | Vu pour la dernière fois | Quand la console a parlé pour la dernière fois (son état arrive toutes les 30 s tant qu'elle est réveillée). | diagnostic, propre à cette intégration |
-| Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`) ; un homebrew aussi, par son nom. | inconnu tant que PlayGuard est ouvert (personne ne joue alors) |
+| Jeu en cours | Le jeu en cours, par son nom (attributs `app_id`, `since`). Les jeux seulement : un homebrew ou un programme système est *App en cours*. | inconnu tant que PlayGuard est ouvert, ou si aucun jeu n'est lancé |
+| App en cours | L'app au premier plan, de tout type, par son nom ; attribut `type` : `game`, `homebrew`, `system` (un programme système, par son identifiant si son nom est inconnu) ou `applet` (l'applet de Boréale, nommée *Boréale*), plus `app_id` et `since`. L'agent donne le genre (un agent plus ancien ne donne que les jeux). | propre à cette intégration ; inconnue si aucune app n'est au premier plan (menu HOME) |
 | Activité | Ce que fait la console : *Joue à un jeu*, *Dans un homebrew*, *Sur PlayGuard*, *Menu HOME* (ou une applet système par-dessus), *Jeu suspendu* (HOME appuyé dans un jeu, sans le fermer), *En veille ou éteinte* (absente du broker) ; attributs `title` et `app_id` du jeu ou du homebrew. Depuis le `activity_today.now` de PlayGuard 1.5, sous 30 s ; un PlayGuard plus ancien ne donne que jeu, PlayGuard et menu HOME. | propre à cette intégration ; affichée aussi pendant la veille |
 | Âge de classification | L'âge de classification du niveau de restriction. | diagnostic, désactivé par défaut |
 | Firmware, Atmosphère | Les versions de la console (les infos de l'appareil les montrent aussi). | diagnostic, désactivé par défaut |
@@ -410,11 +411,13 @@ l'historique de *Jeu en cours* et *En ligne* dans l'enregistreur, il remonte
 donc aussi loin que l'enregistreur les garde (10 jours par défaut) ; vide sans
 l'enregistreur ou avec *Jeu en cours* désactivé. Propre à cette intégration.
 
-**Image** : *Icône du jeu en cours*, l'icône du jeu lancé, depuis un
-PlayGuard qui publie les icônes des jeux (*Accès à distance › Publier les
-icônes des jeux* : celles de tous les jeux installés ou joués, et l'agent
-celle du jeu lancé quand PlayGuard est fermé) : pour une carte image ou
-l'image d'une notification. Inconnue tant qu'aucun jeu n'est lancé, ou avant
+**Image** : *Icône de l'app en cours*, l'icône de l'app au premier plan, de
+tout type (un homebrew aussi), depuis un PlayGuard qui publie les icônes des
+jeux (*Accès à distance › Publier les icônes des jeux* : celles de tous les
+jeux installés ou joués, et l'agent celle de l'app au premier plan quand
+PlayGuard est fermé) : pour une carte image ou l'image d'une notification.
+Celle de Boréale quand son applet est au premier plan. Inconnue tant qu'aucune
+app n'est au premier plan, pour un programme système (il n'en a pas), ou avant
 que son icône n'arrive (un jeu installé depuis la dernière ouverture de
 PlayGuard : dès que PlayGuard s'ouvre).
 
