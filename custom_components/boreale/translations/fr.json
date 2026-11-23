@@ -641,7 +641,7 @@
   "issues": {
     "newer_schema": {
       "title": "{name} parle un protocole PlayGuard plus récent",
-      "description": "{name} publie le schéma {schema} ; cette intégration connaît le schéma {known}. Mettez à jour l'intégration PlayGuard : certaines valeurs peuvent manquer d'ici là."
+      "description": "{name} publie le schéma {schema} ; cette intégration connaît le schéma {known}. Mettez à jour l'intégration PlayGuard : d'ici là, les valeurs restent les dernières lues."
     },
     "native_discovery": {
       "title": "{name} publie de nouveau son propre appareil Home Assistant",

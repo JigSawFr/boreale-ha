@@ -1068,8 +1068,9 @@ disparaît quand les deux versions sont les mêmes.
 Le PlayGuard de la console est plus récent que cette intégration : mettez-la à
 jour (*Paramètres › Mises à jour*). D'ici là, un document de ce schéma plus récent
 n'est pas lu : ses entités gardent ce que disait le dernier document connu (ou
-restent inconnues), aucune entité n'est supprimée et aucune statistique n'en
-est importée.
+restent inconnues), aucune entité n'est supprimée, aucune statistique n'en
+est importée et une action n'attend pas la réponse à son ordre (l'ordre reste
+sur le broker).
 </details>
 
 <details>

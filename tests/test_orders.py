@@ -11,7 +11,7 @@ from unittest.mock import patch
 from homeassistant.components import persistent_notification
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers import device_registry as dr, entity_registry as er, issue_registry as ir
 import pytest
 
 from custom_components.boreale.const import CONF_NOTIFY_REFUSED, CONF_TAKE_OVER, DOMAIN
@@ -125,6 +125,21 @@ async def test_no_answer(hass: HomeAssistant, setup, mqtt_mock) -> None:
     with patch("custom_components.boreale.coordinator.ORDER_TIMEOUT", 0.01):
         await hass.services.async_call(DOMAIN, "sync_now", {"device_id": _device_id(hass)}, blocking=True)
     assert setup.runtime_data._waiters == []
+
+
+async def test_newer_answer(hass: HomeAssistant, setup, wait) -> None:
+    """An answer of a newer schema is not read: the action returns at once, not after the delay."""
+    console = setup.runtime_data
+    task = asyncio.ensure_future(
+        hass.services.async_call(DOMAIN, "sync_now", {"device_id": _device_id(hass)}, blocking=True)
+    )
+    async with asyncio.timeout(5):
+        while not console._waiters:
+            await asyncio.sleep(0)
+        publish(hass, "event", {**_event("command_refused", "sync_now", "PRESS", "busy"), "schema": 2})
+        await task  # the delay is 30 s: a hang here is the timeout
+    assert console._waiters == []
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"newer_schema_{CONSOLE_ID}")
 
 
 async def test_asleep(hass: HomeAssistant, setup, wait) -> None:

@@ -641,7 +641,7 @@
   "issues": {
     "newer_schema": {
       "title": "{name} speaks a newer PlayGuard protocol",
-      "description": "{name} publishes schema {schema}; this integration knows schema {known}. Update the PlayGuard integration: some values may be missing until then."
+      "description": "{name} publishes schema {schema}; this integration knows schema {known}. Update the PlayGuard integration: until then, values stay at the last ones read."
     },
     "native_discovery": {
       "title": "{name} publishes its own Home Assistant device again",
