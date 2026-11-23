@@ -272,6 +272,9 @@
       "now_playing": {
         "name": "Now playing"
       },
+      "current_app": {
+        "name": "Current app"
+      },
       "rating_age": {
         "name": "Age rating"
       },
@@ -500,7 +503,7 @@
     },
     "image": {
       "now_playing_icon": {
-        "name": "Now playing icon"
+        "name": "Current app icon"
       }
     }
   },

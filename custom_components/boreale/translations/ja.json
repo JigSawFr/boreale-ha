@@ -272,6 +272,9 @@
       "now_playing": {
         "name": "プレイ中のソフト"
       },
+      "current_app": {
+        "name": "実行中のアプリ"
+      },
       "rating_age": {
         "name": "年齢区分"
       },
@@ -500,7 +503,7 @@
     },
     "image": {
       "now_playing_icon": {
-        "name": "プレイ中のソフトのアイコン"
+        "name": "実行中のアプリのアイコン"
       }
     }
   },

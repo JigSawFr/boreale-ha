@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import Any, cast
 
@@ -14,7 +15,7 @@ from homeassistant.util import dt as dt_util
 
 from . import PlayGuardConfigEntry, bridge, is_bridge, play, playshelf
 from .bridge import BridgeConfigEntry
-from .const import ACTIVITY_OPTIONS, NO_PLAYGUARD, PUBLISH_ACTIVITY
+from .const import ACTIVITY_OPTIONS, APPLET_NAME, NO_PLAYGUARD, PUBLISH_ACTIVITY
 from .coordinator import PlayGuardConsole
 from .entities import ACCOUNT_ENTITIES, EntityDef, for_platform
 from .entity import PlayGuardEntity
@@ -31,6 +32,7 @@ async def async_setup_entry(
     console = entry.runtime_data
     classes = {
         "now_playing": NowPlayingSensor,
+        "current_app": CurrentAppSensor,
         "used_screen_time_log": PlayLogSensor,
         "week_play_time": WeekSensor,
         "games_installed": GamesInstalledSensor,
@@ -107,19 +109,59 @@ class PlayGuardSensor(PlayGuardEntity, SensorEntity):
         return value if isinstance(value, (int, float, str)) and not isinstance(value, bool) else None
 
 
+def current_app(state: dict[str, Any] | None, game_name: Callable[[Any], str | None]) -> dict[str, Any] | None:
+    """The app in front, from the state: its name, `app_id`, `since` and
+    `type` (`game`, `homebrew`, `system`; an older agent gives no kind, and
+    only games). None when nothing is: PlayGuard's own applet in front is the
+    one app without an id, `applet`."""
+    today = (state or {}).get("activity_today") or {}
+    playing = today.get("now_playing") or {}
+    app_id = playing.get("app_id")
+    if isinstance(app_id, str) and app_id:
+        kind = playing.get("kind")
+        return {
+            "name": playing.get("name") or game_name(app_id) or app_id,
+            "app_id": app_id,
+            "since": playing.get("since"),
+            "type": kind if isinstance(kind, str) and kind else "game",
+        }
+    if today.get("now") == "playguard":
+        return {"name": APPLET_NAME, "app_id": None, "since": None, "type": "applet"}
+    return None
+
+
 class NowPlayingSensor(PlayGuardSensor):
-    """The game being played: its name (from the names PlayGuard publishes), else its id."""
+    """The game being played: its name (from the names PlayGuard publishes),
+    else its id. Games only: the app in front, of any type, is *Current app*."""
+
+    def _game(self) -> dict[str, Any] | None:
+        app = current_app(self.console.state, self.console.game_name)
+        return app if app and app["type"] == "game" else None
 
     @property
     def native_value(self) -> str | None:
-        playing = ((self.console.state or {}).get("activity_today") or {}).get("now_playing") or {}
-        app_id = playing.get("app_id")
-        return playing.get("name") or self.console.game_name(app_id) or app_id
+        game = self._game()
+        return game["name"] if game else None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        playing = ((self.console.state or {}).get("activity_today") or {}).get("now_playing") or {}
-        return {"app_id": playing.get("app_id"), "since": playing.get("since")}
+        game = self._game() or {}
+        return {"app_id": game.get("app_id"), "since": game.get("since")}
+
+
+class CurrentAppSensor(PlayGuardSensor):
+    """The app in front, of any type: its name, and `type` (`game`,
+    `homebrew`, `system` or `applet`), `app_id` and `since` as attributes."""
+
+    @property
+    def native_value(self) -> str | None:
+        app = current_app(self.console.state, self.console.game_name)
+        return app["name"] if app else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        app = current_app(self.console.state, self.console.game_name) or {}
+        return {"type": app.get("type"), "app_id": app.get("app_id"), "since": app.get("since")}
 
 
 class ActivitySensor(PlayGuardSensor):

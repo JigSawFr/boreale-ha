@@ -272,6 +272,9 @@
       "now_playing": {
         "name": "正在游玩"
       },
+      "current_app": {
+        "name": "当前应用"
+      },
       "rating_age": {
         "name": "年龄分级"
       },
@@ -500,7 +503,7 @@
     },
     "image": {
       "now_playing_icon": {
-        "name": "正在游玩的游戏图标"
+        "name": "当前应用图标"
       }
     }
   },

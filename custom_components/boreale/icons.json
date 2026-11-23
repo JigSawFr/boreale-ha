@@ -76,6 +76,9 @@
       "now_playing": {
         "default": "mdi:gamepad-variant"
       },
+      "current_app": {
+        "default": "mdi:application"
+      },
       "week_play_time": {
         "default": "mdi:calendar-week"
       },

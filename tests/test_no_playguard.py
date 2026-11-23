@@ -31,6 +31,7 @@ TREE = f"boreale/{CONSOLE_ID}"
 PLAYGUARD = (
     (Platform.LOCK, "parental_controls"),
     (Platform.SENSOR, "now_playing"),
+    (Platform.SENSOR, "current_app"),
     (Platform.UPDATE, "playguard_update"),
 )
 CONSOLE = ((Platform.SENSOR, "battery"), (Platform.SENSOR, "last_seen"), (Platform.SENSOR, "homebrew_notices"))

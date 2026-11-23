@@ -272,6 +272,9 @@
       "now_playing": {
         "name": "Em jogo agora"
       },
+      "current_app": {
+        "name": "App atual"
+      },
       "rating_age": {
         "name": "Classificação etária"
       },
@@ -500,7 +503,7 @@
     },
     "image": {
       "now_playing_icon": {
-        "name": "Ícone do jogo em curso"
+        "name": "Ícone da app atual"
       }
     }
   },

@@ -1,9 +1,11 @@
-"""The icon of the game being played, as PlayGuard publishes it (every
-installed or played game's, on icon/<APP_ID>)."""
+"""The icon of the app in front, as PlayGuard publishes it (every installed or
+played game's, and the agent's for a homebrew, on icon/<APP_ID>), or
+Boréale's own while its applet is in front."""
 
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 
 from homeassistant.components.image import ImageEntity
 from homeassistant.const import Platform
@@ -13,10 +15,13 @@ from homeassistant.util import dt as dt_util
 
 from . import PlayGuardConfigEntry
 from .coordinator import PlayGuardConsole
-from .entities import EntityDef, dig, for_platform
+from .entities import EntityDef, for_platform
 from .entity import PlayGuardEntity
+from .sensor import current_app
 
 PARALLEL_UPDATES = 0
+
+APPLET_ICON = Path(__file__).parent / "brand" / "icon.png"
 
 
 async def async_setup_entry(
@@ -27,8 +32,9 @@ async def async_setup_entry(
 
 
 class NowPlayingIcon(PlayGuardEntity, ImageEntity):
-    """The game being played: its icon, a JPEG. None while no game is
-    played, or before PlayGuard published its icon."""
+    """The app in front: its icon, a JPEG; Boréale's own, a PNG, in its
+    applet. None while no app is in front, or before its icon was published
+    (a system program has none)."""
 
     _attr_content_type = "image/jpeg"
 
@@ -36,11 +42,24 @@ class NowPlayingIcon(PlayGuardEntity, ImageEntity):
         PlayGuardEntity.__init__(self, console, definition)
         ImageEntity.__init__(self, hass)
         self._shown: bytes | None = None
+        self._applet: bytes | None = None
         self._attr_image_last_updated: datetime | None = None
 
+    async def async_added_to_hass(self) -> None:
+        self._applet = await self.hass.async_add_executor_job(APPLET_ICON.read_bytes)
+        await super().async_added_to_hass()
+
     def _icon(self) -> bytes | None:
-        app_id = dig(self.console.state, ("activity_today", "now_playing", "app_id"))
-        return self.console.icons.get(app_id.upper()) if isinstance(app_id, str) else None
+        app = current_app(self.console.state, self.console.game_name)
+        if app is None:
+            return None
+        if app["type"] == "applet":
+            return self._applet
+        return self.console.icons.get(app["app_id"].upper())
+
+    @property
+    def content_type(self) -> str:
+        return "image/png" if self._shown is not None and self._shown == self._applet else "image/jpeg"
 
     @callback
     def _handle_update(self) -> None:

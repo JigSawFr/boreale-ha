@@ -1,4 +1,4 @@
-"""The icon of the game being played."""
+"""The icon of the app in front."""
 
 from __future__ import annotations
 
@@ -47,6 +47,35 @@ async def test_now_playing_icon(hass: HomeAssistant, setup, state) -> None:
     publish(hass, "state", state)
     await hass.async_block_till_done()
     assert await entity.async_image() is None
+
+
+async def test_current_app_icon(hass: HomeAssistant, setup, state) -> None:
+    """Any app's icon, a homebrew's too; Boréale's own in its applet; none for a system program."""
+    entity_id, entity = _entity(hass)
+    homebrew = "050537E2542E2000"
+    async_fire_mqtt_message(hass, f"{BASE}/icon/{homebrew.lower()}", b"\xff\xd8 sphaira", retain=True)
+    await hass.async_block_till_done()
+    state["activity_today"]["now_playing"] = {"app_id": homebrew, "kind": "homebrew", "since": 1}
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert await entity.async_image() == b"\xff\xd8 sphaira" and entity.content_type == "image/jpeg"
+
+    state["activity_today"]["now_playing"] = {"app_id": "0100000000001000", "kind": "system", "since": 2}
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert await entity.async_image() is None  # a system program has no icon
+
+    state["activity_today"]["now_playing"] = None
+    state["activity_today"]["now"] = "playguard"
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert (await entity.async_image()).startswith(b"\x89PNG") and entity.content_type == "image/png"
+    assert hass.states.get(entity_id).state != STATE_UNKNOWN
+
+    state["activity_today"]["now"] = "home"
+    publish(hass, "state", state)
+    await hass.async_block_till_done()
+    assert await entity.async_image() is None and entity.content_type == "image/jpeg"
 
 
 async def test_icons_not_published(hass: HomeAssistant, setup, state) -> None:
