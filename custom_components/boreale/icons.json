@@ -185,6 +185,12 @@
       },
       "agent_uptime": {
         "default": "mdi:timer-outline"
+      },
+      "clock_network_drift": {
+        "default": "mdi:clock-alert-outline"
+      },
+      "clock_user_drift": {
+        "default": "mdi:clock-edit-outline"
       }
     },
     "switch": {
@@ -226,6 +232,18 @@
     "update": {
       "bridge_update": {
         "default": "mdi:bridge"
+      },
+      "firmware_update": {
+        "default": "mdi:chip"
+      },
+      "atmosphere_update": {
+        "default": "mdi:weather-sunny"
+      },
+      "hekate_update": {
+        "default": "mdi:rocket-launch-outline"
+      },
+      "integration_update": {
+        "default": "mdi:home-assistant"
       }
     },
     "event": {

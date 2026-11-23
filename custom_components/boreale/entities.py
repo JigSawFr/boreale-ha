@@ -60,6 +60,7 @@ class EntityDef:
     precision: int | None = None  # the decimals Home Assistant shows
     playguard: bool = True  # needs PlayGuard's module (its documents): not there on a console without it
     publish: str = PUBLISH_CONTROLS  # what it shows: there while PlayGuard publishes it (link.publishes)
+    latest: tuple[str, ...] | None = None  # an update: where the newest version is (the system document)
     extra: bool = False  # this integration's own: not in PlayGuard's table
 
 
@@ -362,6 +363,68 @@ ENTITIES: tuple[EntityDef, ...] = (
         precision=1,
         category="diagnostic",
         enabled=False,
+        extra=True,
+    ),
+    # What the agent's checks found (the system document's `latest` and `clock`
+    # blocks, only with check_versions and check_clock on): the clocks against a
+    # time server, in seconds (negative: behind it), and the newest versions.
+    _system(
+        "clock_network_drift",
+        ("clock", "network_drift_s"),
+        PUBLISH_CONSOLE,
+        unit=UnitOfTime.SECONDS,
+        device_class="duration",
+        state_class=SensorStateClass.MEASUREMENT,
+        category="diagnostic",
+        extra=True,
+    ),
+    _system(
+        "clock_user_drift",
+        ("clock", "user_drift_s"),
+        PUBLISH_CONSOLE,
+        unit=UnitOfTime.SECONDS,
+        device_class="duration",
+        state_class=SensorStateClass.MEASUREMENT,
+        category="diagnostic",
+        enabled=False,
+        extra=True,
+    ),
+    _system(
+        "firmware_update",
+        ("versions", "firmware"),
+        PUBLISH_HARDWARE,
+        Platform.UPDATE,
+        latest=("latest", "firmware"),
+        category="diagnostic",
+        extra=True,
+    ),
+    _system(
+        "atmosphere_update",
+        ("versions", "atmosphere"),
+        PUBLISH_HARDWARE,
+        Platform.UPDATE,
+        latest=("latest", "atmosphere"),
+        category="diagnostic",
+        extra=True,
+    ),
+    _system(
+        "hekate_update",
+        ("versions", "hekate"),
+        PUBLISH_HARDWARE,
+        Platform.UPDATE,
+        latest=("latest", "hekate"),
+        category="diagnostic",
+        extra=True,
+    ),
+    # This integration's own version: the one installed here, against the
+    # newest the agent found (it has no installed version on the console).
+    _system(
+        "integration_update",
+        ("latest", "integration"),
+        PUBLISH_HARDWARE,
+        Platform.UPDATE,
+        latest=("latest", "integration"),
+        category="diagnostic",
         extra=True,
     ),
     # the games (the games document), each game listed on Games installed

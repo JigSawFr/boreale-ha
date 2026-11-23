@@ -463,6 +463,12 @@
       },
       "agent_uptime": {
         "name": "代理程式運行時間"
+      },
+      "clock_network_drift": {
+        "name": "網路時鐘偏差"
+      },
+      "clock_user_drift": {
+        "name": "使用者時鐘偏差"
       }
     },
     "switch": {
@@ -499,6 +505,18 @@
       },
       "bridge_update": {
         "name": "Lantern 橋接器"
+      },
+      "firmware_update": {
+        "name": "系統韌體"
+      },
+      "atmosphere_update": {
+        "name": "Atmosphère"
+      },
+      "hekate_update": {
+        "name": "hekate"
+      },
+      "integration_update": {
+        "name": "Boréale 整合"
       }
     },
     "image": {

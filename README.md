@@ -404,6 +404,14 @@ is read when the entity is added, then again with the console's documents
 once six hours have passed (`api.github.com`, the only request the
 integration makes outside the broker).
 
+**Updates from the agent's checks**: *System firmware*, *Atmosphère*,
+*hekate* and *Boréale integration*, diagnostic: the version installed (the
+console's, or this integration's) against the newest one the agent found
+(`latest` of the system document: the releases' pages and switchbrew's
+firmware table, no request from Home Assistant). Nothing is installed from
+Home Assistant. Without *Check the versions* on in the agent (off by default)
+the newest is unknown and the entity shows *unknown*, not *up to date*.
+
 **The console itself** (`playguard/<id>/system`, kept fresh by the agent
 while PlayGuard is closed):
 
@@ -418,6 +426,7 @@ while PlayGuard is closed):
 | Last started | When the console started (not when it last woke up). | diagnostic, disabled by default |
 | Agent memory used | What the agent holds of its fixed heap (bytes, shown in KiB), from the `agent` block of its system document; the budget to watch when a module is added. | diagnostic, disabled by default |
 | Agent uptime | How long the agent has been running (seconds, shown in hours). | diagnostic, disabled by default |
+| Network clock offset, User clock offset | How far the console's clocks are ahead of a time server's, in seconds (negative: behind): the network clock (what the play timer counts on) and the one the user set. From the `clock` block of the system document. | diagnostic; the user clock's disabled by default; only with *Check the clocks* on in the agent (off by default) |
 | Serial number | The console's real serial number (from Atmosphère's backup when PRODINFO is blanked). | diagnostic, disabled by default; only with *Publish the serial number* on the console |
 | Wi-Fi network | The network's name. | diagnostic, disabled by default |
 

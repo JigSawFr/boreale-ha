@@ -463,6 +463,12 @@
       },
       "agent_uptime": {
         "name": "Laufzeit des Agenten"
+      },
+      "clock_network_drift": {
+        "name": "Abweichung der Netzwerkuhr"
+      },
+      "clock_user_drift": {
+        "name": "Abweichung der Benutzeruhr"
       }
     },
     "switch": {
@@ -499,6 +505,18 @@
       },
       "bridge_update": {
         "name": "Lantern-Bridge"
+      },
+      "firmware_update": {
+        "name": "System-Firmware"
+      },
+      "atmosphere_update": {
+        "name": "Atmosphère"
+      },
+      "hekate_update": {
+        "name": "hekate"
+      },
+      "integration_update": {
+        "name": "Boréale-Integration"
       }
     },
     "image": {

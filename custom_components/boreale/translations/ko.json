@@ -463,6 +463,12 @@
       },
       "agent_uptime": {
         "name": "에이전트 가동 시간"
+      },
+      "clock_network_drift": {
+        "name": "네트워크 시계 오차"
+      },
+      "clock_user_drift": {
+        "name": "사용자 시계 오차"
       }
     },
     "switch": {
@@ -499,6 +505,18 @@
       },
       "bridge_update": {
         "name": "Lantern 브리지"
+      },
+      "firmware_update": {
+        "name": "시스템 펌웨어"
+      },
+      "atmosphere_update": {
+        "name": "Atmosphère"
+      },
+      "hekate_update": {
+        "name": "hekate"
+      },
+      "integration_update": {
+        "name": "Boréale 통합"
       }
     },
     "image": {

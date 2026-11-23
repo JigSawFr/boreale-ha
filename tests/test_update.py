@@ -6,7 +6,7 @@ from datetime import timedelta
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.update import ATTR_INSTALLED_VERSION, ATTR_LATEST_VERSION, ATTR_RELEASE_URL
-from homeassistant.const import STATE_OFF, STATE_ON
+from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
@@ -14,7 +14,7 @@ from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClien
 from custom_components.boreale.const import DOMAIN
 from custom_components.boreale.update import RELEASES, async_latest_release
 
-from .conftest import CONSOLE_ID, publish
+from .conftest import CONSOLE_ID, fixture, publish
 
 
 def _id(hass: HomeAssistant) -> str:
@@ -74,3 +74,59 @@ async def test_latest_release(hass: HomeAssistant, aioclient_mock: AiohttpClient
     aioclient_mock.clear_requests()
     aioclient_mock.get(RELEASES, status=403)
     assert await async_latest_release(hass) is None
+
+
+def _system_id(hass: HomeAssistant, platform: str, key: str) -> str:
+    entity_id = er.async_get(hass).async_get_entity_id(platform, DOMAIN, f"{CONSOLE_ID}_{key}")
+    assert entity_id, key
+    return entity_id
+
+
+async def test_system_updates(hass: HomeAssistant, setup, state, latest_release) -> None:
+    """The system's versions against what the agent's checks found."""
+    system = fixture("system.json")
+    system["latest"] = {
+        "checked": 1790990000,
+        "firmware": "23.1.0",
+        "atmosphere": "1.12.0",
+        "hekate": "v6.6.0",
+        "syspatch": "1.5.5",
+        "integration": "v99.0.0",
+    }
+    publish(hass, "system", system)
+    await hass.async_block_till_done()
+
+    firmware = hass.states.get(_system_id(hass, "update", "firmware_update"))
+    assert firmware.state == STATE_ON
+    assert firmware.attributes[ATTR_INSTALLED_VERSION] == "23.0.1"
+    assert firmware.attributes[ATTR_LATEST_VERSION] == "23.1.0"
+    assert hass.states.get(_system_id(hass, "update", "atmosphere_update")).state == STATE_OFF
+    hekate = hass.states.get(_system_id(hass, "update", "hekate_update"))
+    assert hekate.state == STATE_ON and hekate.attributes[ATTR_LATEST_VERSION] == "6.6.0"
+    integration = hass.states.get(_system_id(hass, "update", "integration_update"))
+    assert integration.state == STATE_ON and integration.attributes[ATTR_LATEST_VERSION] == "99.0.0"
+    assert integration.attributes[ATTR_INSTALLED_VERSION] == "0.10.0"
+
+    # The checks off (no `latest` block): the newest is unknown, not "up to date".
+    del system["latest"]
+    publish(hass, "system", system)
+    await hass.async_block_till_done()
+    assert hass.states.get(_system_id(hass, "update", "firmware_update")).state == STATE_UNKNOWN
+    assert hass.states.get(_system_id(hass, "update", "integration_update")).state == STATE_UNKNOWN
+
+
+async def test_clock_drift(hass: HomeAssistant, setup) -> None:
+    """The console's clocks against a time server (the `clock` block)."""
+    system = fixture("system.json")
+    system["clock"] = {"checked": 1790990000, "network_drift_s": -3, "user_drift_s": 125, "server": "pool.ntp.org"}
+    publish(hass, "system", system)
+    await hass.async_block_till_done()
+    network = hass.states.get(_system_id(hass, "sensor", "clock_network_drift"))
+    assert network.state == "-3" and network.attributes["unit_of_measurement"] == "s"
+    assert hass.states.get(_system_id(hass, "sensor", "clock_user_drift")).state == "125"
+
+    # Not measured yet (null): unknown, not zero.
+    system["clock"] = {"checked": None, "network_drift_s": None, "user_drift_s": None, "server": None}
+    publish(hass, "system", system)
+    await hass.async_block_till_done()
+    assert hass.states.get(_system_id(hass, "sensor", "clock_network_drift")).state == STATE_UNKNOWN

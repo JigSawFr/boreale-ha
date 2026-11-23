@@ -429,6 +429,15 @@ Home Assistant. La release est lue à l'ajout de l'entité, puis de nouveau avec
 les documents de la console une fois six heures passées (`api.github.com`, la
 seule requête de l'intégration hors du broker).
 
+**Mises à jour des contrôles de l'agent** : *Micrologiciel système*,
+*Atmosphère*, *hekate* et *Intégration Boréale*, diagnostic : la version
+installée (celle de la console, ou de cette intégration) face à la plus
+récente trouvée par l'agent (`latest` du document système : les pages de
+release et la table des micrologiciels de switchbrew, aucune requête depuis
+Home Assistant). Rien ne s'installe depuis Home Assistant. Sans *Contrôler les
+versions* dans l'agent (désactivé par défaut), la plus récente est inconnue et
+l'entité affiche *inconnu*, pas *à jour*.
+
 **La console elle-même** (`playguard/<id>/system`, tenu à jour par l'agent
 quand PlayGuard est fermé) :
 
@@ -443,6 +452,7 @@ quand PlayGuard est fermé) :
 | Dernier démarrage | Quand la console a démarré (pas quand elle est sortie de veille). | diagnostic, désactivé par défaut |
 | Mémoire utilisée par l'agent | Ce que l'agent occupe de son tas fixe (octets, affichés en Kio), d'après le bloc `agent` de son document système ; le budget à surveiller quand on ajoute un module. | diagnostic, désactivé par défaut |
 | Durée de fonctionnement de l'agent | Depuis combien de temps l'agent tourne (secondes, affichées en heures). | diagnostic, désactivé par défaut |
+| Écart de l'horloge réseau, Écart de l'horloge utilisateur | De combien les horloges de la console avancent sur celle d'un serveur de temps, en secondes (négatif : en retard) : l'horloge réseau (celle du minuteur de jeu) et celle réglée par l'utilisateur. Du bloc `clock` du document système. | diagnostic ; celle de l'utilisateur est désactivée par défaut ; seulement avec *Contrôler les horloges* dans l'agent (désactivé par défaut) |
 | Numéro de série | Le vrai numéro de série de la console (tiré de la sauvegarde d'Atmosphère quand le PRODINFO est masqué). | diagnostic, désactivé par défaut ; seulement avec *Publier le numéro de série* sur la console |
 | Réseau Wi-Fi | Le nom du réseau. | diagnostic, désactivé par défaut |
 
