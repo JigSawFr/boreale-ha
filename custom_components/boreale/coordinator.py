@@ -127,7 +127,7 @@ class PlayGuardConsole:
         self._listeners: list[Callable[[], None]] = []
         self._event_listeners: list[Callable[[dict[str, Any]], None]] = []
         # The orders whose action waits for the console's answer: (order, payload, answer).
-        self._waiters: list[tuple[str, str, asyncio.Future[dict[str, Any]]]] = []
+        self._waiters: list[tuple[str, str, asyncio.Future[dict[str, Any] | None]]] = []
         self._unsubscribe: list[CALLBACK_TYPE] = []
         self._statistics_timer: CALLBACK_TYPE | None = None
         self._discovery_sent = False
@@ -454,6 +454,7 @@ class PlayGuardConsole:
             return
         self._seen(msg)
         if not self._readable("event", doc):
+            self._release_waiters()  # an answer it cannot read: no point waiting out the delay
             return
         self.last_event = doc
         self._answer(doc)
@@ -732,12 +733,21 @@ class PlayGuardConsole:
             return
         finally:
             self._waiters.remove(waiter)
-        if doc.get("event_type") == REFUSED:
+        if doc is not None and doc.get("event_type") == REFUSED:
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="refused",
                 translation_placeholders={"name": self.name, "reason": await self._async_reason(doc)},
             )
+
+    @callback
+    def _release_waiters(self) -> None:
+        """The console answers in a schema this integration does not read: the
+        actions waiting return now, as they would after the delay (the order
+        stays on the broker; the repair issue says why nothing was confirmed)."""
+        for _, _, answer in self._waiters:
+            if not answer.done():
+                answer.set_result(None)
 
     @callback
     def _answer(self, doc: dict[str, Any]) -> None:

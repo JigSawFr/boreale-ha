@@ -641,7 +641,7 @@
   "issues": {
     "newer_schema": {
       "title": "{name} は新しい PlayGuard プロトコルを使っています",
-      "description": "{name} はスキーマ {schema} を送信していますが、このインテグレーションが対応しているのはスキーマ {known} までです。PlayGuard インテグレーションを更新してください。それまでは一部の値が表示されないことがあります。"
+      "description": "{name} はスキーマ {schema} を送信していますが、このインテグレーションが対応しているのはスキーマ {known} までです。PlayGuard インテグレーションを更新してください。それまでは、値は最後に読み取ったままになります。"
     },
     "native_discovery": {
       "title": "{name} が再び自身の Home Assistant デバイスを送信しています",

@@ -1013,7 +1013,8 @@ Optional modules › Link agent*. The repair goes once both versions match.
 The console's PlayGuard is newer than this integration: update it
 (*Settings › Updates*). Until then, a document of that newer schema is not read:
 its entities keep what the last document it knew said (or stay unknown), no
-entity is removed, and no statistic is imported from it.
+entity is removed, no statistic is imported from it, and an action does not
+wait for the answer to its order (the order stays on the broker).
 </details>
 
 <details>

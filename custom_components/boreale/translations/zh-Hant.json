@@ -641,7 +641,7 @@
   "issues": {
     "newer_schema": {
       "title": "{name} 使用較新的 PlayGuard 協定",
-      "description": "{name} 發布的是結構描述 {schema}；本整合只認得結構描述 {known}。請更新 PlayGuard 整合：在此之前，部分數值可能會缺少。"
+      "description": "{name} 發布的是結構描述 {schema}；本整合只認得結構描述 {known}。請更新 PlayGuard 整合：在此之前，各數值維持為最後讀取的狀態。"
     },
     "native_discovery": {
       "title": "{name} 再次發布了自己的 Home Assistant 裝置",

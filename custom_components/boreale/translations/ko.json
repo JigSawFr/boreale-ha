@@ -641,7 +641,7 @@
   "issues": {
     "newer_schema": {
       "title": "{name}이(가) 더 새로운 PlayGuard 프로토콜을 사용합니다",
-      "description": "{name}은(는) 스키마 {schema}를 게시하지만, 이 통합구성요소는 스키마 {known}까지 알고 있습니다. PlayGuard 통합구성요소를 업데이트하세요. 그때까지 일부 값이 표시되지 않을 수 있습니다."
+      "description": "{name}은(는) 스키마 {schema}를 게시하지만, 이 통합구성요소는 스키마 {known}까지 알고 있습니다. PlayGuard 통합구성요소를 업데이트하세요. 그때까지 값은 마지막으로 읽은 상태로 유지됩니다."
     },
     "native_discovery": {
       "title": "{name}이(가) 다시 자체 Home Assistant 기기를 게시합니다",

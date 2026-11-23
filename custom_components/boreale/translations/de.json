@@ -641,7 +641,7 @@
   "issues": {
     "newer_schema": {
       "title": "{name} spricht ein neueres PlayGuard-Protokoll",
-      "description": "{name} veröffentlicht Schema {schema}; diese Integration kennt Schema {known}. Aktualisieren Sie die PlayGuard-Integration: Bis dahin fehlen möglicherweise einige Werte."
+      "description": "{name} veröffentlicht Schema {schema}; diese Integration kennt Schema {known}. Aktualisieren Sie die PlayGuard-Integration: Bis dahin behalten die Werte ihren zuletzt gelesenen Stand."
     },
     "native_discovery": {
       "title": "{name} veröffentlicht wieder ein eigenes Home-Assistant-Gerät",
