@@ -153,7 +153,8 @@ class SystemUpdate(PlayGuardEntity, UpdateEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         if self.definition.key == "integration_update":
-            self._integration = (await async_get_integration(self.hass, DOMAIN)).version.string
+            version = (await async_get_integration(self.hass, DOMAIN)).version
+            self._integration = str(version) if version else None
 
     @property
     def installed_version(self) -> str | None:
