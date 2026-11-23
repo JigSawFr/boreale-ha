@@ -463,6 +463,12 @@
       },
       "agent_uptime": {
         "name": "Время работы агента"
+      },
+      "clock_network_drift": {
+        "name": "Расхождение сетевых часов"
+      },
+      "clock_user_drift": {
+        "name": "Расхождение пользовательских часов"
       }
     },
     "switch": {
@@ -499,6 +505,18 @@
       },
       "bridge_update": {
         "name": "Мост Lantern"
+      },
+      "firmware_update": {
+        "name": "Прошивка системы"
+      },
+      "atmosphere_update": {
+        "name": "Atmosphère"
+      },
+      "hekate_update": {
+        "name": "hekate"
+      },
+      "integration_update": {
+        "name": "Интеграция Boréale"
       }
     },
     "image": {

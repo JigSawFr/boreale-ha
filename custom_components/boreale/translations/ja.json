@@ -463,6 +463,12 @@
       },
       "agent_uptime": {
         "name": "エージェントの稼働時間"
+      },
+      "clock_network_drift": {
+        "name": "ネットワーク時計のずれ"
+      },
+      "clock_user_drift": {
+        "name": "ユーザー時計のずれ"
       }
     },
     "switch": {
@@ -499,6 +505,18 @@
       },
       "bridge_update": {
         "name": "Lantern ブリッジ"
+      },
+      "firmware_update": {
+        "name": "システムファームウェア"
+      },
+      "atmosphere_update": {
+        "name": "Atmosphère"
+      },
+      "hekate_update": {
+        "name": "hekate"
+      },
+      "integration_update": {
+        "name": "Boréale 連携"
       }
     },
     "image": {

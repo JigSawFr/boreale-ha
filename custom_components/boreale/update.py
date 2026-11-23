@@ -1,5 +1,6 @@
-"""PlayGuard's version on the console against its latest release on GitHub,
-with the release notes. Installed on the console itself (PlayGuard offers it
+"""The updates: PlayGuard's version on the console against its latest release
+on GitHub, with the release notes, and the system's (firmware, Atmosphère,
+hekate) and this integration's against what the agent's checks found. Installed on the console itself (PlayGuard offers it
 when it checks for updates): nothing to install from here.
 
 Not polled: the release is read when the entity is added, then again with
@@ -18,10 +19,12 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.loader import async_get_integration
 from homeassistant.util import dt as dt_util
 
 from . import PlayGuardConfigEntry, bridge, is_bridge
 from .bridge import BridgeConfigEntry
+from .const import DOMAIN
 from .entities import dig, for_platform
 from .entity import PlayGuardEntity
 
@@ -42,7 +45,10 @@ async def async_setup_entry(
         bridge.async_add_updates(cast(BridgeConfigEntry, entry), async_add_entities)
         return
     console = entry.runtime_data
-    async_add_entities(PlayGuardUpdate(console, d) for d in for_platform(Platform.UPDATE, console.unpublished))
+    async_add_entities(
+        (PlayGuardUpdate if d.latest is None else SystemUpdate)(console, d)
+        for d in for_platform(Platform.UPDATE, console.unpublished)
+    )
 
 
 async def async_latest_release(hass: HomeAssistant) -> dict[str, Any] | None:
@@ -124,3 +130,37 @@ class PlayGuardUpdate(PlayGuardEntity, UpdateEntity):
     async def async_release_notes(self) -> str | None:
         body = (self._release or {}).get("body")
         return body if isinstance(body, str) and body else None
+
+
+def version_of(value: Any) -> str | None:
+    """A version as the documents give it: text, without a leading "v"."""
+    return value.removeprefix("v") if isinstance(value, str) and value else None
+
+
+class SystemUpdate(PlayGuardEntity, UpdateEntity):
+    """What the console runs (firmware, Atmosphère, hekate) or this
+    integration, against the newest version the agent's checks found
+    (`latest` of the system document). Nothing is installed from here.
+    Without the checks (off by default on the agent) the newest is unknown,
+    not "up to date"."""
+
+    _attr_supported_features = UpdateEntityFeature(0)
+
+    def __init__(self, *args: Any) -> None:
+        super().__init__(*args)
+        self._integration: str | None = None  # this integration's version, for integration_update
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        if self.definition.key == "integration_update":
+            self._integration = (await async_get_integration(self.hass, DOMAIN)).version.string
+
+    @property
+    def installed_version(self) -> str | None:
+        if self.definition.key == "integration_update":
+            return self._integration
+        return version_of(self.read())
+
+    @property
+    def latest_version(self) -> str | None:
+        return version_of(dig(self.console.system, self.definition.latest))

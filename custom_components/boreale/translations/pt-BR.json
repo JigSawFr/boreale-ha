@@ -463,6 +463,12 @@
       },
       "agent_uptime": {
         "name": "Tempo de atividade do agente"
+      },
+      "clock_network_drift": {
+        "name": "Desvio do relógio de rede"
+      },
+      "clock_user_drift": {
+        "name": "Desvio do relógio do usuário"
       }
     },
     "switch": {
@@ -499,6 +505,18 @@
       },
       "bridge_update": {
         "name": "Ponte Lantern"
+      },
+      "firmware_update": {
+        "name": "Firmware do sistema"
+      },
+      "atmosphere_update": {
+        "name": "Atmosphère"
+      },
+      "hekate_update": {
+        "name": "hekate"
+      },
+      "integration_update": {
+        "name": "Integração Boréale"
       }
     },
     "image": {

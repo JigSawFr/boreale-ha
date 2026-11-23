@@ -463,6 +463,12 @@
       },
       "agent_uptime": {
         "name": "Agent uptime"
+      },
+      "clock_network_drift": {
+        "name": "Network clock offset"
+      },
+      "clock_user_drift": {
+        "name": "User clock offset"
       }
     },
     "switch": {
@@ -499,6 +505,18 @@
       },
       "bridge_update": {
         "name": "Lantern bridge"
+      },
+      "firmware_update": {
+        "name": "System firmware"
+      },
+      "atmosphere_update": {
+        "name": "Atmosphère"
+      },
+      "hekate_update": {
+        "name": "hekate"
+      },
+      "integration_update": {
+        "name": "Boréale integration"
       }
     },
     "image": {
