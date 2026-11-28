@@ -34,7 +34,7 @@ jobs:
       # PlayGuard: its pushes to the release PR trigger the other workflows, so
       # the checks report on it, and a tag ruleset can let it through. Without
       # it, GITHUB_TOKEN: releases still work, the release PR just gets no CI.
-      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         id: app-token
         if: vars.RELEASE_APP_CLIENT_ID != '' || vars.RELEASE_APP_ID != ''
         with:
@@ -82,7 +82,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: gh release upload "$TAG" --clobber dist/boreale.zip dist/SHA256SUMS.txt
       # The version is out: its pre-releases go (a stable one supersedes them).
-      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         id: app-token
         if: vars.RELEASE_APP_CLIENT_ID != '' || vars.RELEASE_APP_ID != ''
         with:
@@ -110,7 +110,7 @@ jobs:
       id-token: write        # sign the attestation
       attestations: write
     steps:
-      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         id: app-token
         if: vars.RELEASE_APP_CLIENT_ID != '' || vars.RELEASE_APP_ID != ''
         with:
